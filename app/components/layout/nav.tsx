@@ -18,17 +18,16 @@ const Nav: React.FC = () => {
   return (
     <>
       {width >= 1280 ? (
-        <div className="w-[95%] max-w-[1280px] flex flex-row justify-evenly items-center h-[100px] mx-auto p-4 fixed top-0 left-0 right-0">
-          <img src="/logoolgatravel.webp" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className="h-full" />
-          <p>{size.width}</p>
+        <div className="w-[95%] max-w-[1280px] flex flex-row justify-evenly items-center h-[100px] mx-auto p-4 fixed top-5 left-0 right-0">
+          <img src="/logoolgatravel.webp" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className="h-full invert brightness-0" />
           <div className="flex flex-row items-center justify-between gap-16">
             {NavData.map((item) => {
               const isActive = location.pathname === item.path;
               return (
-                <Link key={item.linkText} to={item.path} className={`font-sans transition-all ease-in-out duration-300 group font-semibold relative text-xl ${isActive ? "text-orange-50 md:hover:text-orange-950" : "text-orange-950"}`}>
+                <Link key={item.linkText} to={item.path} className={`font-sans transition-all ease-in-out duration-300 group font-semibold relative text-xl ${isActive ? "text-orange-50 md:hover:text-orange-950" : "text-orange-50"}`}>
                   {item.linkText}
                   {!isActive && <span className="absolute left-0 bottom-[-5px] w-0 h-[5px] bg-orange-800 transition-all duration-300 group-hover:w-full"></span>}
-                  {isActive && <span className="absolute left-0 bottom-[-5px] h-[5px] bg-orange-800 transition-all duration-300 w-full"></span>}
+                  {isActive && <span className="absolute left-0 bottom-[-5px] h-[5px] bg-orange-700 transition-all duration-300 w-full"></span>}
                 </Link>
               );
             })}
