@@ -6,6 +6,7 @@ import { languageCookie } from "~/utils/cookies";
 import { languages } from "~/data/data";
 import { json } from "@remix-run/react";
 import Nav from "~/components/layout/nav";
+import Footer from "./components/layout/footer";
 import { useLoaderData } from "@remix-run/react";
 import { LanguageContextProvider } from "~/providers/LanguageContext";
 
@@ -45,6 +46,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {children}
           <ScrollRestoration />
           <Scripts />
+          <Footer />
         </LanguageContextProvider>
       </body>
     </html>

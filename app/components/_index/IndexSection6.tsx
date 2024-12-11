@@ -14,7 +14,7 @@ type ChildProps = {
 
 const IndexSection6: React.FC<ChildProps> = ({ width, indexSection6Text }) => {
   return (
-    <div className={`w-[95%] max-w-[1280px] p-10 flex flex-col items-center justify-center relative mx-auto z-0`}>
+    <div className={`w-[95%] max-w-[1280px] p-10 flex flex-col items-center justify-center relative mx-auto z-0 mb-24`}>
       <Card className={`${width < 300 ? "w-[140%]" : width < 350 ? "w-[130%]" : width < 400 ? "w-[120%]" : width < 450 ? "w-[115%]" : "w-full"} max-w-[600px]`}>
         <CardHeader className="flex flex-col justify-center items-center">
           <CardTitle className="text-[1.6rem] text-center">{indexSection6Text.cardTitle}</CardTitle>

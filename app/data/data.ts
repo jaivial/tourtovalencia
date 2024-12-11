@@ -50,6 +50,19 @@ export type IndexSection6Type = {
   button: string;
 };
 
+export type FooterType = {
+  firstH4: string;
+  firstp: string;
+  secondH4: string;
+  thirdH4: string;
+  firstspan: string;
+  firstli: string;
+  secondspan: string;
+  thirdspan: string;
+  privacypolicy: string;
+  termsofservice: string;
+};
+
 export type Index = {
   heroSection: HeroSectionType;
   indexSection1: IndexSection1Type;
@@ -64,6 +77,7 @@ export type LanguageData = {
   flag: string;
   currentLanguage: string;
   index: Index;
+  footer: FooterType;
 };
 export const languages: Record<string, LanguageData> = {
   en: {
@@ -119,6 +133,18 @@ export const languages: Record<string, LanguageData> = {
         button: "BOOK NOW",
       },
     },
+    footer: {
+      firstH4: "Olga Travel",
+      firstp: "Explore the longest navigable underground river in Europe. Join us for an unforgettable experience!",
+      secondH4: "Quick Links",
+      thirdH4: "Contact Us",
+      firstspan: "Address:",
+      firstli: "Plaza de La Reina, Valencia, Spain",
+      secondspan: "Phone:",
+      thirdspan: "Email:",
+      privacypolicy: "Privacy Policy",
+      termsofservice: "Terms of Service",
+    },
   },
   es: {
     links: [
@@ -172,6 +198,18 @@ export const languages: Record<string, LanguageData> = {
         secondH4span: "/persona",
         button: "RESERVAR",
       },
+    },
+    footer: {
+      firstH4: "Olga Travel",
+      firstp: "Explora el río subterráneo navegable más largo de Europa. ¡Únete a nosotros para una experiencia inolvidable!",
+      secondH4: "Enlaces Rápidos",
+      thirdH4: "Contáctanos",
+      firstspan: "Dirección:",
+      firstli: "Plaza de La Reina, Valencia, España",
+      secondspan: "Teléfono:",
+      thirdspan: "Correo Electrónico:",
+      privacypolicy: "Política de Privacidad",
+      termsofservice: "Términos del Servicio",
     },
   },
   fr: {
@@ -227,6 +265,18 @@ export const languages: Record<string, LanguageData> = {
         button: "RÉSERVER",
       },
     },
+    footer: {
+      firstH4: "Olga Travel",
+      firstp: "Explorez la plus longue rivière souterraine navigable d'Europe. Rejoignez-nous pour une expérience inoubliable!",
+      secondH4: "Liens Rapides",
+      thirdH4: "Contactez-nous",
+      firstspan: "Adresse :",
+      firstli: "Plaza de La Reina, Valence, Espagne",
+      secondspan: "Téléphone :",
+      thirdspan: "Email :",
+      privacypolicy: "Politique de Confidentialité",
+      termsofservice: "Conditions d'Utilisation",
+    },
   },
   ru: {
     links: [
@@ -280,6 +330,18 @@ export const languages: Record<string, LanguageData> = {
         secondH4span: "/человек",
         button: "ЗАБРОНИРОВАТЬ",
       },
+    },
+    footer: {
+      firstH4: "Olga Travel",
+      firstp: "Исследуйте самую длинную судоходную подземную реку в Европе. Присоединяйтесь к нам для незабываемого приключения!",
+      secondH4: "Быстрые ссылки",
+      thirdH4: "Свяжитесь с нами",
+      firstspan: "Адрес:",
+      firstli: "Пласа-де-ла-Рейна, Валенсия, Испания",
+      secondspan: "Телефон:",
+      thirdspan: "Электронная почта:",
+      privacypolicy: "Политика конфиденциальности",
+      termsofservice: "Условия использования",
     },
   },
   de: {
@@ -335,6 +397,18 @@ export const languages: Record<string, LanguageData> = {
         button: "JETZT BUCHEN",
       },
     },
+    footer: {
+      firstH4: "Olga Travel",
+      firstp: "Entdecken Sie den längsten schiffbaren unterirdischen Fluss Europas. Begleiten Sie uns für ein unvergessliches Erlebnis!",
+      secondH4: "Schnellzugriff",
+      thirdH4: "Kontakt",
+      firstspan: "Adresse:",
+      firstli: "Plaza de La Reina, Valencia, Spanien",
+      secondspan: "Telefon:",
+      thirdspan: "E-Mail:",
+      privacypolicy: "Datenschutzrichtlinie",
+      termsofservice: "Nutzungsbedingungen",
+    },
   },
   it: {
     links: [
@@ -388,6 +462,18 @@ export const languages: Record<string, LanguageData> = {
         secondH4span: "/persona",
         button: "PRENOTA ORA",
       },
+    },
+    footer: {
+      firstH4: "Olga Travel",
+      firstp: "Esplora il fiume sotterraneo navigabile più lungo d'Europa. Unisciti a noi per un'esperienza indimenticabile!",
+      secondH4: "Link Rapidi",
+      thirdH4: "Contattaci",
+      firstspan: "Indirizzo:",
+      firstli: "Plaza de La Reina, Valencia, Spagna",
+      secondspan: "Telefono:",
+      thirdspan: "Email:",
+      privacypolicy: "Informativa sulla Privacy",
+      termsofservice: "Termini di Servizio",
     },
   },
 };
