@@ -10,11 +10,9 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 // Child Props type
 type ChildProps = {
   width: number;
-  height: number;
-  indexSection2Text: IndexSection2Type;
 };
 
-const IndexSection3: React.FC<ChildProps> = ({ width, height, indexSection2Text }) => {
+const IndexSection3: React.FC<ChildProps> = ({ width }) => {
   const plugin = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
   const carouselImages: CarouselDataType[] = carouselData;
   return (
