@@ -10,10 +10,11 @@ const IndexContainer: React.FC = () => {
   const height = size.height ?? 0;
   const { state } = useLanguageContext();
   const heroSectionText = state.index.heroSection;
+  const indexSection1Text = state.index.indexSection1;
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-orange-50">
       <HeroSection width={width} height={height} heroSectionText={heroSectionText} />
-      <IndexSection1 width={width} height={height} />
+      <IndexSection1 width={width} height={height} indexSection1Text={indexSection1Text} />
     </div>
   );
 };

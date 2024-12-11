@@ -1,14 +1,15 @@
 // app/components/IndexSection1.tsx
 //UI Component: just responsible for displaying pure html with props passed from feature component
-import { HeroSectionType } from "~/data/data";
+import { IndexSection1Type } from "~/data/data";
 
 // Child Props type
 type ChildProps = {
   width: number;
   height: number;
+  indexSection1Text: IndexSection1Type;
 };
 
-const IndexSection1: React.FC<ChildProps> = ({ width, height }) => {
+const IndexSection1: React.FC<ChildProps> = ({ width, height, indexSection1Text }) => {
   return (
     <div className="w-[95%] max-w-[1280px] flex flex-row flex-wrap items-center justify-center my-10 mx-auto gap-10 relative z-0">
       <div className="w-full max-w-[620px] h-[600px] p-6 relative">
@@ -25,11 +26,11 @@ const IndexSection1: React.FC<ChildProps> = ({ width, height }) => {
         ></div>
       </div>
       <div className="w-full max-w-[620px] min-h-[600px] flex flex-col justify-center items-center p-6 gap-8">
-        <h2 className={`transition-all duration-500 ease-in-out text-orange-950 font-sans font-bold ${width <= 350 ? "text-[2.5rem]" : width <= 450 ? "text-[3rem]" : "text-[3.5rem]"} text-center`}>EXPLORA VALENCIA</h2>
-        <h3 className={`transition-all duration-500 ease-in-out text-orange-950 font-sans font-medium ${width <= 350 ? "text-[1.6rem]" : width <= 450 ? "text-[2rem]" : "text-[2.5rem]"} text-center`}>Descubre los rincones secretos de Valencia.</h3>
-        <h3 className={`transition-all duration-500 ease-in-out text-orange-950 font-sans font-medium ${width <= 350 ? "text-[1.6rem]" : width <= 450 ? "text-[2rem]" : "text-[2.5rem]"} text-center`}>La aventura te está esperando.</h3>
+        <h2 className={`transition-all duration-500 ease-in-out text-orange-950 font-sans font-bold ${width <= 350 ? "text-[2.5rem]" : width <= 450 ? "text-[3rem]" : "text-[3.5rem]"} text-center`}>{indexSection1Text.firstH2}</h2>
+        <h3 className={`transition-all duration-500 ease-in-out text-orange-950 font-sans font-medium ${width <= 350 ? "text-[1.6rem]" : width <= 450 ? "text-[2rem]" : "text-[2.5rem]"} text-center`}>{indexSection1Text.firstH3}</h3>
+        <h3 className={`transition-all duration-500 ease-in-out text-orange-950 font-sans font-medium ${width <= 350 ? "text-[1.6rem]" : width <= 450 ? "text-[2rem]" : "text-[2.5rem]"} text-center`}>{indexSection1Text.secondH3}</h3>
         <button type="button" className={`${width <= 450 ? "text-xl" : "text-2xl"} text-white bg-slate-950 rounded-xl font-sans tracking-wider font-medium px-4 py-4 md:hover:bg-orange-800 transition-colors duration-500 ease-in-out`}>
-          RESERVAR
+          {indexSection1Text.button}
         </button>
       </div>
     </div>
