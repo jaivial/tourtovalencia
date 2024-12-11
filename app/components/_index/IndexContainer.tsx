@@ -22,7 +22,7 @@ const IndexContainer: React.FC = () => {
   const indexSection6Text = state.index.indexSection6;
 
   return (
-    <div className="w-full h-auto flex flex-col items-start z-0 bg-orange-50 overflow-x-hidden">
+    <div className="w-full h-auto flex flex-col items-start z-0 bg-orange-50 overflow-x-hidden animate-fadeIn">
       <HeroSection width={width} height={height} heroSectionText={heroSectionText} />
       <IndexSection1 width={width} height={height} indexSection1Text={indexSection1Text} />
       <IndexSection2 width={width} height={height} indexSection2Text={indexSection2Text} />
