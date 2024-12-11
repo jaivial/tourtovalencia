@@ -26,7 +26,7 @@ const Nav: React.FC = () => {
   return (
     <>
       {width >= 1280 ? (
-        <div className="w-[95%] max-w-[1280px] flex flex-row justify-evenly items-center h-[100px] mx-auto p-4 fixed top-5 left-0 right-0 z-10">
+        <div className="w-[95%] max-w-[1280px] flex flex-row justify-evenly items-center h-[100px] mx-auto p-4 absolute top-5 left-0 right-0 z-10">
           <img src="/logoolgatravel.webp" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className="h-full invert brightness-0" />
           <div className="flex flex-row items-center justify-between gap-16">
             {navLinks.map((item) => {
@@ -56,7 +56,7 @@ const Nav: React.FC = () => {
           </Select>
         </div>
       ) : (
-        <div className={`w-[100%] max-w-[1280px] flex flex-row justify-center items-center h-[100px] mx-auto p-4 fixed top-0 left-0 right-0 z-10`}>
+        <div className={`w-[100%] max-w-[1280px] flex flex-row justify-center items-center h-[100px] mx-auto p-4 absolute top-0 left-0 right-0 z-10`}>
           <img src="/logoolgatravel.webp" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className={`${width <= 350 ? "h-[80%]" : width <= 450 ? "h-[90%]" : "h-full"} invert brightness-0`} />
           <Menu className={`absolute z-[10] text-white ${width <= 450 ? "right-4" : "right-20"}`} size={width <= 350 ? 40 : 45} onClick={() => setMobileNavOpen(true)} />
           <div className={`fixed top-0 w-full h-full transition-all ease-in-out duration-500 bg-slate-600 ${mobileNavOpen ? "bg-opacity-35 z-[999]" : "bg-opacity-0 z-[1]"}`} onClick={() => setMobileNavOpen(false)}>
