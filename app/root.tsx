@@ -1,13 +1,22 @@
-import {
-  Links,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-} from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
-
 import "./tailwind.css";
+import { LoaderFunction } from "@remix-run/node";
+import { languageCookie } from "~/utils/cookies";
+import { languages } from "~/data/data";
+import { json } from "@remix-run/react";
+import Nav from "~/components/layout/nav";
+import Footer from "./components/layout/footer";
+import ArrowToTop from "./components/_index/ArrowToTop";
+import { useLoaderData } from "@remix-run/react";
+import { LanguageContextProvider } from "~/providers/LanguageContext";
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const cookieHeader = request.headers.get("Cookie");
+  const cookieLanguage = (await languageCookie.parse(cookieHeader)) || "en";
+
+  return json({ initialLanguage: languages[cookieLanguage] || languages.en });
+};
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -23,6 +32,7 @@ export const links: LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { initialLanguage } = useLoaderData<typeof loader>();
   return (
     <html lang="en">
       <head>
@@ -32,9 +42,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
-        <ScrollRestoration />
-        <Scripts />
+        <LanguageContextProvider initialState={initialLanguage}>
+          <ArrowToTop />
+          <Nav />
+          {children}
+          <ScrollRestoration />
+          <Scripts />
+          <Footer />
+        </LanguageContextProvider>
       </body>
     </html>
   );
