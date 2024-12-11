@@ -2,6 +2,7 @@
 import HeroSection from "./HeroSection";
 import IndexSection1 from "./IndexSection1";
 import IndexSection2 from "./IndexSection2";
+import IndexSection3 from "./IndexSection3";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { useLanguageContext } from "~/providers/LanguageContext";
 
@@ -13,11 +14,13 @@ const IndexContainer: React.FC = () => {
   const heroSectionText = state.index.heroSection;
   const indexSection1Text = state.index.indexSection1;
   const indexSection2Text = state.index.indexSection2;
+
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-orange-50">
       <HeroSection width={width} height={height} heroSectionText={heroSectionText} />
       <IndexSection1 width={width} height={height} indexSection1Text={indexSection1Text} />
       <IndexSection2 width={width} height={height} indexSection2Text={indexSection2Text} />
+      <IndexSection3 width={width} height={height} indexSection2Text={indexSection2Text} />
     </div>
   );
 };
