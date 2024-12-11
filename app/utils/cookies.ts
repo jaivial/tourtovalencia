@@ -1,15 +1,8 @@
-// app/utils/cookies.ts
-import { CookieSerializeOptions, serialize } from "cookie";
+// app/cookies.ts
 
-// Helper to get a specific cookie value
-export function getCookie(cookieHeader: string | null, name: string): string | null {
-  if (!cookieHeader) return null;
-  const cookies = Object.fromEntries(cookieHeader.split("; ").map(c => c.split("=")));
-  return cookies[name] || null;
-}
+import { createCookie } from '@remix-run/node';
 
-// Helper to set a cookie header
-export function setCookieHeader(name: string, value: string, options: CookieSerializeOptions = {}) {
-  const serialized = serialize(name, value, { path: "/", ...options });
-  return { "Set-Cookie": serialized };
-}
+export const languageCookie = createCookie('language', {
+  path: '/',
+  maxAge: 60 * 60 * 24 * 30, // 30 days
+});

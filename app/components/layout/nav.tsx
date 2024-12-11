@@ -1,38 +1,32 @@
 // app/components/layout/nav.tsx
 import { useState } from "react";
 import { json, Link } from "@remix-run/react";
-import type { NavType } from "~/data/nav";
-import { useLoaderData, useLocation } from "@remix-run/react";
-import { useNavigate } from "@remix-run/react";
-import { LoaderFunction } from "@remix-run/node";
+import { useLocation } from "@remix-run/react";
 import { useWindowSize } from "@uidotdev/usehooks";
-import { Languages, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { getCookie, setCookieHeader } from "~/utils/cookies";
-
-type LoaderData = {
-  navLinks: NavType["links"];
-  currentLanguage: string;
-  flag: string;
-};
+import { useLanguageContext } from "~/providers/LanguageContext";
 
 // UI component: Just for displaying html
 const Nav: React.FC = () => {
-  const { navLinks, currentLanguage, flag } = useLoaderData<LoaderData>();
+  const { state, dispatch } = useLanguageContext();
+  const navLinks = state.links;
+  const currentLanguage = state.currentLanguage;
+  const flag = state.flag;
   const location = useLocation();
   const size = useWindowSize();
   const width = size.width ?? 0;
   const height = size.height ?? 0;
   const [mobileNavOpen, setMobileNavOpen] = useState<boolean>(false);
 
-  // const handleLanguageChange = async (language: string) => {
-  //   setCookieHeader("language", language, { maxAge: 60 * 60 * 24 * 365 }); // 1 year
-  // };
+  const handleChange = (selectedLanguage: string) => {
+    dispatch({ type: "changeLanguage", payload: selectedLanguage });
+  };
 
   return (
     <>
       {width >= 1280 ? (
-        <div className="w-[95%] max-w-[1280px] flex flex-row justify-evenly items-center h-[100px] mx-auto p-4 fixed top-5 left-0 right-0">
+        <div className="w-[95%] max-w-[1280px] flex flex-row justify-evenly items-center h-[100px] mx-auto p-4 fixed top-5 left-0 right-0 z-10">
           <img src="/logoolgatravel.webp" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className="h-full invert brightness-0" />
           <div className="flex flex-row items-center justify-between gap-16">
             {navLinks.map((item) => {
@@ -46,28 +40,45 @@ const Nav: React.FC = () => {
               );
             })}
           </div>
-          <Select>
+          <Select onValueChange={handleChange}>
             <SelectTrigger className="w-[180px] bg-orange-50 flex flex-row justify-evenly">
               <p className="text-2xl">{flag}</p>
-              <SelectValue placeholder={currentLanguage === "spanish" ? "Español" : currentLanguage.toUpperCase()} />
+              <SelectValue placeholder={currentLanguage} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="spanish">Español</SelectItem>
-              <SelectItem value="english">English</SelectItem>
-              <SelectItem value="german">German</SelectItem>
-              <SelectItem value="italian">Italian</SelectItem>
-              <SelectItem value="russian">Russian</SelectItem>
+              <SelectItem value="es">Español</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="de">German</SelectItem>
+              <SelectItem value="it">Italian</SelectItem>
+              <SelectItem value="ru">Russian</SelectItem>
+              <SelectItem value="fr">French</SelectItem>
             </SelectContent>
           </Select>
         </div>
       ) : (
-        <div className={`w-[100%] max-w-[1280px] flex flex-row justify-center items-center h-[100px] mx-auto p-4 fixed top-0 left-0 right-0`}>
+        <div className={`w-[100%] max-w-[1280px] flex flex-row justify-center items-center h-[100px] mx-auto p-4 fixed top-0 left-0 right-0 z-10`}>
           <img src="/logoolgatravel.webp" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className={`${width <= 350 ? "h-[80%]" : width <= 450 ? "h-[90%]" : "h-full"} invert brightness-0`} />
           <Menu className={`absolute z-[10] text-white ${width <= 450 ? "right-4" : "right-20"}`} size={width <= 350 ? 40 : 45} onClick={() => setMobileNavOpen(true)} />
           <div className={`fixed top-0 w-full h-full transition-all ease-in-out duration-500 bg-slate-600 ${mobileNavOpen ? "bg-opacity-35 z-[999]" : "bg-opacity-0 z-[1]"}`} onClick={() => setMobileNavOpen(false)}>
             <div className={`flex flex-col transition-all ease-in-out duration-500 fixed right-0 h-dvh p-16 bg-orange-800 items-start justify-between gap-10 ${mobileNavOpen ? "max-w-[400px] h-dvh translate-x-0 opacity-100" : "w-0 translate-x-[100%] opacity-0"}`}>
               <img src="/logoolgatravel.webp" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className="h-auto w-auto invert brightness-0" />
               <div className={`h-full flex flex-col justify-start items-start w-full ${height <= 570 ? "justify-between" : "justify-start gap-14"}`}>
+                <div className="w-fit mx-auto">
+                  <Select onValueChange={handleChange}>
+                    <SelectTrigger className="w-[180px] bg-orange-50 flex flex-row justify-evenly">
+                      <p className="text-2xl">{flag}</p>
+                      <SelectValue placeholder={currentLanguage} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="es">Español</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="de">German</SelectItem>
+                      <SelectItem value="it">Italian</SelectItem>
+                      <SelectItem value="ru">Russian</SelectItem>
+                      <SelectItem value="fr">French</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 {navLinks.map((item) => {
                   const isActive = location.pathname === item.path;
                   return (
@@ -88,6 +99,3 @@ const Nav: React.FC = () => {
 };
 
 export default Nav;
-function redirect(url: string, arg1: { headers: { "Set-Cookie": string } }): ({} | Response | null) | PromiseLike<{} | Response | null> {
-  throw new Error("Function not implemented.");
-}

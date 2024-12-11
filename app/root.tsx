@@ -1,49 +1,19 @@
-import { json, Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
-import Nav from "./components/layout/nav";
 import "./tailwind.css";
-
-import { useLoaderData, useLocation } from "@remix-run/react";
 import { LoaderFunction } from "@remix-run/node";
-import { getCookie, setCookieHeader } from "~/utils/cookies";
-import { NavType, NavData } from "~/data/nav";
+import { languageCookie } from "~/utils/cookies";
+import { languages } from "~/data/data";
+import { json } from "@remix-run/react";
+import Nav from "~/components/layout/nav";
+import { useLoaderData } from "@remix-run/react";
+import { LanguageContextProvider } from "~/providers/LanguageContext";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
-  let currentLanguage = getCookie(cookieHeader, "language");
-  let flag;
+  const cookieLanguage = (await languageCookie.parse(cookieHeader)) || "en";
 
-  // Detect language if the cookie is not set
-  if (!currentLanguage) {
-    const acceptLanguage = request.headers.get("Accept-Language") || "es";
-    if (acceptLanguage.startsWith("ru")) {
-      currentLanguage = "russian";
-    } else if (acceptLanguage.startsWith("en")) {
-      currentLanguage = "english";
-    } else if (acceptLanguage.startsWith("de")) {
-      currentLanguage = "german";
-    } else if (acceptLanguage.startsWith("it")) {
-      currentLanguage = "italian";
-    } else {
-      currentLanguage = "spanish"; // Default to Spanish
-    }
-    const headers = setCookieHeader("language", currentLanguage);
-    return json({ navLinks: NavData.find((nav) => nav.language === currentLanguage)?.links || [] }, { headers });
-  }
-
-  if ((currentLanguage = "spanish")) {
-    flag = "🇪🇸";
-  } else if ((currentLanguage = "english")) {
-    flag = "🇬🇧";
-  } else if ((currentLanguage = "german")) {
-    flag = "🇩🇪";
-  } else if ((currentLanguage = "italian")) {
-    flag = "🇮🇹";
-  } else {
-    flag = "🇷🇺";
-  }
-  // Return the navigation links based on the current language
-  return json({ navLinks: NavData.find((nav) => nav.language === currentLanguage)?.links || [], currentLanguage, flag });
+  return json({ initialLanguage: languages[cookieLanguage] || languages.en });
 };
 
 export const links: LinksFunction = () => [
@@ -60,6 +30,7 @@ export const links: LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { initialLanguage } = useLoaderData<typeof loader>();
   return (
     <html lang="en">
       <head>
@@ -69,10 +40,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <Nav />
-        {children}
-        <ScrollRestoration />
-        <Scripts />
+        <LanguageContextProvider initialState={initialLanguage}>
+          <Nav />
+          {children}
+          <ScrollRestoration />
+          <Scripts />;
+        </LanguageContextProvider>
       </body>
     </html>
   );
