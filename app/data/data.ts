@@ -36,12 +36,27 @@ export type IndexSection5Type = {
   fifthH3: string;
 };
 
+export type IndexSection6listType = {
+  li: string;
+  index: number;
+};
+export type IndexSection6Type = {
+  cardTitle: string;
+  cardDescription: string;
+  firstH4: string;
+  list: IndexSection6listType[];
+  secondH4: string;
+  secondH4span: string;
+  button: string;
+};
+
 export type Index = {
   heroSection: HeroSectionType;
   indexSection1: IndexSection1Type;
   indexSection2: IndexSection2Type;
   indexSection4: IndexSection4Type;
   indexSection5: IndexSection5Type;
+  indexSection6: IndexSection6Type;
 };
 
 export type LanguageData = {
@@ -88,6 +103,21 @@ export const languages: Record<string, LanguageData> = {
         fourthH3: "Guided tour: 3h 30m (approx).",
         fifthH3: "Return to Valencia by private transport.",
       },
+      indexSection6: {
+        cardTitle: "GUIDED TOUR",
+        cardDescription: "Trip package to the San Juan Caves",
+        firstH4: "Included Services",
+        list: [
+          { li: "Private transport.", index: 1 },
+          { li: "Pickup in Valencia and return home.", index: 2 },
+          { li: "Guided tour of the San Juan Caves.", index: 3 },
+          { li: "Boat ride in the San Juan Caves.", index: 4 },
+          { li: "All taxes and fees included.", index: 5 },
+        ],
+        secondH4: "€120",
+        secondH4span: "/person",
+        button: "BOOK NOW",
+      },
     },
   },
   es: {
@@ -126,6 +156,21 @@ export const languages: Record<string, LanguageData> = {
         thirdH3: "Viaje en transporte privado hasta La Vall D'Uixo (Castellón).",
         fourthH3: "Visita guiada 3h 30m (aprox).",
         fifthH3: "Vuelta a Valencia en en transporte privado.",
+      },
+      indexSection6: {
+        cardTitle: "VISITA GUIADA",
+        cardDescription: "Pack de viaje a las Cuevas de San Juan",
+        firstH4: "Servicios Incluídos",
+        list: [
+          { li: "Transporte Privado.", index: 1 },
+          { li: "Recogida en valencia y vuelta a casa.", index: 2 },
+          { li: "Visita guiada a las Cuevas de San Juan.", index: 3 },
+          { li: "Viaje en barca en las Cuevas de San Juan.", index: 4 },
+          { li: "Todos los impuestos y tasas incluídos.", index: 5 },
+        ],
+        secondH4: "120€",
+        secondH4span: "/persona",
+        button: "RESERVAR",
       },
     },
   },
@@ -166,6 +211,21 @@ export const languages: Record<string, LanguageData> = {
         fourthH3: "Visite guidée : 3h 30min (env.).",
         fifthH3: "Retour à Valence en transport privé.",
       },
+      indexSection6: {
+        cardTitle: "VISITE GUIDÉE",
+        cardDescription: "Forfait de voyage aux grottes de San Juan",
+        firstH4: "Services Inclus",
+        list: [
+          { li: "Transport privé.", index: 1 },
+          { li: "Prise en charge à Valence et retour à domicile.", index: 2 },
+          { li: "Visite guidée des grottes de San Juan.", index: 3 },
+          { li: "Promenade en barque dans les grottes de San Juan.", index: 4 },
+          { li: "Toutes taxes et frais inclus.", index: 5 },
+        ],
+        secondH4: "120€",
+        secondH4span: "/personne",
+        button: "RÉSERVER",
+      },
     },
   },
   ru: {
@@ -204,6 +264,21 @@ export const languages: Record<string, LanguageData> = {
         thirdH3: "Поездка на частном транспорте до Ла-Валь-д’Ушо (Кастельон).",
         fourthH3: "Экскурсия с гидом: 3 ч 30 мин (примерно).",
         fifthH3: "Возвращение в Валенсию на частном транспорте.",
+      },
+      indexSection6: {
+        cardTitle: "ЭКСКУРСИЯ С ГИДОМ",
+        cardDescription: "Пакет путешествия в пещеры Сан-Хуан",
+        firstH4: "Включенные услуги",
+        list: [
+          { li: "Частный транспорт.", index: 1 },
+          { li: "Трансфер из Валенсии и обратно.", index: 2 },
+          { li: "Экскурсия с гидом по пещерам Сан-Хуан.", index: 3 },
+          { li: "Прогулка на лодке по пещерам Сан-Хуан.", index: 4 },
+          { li: "Все налоги и сборы включены.", index: 5 },
+        ],
+        secondH4: "120€",
+        secondH4span: "/человек",
+        button: "ЗАБРОНИРОВАТЬ",
       },
     },
   },
@@ -244,6 +319,21 @@ export const languages: Record<string, LanguageData> = {
         fourthH3: "Geführte Tour: 3 Std. 30 Min. (ca.).",
         fifthH3: "Rückfahrt nach Valencia mit Privattransport.",
       },
+      indexSection6: {
+        cardTitle: "GEFÜHRTE TOUR",
+        cardDescription: "Reisepaket zu den Höhlen von San Juan",
+        firstH4: "Inklusive Leistungen",
+        list: [
+          { li: "Privattransport.", index: 1 },
+          { li: "Abholung in Valencia und Rückfahrt nach Hause.", index: 2 },
+          { li: "Geführte Tour durch die Höhlen von San Juan.", index: 3 },
+          { li: "Bootsfahrt in den Höhlen von San Juan.", index: 4 },
+          { li: "Alle Steuern und Gebühren inklusive.", index: 5 },
+        ],
+        secondH4: "120€",
+        secondH4span: "/Person",
+        button: "JETZT BUCHEN",
+      },
     },
   },
   it: {
@@ -282,6 +372,21 @@ export const languages: Record<string, LanguageData> = {
         thirdH3: "Trasporto privato fino a La Vall d'Uixó (Castellón).",
         fourthH3: "Visita guidata: 3h 30m (circa).",
         fifthH3: "Ritorno a Valencia con trasporto privato.",
+      },
+      indexSection6: {
+        cardTitle: "VISITA GUIDATA",
+        cardDescription: "Pacchetto viaggio alle grotte di San Juan",
+        firstH4: "Servizi Inclusi",
+        list: [
+          { li: "Trasporto privato.", index: 1 },
+          { li: "Pick-up a Valencia e ritorno a casa.", index: 2 },
+          { li: "Visita guidata alle grotte di San Juan.", index: 3 },
+          { li: "Giro in barca nelle grotte di San Juan.", index: 4 },
+          { li: "Tutte le tasse e imposte incluse.", index: 5 },
+        ],
+        secondH4: "120€",
+        secondH4span: "/persona",
+        button: "PRENOTA ORA",
       },
     },
   },
