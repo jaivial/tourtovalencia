@@ -30,7 +30,7 @@ const Footer: React.FC = () => {
           <h4 className="text-lg font-semibold mb-4">{footerText.secondH4}</h4>
           <ul className="text-sm space-y-2">
             {navLinks.map((item) => (
-              <li>
+              <li key={item.linkText}>
                 <Link key={item.path} to={item.path} className="hover:text-orange-500">
                   {item.linkText}
                 </Link>

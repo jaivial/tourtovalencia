@@ -24,7 +24,7 @@ const IndexSection6: React.FC<ChildProps> = ({ width, indexSection6Text }) => {
           <h4 className="font-semibold">{indexSection6Text.firstH4}</h4>
           <ul className={`flex flex-col gap-4 mt-2 ${width < 350 ? "ml-0 text-[0.9rem]" : width < 500 ? "ml-2 text-[0.9rem]" : "ml-6"}`}>
             {indexSection6Text.list.map((li) => (
-              <li className="flex flex-row items-center justify-start gap-2">
+              <li className="flex flex-row items-center justify-start gap-2" key={li.index}>
                 <Check className=" max-h-[50px] min-h-[50px] max-w-[30px] min-w-[30px]" />
                 <p>{li.li}</p>
               </li>

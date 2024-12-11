@@ -1,15 +1,17 @@
 // app/components/layout/nav.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { json, Link } from "@remix-run/react";
 import { useLocation } from "@remix-run/react";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { Menu } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { useLanguageContext } from "~/providers/LanguageContext";
+import { useFetcher } from "@remix-run/react";
 
 // UI component: Just for displaying html
 const Nav: React.FC = () => {
   const { state, dispatch } = useLanguageContext();
+  const fetcher = useFetcher();
   const navLinks = state.links;
   const currentLanguage = state.currentLanguage;
   const flag = state.flag;
@@ -21,6 +23,8 @@ const Nav: React.FC = () => {
 
   const handleChange = (selectedLanguage: string) => {
     dispatch({ type: "changeLanguage", payload: selectedLanguage });
+    // Submit the selected language to the action
+    fetcher.submit({ language: selectedLanguage }, { method: "post", action: "/set-language" });
   };
 
   return (
