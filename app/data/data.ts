@@ -18,10 +18,16 @@ export type IndexSection1Type = {
   secondH3: string;
   button: string;
 };
+export type IndexSection2Type = {
+  firstH3: string;
+  secondH3: string;
+  thirdH3: string;
+};
 
 export type Index = {
   heroSection: HeroSectionType;
   indexSection1: IndexSection1Type;
+  indexSection2: IndexSection2Type;
 };
 
 export type LanguageData = {
@@ -51,6 +57,11 @@ export const languages: Record<string, LanguageData> = {
         secondH3: "Adventure is waiting for you.",
         button: "BOOK NOW",
       },
+      indexSection2: {
+        firstH3: "Enjoy a relaxing boat ride through one of the most spectacular underground rivers!",
+        secondH3: "You'll travel 800 meters by boat.",
+        thirdH3: "Did you know it's the longest navigable underground river in Europe?",
+      },
     },
   },
   es: {
@@ -72,6 +83,11 @@ export const languages: Record<string, LanguageData> = {
         firstH3: "Descubre los rincones secretos de Valencia.",
         secondH3: "La aventura te está esperando.",
         button: "RESERVAR",
+      },
+      indexSection2: {
+        firstH3: "¡Disfruta de un relajante paseo en barca por uno de los ríos subterráneos más espectaculares!",
+        secondH3: "Recorrerás 800 metros en barca.",
+        thirdH3: "¿Sabías que es el río subterráneo navegable más largo de Europa?",
       },
     },
   },
@@ -95,6 +111,11 @@ export const languages: Record<string, LanguageData> = {
         secondH3: "L'aventure vous attend.",
         button: "RÉSERVER",
       },
+      indexSection2: {
+        firstH3: "Profite d'une balade relaxante en barque sur l'une des rivières souterraines les plus spectaculaires!",
+        secondH3: "Tu parcourras 800 mètres en barque.",
+        thirdH3: "Savais-tu que c'est la plus longue rivière souterraine navigable d'Europe?",
+      },
     },
   },
   ru: {
@@ -116,6 +137,11 @@ export const languages: Record<string, LanguageData> = {
         firstH3: "Откройте для себя тайные уголки Валенсии.",
         secondH3: "Приключение ждет вас.",
         button: "ЗАБРОНИРОВАТЬ",
+      },
+      indexSection2: {
+        firstH3: "Насладись расслабляющей прогулкой на лодке по одному из самых впечатляющих подземных рек!",
+        secondH3: "Ты проплывёшь 800 метров на лодке.",
+        thirdH3: "Знал ли ты, что это самая длинная судоходная подземная река в Европе?",
       },
     },
   },
@@ -139,6 +165,11 @@ export const languages: Record<string, LanguageData> = {
         secondH3: "Das Abenteuer wartet auf dich.",
         button: "JETZT BUCHEN",
       },
+      indexSection2: {
+        firstH3: "Genieße eine entspannte Bootsfahrt durch einen der spektakulärsten unterirdischen Flüsse!",
+        secondH3: "Du fährst 800 Meter mit dem Boot.",
+        thirdH3: "Wusstest du, dass es der längste schiffbare unterirdische Fluss Europas ist?",
+      },
     },
   },
   it: {
@@ -160,6 +191,11 @@ export const languages: Record<string, LanguageData> = {
         firstH3: "Scopri gli angoli nascosti di Valencia.",
         secondH3: "L'avventura ti sta aspettando.",
         button: "PRENOTA ORA",
+      },
+      indexSection2: {
+        firstH3: "Goditi un rilassante giro in barca lungo uno dei fiumi sotterranei più spettacolari!",
+        secondH3: "Percorrerai 800 metri in barca.",
+        thirdH3: "Sapevi che è il fiume sotterraneo navigabile più lungo d'Europa?",
       },
     },
   },
