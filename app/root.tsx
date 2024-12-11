@@ -7,6 +7,7 @@ import { languages } from "~/data/data";
 import { json } from "@remix-run/react";
 import Nav from "~/components/layout/nav";
 import Footer from "./components/layout/footer";
+import ArrowToTop from "./components/_index/ArrowToTop";
 import { useLoaderData } from "@remix-run/react";
 import { LanguageContextProvider } from "~/providers/LanguageContext";
 
@@ -42,6 +43,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <LanguageContextProvider initialState={initialLanguage}>
+          <ArrowToTop />
           <Nav />
           {children}
           <ScrollRestoration />
