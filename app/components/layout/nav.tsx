@@ -30,22 +30,22 @@ const Nav: React.FC = () => {
   return (
     <>
       {width >= 1280 ? (
-        <div className="w-[95%] max-w-[1280px] flex flex-row justify-evenly items-center h-[100px] mx-auto p-4 absolute top-5 left-0 right-0 z-10 ">
-          <img src="/logoolgatravel.webp" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className="h-full invert brightness-0" />
+        <div className="w-[95%] max-w-[1280px] flex flex-row justify-evenly items-center h-[200px] mx-auto p-4 absolute top-5 left-0 right-0 z-10 ">
+          <img src="/logonuevoolga3.png" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className="h-[100%]" />
           <div className="flex flex-row items-center justify-between gap-16">
             {navLinks.map((item) => {
               const isActive = location.pathname === item.path;
               return (
-                <Link key={item.linkText} to={item.path} className={`font-sans transition-all ease-in-out duration-300 group font-semibold relative text-xl ${isActive ? "text-orange-50 md:hover:text-orange-950" : "text-orange-50"}`}>
+                <Link key={item.linkText} to={item.path} className={`font-sans transition-all ease-in-out duration-300 group font-semibold relative text-xl ${isActive ? "text-blue-50 md:hover:text-blue-950" : "text-blue-50"}`}>
                   {item.linkText}
-                  {!isActive && <span className="absolute left-0 bottom-[-5px] w-0 h-[5px] bg-orange-800 transition-all duration-300 group-hover:w-full"></span>}
-                  {isActive && <span className="absolute left-0 bottom-[-5px] h-[5px] bg-orange-700 transition-all duration-300 w-full"></span>}
+                  {!isActive && <span className="absolute left-0 bottom-[-5px] w-0 h-[5px] bg-blue-800 transition-all duration-300 group-hover:w-full"></span>}
+                  {isActive && <span className="absolute left-0 bottom-[-5px] h-[5px] bg-blue-700 transition-all duration-300 w-full"></span>}
                 </Link>
               );
             })}
           </div>
           <Select onValueChange={handleChange}>
-            <SelectTrigger className="w-[180px] bg-orange-50 flex flex-row justify-evenly">
+            <SelectTrigger className="w-[180px] bg-blue-50 flex flex-row justify-evenly">
               <p className="text-2xl">{flag}</p>
               <SelectValue placeholder={currentLanguage} />
             </SelectTrigger>
@@ -64,12 +64,12 @@ const Nav: React.FC = () => {
           <img src="/logoolgatravel.webp" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className={`${width <= 350 ? "h-[80%]" : width <= 450 ? "h-[90%]" : "h-full"} invert brightness-0`} />
           <Menu className={`absolute z-[10] text-white ${width <= 450 ? "right-4" : "right-20"}`} size={width <= 350 ? 40 : 45} onClick={() => setMobileNavOpen(true)} />
           <div className={`fixed top-0 w-full h-full transition-all ease-in-out duration-500 bg-slate-600 ${mobileNavOpen ? "bg-opacity-35 z-[999]" : "bg-opacity-0 z-[1]"}`}>
-            <div className={`flex flex-col transition-all ease-in-out duration-500 fixed right-0 h-dvh p-16 bg-orange-800 items-start justify-between gap-10 ${mobileNavOpen ? "max-w-[400px] h-dvh translate-x-0 opacity-100" : "w-0 translate-x-[100%] opacity-0"}`}>
+            <div className={`flex flex-col transition-all ease-in-out duration-500 fixed right-0 h-dvh p-16 bg-blue-800 items-start justify-between gap-10 ${mobileNavOpen ? "max-w-[400px] h-dvh translate-x-0 opacity-100" : "w-0 translate-x-[100%] opacity-0"}`}>
               <img src="/logoolgatravel.webp" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className="h-auto w-auto invert brightness-0" />
               <div className={`h-full flex flex-col justify-start items-start w-full ${height <= 570 ? "justify-between" : "justify-start gap-14"}`}>
                 <div className="w-fit mx-auto z-[999]">
                   <Select onValueChange={handleChange}>
-                    <SelectTrigger className="w-[180px] bg-orange-50 flex flex-row justify-evenly">
+                    <SelectTrigger className="w-[180px] bg-blue-50 flex flex-row justify-evenly">
                       <p className="text-2xl">{flag}</p>
                       <SelectValue placeholder={currentLanguage} />
                     </SelectTrigger>
@@ -86,15 +86,15 @@ const Nav: React.FC = () => {
                 {navLinks.map((item) => {
                   const isActive = location.pathname === item.path;
                   return (
-                    <Link key={item.linkText} to={item.path} className={`font-sans transition-all ease-in-out duration-300 group font-semibold relative  ${width <= 350 ? "text-lg" : "text-xl"} ${isActive ? "text-orange-50 md:hover:text-orange-950" : "text-orange-50"}`}>
+                    <Link key={item.linkText} to={item.path} className={`font-sans transition-all ease-in-out duration-300 group font-semibold relative  ${width <= 350 ? "text-lg" : "text-xl"} ${isActive ? "text-blue-50 md:hover:text-blue-950" : "text-blue-50"}`}>
                       {item.linkText}
-                      {!isActive && <span className="absolute left-0 bottom-[-5px] w-0 h-[5px] bg-orange-800 transition-all duration-300 group-hover:w-full"></span>}
+                      {!isActive && <span className="absolute left-0 bottom-[-5px] w-0 h-[5px] bg-blue-800 transition-all duration-300 group-hover:w-full"></span>}
                       {isActive && <span className="absolute left-0 bottom-[-5px] h-[5px] bg-white transition-all duration-300 w-full"></span>}
                     </Link>
                   );
                 })}
               </div>
-              <ArrowRightToLine className="text-orange-950 bg-orange-50 rounded-3xl py-4 px-0 mx-auto" size={80} onClick={() => setMobileNavOpen(false)} />
+              <ArrowRightToLine className="text-blue-950 bg-blue-50 rounded-3xl py-4 px-0 mx-auto" size={80} onClick={() => setMobileNavOpen(false)} />
             </div>
           </div>
         </div>
