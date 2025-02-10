@@ -48,7 +48,7 @@ const IndexSection2: React.FC<ChildProps> = ({ width, height, indexSection2Text,
 
                 {/* Rating */}
                 <div className="my-4">
-                  <Rate defaultValue={5} size="lg" />
+                  <Rate defaultValue={5} readOnly size="lg" />
                 </div>
 
                 {/* Review Text */}

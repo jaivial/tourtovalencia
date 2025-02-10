@@ -1,5 +1,7 @@
 // app/data.ts
 
+import IndexSection3 from "~/components/_index/IndexSection3";
+
 export type Link = {
   path: string;
   linkText: string;
@@ -32,6 +34,14 @@ export type Review = {
   reviewText: string; // Review text
   reviewLinkSite: string;
   reviewLink: string;
+};
+
+export type IndexSection3Type = {
+  firstH3: string;
+  firstp: string;
+  secondp: string;
+  thirdp: string;
+  fourthp: string;
 };
 
 export type IndexSection4Type = {
@@ -79,6 +89,7 @@ export type Index = {
   indexSection1: IndexSection1Type;
   indexSection2: IndexSection2Type;
   carouselIndexSection2: Review[];
+  indexSection3: IndexSection3Type;
   indexSection4: IndexSection4Type;
   indexSection5: IndexSection5Type;
   indexSection6: IndexSection6Type;
@@ -249,6 +260,13 @@ export const languages: Record<string, LanguageData> = {
           reviewLink: "https://www.tripadvisor.es/AttractionProductReview-g187529-d27928104-Visit_to_the_Sant_Josep_Caves-Valencia_Province_of_Valencia_Valencian_Community.html",
         },
       ],
+      indexSection3: {
+        firstH3: "Mediterranean Excursions is fantastic!",
+        firstp: "Mediterranean Excursions is the leading company in discovering the most fascinating corners of Valencia.",
+        secondp: "Passion and dedication define each of our experiences. We design unique excursions that connect travelers with the best of the city: its history, culture, gastronomy, and landscapes. Each tour is tailored to meet the desires of our clients, offering a personalized approach.",
+        thirdp: "At Mediterranean Excursions, we don’t just do tours; we create unforgettable moments to explore Valencia like never before.",
+        fourthp: "Let us guide you through the best-kept secrets of this incredible city!",
+      },
       indexSection4: {
         firstH3: "PRIVATE GUIDED TOUR",
         spanH3: "Maximum 4 people",
@@ -447,6 +465,13 @@ export const languages: Record<string, LanguageData> = {
           reviewLink: "https://www.tripadvisor.es/AttractionProductReview-g187529-d27928104-Visit_to_the_Sant_Josep_Caves-Valencia_Province_of_Valencia_Valencian_Community.html",
         },
       ],
+      indexSection3: {
+        firstH3: "¡Excursiones Mediterráneo es fantástico!",
+        firstp: "Excursiones Mediterráneo es la empresa líder en descubrir los rincones más fascinantes de Valencia.",
+        secondp: "Pasión y dedicación definen cada una de nuestras experiencias. Diseñamos excursiones únicas que conectan a los viajeros con lo mejor de la ciudad: su historia, cultura, gastronomía y paisajes. Cada recorrido está pensado para adaptarse a los deseos de nuestros clientes, ofreciendo un enfoque personalizado.",
+        thirdp: "En Excursiones Mediterráneo, no solo hacemos tours, creamos momentos inolvidables para explorar Valencia como nunca antes.",
+        fourthp: "¡Déjanos guiarte por los secretos mejor guardados de esta increíble ciudad!",
+      },
       indexSection4: {
         firstH3: "VISITA GUIADA PRIVADA",
         spanH3: "Máximo 4 personas",
@@ -646,6 +671,13 @@ export const languages: Record<string, LanguageData> = {
           reviewLink: "https://www.tripadvisor.es/AttractionProductReview-g187529-d27928104-Visit_to_the_Sant_Josep_Caves-Valencia_Province_of_Valencia_Valencian_Community.html",
         },
       ],
+      indexSection3: {
+        firstH3: "Excursions Méditerranée est fantastique !",
+        firstp: "Excursions Méditerranée est l'entreprise leader dans la découverte des coins les plus fascinants de Valence.",
+        secondp: "La passion et le dévouement définissent chacune de nos expériences. Nous concevons des excursions uniques qui connectent les voyageurs avec ce que la ville a de mieux à offrir : son histoire, sa culture, sa gastronomie et ses paysages. Chaque parcours est conçu pour s'adapter aux désirs de nos clients, avec une approche personnalisée.",
+        thirdp: "Chez Excursions Méditerranée, nous ne faisons pas que des visites ; nous créons des moments inoubliables pour explorer Valence comme jamais auparavant.",
+        fourthp: "Laissez-nous vous guider à travers les secrets les mieux gardés de cette ville incroyable !",
+      },
       indexSection4: {
         firstH3: "VISITE GUIDÉE PRIVÉE",
         spanH3: "Maximum 4 personnes",
@@ -843,6 +875,13 @@ export const languages: Record<string, LanguageData> = {
           reviewLink: "https://www.tripadvisor.es/AttractionProductReview-g187529-d27928104-Visit_to_the_Sant_Josep_Caves-Valencia_Province_of_Valencia_Valencian_Community.html",
         },
       ],
+      indexSection3: {
+        firstH3: "Экскурсии «Средиземноморье» фантастические!",
+        firstp: "«Средиземноморские экскурсии» — ведущая компания по открытию самых захватывающих уголков Валенсии.",
+        secondp: "Страсть и преданность определяют каждый из наших туров. Мы разрабатываем уникальные маршруты, которые знакомят путешественников с лучшим, что может предложить город: его историей, культурой, гастрономией и пейзажами. Каждый маршрут адаптирован под желания наших клиентов, предлагая индивидуальный подход.",
+        thirdp: "В рамках «Средиземноморских экскурсий» мы не просто проводим туры, мы создаем незабываемые моменты для исследования Валенсии как никогда раньше.",
+        fourthp: "Позвольте нам провести вас через самые сокровенные секреты этого удивительного города!",
+      },
       indexSection4: {
         firstH3: "ЧАСТНАЯ ЭКСКУРСИЯ С ГИДОМ",
         spanH3: "Максимум 4 человека",
@@ -1042,6 +1081,13 @@ export const languages: Record<string, LanguageData> = {
           reviewLink: "https://www.tripadvisor.es/AttractionProductReview-g187529-d27928104-Visit_to_the_Sant_Josep_Caves-Valencia_Province_of_Valencia_Valencian_Community.html",
         },
       ],
+      indexSection3: {
+        firstH3: "Mittelmeer-Ausflüge sind fantastisch!",
+        firstp: "Mittelmeer-Ausflüge ist das führende Unternehmen zur Entdeckung der faszinierendsten Ecken von Valencia.",
+        secondp: "Leidenschaft und Hingabe prägen jede unserer Erfahrungen. Wir gestalten einzigartige Ausflüge, die Reisende mit dem Besten der Stadt verbinden: ihrer Geschichte, Kultur, Gastronomie und ihren Landschaften. Jede Tour ist maßgeschneidert, um den Wünschen unserer Kunden gerecht zu werden, mit einem persönlichen Ansatz.",
+        thirdp: "Bei Mittelmeer-Ausflügen machen wir nicht nur Touren, wir schaffen unvergessliche Momente, um Valencia wie nie zuvor zu erkunden.",
+        fourthp: "Lassen Sie uns Sie durch die bestgehüteten Geheimnisse dieser unglaublichen Stadt führen!",
+      },
       indexSection4: {
         firstH3: "PRIVATE FÜHRUNG",
         spanH3: "Maximal 4 Personen",
@@ -1241,6 +1287,13 @@ export const languages: Record<string, LanguageData> = {
           reviewLink: "https://www.tripadvisor.es/AttractionProductReview-g187529-d27928104-Visit_to_the_Sant_Josep_Caves-Valencia_Province_of_Valencia_Valencian_Community.html",
         },
       ],
+      indexSection3: {
+        firstH3: "Escursioni Mediterranee è fantastico!",
+        firstp: "Escursioni Mediterranee è l'azienda leader nella scoperta degli angoli più affascinanti di Valencia.",
+        secondp: "Passione e dedizione definiscono ogni nostra esperienza. Creiamo escursioni uniche che connettono i viaggiatori con il meglio della città: la sua storia, cultura, gastronomia e paesaggi. Ogni percorso è pensato per adattarsi ai desideri dei nostri clienti, offrendo un approccio personalizzato.",
+        thirdp: "Con Escursioni Mediterranee non facciamo solo tour, creiamo momenti indimenticabili per esplorare Valencia come mai prima d'ora.",
+        fourthp: "Lasciaci guidarti attraverso i segreti meglio custoditi di questa incredibile città!",
+      },
       indexSection4: {
         firstH3: "VISITA GUIDATA PRIVATA",
         spanH3: "Massimo 4 persone",
