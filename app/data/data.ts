@@ -44,10 +44,16 @@ export type IndexSection3Type = {
   fourthp: string;
 };
 
+export type CardProps = {
+  title: string;
+  mainText: string;
+  duration: string;
+  price: string;
+};
+
 export type IndexSection4Type = {
   firstH3: string;
-  spanH3: string;
-  secondH3: string;
+  propscard: CardProps;
 };
 export type IndexSection5Type = {
   firstH3: string;
@@ -268,9 +274,13 @@ export const languages: Record<string, LanguageData> = {
         fourthp: "Let us guide you through the best-kept secrets of this incredible city!",
       },
       indexSection4: {
-        firstH3: "PRIVATE GUIDED TOUR",
-        spanH3: "Maximum 4 people",
-        secondH3: "The experience is located in the province of Castellón, an area where I've lived since childhood and enjoy whenever I can.",
+        firstH3: "OUR EXCURSIONS",
+        propscard: {
+          title: "San Juan Caves",
+          mainText: "Visit to the San Juan Caves, boat ride in a unique natural setting. Departure and return by private transport from Valencia.",
+          duration: "Duration: 3h 30m",
+          price: "Price: 120€ / person",
+        },
       },
       indexSection5: {
         firstH3: "DEPARTURE FROM VALENCIA",
@@ -473,9 +483,13 @@ export const languages: Record<string, LanguageData> = {
         fourthp: "¡Déjanos guiarte por los secretos mejor guardados de esta increíble ciudad!",
       },
       indexSection4: {
-        firstH3: "VISITA GUIADA PRIVADA",
-        spanH3: "Máximo 4 personas",
-        secondH3: "La experiencia está ubicada en la provincia de Castellón, zona donde he vivido desde mi infancia y disfruto siempre que puedo.",
+        firstH3: "NUESTRAS EXCURSIONES",
+        propscard: {
+          title: "Cuevas de San Juan",
+          mainText: "Visita a las Cuevas de San Juan, paseo en barca en un entorno natural único. Salida y vuelta en transporte privado desde Valencia.",
+          duration: "Duración: 3h 30m",
+          price: "Precio: 120€ / persona",
+        },
       },
       indexSection5: {
         firstH3: "SALIDA DESDE VALENCIA",
@@ -679,9 +693,13 @@ export const languages: Record<string, LanguageData> = {
         fourthp: "Laissez-nous vous guider à travers les secrets les mieux gardés de cette ville incroyable !",
       },
       indexSection4: {
-        firstH3: "VISITE GUIDÉE PRIVÉE",
-        spanH3: "Maximum 4 personnes",
-        secondH3: "L'expérience se situe dans la province de Castellón, une région où je vis depuis mon enfance et que je savoure dès que possible.",
+        firstH3: "NOS EXCURSIONS",
+        propscard: {
+          title: "Grottes de San Juan",
+          mainText: "Visite des grottes de San Juan, promenade en bateau dans un cadre naturel unique. Départ et retour en transport privé depuis Valence.",
+          duration: "Durée : 3h 30m",
+          price: "Prix : 120€ / personne",
+        },
       },
       indexSection5: {
         firstH3: "DÉPART DE VALENCE",
@@ -883,9 +901,13 @@ export const languages: Record<string, LanguageData> = {
         fourthp: "Позвольте нам провести вас через самые сокровенные секреты этого удивительного города!",
       },
       indexSection4: {
-        firstH3: "ЧАСТНАЯ ЭКСКУРСИЯ С ГИДОМ",
-        spanH3: "Максимум 4 человека",
-        secondH3: "Экскурсия проходит в провинции Кастельон, где я живу с детства и наслаждаюсь, когда могу.",
+        firstH3: "НАШИ ЭКСКУРСИИ",
+        propscard: {
+          title: "Пещеры Сан-Хуан",
+          mainText: "Посещение пещер Сан-Хуан, прогулка на лодке в уникальной природной среде. Отправление и возвращение на частном транспорте из Валенсии.",
+          duration: "Продолжительность: 3ч 30м",
+          price: "Цена: 120€ / человек",
+        },
       },
       indexSection5: {
         firstH3: "ОТПРАВЛЕНИЕ ИЗ ВАЛЕНСИИ",
@@ -1088,10 +1110,15 @@ export const languages: Record<string, LanguageData> = {
         thirdp: "Bei Mittelmeer-Ausflügen machen wir nicht nur Touren, wir schaffen unvergessliche Momente, um Valencia wie nie zuvor zu erkunden.",
         fourthp: "Lassen Sie uns Sie durch die bestgehüteten Geheimnisse dieser unglaublichen Stadt führen!",
       },
+      // German
       indexSection4: {
-        firstH3: "PRIVATE FÜHRUNG",
-        spanH3: "Maximal 4 Personen",
-        secondH3: "Das Erlebnis befindet sich in der Provinz Castellón, wo ich seit meiner Kindheit lebe und es immer genieße, wenn ich kann.",
+        firstH3: "UNSERE AUSFLÜGE",
+        propscard: {
+          title: "San Juan Höhlen",
+          mainText: "Besuch der San Juan Höhlen, Bootsfahrt in einzigartiger Naturkulisse. Abfahrt und Rückkehr mit privatem Transport von Valencia aus.",
+          duration: "Dauer: 3:30 Std",
+          price: "Preis: 120€ / Person",
+        },
       },
       indexSection5: {
         firstH3: "ABFAHRT VON VALENCIA",
@@ -1295,9 +1322,13 @@ export const languages: Record<string, LanguageData> = {
         fourthp: "Lasciaci guidarti attraverso i segreti meglio custoditi di questa incredibile città!",
       },
       indexSection4: {
-        firstH3: "VISITA GUIDATA PRIVATA",
-        spanH3: "Massimo 4 persone",
-        secondH3: "L'esperienza si trova nella provincia di Castellón, una zona dove vivo fin dall'infanzia e di cui godo ogni volta che posso.",
+        firstH3: "LE NOSTRE ESCURSIONI",
+        propscard: {
+          title: "Grotte di San Juan",
+          mainText: "Visita alle Grotte di San Juan, giro in barca in un ambiente naturale unico. Partenza e ritorno con trasporto privato da Valencia.",
+          duration: "Durata: 3h 30m",
+          price: "Prezzo: 120€ / persona",
+        },
       },
       indexSection5: {
         firstH3: "PARTENZA DA VALENCIA",

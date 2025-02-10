@@ -30,9 +30,7 @@ const IndexContainer: React.FC = () => {
       <IndexSection1 width={width} height={height} indexSection1Text={indexSection1Text} />
       <IndexSection2 width={width} height={height} indexSection2Text={indexSection2Text} carouselIndexSection2={carouselIndexSection2} />
       <IndexSection3 width={width} indexSection3Text={indexSection3Text} />
-      <IndexSection4 width={width} />
-      <IndexSection5 width={width} indexSection5Text={indexSection5Text} />
-      <IndexSection6 width={width} indexSection6Text={indexSection6Text} />
+      <IndexSection4 width={width} indexSection4Text={indexSection4Text} />
     </div>
   );
 };
