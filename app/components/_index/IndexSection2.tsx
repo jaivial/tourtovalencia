@@ -18,13 +18,13 @@ type ChildProps = {
 
 const IndexSection2: React.FC<ChildProps> = ({ width, indexSection2Text, carouselIndexSection2 }) => {
   return (
-    <div className="w-[95%] max-w-[1280px] flex flex-row flex-wrap items-center justify-center my-20 mx-auto relative z-0">
+    <div className="w-[95%] max-w-[1280px] flex flex-row flex-wrap items-center justify-center my-10 mx-auto relative z-0">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="w-full max-w-[1020px] p-6 relative flex flex-col justify-center items-center gap-8"
+        className="w-full max-w-[1020px] p-6 relative flex flex-col justify-center items-center gap-8 bg-blue-50"
       >
         <div className="text-center space-y-4">
           <motion.h2 

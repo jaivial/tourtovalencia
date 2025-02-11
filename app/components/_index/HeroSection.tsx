@@ -13,9 +13,9 @@ type ChildProps = {
 
 const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) => {
   return (
-    <div className="w-full bg-[url('/herosection62.webp')] min-h-screen flex flex-col justify-center items-center bg-cover bg-center bg-no-repeat bg-fixed relative">
-      {/* Overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
+    <div className="w-full bg-[url('/valenciaadventure1.jpg')] min-h-screen flex flex-col justify-center items-center bg-cover bg-center bg-no-repeat bg-fixed relative">
+      {/* Darker overlay gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/10 to-black/0" />
 
       {/* Content container */}
       <motion.div 
@@ -32,8 +32,9 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
           className="flex flex-col gap-8 mb-8"
         >
           <h2 className={`
-            font-bold font-sans text-center drop-shadow-2xl tracking-wide
+            font-bold font-sans text-center tracking-wide
             bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent h-[100%] p-4
+            drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
             ${width <= 350 ? "text-[3.2rem]" : 
               width <= 450 ? "text-[3.7rem]" : 
               width <= 768 ? "text-[4rem]" : 
@@ -45,7 +46,8 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
             {heroSectionText.firstH2Orange}
           </h2>
           <h2 className={`
-            font-bold font-sans text-white text-center drop-shadow-2xl tracking-wide
+            font-bold font-sans text-white text-center
+            tracking-wide    drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
             ${width <= 350 ? "text-[3.2rem]" : 
               width <= 450 ? "text-[3.7rem]" : 
               width <= 768 ? "text-[4rem]" : 
@@ -66,7 +68,8 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
           className="flex flex-col gap-8"
         >
           <h3 className={`
-            font-bold font-sans text-white text-center drop-shadow-2xl
+            font-bold font-sans text-white text-center
+   drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
             ${width <= 350 ? "text-[1.6rem]" : 
               width <= 450 ? "text-[2.2rem]" : 
               width <= 768 ? "text-[2.5rem]" : 
@@ -78,7 +81,8 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
             {heroSectionText.firstH3}
           </h3>
           <h3 className={`
-            font-bold font-sans text-white text-center drop-shadow-2xl
+            font-bold font-sans text-white text-center
+   drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
             ${width <= 350 ? "text-[1.6rem]" : 
               width <= 450 ? "text-[2.2rem]" : 
               width <= 768 ? "text-[2.5rem]" : 
@@ -104,7 +108,7 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
           }}
           className="absolute bottom-12"
         >
-          <ArrowDownCircle className="w-12 h-12 text-white/80 animate-bounce" />
+          <ArrowDownCircle className="w-12 h-12 text-white drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]" />
         </motion.div>
       </motion.div>
     </div>
