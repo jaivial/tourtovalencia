@@ -1,5 +1,9 @@
 //UI Component: just responsible for displaying pure html with props passed from feature component
 import { HeroSectionType } from "~/data/data";
+import { motion } from "framer-motion";
+import { Button } from "../ui/button";
+import { ArrowDownCircle } from "lucide-react";
+
 // Child Props type
 type ChildProps = {
   width: number;
@@ -9,16 +13,100 @@ type ChildProps = {
 
 const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) => {
   return (
-    <div className="w-full bg-[url('/hero1Copia.jpg')] max-h-[1025px] flex flex-col justify-center items-center bg-cover bg-center bg-no-repeat z-[1]">
-      <div className="w-[90%] max-w-[1280px] h-dvh flex flex-col justify-center items-center">
-        <h2 className={`${width <= 350 ? "text-[3rem]" : width <= 450 ? "text-[3.5rem]" : width <= 768 ? "text-[3.8rem]" : width <= 1024 ? "text-[5rem]" : width <= 1280 ? "text-[6rem]" : "text-[7rem]"} font-bold font-sans text-white text-center drop-shadow-md tracking-wide`}>
-          <span className="text-orange-400">{heroSectionText.firstH2Orange}</span> {heroSectionText.firstH2}
-        </h2>
-        <h3 className={`${width <= 350 ? "text-[1.4rem]" : width <= 450 ? "text-[2rem]" : width <= 768 ? "text-[2.3rem]" : width <= 1024 ? "text-[3rem]" : width <= 1280 ? "text-[3rem]" : "text-[4rem]"} font-bold font-sans text-white text-center drop-shadow-xl translate-y-5`}>{heroSectionText.firstH3}</h3>
-        <h3 className={`${width <= 350 ? "text-[1.4rem] translate-y-8" : width <= 450 ? "text-[2rem] translate-y-8" : width <= 768 ? "text-[2.3rem] translate-y-8" : width <= 1024 ? "text-[3rem] translate-y-10" : width <= 1280 ? "text-[3rem] translate-y-12" : "text-[4rem] translate-y-16"} font-bold font-sans text-white text-center drop-shadow-xl `}>
-          {heroSectionText.secondH3}
-        </h3>
-      </div>
+    <div className="w-full bg-[url('/herosection62.webp')] min-h-screen flex flex-col justify-center items-center bg-cover bg-center bg-no-repeat bg-fixed relative">
+      {/* Overlay gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
+
+      {/* Content container */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        className="w-[90%] max-w-[1280px] min-h-screen flex flex-col justify-center items-center gap-12 relative z-10"
+      >
+        {/* Title group */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="flex flex-col gap-8 mb-8"
+        >
+          <h2 className={`
+            font-bold font-sans text-center drop-shadow-2xl tracking-wide
+            bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent h-[100%] p-4
+            ${width <= 350 ? "text-[3.2rem]" : 
+              width <= 450 ? "text-[3.7rem]" : 
+              width <= 768 ? "text-[4rem]" : 
+              width <= 1024 ? "text-[5.2rem]" : 
+              width <= 1280 ? "text-[6.2rem]" : 
+              "text-[6.2rem]"
+            }
+          `}>
+            {heroSectionText.firstH2Orange}
+          </h2>
+          <h2 className={`
+            font-bold font-sans text-white text-center drop-shadow-2xl tracking-wide
+            ${width <= 350 ? "text-[3.2rem]" : 
+              width <= 450 ? "text-[3.7rem]" : 
+              width <= 768 ? "text-[4rem]" : 
+              width <= 1024 ? "text-[5.2rem]" : 
+              width <= 1280 ? "text-[6.2rem]" : 
+              "text-[5.2rem]"
+            }
+          `}>
+            {heroSectionText.firstH2}
+          </h2>
+        </motion.div>
+
+        {/* Subtitle group */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="flex flex-col gap-8"
+        >
+          <h3 className={`
+            font-bold font-sans text-white text-center drop-shadow-2xl
+            ${width <= 350 ? "text-[1.6rem]" : 
+              width <= 450 ? "text-[2.2rem]" : 
+              width <= 768 ? "text-[2.5rem]" : 
+              width <= 1024 ? "text-[3.2rem]" : 
+              width <= 1280 ? "text-[3.2rem]" : 
+              "text-[4.2rem]"
+            }
+          `}>
+            {heroSectionText.firstH3}
+          </h3>
+          <h3 className={`
+            font-bold font-sans text-white text-center drop-shadow-2xl
+            ${width <= 350 ? "text-[1.6rem]" : 
+              width <= 450 ? "text-[2.2rem]" : 
+              width <= 768 ? "text-[2.5rem]" : 
+              width <= 1024 ? "text-[3.2rem]" : 
+              width <= 1280 ? "text-[3.2rem]" : 
+              "text-[4.2rem]"
+            }
+          `}>
+            {heroSectionText.secondH3}
+          </h3>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            duration: 0.8, 
+            delay: 0.9,
+            repeat: Infinity,
+            repeatType: "reverse",
+            repeatDelay: 1
+          }}
+          className="absolute bottom-12"
+        >
+          <ArrowDownCircle className="w-12 h-12 text-white/80 animate-bounce" />
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
