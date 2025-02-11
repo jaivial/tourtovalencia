@@ -16,14 +16,13 @@ const SanJuanSection1: React.FC<ChildProps> = ({ width, sanJuanSection1Text }) =
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="w-full flex flex-col items-center justify-center max-w-[1180px] gap-0 bg-white rounded-3xl p-12 shadow-lg"
+        className="w-full flex flex-col items-center justify-center max-w-[1180px] gap-0 bg-white rounded-3xl p-0 shadow-lg"
       >
         {/* Background image with overlay */}
-        <div className="w-full h-[600px] relative rounded-2xl overflow-hidden mb-0">
+        <div className="w-full h-[600px] relative bg-white rounded-2xl overflow-hidden mb-0 px-12">
           <div 
-            className="absolute inset-0 bg-[url('/hero1.webp')] bg-cover bg-center transform transition-transform duration-700"
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent" />
+            className={`absolute inset-0 bg-[url('/hero1.webp')] bg-cover bg-center transform transition-transform duration-700 rounded-2xl bg-white ${width <= 700 ? "m-0" : "m-8"}`}
+          > 
           </div>
         </div>
 
@@ -33,7 +32,7 @@ const SanJuanSection1: React.FC<ChildProps> = ({ width, sanJuanSection1Text }) =
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="flex flex-col items-center text-center gap-8 max-w-4xl mt-10"
+          className="flex flex-col items-center text-center gap-8 max-w-4xl mt-10 p-6"
         >
 
           <motion.p 

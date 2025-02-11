@@ -63,7 +63,6 @@ export type CardProps = {
   mainText: string;
   duration: string;
   price: string;
-  width: number;
 };
 
 export type IndexSection4Type = {
@@ -404,8 +403,7 @@ export const languages: Record<string, LanguageData> = {
   es: {
     links: [
       { path: "/", linkText: "Inicio" },
-      { path: "/about", linkText: "Acerca de" },
-      { path: "/sanjuan", linkText: "San Juan" },
+      { path: "/book", linkText: "Reservar" },
     ],
     flag: "🇪🇸",
     currentLanguage: "Español",
