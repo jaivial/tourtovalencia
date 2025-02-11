@@ -6,7 +6,7 @@ const ArrowToTop: React.FC = () => {
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  return <ChevronsUp className="fixed bottom-3 right-3 p-2 z-[999] rounded-full bg-orange-950 text-orange-50" size={40} onClick={handleScrollToTop} />;
+  return <ChevronsUp className="fixed bottom-3 right-3 p-2 z-[999] rounded-full bg-blue-950 text-blue-50" size={40} onClick={handleScrollToTop} />;
 };
 
 export default ArrowToTop;
