@@ -5,6 +5,7 @@ import SanJuanSection3 from "./SanJuanSection3";
 import SanJuanSection4 from "./SanJuanSection4";
 import SanJuanSection5 from "./SanJuanSection5";
 import SanJuanSection6 from "./SanJuanSection6";
+import IndexSection5 from "../_index/IndexSection5";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { useLanguageContext } from "~/providers/LanguageContext";
 
@@ -13,14 +14,17 @@ const SanJuanContainer: React.FC = () => {
   const width = size.width ?? 0;
   const height = size.height ?? 0;
   const { state } = useLanguageContext();
+  const sanJuanSection1Text = state.sanjuan.sanJuanSection1;
   const SanJuanSection2Text = state.sanjuan.sanJuanSection2;
   const SanJuanSection4Text = state.sanjuan.sanJuanSection4;
   const SanJuanSection5Text = state.sanjuan.sanJuanSection5;
   const SanJuanSection6Text = state.sanjuan.sanJuanSection6;
+  const indexSection5Text = state.index.indexSection5;
 
   return (
-    <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
-      <SanJuanSection1 width={width} height={height} />
+    <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
+      <IndexSection5 width={width} indexSection5Text={indexSection5Text} />
+      <SanJuanSection1 width={width} sanJuanSection1Text={sanJuanSection1Text} />
       <SanJuanSection2 width={width} height={height} SanJuanSection2Text={SanJuanSection2Text} />
       <SanJuanSection3 width={width} />
       <SanJuanSection4 width={width} SanJuanSection4Text={SanJuanSection4Text} />

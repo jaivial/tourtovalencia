@@ -17,8 +17,8 @@ const IndexSection3: React.FC<ChildProps> = ({ width }) => {
   const carouselImages: CarouselDataType[] = carouselData;
   return (
     <>
-      {width > 500 ? (
-        <div className="w-[95%] max-w-[1280px] flex flex-col flex-wrap-reverse items-center justify-center my-10 mx-auto relative z-0 gap-6">
+      {width > 580 ? (
+        <div className="w-[95%] max-w-[1280px] flex flex-col flex-wrap-reverse items-center justify-center my-10 mx-auto relative z-0 gap-6 overflow-x-hidden">
           <div className="flex flex-row justify-center gap-6 items-center w-full">
             <div className="rounded-2xl h-[400px] w-2/5 bg-[url('/photo1IS3.webp')] bg-no-repeat bg-center bg-cover"></div>
             <div className="rounded-2xl h-[400px] bg-[url('/photo2IS3.webp')] bg-center bg-cover w-3/5"></div>
@@ -29,7 +29,7 @@ const IndexSection3: React.FC<ChildProps> = ({ width }) => {
           </div>
         </div>
       ) : (
-        <div className="w-[95%] max-w-[1280px] flex flex-col flex-wrap-reverse items-center justify-center my-10 mx-auto relative z-0 gap-0 rounded-2xl -translate-y-[100px]">
+        <div className="w-[95%] max-w-[1280px] flex flex-col flex-wrap-reverse items-center justify-center mb-0 mt-28 mx-auto relative z-0 gap-0 rounded-2xl -translate-y-[100px] overflow-x-hidden">
           <Carousel plugins={[plugin.current]} className="w-full" onMouseEnter={plugin.current.stop} onMouseLeave={plugin.current.reset}>
             <CarouselContent>
               {carouselImages.map((image) => (
