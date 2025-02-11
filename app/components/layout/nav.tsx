@@ -60,12 +60,24 @@ const Nav: React.FC = () => {
           </Select>
         </div>
       ) : (
-        <div className={`w-[100%] max-w-[1280px] flex flex-row justify-center items-center h-[100px] mx-auto p-4 absolute top-0 left-0 right-0 z-10 animate-fadeIn backdrop-blur-md bg-white/10`}>
-          <img src="/logoolgatravel.webp" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className={`${width <= 350 ? "h-[80%]" : width <= 450 ? "h-[90%]" : "h-full"} invert brightness-0`} />
-          <Menu className={`absolute z-[10] text-white ${width <= 450 ? "right-4" : "right-20"}`} size={width <= 350 ? 40 : 45} onClick={() => setMobileNavOpen(true)} />
+        <div className={`w-[100%] max-w-[1280px] flex flex-row justify-center items-center h-[100px] mx-auto p-4 absolute top-0 left-0 right-0 z-[90] animate-fadeIn backdrop-blur-md bg-white/10`}>
+          <img 
+            src="/logonuevoolga3.png" 
+            alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." 
+            className={`${width <= 350 ? "h-[80%]" : width <= 450 ? "h-[90%]" : "h-full"} z-[80]`}
+          />
+          <Menu 
+            className={`absolute z-[10] text-white ${width <= 450 ? "right-4" : "right-20"}`} 
+            size={width <= 350 ? 40 : 45} 
+            onClick={() => setMobileNavOpen(true)} 
+          />
           <div className={`fixed top-0 w-full h-full transition-all ease-in-out duration-500 backdrop-blur-sm ${mobileNavOpen ? "bg-opacity-35 z-[999]" : "bg-opacity-0 z-[1]"}`}>
             <div className={`flex flex-col transition-all ease-in-out duration-500 fixed right-0 h-dvh p-16 backdrop-blur-xl bg-blue-800/70 items-start justify-between gap-10 ${mobileNavOpen ? "max-w-[400px] h-dvh translate-x-0 opacity-100" : "w-0 translate-x-[100%] opacity-0"}`}>
-              <img src="/logoolgatravel.webp" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className="h-auto w-auto invert brightness-0" />
+              <img 
+                src="/logonuevoolga3.png" 
+                alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." 
+                className="h-[80px] w-auto"
+              />
               <div className={`h-full flex flex-col justify-start items-start w-full ${height <= 570 ? "justify-between" : "justify-start gap-14"}`}>
                 <div className="w-fit mx-auto z-[999]">
                   <Select onValueChange={handleChange}>
