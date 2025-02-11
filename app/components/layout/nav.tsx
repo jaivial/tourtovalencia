@@ -49,7 +49,7 @@ const Nav: React.FC = () => {
               <p className="text-2xl">{flag}</p>
               <SelectValue placeholder={currentLanguage} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent style={{ zIndex: 100 }}>
               <SelectItem value="es">Español</SelectItem>
               <SelectItem value="en">English</SelectItem>
               <SelectItem value="de">German</SelectItem>
