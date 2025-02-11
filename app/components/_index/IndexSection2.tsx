@@ -18,13 +18,13 @@ type ChildProps = {
 
 const IndexSection2: React.FC<ChildProps> = ({ width, indexSection2Text, carouselIndexSection2 }) => {
   return (
-    <div className="w-[95%] max-w-[1280px] flex flex-row flex-wrap items-center justify-center my-20 mx-auto relative z-0">
+    <div className="w-[95%] max-w-[1280px] flex flex-row flex-wrap items-center justify-center my-10 mx-auto relative z-0">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="w-full max-w-[1020px] p-6 relative flex flex-col justify-center items-center gap-8"
+        className="w-full max-w-[1020px] p-0 relative flex flex-col justify-center items-center gap-8 bg-blue-50"
       >
         <div className="text-center space-y-4">
           <motion.h2 
@@ -34,7 +34,17 @@ const IndexSection2: React.FC<ChildProps> = ({ width, indexSection2Text, carouse
             viewport={{ once: true }}
             className={`
               font-bold bg-gradient-to-r from-blue-900 to-blue-600 bg-clip-text text-transparent
-              ${width <= 450 ? "text-3xl" : "text-4xl"}
+              ${width <= 290 ? "text-xl" :
+                width <= 350 ? "text-2xl" :
+                width <= 400 ? "text-2xl" :
+                width <= 450 ? "text-2xl" :
+                width <= 500 ? "text-2xl" :
+                width <= 550 ? "text-2xl" :
+                width <= 600 ? "text-3xl" :
+                width <= 650 ? "text-3xl" :
+                width <= 700 ? "text-3xl" :
+                "text-4xl"
+              }
             `}
           >
             {indexSection2Text.firstH2}
@@ -46,7 +56,17 @@ const IndexSection2: React.FC<ChildProps> = ({ width, indexSection2Text, carouse
             viewport={{ once: true }}
             className={`
               text-blue-800
-              ${width <= 450 ? "text-2xl" : "text-3xl"}
+              ${width <= 290 ? "text-lg" :
+                width <= 350 ? "text-xl" :
+                width <= 400 ? "text-xl" :
+                width <= 450 ? "text-xl" :
+                width <= 500 ? "text-xl" :
+                width <= 550 ? "text-xl" :
+                width <= 600 ? "text-2xl" :
+                width <= 650 ? "text-2xl" :
+                width <= 700 ? "text-2xl" :
+                "text-3xl"
+              }
             `}
           >
             {indexSection2Text.secondH2}
@@ -67,7 +87,7 @@ const IndexSection2: React.FC<ChildProps> = ({ width, indexSection2Text, carouse
             className="custom-slider" 
             style={{ 
               background: 'linear-gradient(to right, #1e3a8a, #2563eb)',
-              padding: "24px",
+              padding: width <= 350 ? "16px" : "24px",
               borderRadius: "24px",
               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
               height: "auto",
@@ -82,39 +102,80 @@ const IndexSection2: React.FC<ChildProps> = ({ width, indexSection2Text, carouse
                 style={{
                   background: 'linear-gradient(to bottom right, #ffffff, #f3f4f6)',
                   width: "100%",
-                  height: "450px",
+                  height: width <= 350 ? "620px" :
+                          width <= 400 ? "600px" :
+                          width <= 450 ? "580px" :
+                          width <= 500 ? "580px" :
+                          width <= 550 ? "550px" :
+                          width <= 700 ? "580px" :
+                          "480px",
                 }}
-                className="flex flex-col items-center justify-center p-28 rounded-2xl shadow-lg space-y-6 "
+                className={`
+                  flex flex-col items-center justify-center rounded-2xl shadow-lg space-y-6
+                  ${width <= 350 ? "p-2" :
+                    width <= 400 ? "p-2" :
+                    width <= 450 ? "p-4" :
+                    width <= 500 ? "p-4" :
+                    width <= 550 ? "p-6" :
+                    width <= 600 ? "p-8" :
+                    "p-10"
+                  }
+                `}
               >
                 {/* Avatar and Reviewer Info */}
                 <div className="flex flex-row gap-6 items-center">
                   <Avatar 
                     circle 
-                    size="lg"
+                    size={width <= 350 ? "md" : "lg"}
                     style={{ 
                       background: "#1e3a8a",
-                      fontSize: "1.5rem",
+                      fontSize: width <= 350 ? "1.2rem" : "1.5rem",
                       fontWeight: "bold"
                     }}
                   >
                     {review.avatar}
                   </Avatar>
                   <div className="flex flex-col items-start justify-start">
-                    <h3 className="text-xl font-semibold text-blue-900">
+                    <h3 className={`
+                      font-semibold text-blue-900
+                      ${width <= 350 ? "text-base" :
+                        width <= 450 ? "text-lg" :
+                        "text-xl"
+                      }
+                    `}>
                       {review.name} <span className="text-blue-400 mx-2">•</span> {review.country}
                     </h3>
-                    <p className="text-blue-600">{review.date}</p>
+                    <p className={`
+                      text-blue-600
+                      ${width <= 350 ? "text-sm" : "text-base"}
+                    `}>
+                      {review.date}
+                    </p>
                   </div>
                 </div>
 
                 {/* Rating */}
                 <div className="my-2">
-                  <Rate defaultValue={5} readOnly size="lg" color="rgb(29, 78, 216)" />
+                  <Rate 
+                    defaultValue={5} 
+                    readOnly 
+                    size={width <= 350 ? "md" : "lg"} 
+                    color="rgb(29, 78, 216)" 
+                  />
                 </div>
 
                 {/* Review Text */}
-                <div className="max-w-2xl">
-                  <p className="text-lg text-blue-800 leading-relaxed italic">
+                <div className={`
+                  max-w-2xl
+                  ${width <= 350 ? "px-2" : "px-4"}
+                `}>
+                  <p className={`
+                    text-blue-800 leading-relaxed italic
+                    ${width <= 350 ? "text-base" :
+                      width <= 450 ? "text-lg" :
+                      "text-lg"
+                    }
+                  `}>
                     "{review.reviewText}"
                   </p>
                 </div>
@@ -125,7 +186,10 @@ const IndexSection2: React.FC<ChildProps> = ({ width, indexSection2Text, carouse
                     href={review.reviewLink} 
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 transition-colors font-medium flex items-center gap-2"
+                    className={`
+                      text-blue-600 hover:text-blue-800 transition-colors font-medium flex items-center gap-2
+                      ${width <= 350 ? "text-sm" : "text-base"}
+                    `}
                   >
                     {review.reviewLinkSite}
                   </a>
