@@ -55,7 +55,18 @@ export type IndexSection4Type = {
   firstH3: string;
   propscard: CardProps;
 };
-export type IndexSection5Type = {
+
+export type sanJuansection2Type = {
+  firstH3: string;
+  secondH3: string;
+  thirdH3: string;
+};
+export type sanJuansection3Type = {
+  firstH3: string;
+  secondH3: string;
+  thirdH3: string;
+};
+export type sanJuanSection4Type = {
   firstH3: string;
   secondH3: string;
   thirdH3: string;
@@ -63,15 +74,15 @@ export type IndexSection5Type = {
   fifthH3: string;
 };
 
-export type IndexSection6listType = {
+export type SanJuanSection5listType = {
   li: string;
   index: number;
 };
-export type IndexSection6Type = {
+export type SanJuanSection5Type = {
   cardTitle: string;
   cardDescription: string;
   firstH4: string;
-  list: IndexSection6listType[];
+  list: SanJuanSection5listType[];
   secondH4: string;
   secondH4span: string;
   button: string;
@@ -94,11 +105,16 @@ export type Index = {
   heroSection: HeroSectionType;
   indexSection1: IndexSection1Type;
   indexSection2: IndexSection2Type;
-  carouselIndexSection2: Review[];
   indexSection3: IndexSection3Type;
+  carouselIndexSection2: Review[];
   indexSection4: IndexSection4Type;
-  indexSection5: IndexSection5Type;
-  indexSection6: IndexSection6Type;
+};
+
+export type SanJuan = {
+  sanJuanSection2: sanJuansection2Type;
+  sanJuanSection3: sanJuansection3Type;
+  sanJuanSection4: sanJuanSection4Type;
+  sanJuanSection5: SanJuanSection5Type;
 };
 
 export type LanguageData = {
@@ -106,6 +122,7 @@ export type LanguageData = {
   flag: string;
   currentLanguage: string;
   index: Index;
+  sanjuan: SanJuan;
   footer: FooterType;
 };
 export const languages: Record<string, LanguageData> = {
@@ -113,6 +130,7 @@ export const languages: Record<string, LanguageData> = {
     links: [
       { path: "/", linkText: "Home" },
       { path: "/about", linkText: "About" },
+      { path: "/sanjuan", linkText: "San Juan" },
     ],
     flag: "🇺🇸",
     currentLanguage: "English",
@@ -282,14 +300,26 @@ export const languages: Record<string, LanguageData> = {
           price: "Price: 120€ / person",
         },
       },
-      indexSection5: {
+    },
+    sanjuan: {
+      sanJuanSection2: {
+        firstH3: "Enjoy a relaxing boat ride through one of the most spectacular underground rivers!",
+        secondH3: "You'll travel 800 meters by boat.",
+        thirdH3: "Did you know it's the longest navigable underground river in Europe?",
+      },
+      sanJuanSection3: {
+        firstH3: "PRIVATE GUIDED TOUR",
+        secondH3: "(Maxiumum 4 people)",
+        thirdH3: "The experience is located in the province of Castellón, an area where I've lived since childhood and enjoy whenever I can.",
+      },
+      sanJuanSection4: {
         firstH3: "DEPARTURE FROM VALENCIA",
         secondH3: "Departure from Plaza de La Reina, Valencia.",
         thirdH3: "Private transport to La Vall d'Uixó (Castellón).",
         fourthH3: "Guided tour: 3h 30m (approx).",
         fifthH3: "Return to Valencia by private transport.",
       },
-      indexSection6: {
+      sanJuanSection5: {
         cardTitle: "GUIDED TOUR",
         cardDescription: "Trip package to the San Juan Caves",
         firstH4: "Included Services",
@@ -322,6 +352,7 @@ export const languages: Record<string, LanguageData> = {
     links: [
       { path: "/", linkText: "Inicio" },
       { path: "/about", linkText: "Acerca de" },
+      { path: "/sanjuan", linkText: "San Juan" },
     ],
     flag: "🇪🇸",
     currentLanguage: "Español",
@@ -498,7 +529,7 @@ export const languages: Record<string, LanguageData> = {
         fourthH3: "Visita guiada 3h 30m (aprox).",
         fifthH3: "Vuelta a Valencia en en transporte privado.",
       },
-      indexSection6: {
+      SanJuanSection5: {
         cardTitle: "VISITA GUIADA",
         cardDescription: "Pack de viaje a las Cuevas de San Juan",
         firstH4: "Servicios Incluídos",
@@ -531,6 +562,7 @@ export const languages: Record<string, LanguageData> = {
     links: [
       { path: "/", linkText: "Accueil" },
       { path: "/about", linkText: "À propos" },
+      { path: "/sanjuan", linkText: "San Juan" },
     ],
     flag: "🇫🇷",
     currentLanguage: "Français",
@@ -708,7 +740,7 @@ export const languages: Record<string, LanguageData> = {
         fourthH3: "Visite guidée : 3h 30min (env.).",
         fifthH3: "Retour à Valence en transport privé.",
       },
-      indexSection6: {
+      SanJuanSection5: {
         cardTitle: "VISITE GUIDÉE",
         cardDescription: "Forfait de voyage aux grottes de San Juan",
         firstH4: "Services Inclus",
@@ -741,6 +773,7 @@ export const languages: Record<string, LanguageData> = {
     links: [
       { path: "/", linkText: "Домой" },
       { path: "/about", linkText: "О нас" },
+      { path: "/sanjuan", linkText: "Сан-Хуан" },
     ],
     flag: "🇷🇺",
     currentLanguage: "Русский",
@@ -916,7 +949,7 @@ export const languages: Record<string, LanguageData> = {
         fourthH3: "Экскурсия с гидом: 3 ч 30 мин (примерно).",
         fifthH3: "Возвращение в Валенсию на частном транспорте.",
       },
-      indexSection6: {
+      SanJuanSection5: {
         cardTitle: "ЭКСКУРСИЯ С ГИДОМ",
         cardDescription: "Пакет путешествия в пещеры Сан-Хуан",
         firstH4: "Включенные услуги",
@@ -949,6 +982,7 @@ export const languages: Record<string, LanguageData> = {
     links: [
       { path: "/", linkText: "Startseite" },
       { path: "/about", linkText: "Über uns" },
+      { path: "/sanjuan", linkText: "Sankt Juan" },
     ],
     flag: "🇩🇪",
     currentLanguage: "Deutsch",
@@ -1127,7 +1161,7 @@ export const languages: Record<string, LanguageData> = {
         fourthH3: "Geführte Tour: 3 Std. 30 Min. (ca.).",
         fifthH3: "Rückfahrt nach Valencia mit Privattransport.",
       },
-      indexSection6: {
+      SanJuanSection5: {
         cardTitle: "GEFÜHRTE TOUR",
         cardDescription: "Reisepaket zu den Höhlen von San Juan",
         firstH4: "Inklusive Leistungen",
@@ -1160,6 +1194,7 @@ export const languages: Record<string, LanguageData> = {
     links: [
       { path: "/", linkText: "Home" },
       { path: "/about", linkText: "Chi siamo" },
+      { path: "/sanjuan", linkText: "San Juan" },
     ],
     flag: "🇮🇹",
     currentLanguage: "Italiano",
@@ -1337,7 +1372,7 @@ export const languages: Record<string, LanguageData> = {
         fourthH3: "Visita guidata: 3h 30m (circa).",
         fifthH3: "Ritorno a Valencia con trasporto privato.",
       },
-      indexSection6: {
+      SanJuanSection5: {
         cardTitle: "VISITA GUIDATA",
         cardDescription: "Pacchetto viaggio alle grotte di San Juan",
         firstH4: "Servizi Inclusi",

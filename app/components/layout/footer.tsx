@@ -3,35 +3,36 @@ import { useLanguageContext } from "~/providers/LanguageContext";
 import { useLocation } from "@remix-run/react";
 
 import { Link } from "@remix-run/react";
+import { Facebook, Instagram } from "lucide-react";
 
 const Footer: React.FC = () => {
   const { state } = useLanguageContext();
   const navLinks = state.links;
   const footerText = state.footer;
   return (
-    <footer className="bg-gray-900 text-white py-10">
-      <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+    <footer className="bg-gradient-to-b from-gray-900 to-gray-800 text-white py-16">
+      <div className="container mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-12">
         {/* Section 1: Company Info */}
-        <div className="mx-auto w-[80%] sm:w-auto">
-          <h4 className="text-lg font-semibold mb-4">{footerText.firstH4}</h4>
-          <p className="text-sm max-w-[350px]">{footerText.firstp}</p>
-          <div className="mt-4 flex space-x-4">
-            <Link to="#" aria-label="Facebook" className="hover:text-orange-500">
-              Facebook
+        <div className="mx-auto w-[90%] sm:w-auto transition-transform duration-300 hover:scale-105">
+          <img src="/logonuevoolga3.png" alt="Olga Travel" className="h-16 mb-6" />
+          <p className="text-gray-300 text-base leading-relaxed max-w-[350px] mb-6">{footerText.firstp}</p>
+          <div className="mt-6 flex space-x-6">
+            <Link to="#" aria-label="Facebook" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 text-base">
+              <Facebook className="w-6 h-6" />
             </Link>
-            <Link to="#" aria-label="Instagram" className="hover:text-orange-500">
-              Instagram
+            <Link to="#" aria-label="Instagram" className="text-gray-300 hover:text-pink-400 transition-colors duration-300 text-base">
+              <Instagram className="w-6 h-6" />
             </Link>
           </div>
         </div>
 
         {/* Section 2: Quick Links */}
-        <div className="mx-auto w-[80%] sm:w-auto">
-          <h4 className="text-lg font-semibold mb-4">{footerText.secondH4}</h4>
-          <ul className="text-sm space-y-2">
+        <div className="mx-auto w-[90%] sm:w-auto">
+          <h4 className="text-xl font-bold mb-6 text-blue-300">{footerText.secondH4}</h4>
+          <ul className="text-base space-y-3">
             {navLinks.map((item) => (
-              <li key={item.linkText}>
-                <Link key={item.path} to={item.path} className="hover:text-orange-500">
+              <li key={item.linkText} className="transform transition-transform duration-300 hover:translate-x-2">
+                <Link key={item.path} to={item.path} className="text-gray-300 hover:text-white transition-colors duration-300">
                   {item.linkText}
                 </Link>
               </li>
@@ -40,25 +41,22 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Section 3: Contact Info */}
-        <div className="mx-auto w-[80%] sm:w-auto">
-          <h4 className="text-lg font-semibold mb-4">{footerText.thirdH4}</h4>
-          <ul className="text-sm space-y-2">
-            <li>
-              <span className="font-semibold">{footerText.firstspan}</span>
-              <br />
-              {footerText.firstli}
+        <div className="mx-auto w-[90%] sm:w-auto">
+          <h4 className="text-xl font-bold mb-6 text-blue-300">{footerText.thirdH4}</h4>
+          <ul className="text-base space-y-4">
+            <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
+              <span className="font-semibold text-blue-200 block mb-1">{footerText.firstspan}</span>
+              <span className="text-gray-300">{footerText.firstli}</span>
             </li>
-            <li>
-              <span className="font-semibold">{footerText.secondspan}</span>
-              <br />
-              <Link to="tel:+34123456789" className="hover:text-orange-500">
+            <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
+              <span className="font-semibold text-blue-200 block mb-1">{footerText.secondspan}</span>
+              <Link to="tel:+34123456789" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 block">
                 +34 123 456 789
               </Link>
             </li>
-            <li>
-              <span className="font-semibold">{footerText.thirdspan}</span>
-              <br />
-              <Link to="mailto:info@olgatravel.com" className="hover:text-orange-500">
+            <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
+              <span className="font-semibold text-blue-200 block mb-1">{footerText.thirdspan}</span>
+              <Link to="mailto:info@olgatravel.com" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 block">
                 info@olgatravel.com
               </Link>
             </li>
@@ -67,13 +65,13 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Bottom Section: Legal and Copyright */}
-      <div className="border-t border-gray-700 mt-8 pt-6 text-center text-sm">
-        <p>&copy; {new Date().getFullYear()} jaimedigitalstudio.com All rights reserved.</p>
-        <div className="mt-2">
-          <Link to="/privacy-policy" className="hover:text-orange-500 mx-2">
+      <div className="border-t border-gray-700/50 mt-12 pt-8 text-center">
+        <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} jaimedigitalstudio.com All rights reserved.</p>
+        <div className="mt-4 space-x-6">
+          <Link to="/privacy-policy" className="text-gray-400 hover:text-blue-300 transition-colors duration-300 text-sm">
             {footerText.privacypolicy}
           </Link>
-          <Link to="/terms-of-service" className="hover:text-orange-500 mx-2">
+          <Link to="/terms-of-service" className="text-gray-400 hover:text-blue-300 transition-colors duration-300 text-sm">
             {footerText.termsofservice}
           </Link>
         </div>
