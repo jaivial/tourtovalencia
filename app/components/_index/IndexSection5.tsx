@@ -1,14 +1,15 @@
 //UI Component: just responsible for displaying pure html with props passed from feature component
 import { motion } from "framer-motion";
-
+import { IndexSection5Type } from "~/data/data";
 // Child Props type
 type ChildProps = {
   width: number;
+  indexSection5Text: IndexSection5Type;
 };
 
-const IndexSection5: React.FC<ChildProps> = ({ width }) => {
+const IndexSection5: React.FC<ChildProps> = ({ width, indexSection5Text }) => {
   return (
-    <div className="w-[95%] max-w-[1280px] flex flex-row flex-wrap items-center justify-center my-20 mx-auto relative z-0">
+    <div className="w-[95%] max-w-[1280px] flex flex-row flex-wrap items-center justify-center mt-20 mb-0 mx-auto relative z-0">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -27,7 +28,7 @@ const IndexSection5: React.FC<ChildProps> = ({ width }) => {
               ${width <= 450 ? "text-3xl" : "text-4xl"}
             `}
           >
-            Explora Las Cuevas de San Juan
+            {indexSection5Text.firstH3}
           </motion.h2>
           <motion.h3 
             initial={{ opacity: 0, y: 20 }}
@@ -39,7 +40,7 @@ const IndexSection5: React.FC<ChildProps> = ({ width }) => {
               ${width <= 450 ? "text-xl" : "text-2xl"}
             `}
           >
-            Una aventura subterránea única en Valencia
+            {indexSection5Text.secondH3}
           </motion.h3>
         </div>
       </motion.div>

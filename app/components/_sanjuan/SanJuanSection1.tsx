@@ -2,13 +2,13 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
-
+import { sanJuanSection1Type } from "~/data/data";
 type ChildProps = {
   width: number;
-  height: number;
+  sanJuanSection1Text: sanJuanSection1Type;
 };
 
-const SanJuanSection1: React.FC<ChildProps> = ({ width, height }) => {
+const SanJuanSection1: React.FC<ChildProps> = ({ width, sanJuanSection1Text }) => {
   return (
     <div className="w-[95%] max-w-[1280px] flex flex-row flex-wrap items-center justify-center my-20 mx-auto relative z-0">
       <motion.div 
@@ -47,7 +47,7 @@ const SanJuanSection1: React.FC<ChildProps> = ({ width, height }) => {
               "text-3xl"
             } text-blue-900`}
           >
-            Descubre la magia subterránea de Valencia en un viaje único por las Cuevas de San Juan
+            {sanJuanSection1Text.firstH3}
           </motion.p>
 
           {/* Feature highlights */}
@@ -59,9 +59,9 @@ const SanJuanSection1: React.FC<ChildProps> = ({ width, height }) => {
             className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 w-full"
           >
             {[
-              { title: "3.5 Horas", desc: "Duración del Tour" },
-              { title: "Guía Local", desc: "Tour Privado" },
-              { title: "Viaje en Barca", desc: "Experiencia Única" }
+              { title: sanJuanSection1Text.firstSquareH3, desc: sanJuanSection1Text.firstSquareP },
+              { title: sanJuanSection1Text.secondSquareH3, desc: sanJuanSection1Text.secondSquareP },
+              { title: sanJuanSection1Text.thirdSquareH3, desc: sanJuanSection1Text.thirdSquareP }
             ].map((feature, index) => (
               <div key={index} className="bg-blue-50/50 rounded-xl p-6 transform hover:scale-105 transition-transform">
                 <h3 className="text-2xl font-bold text-blue-900 mb-2">{feature.title}</h3>
@@ -80,7 +80,7 @@ const SanJuanSection1: React.FC<ChildProps> = ({ width, height }) => {
             <Button 
               className="bg-blue-900 hover:bg-blue-800 text-white px-8 py-6 text-xl rounded-full group transition-all duration-300 hover:shadow-lg"
             >
-              Reserva Ahora
+              {sanJuanSection1Text.button}
               <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </motion.div>

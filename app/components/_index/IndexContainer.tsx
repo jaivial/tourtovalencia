@@ -28,7 +28,8 @@ const IndexContainer: React.FC = () => {
   const carouselIndexSection2 = state.index.carouselIndexSection2;
   const indexSection4Text = state.index.indexSection4;
   const indexSection5Text = state.index.indexSection5;
-  const indexSection6Text = state.index.indexSection6;
+  const indexFeatures = state.index.indexFeatures;
+  const sanJuanSection1Text = state.sanjuan.sanJuanSection1;
   const SanJuanSection2Text = state.sanjuan.sanJuanSection2;
   const SanJuanSection4Text = state.sanjuan.sanJuanSection4;
   const SanJuanSection5Text = state.sanjuan.sanJuanSection5;
@@ -36,13 +37,13 @@ const IndexContainer: React.FC = () => {
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn">
       <HeroSection width={width} height={height} heroSectionText={heroSectionText} />
-      <IndexSection5 width={width} />
+      <IndexSection5 width={width} indexSection5Text={indexSection5Text} />
       <SanJuanSection2 width={width} height={height} SanJuanSection2Text={SanJuanSection2Text} />
-      <SanJuanSection1 width={width} height={height} />
+      <SanJuanSection1 width={width} sanJuanSection1Text={sanJuanSection1Text} />
       <SanJuanSection3 width={width} height={height} />
       <SanJuanSection4 width={width} SanJuanSection4Text={SanJuanSection4Text} />
       <SanJuanSection5 width={width} SanJuanSection5Text={SanJuanSection5Text} />
-      <IndexFeatures width={width} />
+      <IndexFeatures width={width} indexFeatures={indexFeatures} />
       {/* <IndexSection4 width={width} indexSection4Text={indexSection4Text} /> */}
       <SanJuanSection6 width={width} SanJuanSection6Text={SanJuanSection6Text} />
       {/* <IndexSection1 width={width} height={height} indexSection1Text={indexSection1Text} /> */}

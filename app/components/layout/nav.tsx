@@ -72,7 +72,13 @@ const Nav: React.FC = () => {
       {/* Mobile Menu Overlay */}
       {mobileNavOpen && (
         <div className="fixed inset-0 z-[999] isolate">
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setMobileNavOpen(false)} />
+          <div 
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm" 
+            onClick={() => setMobileNavOpen(false)}
+            onKeyDown={(e) => e.key === 'Escape' && setMobileNavOpen(false)}
+            role="button"
+            tabIndex={0}
+          />
           <div className={`fixed right-0 top-0 h-dvh w-[400px] bg-blue-800/90 p-16 flex flex-col items-start justify-between gap-10 transform transition-transform duration-300 ${mobileNavOpen ? 'translate-x-0' : 'translate-x-full'}`}>
             <img 
               src="/logonuevoolga3.png" 
@@ -121,11 +127,20 @@ const Nav: React.FC = () => {
                     <Link 
                       key={item.linkText} 
                       to={item.path} 
-                      className={`font-sans transition-all ease-in-out duration-300 group font-semibold relative ${width <= 350 ? "text-lg" : "text-xl"} ${isActive ? "text-blue-50" : "text-blue-50"}`}
+                      className={`
+                        font-sans transition-all ease-in-out duration-300 
+                        group font-semibold no-underline relative decoration-none
+                        ${width <= 350 ? "text-lg" : "text-xl"} 
+                        ${isActive ? "text-blue-50 hover:text-white hover:no-underline" : "text-blue-50 hover:text-white hover:no-underline"}
+                      `}
                     >
                       {item.linkText}
-                      {!isActive && <span className="absolute left-0 bottom-[-5px] w-0 h-[5px] bg-blue-800 transition-all duration-300 group-hover:w-full"></span>}
-                      {isActive && <span className="absolute left-0 bottom-[-5px] h-[5px] bg-white transition-all duration-300 w-full"></span>}
+                      {!isActive && (
+                        <span className="absolute left-0 bottom-[-5px] w-0 h-[5px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                      )}
+                      {isActive && (
+                        <span className="absolute left-0 bottom-[-5px] h-[5px] bg-white transition-all duration-300 w-full"></span>
+                      )}
                     </Link>
                   );
                 }
