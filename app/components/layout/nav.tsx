@@ -26,6 +26,10 @@ const Nav: React.FC = () => {
     fetcher.submit({ language: selectedLanguage }, { method: "post", action: "/set-language" });
   };
 
+  const handleLinkClick = () => {
+    setMobileNavOpen(false);
+  };
+
   return (
     <>
       {width >= 1280 ? (
@@ -34,7 +38,7 @@ const Nav: React.FC = () => {
           <img 
             src="/logonuevoolga3.png" 
             alt="Olga Travel" 
-            className="h-[80px] absolute left-1/2 -translate-x-1/2" 
+            className={` ${width < 380 ? "h-[20px]" : "h-[100px]"} absolute left-1/2 -translate-x-1/2 w-auto`}
           />
           <Menu 
             className="text-white cursor-pointer hover:text-blue-200 transition-colors" 
@@ -43,25 +47,16 @@ const Nav: React.FC = () => {
           />
         </div>
       ) : (
-        <div className="w-[100%] max-w-[1280px] flex flex-row justify-between items-center h-[100px] mx-auto p-4 absolute top-0 left-0 right-0 z-10 animate-fadeIn bg-white/10">
+        <div className="w-[90%] max-w-[920px] flex flex-row justify-between items-center h-[100px] backdrop-blur-xl left-1/2 -translate-x-1/2 p-6 absolute top-5 z-[90] bg-black/15 rounded-2xl border border-white/20">
           <img 
             src="/logonuevoolga3.png" 
             alt="Olga Travel" 
-            className="h-[80px]" 
+            className={` ${width < 380 ? "h-[50px]" : width < 450 ? "h-[60px]" :  width < 500 ? "h-[70px]" : "h-[80px]"}`}
           />
           <div className="flex items-center gap-4">
-            <Select onValueChange={handleChange}>
-              <SelectTrigger className="w-[180px] bg-blue-50 flex flex-row justify-evenly">
-                <p className="text-2xl">{flag}</p>
-                <SelectValue placeholder={currentLanguage} />
-              </SelectTrigger>
-              <SelectContent style={{ zIndex: 1000 }}>
-                <SelectItem value="es">Español</SelectItem>
-                <SelectItem value="en">English</SelectItem>
-              </SelectContent>
-            </Select>
+           
             <Menu 
-              className="text-white cursor-pointer hover:text-blue-200 transition-colors" 
+              className="text-white cursor-pointer hover:text-blue-200 transition-colors z-[990]" 
               size={45} 
               onClick={() => setMobileNavOpen(true)} 
             />
@@ -112,6 +107,7 @@ const Nav: React.FC = () => {
                 <div className={`overflow-hidden transition-all duration-300 ${isToursOpen ? 'max-h-[200px] mt-4' : 'max-h-0'}`}>
                   <Link 
                     to="/sanjuan"
+                    onClick={handleLinkClick}
                     className="pl-4 text-blue-50 hover:text-blue-200 transition-colors font-sans text-lg block py-2"
                   >
                     Cuevas de San Juan
@@ -127,6 +123,7 @@ const Nav: React.FC = () => {
                     <Link 
                       key={item.linkText} 
                       to={item.path} 
+                      onClick={handleLinkClick}
                       className={`
                         font-sans transition-all ease-in-out duration-300 
                         group font-semibold no-underline relative decoration-none

@@ -63,6 +63,7 @@ export type CardProps = {
   mainText: string;
   duration: string;
   price: string;
+  width: number;
 };
 
 export type IndexSection4Type = {

@@ -10,7 +10,7 @@ type ChildProps = {
 
 const SanJuanSection1: React.FC<ChildProps> = ({ width, sanJuanSection1Text }) => {
   return (
-    <div className="w-[95%] max-w-[1280px] flex flex-row flex-wrap items-center justify-center my-20 mx-auto relative z-0">
+    <div className="w-[95%] max-w-[1280px] flex flex-row flex-wrap items-center justify-center mb-10 mx-auto relative z-0">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
