@@ -4,6 +4,7 @@ import IndexSection1 from "./IndexSection1";
 import IndexSection2 from "./IndexSection2";
 import IndexSection3 from "./IndexSection3";
 import IndexSection4 from "./IndexSection4";
+import IndexFeatures from "./IndexFeatures";
 
 import IndexSection5 from "../_sanjuan/SanJuanSection5";
 import IndexSection6 from "../_sanjuan/SanJuanSection6";
@@ -31,6 +32,7 @@ const IndexContainer: React.FC = () => {
       <IndexSection2 width={width} height={height} indexSection2Text={indexSection2Text} carouselIndexSection2={carouselIndexSection2} />
       <IndexSection3 width={width} indexSection3Text={indexSection3Text} />
       <IndexSection4 width={width} indexSection4Text={indexSection4Text} />
+      <IndexFeatures width={width} />
     </div>
   );
 };
