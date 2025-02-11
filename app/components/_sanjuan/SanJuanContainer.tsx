@@ -1,4 +1,5 @@
 // Feature component: just responsible for containing UI components, fetch data and handle features and pass down props to UI components.
+import SanJuanSection1 from "./SanJuanSection1";
 import SanJuanSection2 from "./SanJuanSection2";
 import SanJuanSection3 from "./SanJuanSection3";
 import SanJuanSection4 from "./SanJuanSection4";
@@ -19,6 +20,7 @@ const SanJuanContainer: React.FC = () => {
 
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn">
+      <SanJuanSection1 width={width} height={height} />
       <SanJuanSection2 width={width} height={height} SanJuanSection2Text={SanJuanSection2Text} />
       <SanJuanSection3 width={width} />
       <SanJuanSection4 width={width} SanJuanSection4Text={SanJuanSection4Text} />
