@@ -19,7 +19,7 @@ const SanJuanContainer: React.FC = () => {
   const SanJuanSection6Text = state.sanjuan.sanJuanSection6;
 
   return (
-    <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn">
+    <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
       <SanJuanSection1 width={width} height={height} />
       <SanJuanSection2 width={width} height={height} SanJuanSection2Text={SanJuanSection2Text} />
       <SanJuanSection3 width={width} />

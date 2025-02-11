@@ -11,7 +11,7 @@ type ChildProps = {
 
 const SanJuanSection4: React.FC<ChildProps> = ({ width, SanJuanSection4Text }) => {
   return (
-    <div className={`w-[95%] max-w-[1280px] flex flex-col flex-wrap-reverse items-center justify-center my-10 mx-auto relative z-0 ${width <= 1280 ? "gap-0" : "gap-10"}`}>
+    <div className={`w-[95%] max-w-[1280px] flex flex-col flex-wrap-reverse items-center justify-center my-28 mx-auto relative z-0 ${width <= 1280 ? "gap-0" : "gap-10"}`}>
       <div className={`w-full max-w-[620px] min-h-[600px] flex flex-col justify-center items-center p-6 gap-8 -translate-y-[50px]`}>
         <DotLottieReact src="https://lottie.host/f8570958-3acf-4c42-8ae6-2ad50fe220c7/N8q8bzQLK3.lottie" loop autoplay className={`${width <= 500 ? "w-[400px]" : "w-[600px]"}`} />
         <h3 className={`transition-all duration-500 ease-in-out text-orange-950 font-sans font-bold ${width <= 350 ? "text-[1.7rem]" : width <= 450 ? "text-[2.1rem]" : "text-[2.5rem]"} text-center`}>

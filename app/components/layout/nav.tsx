@@ -30,7 +30,7 @@ const Nav: React.FC = () => {
   return (
     <>
       {width >= 1280 ? (
-        <div className="w-[95%] max-w-[1280px] flex flex-row justify-evenly items-center h-[200px] mx-auto p-4 absolute top-5 left-0 right-0 z-10 backdrop-blur-md bg-white/10 rounded-2xl border border-white/20">
+        <div className="w-[95%] max-w-[1280px] flex flex-row justify-evenly items-center h-[100px] mx-auto p-4 absolute top-5 left-0 right-0 z-[90] backdrop-blur-md bg-white/10 rounded-2xl border border-white/20">
           <img src="/logonuevoolga3.png" alt="Olga Travel, excursion to San Juan caves from Valencia. Boat travel in San Juan Caves. Viajes en barca en las cuevas de San Juan Valencia." className="h-[100%]" />
           <div className="flex flex-row items-center justify-between gap-16">
             {navLinks.map((item) => {

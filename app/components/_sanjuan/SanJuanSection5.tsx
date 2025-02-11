@@ -11,7 +11,7 @@ type ChildProps = {
 
 const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) => {
   return (
-    <div className={`w-[95%] max-w-[1280px] p-0 flex flex-col items-center justify-center relative mx-auto z-0`}>
+    <div className={`w-[95%] max-w-[1280px] p-0 flex flex-col items-center my-10 justify-center relative mx-auto z-0`}>
       <div className={`w-full h-fit flex ${width <= 500 ? "flex-col" : "flex-row"} justify-center items-center p-0  -translate-y-[50px]`}>
         <DotLottieReact src="https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie" loop autoplay className={`h-[170px] w-auto`} />
         <h3 className={`transition-all duration-500 ease-in-out text-orange-950 font-sans font-bold ${width <= 1280 ? "" : "-translate-x-[50px]"} ${width <= 350 ? "text-[1.7rem]" : width <= 450 ? "text-[2.1rem]" : "text-[2.5rem]"} text-center`}>{SanJuanSection5Text.firstH3}</h3>
