@@ -12,18 +12,18 @@ const SanJuanContainer: React.FC = () => {
   const width = size.width ?? 0;
   const height = size.height ?? 0;
   const { state } = useLanguageContext();
-  const indexSection2Text = state.index.indexSection2;
-  const indexSection4Text = state.index.indexSection4;
-  const indexSection5Text = state.index.indexSection5;
-  const indexSection6Text = state.index.indexSection6;
+  const SanJuanSection2Text = state.sanjuan.sanJuanSection2;
+  const SanJuanSection4Text = state.sanjuan.sanJuanSection4;
+  const SanJuanSection5Text = state.sanjuan.sanJuanSection5;
+  const SanJuanSection6Text = state.sanjuan.sanJuanSection6;
 
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn">
-      <SanJuanSection2 width={width} height={height} indexSection2Text={indexSection2Text} />
+      <SanJuanSection2 width={width} height={height} SanJuanSection2Text={SanJuanSection2Text} />
       <SanJuanSection3 width={width} />
-      <SanJuanSection4 width={width} indexSection4Text={indexSection4Text} />
-      <SanJuanSection5 width={width} indexSection5Text={indexSection5Text} />
-      <SanJuanSection6 width={width} indexSection6Text={indexSection6Text} />
+      <SanJuanSection4 width={width} SanJuanSection4Text={SanJuanSection4Text} />
+      <SanJuanSection5 width={width} SanJuanSection5Text={SanJuanSection5Text} />
+      <SanJuanSection6 width={width} SanJuanSection6Text={SanJuanSection6Text} />
     </div>
   );
 };
