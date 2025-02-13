@@ -47,15 +47,23 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
       <div className="w-full overflow-x-hidden">
         <motion.div
           ref={ref}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? 
+            { opacity: 1, y: 0 } : 
+            { opacity: 0, y: 50 }
+          }
+          transition={{ duration: 0.8 }}
           className="w-[95%] max-w-[1280px] mx-auto relative z-[1] px-4"
         >
           {width > 580 ? (
             <div className="flex flex-col items-center justify-center my-10 gap-6">
               <motion.div 
-                variants={imageVariants}
-                initial="hidden"
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? 
+                  { opacity: 1, y: 0 } : 
+                  { opacity: 0, y: 20 }
+                }
+                transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex flex-row justify-center gap-6 items-center w-full"
               >
                 <motion.div
@@ -83,8 +91,12 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
               </motion.div>
 
               <motion.div 
-                variants={imageVariants}
-                initial="hidden"
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? 
+                  { opacity: 1, y: 0 } : 
+                  { opacity: 0, y: 20 }
+                }
+                transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex flex-row-reverse justify-center gap-6 items-center w-full"
               >
                 <motion.div
@@ -113,24 +125,21 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
             </div>
           ) : (
             <motion.div 
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { 
-                  opacity: 1, 
-                  y: 0,
-                  transition: { duration: 0.6 }
-                }
-              }}
-              initial="hidden"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? 
+                { opacity: 1, y: 0 } : 
+                { opacity: 0, y: 20 }
+              }
+              transition={{ duration: 0.5, delay: 0.2 }}
               className="
                 flex flex-col items-center justify-center 
-                mb-0 mt-28 -translate-y-[100px] 
+                py-8 w-full
                 rounded-2xl
               "
             >
               <Carousel 
                 plugins={[plugin.current]} 
-                className="w-full"
+                className="w-full max-w-[90vw]"
                 onMouseEnter={plugin.current.stop} 
                 onMouseLeave={plugin.current.reset}
               >
@@ -142,16 +151,16 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                         whileHover={{ scale: 1.02 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.3 }}
-                        className="p-1 cursor-pointer"
+                        className="p-1 cursor-pointer h-full"
                         onClick={() => handleImageClick(index)}
                       >
-                        <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-all">
+                        <Card className="w-full aspect-square overflow-hidden shadow-lg hover:shadow-xl transition-all">
                           <CardContent 
                             className={`
-                              flex aspect-square items-center justify-center 
-                              rounded-xl p-6 bg-cover bg-center bg-no-repeat 
+                              w-full h-full p-0
+                              bg-cover bg-center bg-no-repeat 
                               bg-[url('${image.source}')]
-                              transform perspective-1000
+                              transform-gpu
                             `}
                           />
                         </Card>
