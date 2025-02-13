@@ -7,7 +7,7 @@ import { Carousel, CarouselContent, CarouselItem } from "~/components/ui/carouse
 import { motion, useInView } from "framer-motion";
 import ImageGalleryModal from "../ui/ImageGalleryModal";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import Image from "next/image";
+
 // Child Props type
 type ChildProps = {
   width: number;
