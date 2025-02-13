@@ -153,7 +153,11 @@ export type LanguageData = {
   index: Index;
   sanjuan: SanJuan;
   footer: FooterType;
+  common: {
+    bookNow: string;
+  };
 };
+
 export const languages: Record<string, LanguageData> = {
   en: {
     links: [
@@ -217,7 +221,7 @@ export const languages: Record<string, LanguageData> = {
           date: "July 8, 2024",
           reviewTitle: "A 10 out of 10 getaway",
           reviewText:
-            "I wanted to surprise my girlfriend but didn’t know what plan to make. This guided tour was definitely a success. The attention and service from our guide Olga was a 10 out of 10; we laughed a lot and she kept us entertained at all times. The caves are incredible, something that without a guide would be difficult to fully understand. We will definitely return next year.",
+            "I wanted to surprise my girlfriend but didn't know what plan to make. This guided tour was definitely a success. The attention and service from our guide Olga was a 10 out of 10; we laughed a lot and she kept us entertained at all times. The caves are incredible, something that without a guide would be difficult to fully understand. We will definitely return next year.",
           reviewLinkSite: "TripAdvisor",
           reviewLink: "https://www.tripadvisor.es/AttractionProductReview-g187529-d27928104-Visit_to_the_Sant_Josep_Caves-Valencia_Province_of_Valencia_Valencian_Community.html",
         },
@@ -227,7 +231,7 @@ export const languages: Record<string, LanguageData> = {
           country: "Spain",
           date: "July 8, 2024",
           reviewTitle: "Unforgettable Family Excursion",
-          reviewText: "Everything was perfect! From the spectacular scenery to the attentive care of the guide... Everything is highly recommended, no doubt. I wouldn’t need to highlight anything because everything stood out on its own: despite the weather not being too charming, the visit to the San José Caves was wonderful.",
+          reviewText: "Everything was perfect! From the spectacular scenery to the attentive care of the guide... Everything is highly recommended, no doubt. I wouldn't need to highlight anything because everything stood out on its own: despite the weather not being too charming, the visit to the San José Caves was wonderful.",
           reviewLinkSite: "TripAdvisor",
           reviewLink: "https://www.tripadvisor.es/AttractionProductReview-g187529-d27928104-Visit_to_the_Sant_Josep_Caves-Valencia_Province_of_Valencia_Valencian_Community.html",
         },
@@ -316,7 +320,7 @@ export const languages: Record<string, LanguageData> = {
         firstH3: "Mediterranean Excursions is fantastic!",
         firstp: "Mediterranean Excursions is the leading company in discovering the most fascinating corners of Valencia.",
         secondp: "Passion and dedication define each of our experiences. We design unique excursions that connect travelers with the best of the city: its history, culture, gastronomy, and landscapes. Each tour is tailored to meet the desires of our clients, offering a personalized approach.",
-        thirdp: "At Mediterranean Excursions, we don’t just do tours; we create unforgettable moments to explore Valencia like never before.",
+        thirdp: "At Mediterranean Excursions, we don't just do tours; we create unforgettable moments to explore Valencia like never before.",
         fourthp: "Let us guide you through the best-kept secrets of this incredible city!",
       },
       indexSection4: {
@@ -331,17 +335,17 @@ export const languages: Record<string, LanguageData> = {
       indexSection5: {
         firstH3: "Explore The San Juan Caves",
         secondH3: "A unique underground adventure in Valencia",
-    },
-    indexFeatures: {
-      firstSquareTitle: "Bookings",
-      firstSquareDescription: "We typically accept bookings at least 24 hours before the tour. The minimum legal age for a passenger is over 2 years old.",
-      secondSquareTitle: "Prices",
-      secondSquareDescription: "120€ per person. The maximum number of participants per tour is 4 people.",
-      thirdSquareTitle: "Languages",
-      thirdSquareDescription: "All our tours can be narrated in Spanish and English.",
-      fourthSquareTitle: "Pets",
-      fourthSquareDescription: "Pets are not allowed during the tour.",
-  },
+      },
+      indexFeatures: {
+        firstSquareTitle: "Bookings",
+        firstSquareDescription: "We typically accept bookings at least 24 hours before the tour. The minimum legal age for a passenger is over 2 years old.",
+        secondSquareTitle: "Prices",
+        secondSquareDescription: "120€ per person. The maximum number of participants per tour is 4 people.",
+        thirdSquareTitle: "Languages",
+        thirdSquareDescription: "All our tours can be narrated in Spanish and English.",
+        fourthSquareTitle: "Pets",
+        fourthSquareDescription: "Pets are not allowed during the tour.",
+      },
     },
     sanjuan: {
       sanJuanSection1: {
@@ -353,7 +357,7 @@ export const languages: Record<string, LanguageData> = {
         thirdSquareH3: "Boat Trip",
         thirdSquareP: "Unique Experience",
         button: "Book Now",
-    },
+      },
       sanJuanSection2: {
         firstH3: "Enjoy a relaxing boat ride through one of the most spectacular underground rivers!",
         secondH3: "You'll travel 800 meters by boat.",
@@ -398,6 +402,9 @@ export const languages: Record<string, LanguageData> = {
       thirdspan: "Email:",
       privacypolicy: "Privacy Policy",
       termsofservice: "Terms of Service",
+    },
+    common: {
+      bookNow: "Book Now",
     },
   },
   es: {
@@ -643,6 +650,9 @@ export const languages: Record<string, LanguageData> = {
       thirdspan: "Correo Electrónico:",
       privacypolicy: "Política de Privacidad",
       termsofservice: "Términos del Servicio",
+    },
+    common: {
+      bookNow: "Reservar",
     },
   },
 };

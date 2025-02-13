@@ -12,7 +12,7 @@ type ChildProps = {
 
 const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) => {
   return (
-    <div className="w-full overflow-x-hidden min-h-[100dvh] flex flex-col justify-center items-center relative">
+    <div className="w-full overflow-x-hidden min-h-[100dvh] flex flex-col justify-center items-center relative" id="hero-section">
       {/* Background image with responsive handling */}
       <div className="absolute inset-0 w-full h-full">
         <picture>
