@@ -18,8 +18,8 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
 
   const commonH3Styles = `
     transition-all duration-500 ease-in-out 
-    text-orange-950 font-sans text-center
-    leading-normal hover:text-orange-900
+    text-blue-950 font-sans text-center
+    leading-normal hover:text-blue-900
   `;
 
   const getResponsiveTextSize = (small: string, medium: string, large: string) => 
@@ -39,7 +39,7 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
         transition={{ duration: 0.8 }}
         className={`
           w-[95%] max-w-[1280px] flex flex-row flex-wrap-reverse 
-          items-center justify-center mt-4 mb-28 mx-auto 
+          items-center justify-center -mt-24 mb-16 mx-auto 
           relative z-[1] ${width <= 1280 ? "gap-0" : "gap-10"}
         `}
       >
@@ -120,7 +120,7 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
           initial={{ opacity: 0, x: 50 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className={`
-            w-full max-w-[620px] px-4 
+            w-full max-w-[720px] px-4 
             flex flex-col justify-center items-center relative 
             ${width <= 1280 ? "h-fit mt-8 mb-0" : "h-[600px]"}
           `}
@@ -128,7 +128,7 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
           <motion.img 
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.3 }}
-            src="/photo1IndexSection2.webp" 
+            src="/hero1.webp" 
             alt="Cuevas de San Juan, visita guiada y viaje en barca." 
             className="
               w-full h-auto rounded-2xl mt-28

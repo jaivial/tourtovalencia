@@ -7,6 +7,19 @@ export const TimelineFeature = () => {
   const [activeSteps, setActiveSteps] = useState<boolean[]>([]);
   const sectionRef = useRef<HTMLDivElement>(null);
   const stepsRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Check if device is mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     // Initialize activeSteps array based on the number of steps
@@ -15,28 +28,38 @@ export const TimelineFeature = () => {
     const handleScroll = () => {
       if (!sectionRef.current) return;
 
-      const sectionTop = sectionRef.current.offsetTop;
       const windowHeight = window.innerHeight;
-      const scrollY = window.scrollY;
 
-      const newActiveSteps = stepsRefs.current.map((stepRef, index) => {
+      const newActiveSteps = stepsRefs.current.map((stepRef) => {
         if (!stepRef) return false;
 
-        const stepTop = stepRef.offsetTop - sectionTop;
-        const stepHeight = stepRef.offsetHeight;
+        const stepRect = stepRef.getBoundingClientRect();
+        const stepMiddle = stepRect.top + stepRect.height / 2;
         
-        return (
-          scrollY + windowHeight > sectionTop + stepTop + stepHeight * 0.3 &&
-          scrollY < sectionTop + stepTop + stepHeight * 0.7
-        );
+        // Different activation zones for mobile and desktop
+        if (isMobile) {
+          // Mobile: activate when step is in the middle 50% of the viewport
+          const mobileStart = windowHeight * 0.25;
+          const mobileEnd = windowHeight * 0.75;
+          return stepMiddle > mobileStart && stepMiddle < mobileEnd;
+        } else {
+          // Desktop: activate when step is in the middle 30% of the viewport
+          const desktopStart = windowHeight * 0.35;
+          const desktopEnd = windowHeight * 0.65;
+          return stepMiddle > desktopStart && stepMiddle < desktopEnd;
+        }
       });
 
       setActiveSteps(newActiveSteps);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    // Initial check
+    handleScroll();
+
+    // Use passive listener for better mobile performance
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [state.timeline.steps.length]);
+  }, [state.timeline.steps.length, isMobile]);
 
   const stepsWithActive = state.timeline.steps.map((step, index) => ({
     ...step,
@@ -44,13 +67,18 @@ export const TimelineFeature = () => {
   }));
 
   return (
-    <div ref={sectionRef}>
-      <TimelineUI
-        title={state.timeline.title}
-        subtitle={state.timeline.subtitle}
-        steps={stepsWithActive}
-        stepsRefs={stepsRefs}
-      />
+    <div className="w-full bg-blue-50">
+      <div 
+        ref={sectionRef} 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16"
+      >
+        <TimelineUI
+          title={state.timeline.title}
+          subtitle={state.timeline.subtitle}
+          steps={stepsWithActive}
+          stepsRefs={stepsRefs}
+        />
+      </div>
     </div>
   );
 }; 
