@@ -1,6 +1,8 @@
 // app/components/IndexSection1.tsx
 //UI Component: just responsible for displaying pure html with props passed from feature component
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 import { sanJuansection2Type } from "~/data/data";
 
 // Child Props type
@@ -10,19 +12,121 @@ type ChildProps = {
   SanJuanSection2Text: sanJuansection2Type;
 };
 
-const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2Text }) => {   
+const SanJuanSection2: React.FC<ChildProps> = ({ width, SanJuanSection2Text }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { margin: "-300px" });
+
+  const commonH3Styles = `
+    transition-all duration-500 ease-in-out 
+    text-orange-950 font-sans text-center
+    leading-normal hover:text-orange-900
+  `;
+
+  const getResponsiveTextSize = (small: string, medium: string, large: string) => 
+    `${width <= 350 ? small : width <= 450 ? medium : large}`;
+
   return (
-    <div className={`w-[95%] max-w-[1280px] flex flex-row flex-wrap-reverse items-center justify-center my-10 mx-auto relative z-0 ${width <= 1280 ? "gap-0" : "gap-10"}`}>
-      <div className={`w-full max-w-[620px] min-h-[600px] flex flex-col justify-center items-center p-6 gap-8 -translate-y-[50px]`}>
-        <DotLottieReact src="https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie" loop autoplay className={`translate-y-[50px] ${width <= 450 ? "w-[350px]" : "w-[400px] "}`} />
-        <h3 className={`transition-all duration-500 ease-in-out text-orange-950 font-sans font-medium ${width <= 350 ? "text-[1.3rem]" : width <= 450 ? "text-[1.4rem]" : "text-[1.8rem]"} text-center`}>{SanJuanSection2Text.firstH3}</h3>
-        <h3 className={`transition-all duration-500 ease-in-out text-orange-950 font-sans font-medium ${width <= 350 ? "text-[1.3rem]" : width <= 450 ? "text-[1.4rem]" : "text-[1.8rem]"} text-center`}>{SanJuanSection2Text.secondH3}</h3>
-        <h3 className={`transition-all duration-500 ease-in-out text-orange-950 font-sans font-medium ${width <= 350 ? "text-[1.3rem]" : width <= 450 ? "text-[1.4rem]" : "text-[1.8rem]"} text-center`}>{SanJuanSection2Text.thirdH3}</h3>
-      </div>
-      <div className={`w-full max-w-[620px] p-0 flex flex-col justify-center items-center relative ${width <= 1280 ? "h-fit" : "h-[600px]"}`}>
-        <img src="/photo1IndexSection2.webp" alt="Cuevas de San Juan, visita guiada y viaje en barca." className="w-full h-auto rounded-2xl" />
-      </div>
-    </div>
+    <motion.div 
+      ref={ref}
+      animate={isInView ? 
+        { opacity: 1, y: 0 } : 
+        { opacity: 0, y: 50 }
+      }
+      transition={{ duration: 0.8 }}
+      className={`
+        w-[95%] max-w-[1280px] flex flex-row flex-wrap-reverse 
+        items-center justify-center mt-4 mb-28 mx-auto 
+        relative z-0 ${width <= 1280 ? "gap-0" : "gap-10"}
+      `}
+    >
+      {/* Left Content Section */}
+      <motion.div 
+        animate={isInView ? 
+          { opacity: 1, x: 0 } : 
+          { opacity: 0, x: -50 }
+        }
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className={`
+          w-full max-w-[620px] min-h-[600px] 
+          flex flex-col justify-center items-center gap-6 ${width <= 1280 ? "p-0 -mt-16" : "p-6"} 
+        `}
+      >
+        <motion.div
+          animate={isInView ? 
+            { opacity: 1, scale: 1 } : 
+            { opacity: 0, scale: 0.9 }
+          }
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <DotLottieReact 
+            src="https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie" 
+            loop 
+            autoplay 
+            className={`
+              translate-y-[50px] mb-4
+              ${width <= 450 ? "w-[350px]" : "w-[400px]"}
+            `} 
+          />
+        </motion.div>
+
+        {[
+          SanJuanSection2Text.firstH3,
+          SanJuanSection2Text.secondH3,
+          SanJuanSection2Text.thirdH3
+        ].map((text, index) => (
+          <motion.h3 
+            key={index}
+            whileHover={{ scale: 1.02 }}
+            animate={isInView ? 
+              { opacity: 1, x: 0 } : 
+              { opacity: 0, x: -20 }
+            }
+            transition={{ 
+              duration: 0.5, 
+              delay: 0.4 + (index * 0.1) 
+            }}
+            className={`
+              ${commonH3Styles}
+              font-medium
+              ${getResponsiveTextSize(
+                "text-[1.3rem]",
+                "text-[1.4rem]",
+                "text-[1.8rem]"
+              )}
+              max-w-[90%]
+            `}
+          >
+            {text}
+          </motion.h3>
+        ))}
+      </motion.div>
+
+      {/* Right Image Section */}
+      <motion.div 
+        animate={isInView ? 
+          { opacity: 1, x: 0 } : 
+          { opacity: 0, x: 50 }
+        }
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className={`
+          w-full max-w-[620px] p-0 
+          flex flex-col justify-center items-center relative 
+          ${width <= 1280 ? "h-fit mt-8 mb-0" : "h-[600px]"}
+        `}
+      >
+        <motion.img 
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.3 }}
+          src="/photo1IndexSection2.webp" 
+          alt="Cuevas de San Juan, visita guiada y viaje en barca." 
+          className="
+            w-full h-auto rounded-2xl mt-28
+            shadow-lg hover:shadow-xl 
+            transition-shadow duration-300 
+          " 
+        />
+      </motion.div>
+    </motion.div>
   );
 };
 

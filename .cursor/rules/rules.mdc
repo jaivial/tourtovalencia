@@ -1,0 +1,21 @@
+---
+description: Rules
+globs: *.tsx, *.ts
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
+Coding Rules and Patterns
+Component Organization:
+Page Components: Responsible for fetching data on the server side, containing the context provider, and returning feature components.
+Feature Components: Responsible for importing and calling context variables and custom hooks from [page].hooks.ts. They can return UI components or other feature components.
+UI Components: Responsible only for receiving variables as props and returning UI elements.
+Context Usage:
+Each page has its own context provider. The context receives server-side props as parameters.
+The context calls a custom hook useStates as const states, which is defined in [page].hooks.ts. This hook stores all useState variables, constants, and non-function logic.
+Custom Hooks:
+All functions and state management are encapsulated in custom hooks, which are declared and called from a unique file named [page].hooks.ts.
+Database Integration:
+MongoDB is local (not cloud-based or Atlas). Ensure that any database interaction is handled via API routes and follows secure practices.
