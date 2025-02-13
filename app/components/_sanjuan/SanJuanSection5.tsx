@@ -43,7 +43,7 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
         }
         transition={{ duration: 0.6, delay: 0.2 }}
         className={`
-          w-full flex ${width <= 500 ? "flex-col" : "flex-row"} 
+          w-full flex flex-col
           justify-center items-center -translate-y-[50px]
           gap-4
         `}
