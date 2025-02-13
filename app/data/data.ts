@@ -528,7 +528,7 @@ export const languages: Record<string, LanguageData> = {
     accessibility: {
       title: "Accessibility",
       wheelchairAccess: "Not wheelchair accessible",
-      babySeating: "Babies must be seated on lap",
+      babySeating: "The minimum age for a passenger is more than 2 years",
       helpText: "If you have any questions about accessibility, we'll be happy to help. Just call the following number and indicate the product code: 482538P1",
       phoneNumber: "+34 91 177 6743"
     },
@@ -553,7 +553,7 @@ export const languages: Record<string, LanguageData> = {
       accessibility: {
         title: "Accessibility Information",
         wheelchair: "Not wheelchair accessible",
-        babies: "Babies must sit on laps"
+        babies: "The minimum age for a passenger is more than 2 years"
       },
       additional: {
         title: "Additional Information",
@@ -876,7 +876,7 @@ export const languages: Record<string, LanguageData> = {
     accessibility: {
       title: "Accesibilidad",
       wheelchairAccess: "No es accesible para sillas de ruedas",
-      babySeating: "Los bebés deben sentarse en el regazo",
+      babySeating: "La edad mínima para un pasajero es de más de 2 años",
       helpText: "Si tiene alguna pregunta sobre la accesibilidad, estaremos encantados de ayudarle. Solo tiene que llamar al siguiente número e indicar el código del producto: 482538P1",
       phoneNumber: "+34 91 177 6743"
     },
@@ -901,7 +901,7 @@ export const languages: Record<string, LanguageData> = {
       accessibility: {
         title: "Información de Accesibilidad",
         wheelchair: "No es accesible para sillas de ruedas",
-        babies: "Los bebés deben sentarse en el regazo"
+        babies: "La edad mínima para un pasajero es de más de 2 años"
       },
       additional: {
         title: "Información Adicional",
