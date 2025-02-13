@@ -1,12 +1,10 @@
 // app/components/layout/nav.tsx
 import { useState } from "react";
-import { Link } from "@remix-run/react";
-import { useLocation } from "@remix-run/react";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { Menu, ArrowRightToLine, ChevronDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { useFetcher } from "@remix-run/react";
+import { useFetcher, Link, useLocation } from "@remix-run/react";
 
 const Nav: React.FC = () => {
   const { state, dispatch } = useLanguageContext();
@@ -110,7 +108,7 @@ const Nav: React.FC = () => {
                     onClick={handleLinkClick}
                     className="pl-4 text-blue-50 hover:text-blue-200 transition-colors font-sans text-lg block py-2"
                   >
-                    Cuevas de San Juan
+                    {state.common.toursMenu.caves}
                   </Link>
                 </div>
               </div>

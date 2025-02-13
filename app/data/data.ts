@@ -153,7 +153,14 @@ export type LanguageData = {
   index: Index;
   sanjuan: SanJuan;
   footer: FooterType;
+  common: {
+    bookNow: string;
+    toursMenu: {
+      caves: string;
+    };
+  };
 };
+
 export const languages: Record<string, LanguageData> = {
   en: {
     links: [
@@ -164,8 +171,8 @@ export const languages: Record<string, LanguageData> = {
     currentLanguage: "English",
     index: {
       heroSection: {
-        firstH2Orange: "EXCURSIONS",
-        firstH2: "MEDITERRANEAN",
+        firstH2Orange: "MEDITERRANEAN",
+        firstH2: "EXCURSIONS",
         firstH3: "EXPLORE THE BEST",
         secondH3: "EXPERIENCES IN VALENCIA",
       },
@@ -217,7 +224,7 @@ export const languages: Record<string, LanguageData> = {
           date: "July 8, 2024",
           reviewTitle: "A 10 out of 10 getaway",
           reviewText:
-            "I wanted to surprise my girlfriend but didn’t know what plan to make. This guided tour was definitely a success. The attention and service from our guide Olga was a 10 out of 10; we laughed a lot and she kept us entertained at all times. The caves are incredible, something that without a guide would be difficult to fully understand. We will definitely return next year.",
+            "I wanted to surprise my girlfriend but didn't know what plan to make. This guided tour was definitely a success. The attention and service from our guide Olga was a 10 out of 10; we laughed a lot and she kept us entertained at all times. The caves are incredible, something that without a guide would be difficult to fully understand. We will definitely return next year.",
           reviewLinkSite: "TripAdvisor",
           reviewLink: "https://www.tripadvisor.es/AttractionProductReview-g187529-d27928104-Visit_to_the_Sant_Josep_Caves-Valencia_Province_of_Valencia_Valencian_Community.html",
         },
@@ -227,7 +234,7 @@ export const languages: Record<string, LanguageData> = {
           country: "Spain",
           date: "July 8, 2024",
           reviewTitle: "Unforgettable Family Excursion",
-          reviewText: "Everything was perfect! From the spectacular scenery to the attentive care of the guide... Everything is highly recommended, no doubt. I wouldn’t need to highlight anything because everything stood out on its own: despite the weather not being too charming, the visit to the San José Caves was wonderful.",
+          reviewText: "Everything was perfect! From the spectacular scenery to the attentive care of the guide... Everything is highly recommended, no doubt. I wouldn't need to highlight anything because everything stood out on its own: despite the weather not being too charming, the visit to the San José Caves was wonderful.",
           reviewLinkSite: "TripAdvisor",
           reviewLink: "https://www.tripadvisor.es/AttractionProductReview-g187529-d27928104-Visit_to_the_Sant_Josep_Caves-Valencia_Province_of_Valencia_Valencian_Community.html",
         },
@@ -316,53 +323,53 @@ export const languages: Record<string, LanguageData> = {
         firstH3: "Mediterranean Excursions is fantastic!",
         firstp: "Mediterranean Excursions is the leading company in discovering the most fascinating corners of Valencia.",
         secondp: "Passion and dedication define each of our experiences. We design unique excursions that connect travelers with the best of the city: its history, culture, gastronomy, and landscapes. Each tour is tailored to meet the desires of our clients, offering a personalized approach.",
-        thirdp: "At Mediterranean Excursions, we don’t just do tours; we create unforgettable moments to explore Valencia like never before.",
+        thirdp: "At Mediterranean Excursions, we don't just do tours; we create unforgettable moments to explore Valencia like never before.",
         fourthp: "Let us guide you through the best-kept secrets of this incredible city!",
       },
       indexSection4: {
         firstH3: "OUR EXCURSIONS",
         propscard: {
-          title: "San Juan Caves",
-          mainText: "Visit to the San Juan Caves, boat ride in a unique natural setting. Departure and return by private transport from Valencia.",
+          title: "San José Caves",
+          mainText: "Visit to the San José Caves, boat ride in a unique natural setting. Departure and return by private transport from Valencia.",
           duration: "Duration: 3h 30m",
           price: "Price: 120€ / person",
         },
       },
       indexSection5: {
-        firstH3: "Explore The San Juan Caves",
-        secondH3: "A unique underground adventure in Valencia",
-    },
-    indexFeatures: {
-      firstSquareTitle: "Bookings",
-      firstSquareDescription: "We typically accept bookings at least 24 hours before the tour. The minimum legal age for a passenger is over 2 years old.",
-      secondSquareTitle: "Prices",
-      secondSquareDescription: "120€ per person. The maximum number of participants per tour is 4 people.",
-      thirdSquareTitle: "Languages",
-      thirdSquareDescription: "All our tours can be narrated in Spanish and English.",
-      fourthSquareTitle: "Pets",
-      fourthSquareDescription: "Pets are not allowed during the tour.",
-  },
+        firstH3: "Explore The San José Caves",
+        secondH3: "A unique underground adventure with departure from Valencia",
+      },
+      indexFeatures: {
+        firstSquareTitle: "Bookings",
+        firstSquareDescription: "We typically accept bookings at least 24 hours before the tour. The minimum legal age for a passenger is over 2 years old.",
+        secondSquareTitle: "Prices",
+        secondSquareDescription: "120€ per person. The maximum number of participants per tour is 10 people.",
+        thirdSquareTitle: "Languages",
+        thirdSquareDescription: "All our tours can be narrated in Spanish and English.",
+        fourthSquareTitle: "Pets",
+        fourthSquareDescription: "Pets are not allowed during the tour.",
+      },
     },
     sanjuan: {
       sanJuanSection1: {
-        firstH3: "Discover the underground magic of Valencia in a unique journey through the San Juan Caves",
+        firstH3: "Discover the underground magic of Castellón in a unique journey through the San José Caves",
         firstSquareH3: "3.5 Hours",
         firstSquareP: "Tour Duration",
-        secondSquareH3: "Local Guide",
-        secondSquareP: "Private Tour",
+        secondSquareH3: "Expert Guides",
+        secondSquareP: "Small Groups",
         thirdSquareH3: "Boat Trip",
         thirdSquareP: "Unique Experience",
         button: "Book Now",
-    },
+      },
       sanJuanSection2: {
         firstH3: "Enjoy a relaxing boat ride through one of the most spectacular underground rivers!",
         secondH3: "You'll travel 800 meters by boat.",
         thirdH3: "Did you know it's the longest navigable underground river in Europe?",
       },
       sanJuanSection4: {
-        firstH3: "PRIVATE GUIDED TOUR",
-        secondH3: "(Maxiumum 4 people)",
-        thirdH3: "The experience is located in the province of Castellón, an area where I've lived since childhood and enjoy whenever I can.",
+        firstH3: "EXCLUSIVE GUIDED TOUR",
+        secondH3: "(Small groups of maximum 10 people)",
+        thirdH3: "The experience takes place in the province of Castellón, a region we know perfectly and where we offer the best tourist routes.",
       },
       sanJuanSection5: {
         firstH3: "DEPARTURE FROM VALENCIA",
@@ -373,13 +380,13 @@ export const languages: Record<string, LanguageData> = {
       },
       sanJuanSection6: {
         cardTitle: "GUIDED TOUR",
-        cardDescription: "Trip package to the San Juan Caves",
+        cardDescription: "Trip package to the San José Caves",
         firstH4: "Included Services",
         list: [
           { li: "Private transport.", index: 1 },
           { li: "Pickup in Valencia and return home.", index: 2 },
-          { li: "Guided tour of the San Juan Caves.", index: 3 },
-          { li: "Boat ride in the San Juan Caves.", index: 4 },
+          { li: "Guided tour of the San José Caves.", index: 3 },
+          { li: "Boat ride in the San José Caves.", index: 4 },
           { li: "All taxes and fees included.", index: 5 },
         ],
         secondH4: "€120",
@@ -398,6 +405,12 @@ export const languages: Record<string, LanguageData> = {
       thirdspan: "Email:",
       privacypolicy: "Privacy Policy",
       termsofservice: "Terms of Service",
+    },
+    common: {
+      bookNow: "Book Now",
+      toursMenu: {
+        caves: "San José Caves"
+      }
     },
   },
   es: {
@@ -567,21 +580,21 @@ export const languages: Record<string, LanguageData> = {
       indexSection4: {
         firstH3: "NUESTRAS EXCURSIONES",
         propscard: {
-          title: "Cuevas de San Juan",
-          mainText: "Visita a las Cuevas de San Juan, paseo en barca en un entorno natural único. Salida y vuelta en transporte privado desde Valencia.",
+          title: "Cuevas de San José",
+          mainText: "Visita a las Cuevas de San José, paseo en barca en un entorno natural único. Salida y vuelta en transporte privado desde Valencia.",
           duration: "Duración: 3h 30m",
           price: "Precio: 120€ / persona",
         },
       },
       indexSection5: {
-        firstH3: "Explora Las Cuevas de San Juan",
-        secondH3: "Una aventura subterránea única en Valencia",
+        firstH3: "Explora Las Cuevas de San José",
+        secondH3: "Una aventura subterránea única con salida desde Valencia",
       },
       indexFeatures: {
         firstSquareTitle: "Reservas",
         firstSquareDescription: "Normalmente aceptaremos reservas al menos 24 horas antes del tour. La edad legal mínima para un pasajero es de más de 2 años.",
         secondSquareTitle: "Precios",
-        secondSquareDescription: "120€ por persona. El número máximo de participantes por tour es de 4 personas.",
+        secondSquareDescription: "120€ por persona. El número máximo de participantes por tour es de 10 personas.",
         thirdSquareTitle: "Idiomas",
         thirdSquareDescription: "Todos nuestros tours pueden ser narrados en español e inglés.",
         fourthSquareTitle: "Mascotas",
@@ -590,46 +603,46 @@ export const languages: Record<string, LanguageData> = {
     },
     sanjuan: {
       sanJuanSection1: {
-        firstH3: "Descubre la magia subterránea de Valencia en un viaje único por las Cuevas de San Juan",
+        firstH3: "Descubre la magia subterránea de Castellón en un viaje único por las Cuevas de San José",
         firstSquareH3: "3.5 Horas",
-        firstSquareP: "Duración del Tour",
-        secondSquareH3: "Guía Local",
-        secondSquareP: "Tour Privado",
+        firstSquareP: "Duración de la Excursión",
+        secondSquareH3: "Guías Expertos",
+        secondSquareP: "Grupos Reducidos",
         thirdSquareH3: "Viaje en Barca",
         thirdSquareP: "Experiencia Única",
         button: "Reserva Ahora",
       },
       sanJuanSection2: {
-        firstH3: "Enjoy a relaxing boat ride through one of the most spectacular underground rivers!",
-        secondH3: "You'll travel 800 meters by boat.",
-        thirdH3: "Did you know it's the longest navigable underground river in Europe?",
+        firstH3: "Disfruta de un relajante paseo en barca a través de uno de los ríos subterráneos más espectaculares.",
+        secondH3: "Viajarás 800 metros en barca.",
+        thirdH3: "¿Sabías que es el río subterráneo navegable más largo de Europa?",
       },
       sanJuanSection4: {
-        firstH3: "PRIVATE GUIDED TOUR",
-        secondH3: "(Maxiumum 4 people)",
-        thirdH3: "The experience is located in the province of Castellón, an area where I've lived since childhood and enjoy whenever I can.",
+        firstH3: "TOUR GUIADO EXCLUSIVO",
+        secondH3: "(Grupos reducidos de máximo 10 personas)",
+        thirdH3: "La experiencia se desarrolla en la provincia de Castellón, una región que conocemos a la perfección y donde ofrecemos las mejores rutas turísticas.",
       },
       sanJuanSection5: {
-        firstH3: "DEPARTURE FROM VALENCIA",
-        secondH3: "Departure from Plaza de La Reina, Valencia.",
-        thirdH3: "Private transport to La Vall d'Uixó (Castellón).",
-        fourthH3: "Guided tour: 3h 30m (approx).",
-        fifthH3: "Return to Valencia by private transport.",
+        firstH3: "SALIDA DESDE VALENCIA",
+        secondH3: "Salida desde la Plaza de La Reina, Valencia.",
+        thirdH3: "Transporte privado a La Vall d'Uixó (Castellón).",
+        fourthH3: "Tour guiado: 3h 30m (aprox).",
+        fifthH3: "Regreso a Valencia por transporte privado.",
       },
       sanJuanSection6: {
-        cardTitle: "GUIDED TOUR",
-        cardDescription: "Trip package to the San Juan Caves",
-        firstH4: "Included Services",
+        cardTitle: "TOUR GUIADO",
+        cardDescription: "Paquete de viaje a las Cuevas de San José",
+        firstH4: "Servicios Incluidos",
         list: [
-          { li: "Private transport.", index: 1 },
-          { li: "Pickup in Valencia and return home.", index: 2 },
-          { li: "Guided tour of the San Juan Caves.", index: 3 },
-          { li: "Boat ride in the San Juan Caves.", index: 4 },
-          { li: "All taxes and fees included.", index: 5 },
+          { li: "Transporte privado.", index: 1 },
+          { li: "Recogida en Valencia y regreso a casa.", index: 2 },
+          { li: "Tour guiado de las Cuevas de San José.", index: 3 },
+          { li: "Paseo en barca en las Cuevas de San José.", index: 4 },
+          { li: "Todos los impuestos y gastos incluidos.", index: 5 },
         ],
         secondH4: "€120",
-        secondH4span: "/person",
-        button: "BOOK NOW",
+        secondH4span: "/persona",
+        button: "RESERVAR AHORA",
       },
     },
     footer: {
@@ -643,6 +656,12 @@ export const languages: Record<string, LanguageData> = {
       thirdspan: "Correo Electrónico:",
       privacypolicy: "Política de Privacidad",
       termsofservice: "Términos del Servicio",
+    },
+    common: {
+      bookNow: "Reservar",
+      toursMenu: {
+        caves: "Cuevas de San José"
+      }
     },
   },
 };
