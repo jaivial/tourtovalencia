@@ -155,6 +155,9 @@ export type LanguageData = {
   footer: FooterType;
   common: {
     bookNow: string;
+    toursMenu: {
+      caves: string;
+    };
   };
 };
 
@@ -168,8 +171,8 @@ export const languages: Record<string, LanguageData> = {
     currentLanguage: "English",
     index: {
       heroSection: {
-        firstH2Orange: "EXCURSIONS",
-        firstH2: "MEDITERRANEAN",
+        firstH2Orange: "MEDITERRANEAN",
+        firstH2: "EXCURSIONS",
         firstH3: "EXPLORE THE BEST",
         secondH3: "EXPERIENCES IN VALENCIA",
       },
@@ -326,21 +329,21 @@ export const languages: Record<string, LanguageData> = {
       indexSection4: {
         firstH3: "OUR EXCURSIONS",
         propscard: {
-          title: "San Juan Caves",
-          mainText: "Visit to the San Juan Caves, boat ride in a unique natural setting. Departure and return by private transport from Valencia.",
+          title: "San José Caves",
+          mainText: "Visit to the San José Caves, boat ride in a unique natural setting. Departure and return by private transport from Valencia.",
           duration: "Duration: 3h 30m",
           price: "Price: 120€ / person",
         },
       },
       indexSection5: {
-        firstH3: "Explore The San Juan Caves",
-        secondH3: "A unique underground adventure in Valencia",
+        firstH3: "Explore The San José Caves",
+        secondH3: "A unique underground adventure with departure from Valencia",
       },
       indexFeatures: {
         firstSquareTitle: "Bookings",
         firstSquareDescription: "We typically accept bookings at least 24 hours before the tour. The minimum legal age for a passenger is over 2 years old.",
         secondSquareTitle: "Prices",
-        secondSquareDescription: "120€ per person. The maximum number of participants per tour is 4 people.",
+        secondSquareDescription: "120€ per person. The maximum number of participants per tour is 10 people.",
         thirdSquareTitle: "Languages",
         thirdSquareDescription: "All our tours can be narrated in Spanish and English.",
         fourthSquareTitle: "Pets",
@@ -365,7 +368,7 @@ export const languages: Record<string, LanguageData> = {
       },
       sanJuanSection4: {
         firstH3: "EXCLUSIVE GUIDED TOUR",
-        secondH3: "(Small groups of maximum 4 people)",
+        secondH3: "(Small groups of maximum 10 people)",
         thirdH3: "The experience takes place in the province of Castellón, a region we know perfectly and where we offer the best tourist routes.",
       },
       sanJuanSection5: {
@@ -377,13 +380,13 @@ export const languages: Record<string, LanguageData> = {
       },
       sanJuanSection6: {
         cardTitle: "GUIDED TOUR",
-        cardDescription: "Trip package to the San Juan Caves",
+        cardDescription: "Trip package to the San José Caves",
         firstH4: "Included Services",
         list: [
           { li: "Private transport.", index: 1 },
           { li: "Pickup in Valencia and return home.", index: 2 },
-          { li: "Guided tour of the San Juan Caves.", index: 3 },
-          { li: "Boat ride in the San Juan Caves.", index: 4 },
+          { li: "Guided tour of the San José Caves.", index: 3 },
+          { li: "Boat ride in the San José Caves.", index: 4 },
           { li: "All taxes and fees included.", index: 5 },
         ],
         secondH4: "€120",
@@ -405,6 +408,9 @@ export const languages: Record<string, LanguageData> = {
     },
     common: {
       bookNow: "Book Now",
+      toursMenu: {
+        caves: "San José Caves"
+      }
     },
   },
   es: {
@@ -582,13 +588,13 @@ export const languages: Record<string, LanguageData> = {
       },
       indexSection5: {
         firstH3: "Explora Las Cuevas de San José",
-        secondH3: "Una aventura subterránea única en la Comunidad Valenciana",
+        secondH3: "Una aventura subterránea única con salida desde Valencia",
       },
       indexFeatures: {
         firstSquareTitle: "Reservas",
         firstSquareDescription: "Normalmente aceptaremos reservas al menos 24 horas antes del tour. La edad legal mínima para un pasajero es de más de 2 años.",
         secondSquareTitle: "Precios",
-        secondSquareDescription: "120€ por persona. El número máximo de participantes por tour es de 4 personas.",
+        secondSquareDescription: "120€ por persona. El número máximo de participantes por tour es de 10 personas.",
         thirdSquareTitle: "Idiomas",
         thirdSquareDescription: "Todos nuestros tours pueden ser narrados en español e inglés.",
         fourthSquareTitle: "Mascotas",
@@ -613,7 +619,7 @@ export const languages: Record<string, LanguageData> = {
       },
       sanJuanSection4: {
         firstH3: "TOUR GUIADO EXCLUSIVO",
-        secondH3: "(Grupos reducidos de máximo 4 personas)",
+        secondH3: "(Grupos reducidos de máximo 10 personas)",
         thirdH3: "La experiencia se desarrolla en la provincia de Castellón, una región que conocemos a la perfección y donde ofrecemos las mejores rutas turísticas.",
       },
       sanJuanSection5: {
@@ -625,13 +631,13 @@ export const languages: Record<string, LanguageData> = {
       },
       sanJuanSection6: {
         cardTitle: "TOUR GUIADO",
-        cardDescription: "Paquete de viaje a las Cuevas de San Juan",
+        cardDescription: "Paquete de viaje a las Cuevas de San José",
         firstH4: "Servicios Incluidos",
         list: [
           { li: "Transporte privado.", index: 1 },
           { li: "Recogida en Valencia y regreso a casa.", index: 2 },
-          { li: "Tour guiado de las Cuevas de San Juan.", index: 3 },
-          { li: "Paseo en barca en las Cuevas de San Juan.", index: 4 },
+          { li: "Tour guiado de las Cuevas de San José.", index: 3 },
+          { li: "Paseo en barca en las Cuevas de San José.", index: 4 },
           { li: "Todos los impuestos y gastos incluidos.", index: 5 },
         ],
         secondH4: "€120",
@@ -653,6 +659,9 @@ export const languages: Record<string, LanguageData> = {
     },
     common: {
       bookNow: "Reservar",
+      toursMenu: {
+        caves: "Cuevas de San José"
+      }
     },
   },
 };

@@ -108,7 +108,7 @@ const Nav: React.FC = () => {
                     onClick={handleLinkClick}
                     className="pl-4 text-blue-50 hover:text-blue-200 transition-colors font-sans text-lg block py-2"
                   >
-                    Cuevas de San Juan
+                    {state.common.toursMenu.caves}
                   </Link>
                 </div>
               </div>
