@@ -1,41 +1,29 @@
 // app/components/IndexSection1.tsx
 //UI Component: just responsible for displaying pure html with props passed from feature component
 import * as React from "react";
-import { carouselData, CarouselDataType } from "~/data/carouseldata";
 import Autoplay from "embla-carousel-autoplay";
 import { Card, CardContent } from "~/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem } from "~/components/ui/carousel";
 import { motion, useInView } from "framer-motion";
 import ImageGalleryModal from "../ui/ImageGalleryModal";
-
+import { useLanguageContext } from "~/providers/LanguageContext";
+import Image from "next/image";
 // Child Props type
 type ChildProps = {
   width: number;
 };
 
 const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
+  const { state } = useLanguageContext();
+  const { images } = state.sanjuan.sanJuanSection3;
+  
   const plugin = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
-  const carouselImages: CarouselDataType[] = carouselData;
   const ref = React.useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
 
-  const imageVariants = {
-    hidden: { opacity: 0, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      transition: { duration: 0.6 }
-    }
-  };
-
-  const imageUrls = [
-    '/photo1IS3.webp',
-    '/photo2IS3.webp',
-    '/photo3IS3.webp',
-    '/photo4IS3.webp'
-  ];
+  const imageUrls = images.map(img => img.source);
 
   const handleImageClick = (index: number) => {
     setSelectedImageIndex(index);
@@ -56,70 +44,99 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
           className="w-[95%] max-w-[1280px] mx-auto relative z-[1] px-4"
         >
           {width > 580 ? (
-            <div className="flex flex-col items-center justify-center my-10 gap-6">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? 
-                  { opacity: 1, y: 0 } : 
-                  { opacity: 0, y: 20 }
-                }
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex flex-row justify-center gap-6 items-center w-full"
+            <div className="grid grid-cols-4 grid-rows-3 gap-4 h-[900px] my-10">
+              {/* First two rows - existing layout */}
+              {/* Large image spanning 2 rows */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl cursor-pointer"
+                onClick={() => handleImageClick(0)}
               >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
-                  className="
-                    rounded-2xl h-[400px] w-2/5 
-                    bg-[url('/photo1IS3.webp')] bg-no-repeat bg-center bg-cover
-                    shadow-lg hover:shadow-xl transition-all
-                    transform perspective-1000 cursor-pointer"
-                  onClick={() => handleImageClick(0)}
-                />
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
-                  className="
-                    rounded-2xl h-[400px] w-3/5 
-                    bg-[url('/photo2IS3.webp')] bg-center bg-cover
-                    shadow-lg hover:shadow-xl transition-all
-                    transform perspective-1000 cursor-pointer"
-                  onClick={() => handleImageClick(1)}
+                <img 
+                  src={images[0].source}
+                  alt={images[0].alt}
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
               </motion.div>
 
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? 
-                  { opacity: 1, y: 0 } : 
-                  { opacity: 0, y: 20 }
-                }
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex flex-row-reverse justify-center gap-6 items-center w-full"
+              {/* Top right image */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="col-span-2 relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl cursor-pointer"
+                onClick={() => handleImageClick(1)}
               >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
-                  className="
-                    rounded-2xl h-[400px] w-2/5 
-                    bg-[url('/photo3IS3.webp')] bg-no-repeat bg-center bg-cover
-                    shadow-lg hover:shadow-xl transition-all
-                    transform perspective-1000 cursor-pointer"
-                  onClick={() => handleImageClick(2)}
+                <img 
+                  src={images[1].source}
+                  alt={images[1].alt}
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
-                  className="
-                    rounded-2xl h-[400px] w-3/5 
-                    bg-[url('/photo4IS3.webp')] bg-center bg-cover
-                    shadow-lg hover:shadow-xl transition-all
-                    transform perspective-1000 cursor-pointer"
-                  onClick={() => handleImageClick(3)}
+              </motion.div>
+
+              {/* Bottom right images of first section */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl cursor-pointer"
+                onClick={() => handleImageClick(2)}
+              >
+                <img 
+                  src={images[2].source}
+                  alt={images[2].alt}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl cursor-pointer"
+                onClick={() => handleImageClick(3)}
+              >
+                <img 
+                  src={images[3].source}
+                  alt={images[3].alt}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </motion.div>
+
+              {/* Third row - new images */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="col-span-2 relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl cursor-pointer"
+                onClick={() => handleImageClick(4)}
+              >
+                <img 
+                  src={images[4].source}
+                  alt={images[4].alt}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="col-span-2 relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl cursor-pointer"
+                onClick={() => handleImageClick(5)}
+              >
+                <img 
+                  src={images[5].source}
+                  alt={images[5].alt}
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
               </motion.div>
             </div>
@@ -131,11 +148,7 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                 { opacity: 0, y: 20 }
               }
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="
-                flex flex-col items-center justify-center 
-                py-8 w-full
-                rounded-2xl
-              "
+              className="flex flex-col items-center justify-center py-8 w-full rounded-2xl"
             >
               <Carousel 
                 plugins={[plugin.current]} 
@@ -144,8 +157,8 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                 onMouseLeave={plugin.current.reset}
               >
                 <CarouselContent>
-                  {carouselImages.map((image, index) => (
-                    <CarouselItem key={image.index}>
+                  {images.map((image, index) => (
+                    <CarouselItem key={index}>
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileHover={{ scale: 1.02 }}
@@ -162,6 +175,8 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                               bg-[url('${image.source}')]
                               transform-gpu
                             `}
+                            role="img"
+                            aria-label={image.alt}
                           />
                         </Card>
                       </motion.div>
