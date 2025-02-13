@@ -7,13 +7,13 @@ import IndexFeatures from "./IndexFeatures";
 import SanJuanSection1 from "../_sanjuan/SanJuanSection1";
 import SanJuanSection2 from "../_sanjuan/SanJuanSection2";
 import SanJuanSection3 from "../_sanjuan/SanJuanSection3";
-import SanJuanSection4 from "../_sanjuan/SanJuanSection4";
 import SanJuanSection5 from "../_sanjuan/SanJuanSection5";
 import SanJuanSection6 from "../_sanjuan/SanJuanSection6";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import FloatingButton from '../ui/FloatingButton';
 import { TimelineFeature } from "./TimelineFeature";
+import IndexSection6 from "./IndexSection6";
 
 const IndexContainer: React.FC = () => {
   const size = useWindowSize();
@@ -25,16 +25,14 @@ const IndexContainer: React.FC = () => {
   const indexSection2Text = state.index.indexSection2;
   const indexSection3Text = state.index.indexSection3;
   const carouselIndexSection2 = state.index.carouselIndexSection2;
-  // const indexSection4Text = state.index.indexSection4;
   const indexSection5Text = state.index.indexSection5;
   const indexFeatures = state.index.indexFeatures;
   const sanJuanSection1Text = state.sanjuan.sanJuanSection1;
   const SanJuanSection2Text = state.sanjuan.sanJuanSection2;
-  const SanJuanSection4Text = state.sanjuan.sanJuanSection4;
+
   const SanJuanSection5Text = state.sanjuan.sanJuanSection5;
   const SanJuanSection6Text = state.sanjuan.sanJuanSection6;
   const floatingButtonText = state.common.bookNow;
-  const SanJuanSection3Text = state.sanjuan.sanJuanSection3;
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn">
         <HeroSection width={width} height={height} heroSectionText={heroSectionText} />
@@ -42,7 +40,6 @@ const IndexContainer: React.FC = () => {
       <SanJuanSection2 width={width} height={height} SanJuanSection2Text={SanJuanSection2Text} />
       <SanJuanSection1 width={width} sanJuanSection1Text={sanJuanSection1Text} />
       <SanJuanSection3 width={width} />
-      <SanJuanSection4 width={width} SanJuanSection4Text={SanJuanSection4Text} />
       <SanJuanSection5 width={width} SanJuanSection5Text={SanJuanSection5Text} />
       <TimelineFeature />
       <IndexFeatures width={width} indexFeatures={indexFeatures} />
@@ -50,6 +47,7 @@ const IndexContainer: React.FC = () => {
       <IndexSection3 width={width} indexSection3Text={indexSection3Text} />
       <IndexSection2 width={width} height={height} indexSection2Text={indexSection2Text} carouselIndexSection2={carouselIndexSection2} />
       <FloatingButton text={floatingButtonText} />
+      <IndexSection6 />
     </div>
   );
 };

@@ -120,7 +120,7 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
           initial={{ opacity: 0, x: 50 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className={`
-            w-full max-w-[620px] px-4 
+            w-full max-w-[720px] px-4 
             flex flex-col justify-center items-center relative 
             ${width <= 1280 ? "h-fit mt-8 mb-0" : "h-[600px]"}
           `}
@@ -128,7 +128,7 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
           <motion.img 
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.3 }}
-            src="/photo1IndexSection2.webp" 
+            src="/hero1.webp" 
             alt="Cuevas de San Juan, visita guiada y viaje en barca." 
             className="
               w-full h-auto rounded-2xl mt-28

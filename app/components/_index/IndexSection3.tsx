@@ -92,8 +92,8 @@ const IndexSection3: React.FC<ChildProps> = ({ width, indexSection3Text }) => {
                 stiffness: 300
               }}
               className="
-                w-full aspect-[4/3] bg-[url('/sanjuanbarca.jpg')] 
-                bg-cover bg-center rounded-2xl overflow-hidden 
+                w-full aspect-[4/3] bg-[url('/olgaphoto5.jpeg')] 
+                bg-cover bg-top rounded-2xl overflow-hidden 
                 shadow-md hover:shadow-xl transition-all duration-500
                 transform perspective-1000
               "

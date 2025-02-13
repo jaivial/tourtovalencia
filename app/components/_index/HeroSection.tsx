@@ -68,7 +68,7 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
             {heroSectionText.firstH2Orange}
           </h2>
           <h2 className={`
-            font-bold font-sans text-white text-center
+            font-bold font-sans bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent text-center
             tracking-wide drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
                ${width <= 290 ? "text-[1.8rem]" : 
               width <= 350 ? "text-[2rem]" : 

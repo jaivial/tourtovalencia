@@ -175,6 +175,55 @@ export type LanguageData = {
       description: string;
     }[];
   };
+  accessibility: {
+    title: string;
+    wheelchairAccess: string;
+    babySeating: string;
+    helpText: string;
+    phoneNumber: string;
+  };
+  additionalInfo: {
+    title: string;
+    confirmation: string;
+    participation: string;
+    weatherDependent: string;
+    minimumRequired: string;
+    privateActivity: string;
+  };
+  cancellation: {
+    title: string;
+    freeCancellation: string;
+    fullRefund24h: string;
+    noRefund24h: string;
+    noChanges24h: string;
+    timeZoneNote: string;
+  };
+  indexSection6: {
+    title: string;
+    accessibility: {
+      title: string;
+      wheelchair: string;
+      babies: string;
+    };
+    additional: {
+      title: string;
+      confirmation: string;
+      participation: string;
+      weather: string;
+      minTravelers: string;
+      private: string;
+    };
+    cancellation: {
+      title: string;
+      free: string;
+      noRefund: string;
+      noChanges: string;
+      deadline: string;
+      weather: string;
+      minParticipants: string;
+      moreDetails: string;
+    };
+  };
 };
 
 export const languages: Record<string, LanguageData> = {
@@ -384,12 +433,24 @@ export const languages: Record<string, LanguageData> = {
       },
       sanJuanSection3: {
         images: [
-          { source: '/photo1IS3.webp', alt: 'San José Caves entrance' },
+          { source: '/photo4IS3.webp', alt: 'San José Caves entrance' },
+          { source: '/olgaphoto6.jpeg', alt: 'Cave exploration' },
           { source: '/photo2IS3.webp', alt: 'Underground river view' },
+          { source: '/airbnb.jpeg', alt: 'Cave exploration' },
+          { source: '/olgaphoto8.jpeg', alt: 'Cave exploration' },
+          { source: '/photo1IndexSection2.webp', alt: 'Cave exploration' },
           { source: '/photo3IS3.webp', alt: 'Cave formations' },
           { source: '/photo4IS3.webp', alt: 'Boat journey through caves' },
-          { source: '/photo5IS3.webp', alt: 'Cave interior view' },
-          { source: '/photo6IS3.webp', alt: 'Cave exploration' }
+          { source: '/photo1IS3.webp', alt: 'Boat journey through caves' },
+          { source: '/olgaphoto9.jpeg', alt: 'Cave exploration' },
+          { source: '/olgaphoto1.jpeg', alt: 'Cave interior view' },
+          { source: '/olgaphoto5.jpeg', alt: 'Cave exploration' },
+          { source: '/olgaphoto2.jpeg', alt: 'Cave exploration' },
+          { source: '/olgaphoto3.jpeg', alt: 'Cave exploration' },
+          { source: '/olgaphoto4.jpeg', alt: 'Cave exploration' },
+          { source: '/olgaphoto7.jpeg', alt: 'Cave exploration' },
+          { source: '/airbnb2.jpeg', alt: 'Cave exploration' },
+          { source: '/airbnb3.avif', alt: 'Cave exploration' },
         ]
       },
       sanJuanSection4: {
@@ -463,6 +524,55 @@ export const languages: Record<string, LanguageData> = {
           description: "After the visit, we'll return to Valencia to the starting point"
         }
       ]
+    },
+    accessibility: {
+      title: "Accessibility",
+      wheelchairAccess: "Not wheelchair accessible",
+      babySeating: "Babies must be seated on lap",
+      helpText: "If you have any questions about accessibility, we'll be happy to help. Just call the following number and indicate the product code: 482538P1",
+      phoneNumber: "+34 91 177 6743"
+    },
+    additionalInfo: {
+      title: "Additional Information",
+      confirmation: "Confirmation will be received at time of booking",
+      participation: "Most travelers can participate",
+      weatherDependent: "Good weather conditions are required for this experience. If canceled due to poor weather, you'll be offered a different date or a full refund.",
+      minimumRequired: "This experience requires a minimum number of travelers. If canceled because the minimum isn't met, you'll be offered a different date/experience or a full refund.",
+      privateActivity: "This is a private tour/activity. Only your group will participate"
+    },
+    cancellation: {
+      title: "Cancellation Policy",
+      freeCancellation: "Free cancellation",
+      fullRefund24h: "For a full refund, cancel at least 24 hours before the experience's start date",
+      noRefund24h: "If you cancel less than 24 hours before the experience's start date, the amount paid will not be refunded",
+      noChanges24h: "Any changes made less than 24 hours before the experience's start date will not be accepted",
+      timeZoneNote: "Cut-off times are based on the experience's local time",
+    },
+    indexSection6: {
+      title: "Important Information",
+      accessibility: {
+        title: "Accessibility Information",
+        wheelchair: "Not wheelchair accessible",
+        babies: "Babies must sit on laps"
+      },
+      additional: {
+        title: "Additional Information",
+        confirmation: "Confirmation will be received at the time of booking",
+        participation: "Most travelers can participate in the experience",
+        weather: "The experience requires good weather conditions. If canceled due to bad weather, you will be offered an alternative date or a full refund",
+        minTravelers: "A minimum number of travelers is required for this experience. If canceled due to not meeting this requirement, you will be offered another date/experience or a full refund",
+        private: "This is a private tour/activity; only your group will participate"
+      },
+      cancellation: {
+        title: "Cancellation Policy",
+        free: "Free cancellation up to 24 hours before the start of the experience for a full refund",
+        noRefund: "No refund if canceled less than 24 hours before the experience starts",
+        noChanges: "No changes accepted within 24 hours of the experience start time",
+        deadline: "The deadline is based on the local time of the experience location",
+        weather: "Weather-dependent experiences will offer an alternative date or full refund if canceled due to bad weather",
+        minParticipants: "Experiences requiring a minimum number of participants will offer an alternative date/experience or full refund if canceled due to insufficient participants",
+        moreDetails: "For more details, refer to the cancellation policy"
+      }
     }
   },
   es: {
@@ -671,12 +781,24 @@ export const languages: Record<string, LanguageData> = {
       },
       sanJuanSection3: {
         images: [
-          { source: '/photo1IS3.webp', alt: 'San José Caves entrance' },
+          { source: '/photo4IS3.webp', alt: 'San José Caves entrance' },
+          { source: '/olgaphoto6.jpeg', alt: 'Cave exploration' },
           { source: '/photo2IS3.webp', alt: 'Underground river view' },
+          { source: '/airbnb.jpeg', alt: 'Cave exploration' },
+          { source: '/olgaphoto8.jpeg', alt: 'Cave exploration' },
+          { source: '/photo1IndexSection2.webp', alt: 'Cave exploration' },
           { source: '/photo3IS3.webp', alt: 'Cave formations' },
           { source: '/photo4IS3.webp', alt: 'Boat journey through caves' },
-          { source: '/photo5IS3.webp', alt: 'Cave interior view' },
-          { source: '/photo6IS3.webp', alt: 'Cave exploration' }
+          { source: '/photo1IS3.webp', alt: 'Boat journey through caves' },
+          { source: '/olgaphoto9.jpeg', alt: 'Cave exploration' },
+          { source: '/olgaphoto1.jpeg', alt: 'Cave interior view' },
+          { source: '/olgaphoto5.jpeg', alt: 'Cave exploration' },
+          { source: '/olgaphoto2.jpeg', alt: 'Cave exploration' },
+          { source: '/olgaphoto3.jpeg', alt: 'Cave exploration' },
+          { source: '/olgaphoto4.jpeg', alt: 'Cave exploration' },
+          { source: '/olgaphoto7.jpeg', alt: 'Cave exploration' },
+          { source: '/airbnb2.jpeg', alt: 'Cave exploration' },
+          { source: '/airbnb3.avif', alt: 'Cave exploration' },
         ]
       },
       sanJuanSection4: {
@@ -750,6 +872,55 @@ export const languages: Record<string, LanguageData> = {
           description: "Al terminar la visita volveremos a Valencia al punto de partida"
         }
       ]
+    },
+    accessibility: {
+      title: "Accesibilidad",
+      wheelchairAccess: "No es accesible para sillas de ruedas",
+      babySeating: "Los bebés deben sentarse en el regazo",
+      helpText: "Si tiene alguna pregunta sobre la accesibilidad, estaremos encantados de ayudarle. Solo tiene que llamar al siguiente número e indicar el código del producto: 482538P1",
+      phoneNumber: "+34 91 177 6743"
+    },
+    additionalInfo: {
+      title: "Información adicional",
+      confirmation: "La confirmación se recibirá en el momento de la reserva",
+      participation: "La mayoría de los viajeros pueden participar en la experiencia",
+      weatherDependent: "La experiencia requiere buenas condiciones climáticas. Si se cancela debido al mal tiempo, se le ofrecerá una fecha alternativa o un reembolso completo",
+      minimumRequired: "Se requiere un número mínimo de viajeros para esta experiencia. Si se cancela por no cumplir con este requisito, se le ofrecerá otra fecha/experiencia o un reembolso completo",
+      privateActivity: "Este es un tour/actividad privada; solo participará su grupo"
+    },
+    cancellation: {
+      title: "Política de cancelación",
+      freeCancellation: "Cancelación gratuita hasta 24 horas antes del inicio de la experiencia para un reembolso completo",
+      fullRefund24h: "Para recibir el reembolso íntegro de la experiencia debes cancelarla como mínimo 24 horas antes de que empiece",
+      noRefund24h: "Si cancelas la experiencia menos de 24 horas antes de que empiece, no se te devolverá el importe abonado",
+      noChanges24h: "No se aceptan cambios dentro de las 24 horas previas al inicio de la experiencia",
+      timeZoneNote: "La hora límite se basa en la hora local del lugar de la experiencia",
+    },
+    indexSection6: {
+      title: "Información Importante",
+      accessibility: {
+        title: "Información de Accesibilidad",
+        wheelchair: "No es accesible para sillas de ruedas",
+        babies: "Los bebés deben sentarse en el regazo"
+      },
+      additional: {
+        title: "Información Adicional",
+        confirmation: "La confirmación se recibirá en el momento de la reserva",
+        participation: "La mayoría de los viajeros pueden participar en la experiencia",
+        weather: "La experiencia requiere buenas condiciones climáticas. Si se cancela debido al mal tiempo, se le ofrecerá una fecha alternativa o un reembolso completo",
+        minTravelers: "Se requiere un número mínimo de viajeros para esta experiencia. Si se cancela por no cumplir con este requisito, se le ofrecerá otra fecha/experiencia o un reembolso completo",
+        private: "Este es un tour/actividad privada; solo participará su grupo"
+      },
+      cancellation: {
+        title: "Política de Cancelación",
+        free: "Cancelación gratuita hasta 24 horas antes del inicio de la experiencia para un reembolso completo",
+        noRefund: "Sin reembolso si se cancela menos de 24 horas antes del inicio de la experiencia",
+        noChanges: "No se aceptan cambios dentro de las 24 horas previas al inicio de la experiencia",
+        deadline: "La fecha límite se basa en la hora local del lugar de la experiencia",
+        weather: "Las experiencias que dependen del clima ofrecerán una fecha alternativa o un reembolso completo si se cancelan debido al mal tiempo",
+        minParticipants: "Las experiencias que requieren un número mínimo de participantes ofrecerán una fecha/experiencia alternativa o un reembolso completo si se cancelan debido a participantes insuficientes",
+        moreDetails: "Para más detalles, consulte la política de cancelación"
+      }
     }
   },
 };

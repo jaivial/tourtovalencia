@@ -7,7 +7,7 @@ import { Carousel, CarouselContent, CarouselItem } from "~/components/ui/carouse
 import { motion, useInView } from "framer-motion";
 import ImageGalleryModal from "../ui/ImageGalleryModal";
 import { useLanguageContext } from "~/providers/LanguageContext";
-
+import Image from "next/image";
 // Child Props type
 type ChildProps = {
   width: number;
@@ -164,18 +164,20 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                         whileHover={{ scale: 1.02 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.3 }}
-                        className="p-1 cursor-pointer"
+                        className="p-1 cursor-pointer h-full"
                         onClick={() => handleImageClick(index)}
                       >
-                        <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-all">
-                          <CardContent className="p-0 aspect-square">
-                            <img
-                              src={image.source}
-                              alt={image.alt}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
-                          </CardContent>
+                        <Card className="w-full aspect-square overflow-hidden shadow-lg hover:shadow-xl transition-all">
+                          <CardContent 
+                            className={`
+                              w-full h-full p-0
+                              bg-cover bg-center bg-no-repeat 
+                              bg-[url('${image.source}')]
+                              transform-gpu
+                            `}
+                            role="img"
+                            aria-label={image.alt}
+                          />
                         </Card>
                       </motion.div>
                     </CarouselItem>
