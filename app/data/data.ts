@@ -127,6 +127,13 @@ export type FooterType = {
   termsofservice: string;
 };
 
+export type sanJuanSection3Type = {
+  images: {
+    source: string;
+    alt: string;
+  }[];
+};
+
 export type Index = {
   heroSection: HeroSectionType;
   indexSection1: IndexSection1Type;
@@ -141,6 +148,7 @@ export type Index = {
 export type SanJuan = {
   sanJuanSection1: sanJuanSection1Type;
   sanJuanSection2: sanJuansection2Type;
+  sanJuanSection3: sanJuanSection3Type;
   sanJuanSection4: sanJuansection4Type;
   sanJuanSection5: sanJuanSection5Type;
   sanJuanSection6: SanJuanSection6Type;
@@ -158,6 +166,14 @@ export type LanguageData = {
     toursMenu: {
       caves: string;
     };
+  };
+  timeline: {
+    title: string;
+    subtitle: string;
+    steps: {
+      title: string;
+      description: string;
+    }[];
   };
 };
 
@@ -366,6 +382,16 @@ export const languages: Record<string, LanguageData> = {
         secondH3: "You'll travel 800 meters by boat.",
         thirdH3: "Did you know it's the longest navigable underground river in Europe?",
       },
+      sanJuanSection3: {
+        images: [
+          { source: '/photo1IS3.webp', alt: 'San José Caves entrance' },
+          { source: '/photo2IS3.webp', alt: 'Underground river view' },
+          { source: '/photo3IS3.webp', alt: 'Cave formations' },
+          { source: '/photo4IS3.webp', alt: 'Boat journey through caves' },
+          { source: '/photo5IS3.webp', alt: 'Cave interior view' },
+          { source: '/photo6IS3.webp', alt: 'Cave exploration' }
+        ]
+      },
       sanJuanSection4: {
         firstH3: "EXCLUSIVE GUIDED TOUR",
         secondH3: "(Small groups of maximum 10 people)",
@@ -410,8 +436,34 @@ export const languages: Record<string, LanguageData> = {
       bookNow: "Book Now",
       toursMenu: {
         caves: "San José Caves"
-      }
+      },
     },
+    timeline: {
+      title: "What to Expect",
+      subtitle: "Itinerary",
+      steps: [
+        {
+          title: "Meeting Point",
+          description: "We'll depart from Valencia (maximum 4 people) and drive for approximately 40 minutes to La Vall D'uixo (Castellón)."
+        },
+        {
+          title: "Arrival at the Caves",
+          description: "Once there, we'll begin the cave tour that lasts about 40 minutes at a constant temperature of 20°."
+        },
+        {
+          title: "Exploration",
+          description: "The tour consists of 800 meters by boat and 250 meters on foot. There are no risks or dangerous situations during the visit."
+        },
+        {
+          title: "Unique Experience",
+          description: "Dare to enjoy something different and special. Feel the sensation of time standing still in a very special atmosphere."
+        },
+        {
+          title: "Return",
+          description: "After the visit, we'll return to Valencia to the starting point"
+        }
+      ]
+    }
   },
   es: {
     links: [
@@ -617,6 +669,16 @@ export const languages: Record<string, LanguageData> = {
         secondH3: "Viajarás 800 metros en barca.",
         thirdH3: "¿Sabías que es el río subterráneo navegable más largo de Europa?",
       },
+      sanJuanSection3: {
+        images: [
+          { source: '/photo1IS3.webp', alt: 'San José Caves entrance' },
+          { source: '/photo2IS3.webp', alt: 'Underground river view' },
+          { source: '/photo3IS3.webp', alt: 'Cave formations' },
+          { source: '/photo4IS3.webp', alt: 'Boat journey through caves' },
+          { source: '/photo5IS3.webp', alt: 'Cave interior view' },
+          { source: '/photo6IS3.webp', alt: 'Cave exploration' }
+        ]
+      },
       sanJuanSection4: {
         firstH3: "TOUR GUIADO EXCLUSIVO",
         secondH3: "(Grupos reducidos de máximo 10 personas)",
@@ -661,7 +723,33 @@ export const languages: Record<string, LanguageData> = {
       bookNow: "Reservar",
       toursMenu: {
         caves: "Cuevas de San José"
-      }
+      },
     },
+    timeline: {
+      title: "Qué esperar",
+      subtitle: "Itinerario",
+      steps: [
+        {
+          title: "Punto de encuentro",
+          description: "Saldremos desde Valencia (máximo 4 personas) desplazándonos en coche durante aproximadamente 40 minutos hasta la población de La Vall D'uixo (Castellón)."
+        },
+        {
+          title: "Llegada a las Cuevas",
+          description: "Una vez allí empezaremos el recorrido dentro de la cueva que durará unos 40 minutos a una temperatura constante de 20°."
+        },
+        {
+          title: "Exploración",
+          description: "El recorrido consta de 800 metros en barca y 250 metros a pie. No existe ningún riesgo ni situación peligrosa en la visita."
+        },
+        {
+          title: "Experiencia única",
+          description: "Atrévete a disfrutar algo diferente y especial. Siente la sensación de que el tiempo se ha parado en una atmósfera muy especial."
+        },
+        {
+          title: "Regreso",
+          description: "Al terminar la visita volveremos a Valencia al punto de partida"
+        }
+      ]
+    }
   },
 };
