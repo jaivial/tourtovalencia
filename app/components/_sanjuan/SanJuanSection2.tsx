@@ -18,8 +18,8 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
 
   const commonH3Styles = `
     transition-all duration-500 ease-in-out 
-    text-orange-950 font-sans text-center
-    leading-normal hover:text-orange-900
+    text-blue-950 font-sans text-center
+    leading-normal hover:text-blue-900
   `;
 
   const getResponsiveTextSize = (small: string, medium: string, large: string) => 
@@ -39,7 +39,7 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
         transition={{ duration: 0.8 }}
         className={`
           w-[95%] max-w-[1280px] flex flex-row flex-wrap-reverse 
-          items-center justify-center mt-4 mb-28 mx-auto 
+          items-center justify-center -mt-24 mb-16 mx-auto 
           relative z-[1] ${width <= 1280 ? "gap-0" : "gap-10"}
         `}
       >

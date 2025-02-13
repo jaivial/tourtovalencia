@@ -17,7 +17,7 @@ const SanJuanSection4: React.FC<ChildProps> = ({ width, SanJuanSection4Text }) =
 
   const commonH3Styles = `
     transition-all duration-500 ease-in-out 
-    text-orange-950 font-sans text-center
+    text-blue-950 font-sans text-center
     leading-normal
   `;
 
@@ -34,7 +34,7 @@ const SanJuanSection4: React.FC<ChildProps> = ({ width, SanJuanSection4Text }) =
       transition={{ duration: 0.8 }}
       className={`
         w-[95%] max-w-[1280px] flex flex-col flex-wrap-reverse 
-        items-center justify-center mt-4 mb-28 mx-auto relative z-0 
+        items-center justify-center mt-4 mb-16 mx-auto relative z-0 
         ${width <= 1280 ? "gap-0" : "gap-10"}
       `}
     >

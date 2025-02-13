@@ -18,7 +18,7 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
   // Common text styles for h3 elements
   const commonH3Styles = `
     transition-all duration-500 ease-in-out 
-    text-orange-950 font-sans text-center
+    text-blue-950 font-sans text-center
     leading-normal
   `;
 
@@ -133,7 +133,7 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
                   ${commonH3Styles}
                   font-medium
                   ${getResponsiveTextSize("text-[1rem]", "text-[1.2rem]", "text-[1.4rem]", "text-[1.6rem]", "text-[1.8rem]")}
-                  hover:text-orange-900
+                  hover:text-blue-900
                 `}
               >
                 {text}
