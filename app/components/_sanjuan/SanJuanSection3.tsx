@@ -168,16 +168,13 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                         onClick={() => handleImageClick(index)}
                       >
                         <Card className="w-full aspect-square overflow-hidden shadow-lg hover:shadow-xl transition-all">
-                          <CardContent 
-                            className={`
-                              w-full h-full p-0
-                              bg-cover bg-center bg-no-repeat 
-                              bg-[url('${image.source}')]
-                              transform-gpu
-                            `}
-                            role="img"
-                            aria-label={image.alt}
-                          />
+                          <CardContent className="w-full h-full p-0">
+                            <img
+                              src={image.source}
+                              alt={image.alt}
+                              className="w-full h-full object-cover"
+                            />
+                          </CardContent>
                         </Card>
                       </motion.div>
                     </CarouselItem>

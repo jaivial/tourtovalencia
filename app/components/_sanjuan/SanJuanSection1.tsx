@@ -21,7 +21,7 @@ const SanJuanSection1: React.FC<ChildProps> = ({ width, sanJuanSection1Text }) =
         {/* Background image with overlay */}
         <div className="w-full h-[600px] relative bg-white rounded-2xl overflow-hidden mb-0 px-12">
           <div 
-            className={`absolute inset-0 bg-[url('/hero1.webp')] bg-cover bg-center transform transition-transform duration-700 rounded-2xl bg-white ${width <= 700 ? "m-0" : "m-8"}`}
+            className={`absolute inset-0 bg-[url('/olgaphoto3.jpeg')] bg-cover bg-bottom transform transition-transform duration-700 rounded-2xl bg-white ${width <= 700 ? "m-0" : "m-8"}`}
           > 
           </div>
         </div>

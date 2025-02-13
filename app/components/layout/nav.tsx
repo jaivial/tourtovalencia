@@ -36,7 +36,7 @@ const Nav: React.FC = () => {
           <img 
             src="/logonuevoolga3.png" 
             alt="Olga Travel" 
-            className={` ${width < 380 ? "h-[20px]" : "h-[100px]"} absolute left-1/2 -translate-x-1/2 w-auto`}
+            className={` ${width < 380 ? "h-[20px]" : "h-[100px]"} py-3 absolute left-1/2 -translate-x-1/2 w-auto`}
           />
           <Menu 
             className="text-white cursor-pointer hover:text-blue-200 transition-colors" 
