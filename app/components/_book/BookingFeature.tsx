@@ -18,7 +18,7 @@ export const BookingFeature = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto mt-36 mb-20 p-6">
+    <div className={`max-[730px]:max-w-[calc(100%-5rem)] max-w-2xl mx-auto mt-36 mb-20 px-4 sm:px-6 md:px-6`}>
       <div className="text-center mb-12 space-y-6">
         <div className="flex justify-center gap-4">
           <CalendarRange className="w-8 h-8 text-primary" />

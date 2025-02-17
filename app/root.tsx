@@ -1,4 +1,4 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation, useLoaderData } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import "./tailwind.css";
 import { LoaderFunction } from "@remix-run/node";
@@ -8,8 +8,10 @@ import { json } from "@remix-run/react";
 import Nav from "~/components/layout/nav";
 import Footer from "./components/layout/footer";
 import ArrowToTop from "./components/_index/ArrowToTop";
-import { useLoaderData } from "@remix-run/react";
 import { LanguageContextProvider } from "~/providers/LanguageContext";
+import { ChakraProvider } from "@chakra-ui/react";
+import { ColorModeScript } from "@chakra-ui/color-mode";
+import theme from "~/theme";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
@@ -31,8 +33,11 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export default function App() {
   const { initialLanguage } = useLoaderData<typeof loader>();
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin-');
+
   return (
     <html lang="en">
       <head>
@@ -42,19 +47,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <LanguageContextProvider initialState={initialLanguage}>
-          <ArrowToTop />
-          <Nav />
-          {children}
-          <ScrollRestoration />
-          <Scripts />
-          <Footer />
-        </LanguageContextProvider>
+        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+        <ChakraProvider theme={theme}>
+          <LanguageContextProvider initialState={initialLanguage}>
+            <ArrowToTop />
+            {!isAdminRoute && <Nav />}
+            <Outlet />
+            {!isAdminRoute && <Footer />}
+          </LanguageContextProvider>
+        </ChakraProvider>
+        <ScrollRestoration />
+        <Scripts />
       </body>
     </html>
   );
-}
-
-export default function App() {
-  return <Outlet />;
 }

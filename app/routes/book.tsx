@@ -11,6 +11,9 @@ import { BookingConfirmationEmail } from "~/emails/BookingConfirmationEmail";
 import { BookingAdminEmail } from "~/emails/BookingAdminEmail";
 import type { BookingFormData } from "~/hooks/book.hooks";
 
+// Add this directive at the top of the file to make it a client component
+'use client';
+
 export const meta: MetaFunction = () => {
   return [
     { title: "Book Your Experience" },
@@ -71,8 +74,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 };
 
+type ActionData = 
+  | { success: true }
+  | { success: false, error: string };
+
 export default function Book() {
-  const actionData = useActionData<typeof action>();
+  const actionData = useActionData<typeof action>() as ActionData;
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
