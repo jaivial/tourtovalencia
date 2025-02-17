@@ -29,6 +29,11 @@ const Nav: React.FC = () => {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
+  // Don't show nav on admin dashboard routes
+  if (location.pathname.includes('/admindashboard')) {
+    return null;
+  }
+
   // Only render content after component is mounted on client
   if (!isMounted) {
     return null;
