@@ -146,6 +146,33 @@ export type AdminType = {
     bookings: string;
     logout: string;
   };
+  bookings: {
+    title: string;
+    completion: string;
+    dailyLimit: string;
+    updateLimit: string;
+    currentLimit: string;
+    places: string;
+    noBookings: string;
+    loading: string;
+    tableHeaders: {
+      name: string;
+      email: string;
+      phone: string;
+      people: string;
+      status: string;
+      payment: string;
+      requests: string;
+    };
+    status: {
+      confirmed: string;
+      pending: string;
+    };
+    payment: {
+      paid: string;
+      unpaid: string;
+    };
+  };
 };
 
 export type Index = {
@@ -601,7 +628,34 @@ export const languages: Record<string, LanguageData> = {
         title: "Dashboard",
         bookings: "Bookings",
         logout: "Logout"
-      }
+      },
+      bookings: {
+        title: "Bookings Management",
+        completion: "Booking Completion",
+        dailyLimit: "Daily Places Limit",
+        updateLimit: "Update",
+        currentLimit: "Current limit:",
+        places: "places",
+        noBookings: "No bookings for this date",
+        loading: "Loading...",
+        tableHeaders: {
+          name: "Name",
+          email: "Email",
+          phone: "Phone",
+          people: "People",
+          status: "Status",
+          payment: "Payment",
+          requests: "Special Requests",
+        },
+        status: {
+          confirmed: "Confirmed",
+          pending: "Pending",
+        },
+        payment: {
+          paid: "Paid",
+          unpaid: "Unpaid",
+        },
+      },
     }
   },
   es: {
@@ -962,7 +1016,34 @@ export const languages: Record<string, LanguageData> = {
         title: "Panel de Control",
         bookings: "Reservas",
         logout: "Cerrar Sesión"
-      }
+      },
+      bookings: {
+        title: "Gestión de Reservas",
+        completion: "Completado de Reservas",
+        dailyLimit: "Límite Diario de Plazas",
+        updateLimit: "Actualizar",
+        currentLimit: "Límite actual:",
+        places: "plazas",
+        noBookings: "No hay reservas para esta fecha",
+        loading: "Cargando...",
+        tableHeaders: {
+          name: "Nombre",
+          email: "Email",
+          phone: "Teléfono",
+          people: "Personas",
+          status: "Estado",
+          payment: "Pago",
+          requests: "Peticiones Especiales",
+        },
+        status: {
+          confirmed: "Confirmado",
+          pending: "Pendiente",
+        },
+        payment: {
+          paid: "Pagado",
+          unpaid: "No Pagado",
+        },
+      },
     }
   },
 };

@@ -1,7 +1,7 @@
 import { useAuth } from "~/context/auth.context";
-import { AdminDashboardUI } from "~/components/ui/AdminDashboardUI";
+import { AdminDashboardLayout } from "~/components/ui/AdminDashboardLayout";
 
 export const AdminDashboardFeature = () => {
   const { handleLogout, strings } = useAuth();
-  return <AdminDashboardUI onLogout={handleLogout} strings={strings.en} />;
+  return <AdminDashboardLayout onLogout={handleLogout} strings={strings.en} />;
 };
