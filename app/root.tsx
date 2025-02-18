@@ -1,14 +1,13 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
-import "./tailwind.css";
+import "./styles/globals.css";
 import { LoaderFunction } from "@remix-run/node";
 import { languageCookie } from "~/utils/cookies";
 import { languages } from "~/data/data";
-import { json } from "@remix-run/react";
+import { json } from "@remix-run/node";
 import Nav from "~/components/layout/nav";
 import Footer from "./components/layout/footer";
 import ArrowToTop from "./components/_index/ArrowToTop";
-import { useLoaderData } from "@remix-run/react";
 import { LanguageContextProvider } from "~/providers/LanguageContext";
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -29,32 +28,42 @@ export const links: LinksFunction = () => [
     rel: "stylesheet",
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
+  {
+    rel: "apple-touch-icon",
+    href: "/apple-touch-icon.png",
+  },
+  {
+    rel: "apple-touch-icon-precomposed",
+    href: "/apple-touch-icon-precomposed.png",
+  },
+  {
+    rel: "icon",
+    type: "image/x-icon",
+    href: "/favicon.ico",
+  },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export default function App() {
   const { initialLanguage } = useLoaderData<typeof loader>();
+
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="h-full bg-background text-foreground">
         <LanguageContextProvider initialState={initialLanguage}>
           <ArrowToTop />
           <Nav />
-          {children}
-          <ScrollRestoration />
-          <Scripts />
+          <Outlet />
           <Footer />
         </LanguageContextProvider>
+        <ScrollRestoration />
+        <Scripts />
       </body>
     </html>
   );
-}
-
-export default function App() {
-  return <Outlet />;
 }

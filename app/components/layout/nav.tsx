@@ -1,7 +1,6 @@
 // app/components/layout/nav.tsx
-import { useState } from "react";
-import { useWindowSize } from "@uidotdev/usehooks";
-import { Menu, ArrowRightToLine, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, ArrowRightToLine, ChevronDown, Settings } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import { useFetcher, Link, useLocation } from "@remix-run/react";
@@ -13,11 +12,32 @@ const Nav: React.FC = () => {
   const currentLanguage = state.currentLanguage;
   const flag = state.flag;
   const location = useLocation();
-  const size = useWindowSize();
-  const width = size.width ?? 0;
-  const height = size.height ?? 0;
+  const [clientWidth, setClientWidth] = useState(0);
+  const [clientHeight, setClientHeight] = useState(0);
   const [mobileNavOpen, setMobileNavOpen] = useState<boolean>(false);
   const [isToursOpen, setIsToursOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const updateSize = () => {
+      setClientWidth(window.innerWidth);
+      setClientHeight(window.innerHeight);
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
+  // Don't show nav on admin dashboard routes
+  if (location.pathname.includes('/admindashboard')) {
+    return null;
+  }
+
+  // Only render content after component is mounted on client
+  if (!isMounted) {
+    return null;
+  }
 
   const handleChange = (selectedLanguage: string) => {
     dispatch({ type: "changeLanguage", payload: selectedLanguage });
@@ -30,13 +50,13 @@ const Nav: React.FC = () => {
 
   return (
     <>
-      {width >= 1280 ? (
+      {clientWidth >= 1280 ? (
         <div className="w-[95%] max-w-[920px] flex flex-row justify-between items-center h-[100px] backdrop-blur-xl mx-auto p-4 absolute top-5 left-0 right-0 z-[90] bg-black/15 rounded-2xl border border-white/20">
           <div className="w-[45px]" />
           <img 
             src="/logonuevoolga3.png" 
             alt="Olga Travel" 
-            className={` ${width < 380 ? "h-[20px]" : "h-[100px]"} py-3 absolute left-1/2 -translate-x-1/2 w-auto`}
+            className={` ${clientWidth < 380 ? "h-[20px]" : "h-[100px]"} py-3 absolute left-1/2 -translate-x-1/2 w-auto`}
           />
           <Menu 
             className="text-white cursor-pointer hover:text-blue-200 transition-colors" 
@@ -49,16 +69,13 @@ const Nav: React.FC = () => {
           <img 
             src="/logonuevoolga3.png" 
             alt="Olga Travel" 
-            className={` ${width < 380 ? "h-[50px]" : width < 450 ? "h-[60px]" :  width < 500 ? "h-[70px]" : "h-[80px]"}`}
+            className={` ${clientWidth < 380 ? "h-[50px]" : clientWidth < 450 ? "h-[60px]" :  clientWidth < 500 ? "h-[70px]" : "h-[80px]"}`}
           />
-          <div className="flex items-center gap-4">
-           
-            <Menu 
-              className="text-white cursor-pointer hover:text-blue-200 transition-colors z-[990]" 
-              size={45} 
-              onClick={() => setMobileNavOpen(true)} 
-            />
-          </div>
+          <Menu 
+            className="text-white cursor-pointer hover:text-blue-200 transition-colors z-[990]" 
+            size={45} 
+            onClick={() => setMobileNavOpen(true)} 
+          />
         </div>
       )}
 
@@ -78,7 +95,7 @@ const Nav: React.FC = () => {
               alt="Olga Travel" 
               className="h-[80px]" 
             />
-            <div className={`h-full flex flex-col justify-start items-start w-full ${height <= 570 ? "justify-between" : "justify-start gap-14"}`}>
+            <div className={`h-full flex flex-col justify-start items-start w-full ${clientHeight <= 570 ? "justify-between" : "justify-start gap-14"}`}>
               <Select onValueChange={handleChange}>
                 <SelectTrigger className="w-[180px] bg-blue-50 flex flex-row justify-evenly">
                   <p className="text-2xl">{flag}</p>
@@ -125,7 +142,7 @@ const Nav: React.FC = () => {
                       className={`
                         font-sans transition-all ease-in-out duration-300 
                         group font-semibold no-underline relative decoration-none
-                        ${width <= 350 ? "text-lg" : "text-xl"} 
+                        ${clientWidth <= 350 ? "text-lg" : "text-xl"} 
                         ${isActive ? "text-blue-50 hover:text-white hover:no-underline" : "text-blue-50 hover:text-white hover:no-underline"}
                       `}
                     >
@@ -142,11 +159,21 @@ const Nav: React.FC = () => {
                 return null;
               })}
             </div>
-            <ArrowRightToLine 
-              className="text-blue-950 bg-blue-50 rounded-3xl py-4 px-0 mx-auto cursor-pointer hover:bg-blue-100 transition-colors" 
-              size={80} 
-              onClick={() => setMobileNavOpen(false)} 
-            />
+            <div className="w-full flex justify-between items-center">
+              <ArrowRightToLine 
+                className="text-blue-950 bg-blue-50 rounded-3xl py-4 px-0 cursor-pointer hover:bg-blue-100 transition-colors" 
+                size={80} 
+                onClick={() => setMobileNavOpen(false)} 
+              />
+              <Link 
+                to="/admin-login"
+                className="text-blue-950 bg-blue-50 rounded-3xl p-4 cursor-pointer hover:bg-blue-100 transition-colors"
+                aria-label="Admin Login"
+                onClick={handleLinkClick}
+              >
+                <Settings size={30} />
+              </Link>
+            </div>
           </div>
         </div>
       )}

@@ -54,7 +54,7 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
           className={`
             w-full max-w-[620px] min-h-[300px] 
             flex flex-col justify-center items-center gap-6 
-            ${width <= 1280 ? "p-4 -mt-16" : "p-6"} 
+            ${width <= 1280 ? "p-4 -mt-16" : "p-6 -mt-28"} 
           `}
         >
           <motion.div

@@ -1,4 +1,5 @@
 // Feature component: just responsible for containing UI components, fetch data and handle features and pass down props to UI components.
+import { useState, useEffect } from "react";
 import HeroSection from "./HeroSection";
 import IndexSection2 from "./IndexSection2";
 import IndexSection3 from "./IndexSection3";
@@ -9,16 +10,15 @@ import SanJuanSection2 from "../_sanjuan/SanJuanSection2";
 import SanJuanSection3 from "../_sanjuan/SanJuanSection3";
 import SanJuanSection5 from "../_sanjuan/SanJuanSection5";
 import SanJuanSection6 from "../_sanjuan/SanJuanSection6";
-import { useWindowSize } from "@uidotdev/usehooks";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import FloatingButton from '../ui/FloatingButton';
 import { TimelineFeature } from "./TimelineFeature";
 import IndexSection6 from "./IndexSection6";
 
 const IndexContainer: React.FC = () => {
-  const size = useWindowSize();
-  const width = size.width ?? 0;
-  const height = size.height ?? 0;
+  const [clientWidth, setClientWidth] = useState(0);
+  const [clientHeight, setClientHeight] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
   const { state } = useLanguageContext();
   const heroSectionText = state.index.heroSection;
   // const indexSection1Text = state.index.indexSection1;
@@ -33,19 +33,35 @@ const IndexContainer: React.FC = () => {
   const SanJuanSection5Text = state.sanjuan.sanJuanSection5;
   const SanJuanSection6Text = state.sanjuan.sanJuanSection6;
   const floatingButtonText = state.common.bookNow;
+
+  useEffect(() => {
+    setIsMounted(true);
+    const updateSize = () => {
+      setClientWidth(window.innerWidth);
+      setClientHeight(window.innerHeight);
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn">
-        <HeroSection width={width} height={height} heroSectionText={heroSectionText} />
-      <IndexSection5 width={width} indexSection5Text={indexSection5Text} />
-      <SanJuanSection2 width={width} height={height} SanJuanSection2Text={SanJuanSection2Text} />
-      <SanJuanSection1 width={width} sanJuanSection1Text={sanJuanSection1Text} />
-      <SanJuanSection3 width={width} />
-      <SanJuanSection5 width={width} SanJuanSection5Text={SanJuanSection5Text} />
+      <HeroSection width={clientWidth} height={clientHeight} heroSectionText={heroSectionText} />
+      <IndexSection5 width={clientWidth} indexSection5Text={indexSection5Text} />
+      <SanJuanSection2 width={clientWidth} height={clientHeight} SanJuanSection2Text={SanJuanSection2Text} />
+      <SanJuanSection1 width={clientWidth} sanJuanSection1Text={sanJuanSection1Text} />
+      <SanJuanSection3 width={clientWidth} />
+      <SanJuanSection5 width={clientWidth} SanJuanSection5Text={SanJuanSection5Text} />
       <TimelineFeature />
-      <IndexFeatures width={width} indexFeatures={indexFeatures} />
-      <SanJuanSection6 width={width} SanJuanSection6Text={SanJuanSection6Text} />
-      <IndexSection3 width={width} indexSection3Text={indexSection3Text} />
-      <IndexSection2 width={width} height={height} indexSection2Text={indexSection2Text} carouselIndexSection2={carouselIndexSection2} />
+      <IndexFeatures width={clientWidth} indexFeatures={indexFeatures} />
+      <SanJuanSection6 width={clientWidth} SanJuanSection6Text={SanJuanSection6Text} />
+      <IndexSection3 width={clientWidth} indexSection3Text={indexSection3Text} />
+      <IndexSection2 width={clientWidth} height={clientHeight} indexSection2Text={indexSection2Text} carouselIndexSection2={carouselIndexSection2} />
       <FloatingButton text={floatingButtonText} />
       <IndexSection6 />
     </div>

@@ -19,7 +19,7 @@ export const BookingProgress = ({ currentStep }: BookingProgressProps) => {
             <div className="relative">
               <div
                 className={cn(
-                  "w-10 h-10 flex items-center justify-center rounded-full border-2",
+                  "w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 flex items-center justify-center rounded-full border-2 text-xs sm:text-sm md:text-base lg:text-base",
                   currentStep >= step.number
                     ? "bg-primary border-primary text-white"
                     : "border-gray-300 text-gray-500"
@@ -27,14 +27,15 @@ export const BookingProgress = ({ currentStep }: BookingProgressProps) => {
               >
                 {step.number}
               </div>
-              <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-sm">
+              <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[12px] sm:text-xs md:text-sm">
                 {step.label}
               </span>
             </div>
             {index < steps.length - 1 && (
               <div
                 className={cn(
-                  "w-24 h-0.5 mx-2",
+                  "h-0.5 mx-1 sm:mx-1.5 md:mx-2 lg:mx-3",
+                  "w-24 sm:w-32 md:w-44 lg:w-44",
                   currentStep > step.number ? "bg-primary" : "bg-gray-300"
                 )}
               />
