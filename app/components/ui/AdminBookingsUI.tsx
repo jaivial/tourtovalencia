@@ -70,8 +70,45 @@ export const AdminBookingsUI = ({
 
   return (
     <div className="p-8 space-y-6 bg-gray-100 min-h-screen">
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Statistics Cards and Calendar Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="flex flex-col">
+          <CardHeader>
+            <CardTitle>Select Date</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 flex items-center justify-center p-0">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => date && onDateChange(date)}
+              className="w-full"
+              classNames={{
+                months: "w-full space-y-4",
+                month: "w-full space-y-4",
+                table: "w-full border-collapse space-y-1",
+                head_row: "flex w-full",
+                head_cell: "text-muted-foreground rounded-md w-full font-normal text-center",
+                row: "flex w-full mt-2",
+                cell: "text-center relative p-0 text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md h-9 w-full",
+                day: "h-9 w-9 p-0 font-normal text-center mx-auto flex items-center justify-center aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
+                day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                day_today: "bg-accent text-accent-foreground",
+                day_outside: "text-muted-foreground opacity-50",
+                day_disabled: "text-muted-foreground opacity-50",
+                day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                day_hidden: "invisible",
+                nav: "space-x-1 flex items-center justify-center",
+                nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 flex items-center justify-center",
+                nav_button_previous: "absolute left-1",
+                nav_button_next: "absolute right-1",
+                caption: "relative flex items-center justify-center py-2 border-b",
+                caption_label: "text-sm font-medium",
+                caption_dropdowns: "flex space-x-2",
+              }}
+            />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Booking Completion</CardTitle>
@@ -132,16 +169,6 @@ export const AdminBookingsUI = ({
           </CardContent>
         </Card>
       </div>
-
-      {/* Date Selection */}
-      <Card className="p-4">
-        <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={(date) => date && onDateChange(date)}
-          className="rounded-md border"
-        />
-      </Card>
 
       {/* Bookings Table */}
       <Card>

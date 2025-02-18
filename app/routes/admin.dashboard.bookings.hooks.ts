@@ -5,7 +5,7 @@ type Booking = {
   _id: string;
   name: string;
   email: string;
-  date: string;
+  date: Date;
   tourType: string;
   numberOfPeople: number;
   status: string;
@@ -31,13 +31,23 @@ export const useStates = (props: any) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/bookings?date=${date.toISOString().split('T')[0]}`);
+      const formattedDate = date.toISOString().split('T')[0];
+      console.log('Fetching bookings for date:', formattedDate);
+      
+      const response = await fetch(`/api/bookings?date=${formattedDate}`);
       if (!response.ok) throw new Error('Failed to fetch bookings');
+      
       const data = await response.json();
-      setBookings(data.bookings);
+      const bookingsWithDates = data.bookings.map((booking: any) => ({
+        ...booking,
+        date: new Date(booking.date)
+      }));
+      
+      setBookings(bookingsWithDates);
       setBookingLimit(data.limit);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Error fetching bookings:', err);
     } finally {
       setIsLoading(false);
     }
@@ -50,16 +60,21 @@ export const useStates = (props: any) => {
 
   const handleUpdateMaxBookings = async (newMax: number) => {
     setIsLoading(true);
+    setError(null);
     try {
-      const response = await fetch('/api/bookings/limit', {
+      const response = await fetch('/api/booking-limits', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           date: selectedDate.toISOString().split('T')[0],
-          maxBookings: newMax
-        })
+          maxBookings: newMax,
+        }),
       });
+      
       if (!response.ok) throw new Error('Failed to update booking limit');
+      
       const data = await response.json();
       setBookingLimit(data);
     } catch (err) {

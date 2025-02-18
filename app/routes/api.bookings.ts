@@ -1,5 +1,6 @@
 import { json } from "@remix-run/node";
 import { getDb } from "~/utils/db.server";
+import { ObjectId } from "mongodb";
 
 export async function loader({ request }: { request: Request }) {
   const url = new URL(request.url);
@@ -25,25 +26,47 @@ export async function loader({ request }: { request: Request }) {
       endDate: endDate.toISOString()
     });
 
-    // First, let's see what documents we have in the collection
-    const sampleBooking = await db.collection("bookings").findOne({});
-    console.log('Sample booking document:', JSON.stringify(sampleBooking, null, 2));
+    // Verify database connection
+    const collections = await db.collections();
+    const collectionNames = collections.map(c => c.collectionName);
+    console.log('Available collections:', collectionNames);
 
-    const query = {
-      date: {
-        $gte: startDate,
-        $lte: endDate
-      }
-    };
-    console.log('MongoDB query:', JSON.stringify(query, null, 2));
+    // Ensure bookings collection exists
+    if (!collectionNames.includes('bookings')) {
+      console.log('Creating bookings collection...');
+      await db.createCollection('bookings');
+    }
 
-    const bookings = await db.collection("bookings").find(query).toArray();
+    // Get bookings for the selected date
+    const bookings = await db.collection("bookings")
+      .find({
+        date: {
+          $gte: startDate,
+          $lte: endDate
+        }
+      })
+      .toArray();
 
     console.log('Found bookings:', bookings.length);
+    
     if (bookings.length === 0) {
-      // Let's check all bookings to see their dates
-      const allBookings = await db.collection("bookings").find({}, { projection: { date: 1 } }).toArray();
-      console.log('All booking dates in system:', JSON.stringify(allBookings, null, 2));
+      // Let's check what bookings we have in the system
+      const allBookings = await db.collection("bookings")
+        .find({})
+        .project({ date: 1, name: 1, status: 1 })
+        .toArray();
+      
+      console.log('All bookings in system:', JSON.stringify(allBookings, null, 2));
+      
+      // Get a sample booking to verify data structure
+      const sampleBooking = await db.collection("bookings").findOne({});
+      console.log('Sample booking:', JSON.stringify(sampleBooking, null, 2));
+    }
+
+    // Ensure bookingLimits collection exists
+    if (!collectionNames.includes('bookingLimits')) {
+      console.log('Creating bookingLimits collection...');
+      await db.createCollection('bookingLimits');
     }
 
     const bookingLimit = await db.collection("bookingLimits").findOne({
@@ -52,6 +75,12 @@ export async function loader({ request }: { request: Request }) {
         $lte: endDate
       }
     });
+
+    // Ensure payments collection exists
+    if (!collectionNames.includes('payments')) {
+      console.log('Creating payments collection...');
+      await db.createCollection('payments');
+    }
 
     const payments = await db.collection("payments").find({
       bookingId: {
@@ -70,6 +99,9 @@ export async function loader({ request }: { request: Request }) {
     });
   } catch (error) {
     console.error("Error fetching bookings:", error);
-    return json({ error: "Failed to fetch bookings" }, { status: 500 });
+    return json({ 
+      error: "Failed to fetch bookings",
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }
