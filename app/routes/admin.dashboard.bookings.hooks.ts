@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "@remix-run/react";
+import { useState } from "react";
 
 type Booking = {
   _id: string;
@@ -19,21 +18,25 @@ type BookingLimit = {
   currentBookings: number;
 };
 
-export const useStates = (props: any) => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [bookingLimit, setBookingLimit] = useState<BookingLimit>({ maxBookings: 20, currentBookings: 0 });
+type StatesProps = {
+  initialBookings: Booking[];
+  initialLimit: BookingLimit;
+  initialDate: Date;
+};
+
+export const useStates = ({ initialBookings, initialLimit, initialDate }: StatesProps) => {
+  const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
+  const [bookings, setBookings] = useState<Booking[]>(initialBookings);
+  const [bookingLimit, setBookingLimit] = useState<BookingLimit>(initialLimit);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const [maxBookings, setMaxBookings] = useState(initialLimit.maxBookings);
 
   const fetchBookings = async (date: Date) => {
     setIsLoading(true);
     setError(null);
     try {
-      // Ensure we're using local timezone for the date
-      const localDate = new Date(date);
-      const formattedDate = localDate.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+      const formattedDate = date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
       console.log('Fetching bookings for date:', formattedDate);
       
       const response = await fetch(`/api/bookings?date=${formattedDate}`);
@@ -47,6 +50,7 @@ export const useStates = (props: any) => {
       
       setBookings(bookingsWithDates);
       setBookingLimit(data.limit);
+      setMaxBookings(data.limit.maxBookings);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       console.error('Error fetching bookings:', err);
@@ -55,40 +59,47 @@ export const useStates = (props: any) => {
     }
   };
 
-  const handleDateChange = (date: Date) => {
-    setSelectedDate(date);
-    fetchBookings(date);
+  const handleMaxBookingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value >= 0) {
+      setMaxBookings(value);
+    }
   };
 
-  const handleUpdateMaxBookings = async (newMax: number) => {
+  const handleUpdateClick = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/booking-limits', {
+      const formattedDate = selectedDate.toLocaleDateString('en-CA');
+      const response = await fetch(`/api/bookings/limit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          date: selectedDate.toISOString().split('T')[0],
-          maxBookings: newMax,
+          date: formattedDate,
+          maxBookings,
         }),
       });
-      
+
       if (!response.ok) throw new Error('Failed to update booking limit');
       
       const data = await response.json();
-      setBookingLimit(data);
+      setBookingLimit(data.limit);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Error updating booking limit:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchBookings(selectedDate);
-  }, []);
+  const onDateChange = (date: Date) => {
+    setSelectedDate(date);
+    fetchBookings(date);
+  };
+
+  const completionPercentage = Math.round((bookingLimit.currentBookings / bookingLimit.maxBookings) * 100);
 
   return {
     selectedDate,
@@ -96,8 +107,10 @@ export const useStates = (props: any) => {
     bookingLimit,
     isLoading,
     error,
-    handleDateChange,
-    handleUpdateMaxBookings,
-    ...props
+    maxBookings,
+    completionPercentage,
+    onDateChange,
+    handleMaxBookingsChange,
+    handleUpdateClick,
   };
 };
