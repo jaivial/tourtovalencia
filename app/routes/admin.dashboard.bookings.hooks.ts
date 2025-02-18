@@ -31,7 +31,9 @@ export const useStates = (props: any) => {
     setIsLoading(true);
     setError(null);
     try {
-      const formattedDate = date.toISOString().split('T')[0];
+      // Ensure we're using local timezone for the date
+      const localDate = new Date(date);
+      const formattedDate = localDate.toLocaleDateString('en-CA'); // YYYY-MM-DD format
       console.log('Fetching bookings for date:', formattedDate);
       
       const response = await fetch(`/api/bookings?date=${formattedDate}`);

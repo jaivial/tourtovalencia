@@ -13,12 +13,12 @@ export async function loader({ request }: { request: Request }) {
   try {
     const db = await getDb();
     
-    // Create date objects for the start and end of the selected day in UTC
+    // Create date objects for the start and end of the selected day in local timezone
     const startDate = new Date(date);
-    startDate.setUTCHours(0, 0, 0, 0);
+    startDate.setHours(0, 0, 0, 0);
     
     const endDate = new Date(date);
-    endDate.setUTCHours(23, 59, 59, 999);
+    endDate.setHours(23, 59, 59, 999);
 
     console.log('Input date:', date);
     console.log('Query date range:', {
