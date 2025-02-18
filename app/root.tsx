@@ -1,17 +1,14 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation, useLoaderData } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
-import "./tailwind.css";
+import "./styles/globals.css";
 import { LoaderFunction } from "@remix-run/node";
 import { languageCookie } from "~/utils/cookies";
 import { languages } from "~/data/data";
-import { json } from "@remix-run/react";
+import { json } from "@remix-run/node";
 import Nav from "~/components/layout/nav";
 import Footer from "./components/layout/footer";
 import ArrowToTop from "./components/_index/ArrowToTop";
 import { LanguageContextProvider } from "~/providers/LanguageContext";
-import { ChakraProvider } from "@chakra-ui/react";
-import { ColorModeScript } from "@chakra-ui/color-mode";
-import theme from "~/theme";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
@@ -31,31 +28,39 @@ export const links: LinksFunction = () => [
     rel: "stylesheet",
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
+  {
+    rel: "apple-touch-icon",
+    href: "/apple-touch-icon.png",
+  },
+  {
+    rel: "apple-touch-icon-precomposed",
+    href: "/apple-touch-icon-precomposed.png",
+  },
+  {
+    rel: "icon",
+    type: "image/x-icon",
+    href: "/favicon.ico",
+  },
 ];
 
 export default function App() {
   const { initialLanguage } = useLoaderData<typeof loader>();
-  const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin-');
 
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
-      <body>
-        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-        <ChakraProvider theme={theme}>
-          <LanguageContextProvider initialState={initialLanguage}>
-            <ArrowToTop />
-            {!isAdminRoute && <Nav />}
-            <Outlet />
-            {!isAdminRoute && <Footer />}
-          </LanguageContextProvider>
-        </ChakraProvider>
+      <body className="h-full bg-background text-foreground">
+        <LanguageContextProvider initialState={initialLanguage}>
+          <ArrowToTop />
+          <Nav />
+          <Outlet />
+          <Footer />
+        </LanguageContextProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

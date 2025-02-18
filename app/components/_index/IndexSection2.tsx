@@ -82,7 +82,7 @@ const IndexSection2: React.FC<ChildProps> = ({ width, indexSection2Text, carouse
         >
           <Carousel 
             autoplay 
-            shape="none"
+            shape="dot"
             autoplayInterval={3500} 
             className="custom-slider" 
             style={{ 

@@ -35,6 +35,18 @@ const TableBody = React.forwardRef<
 ));
 TableBody.displayName = "TableBody";
 
+const TableCaption = React.forwardRef<
+  HTMLTableCaptionElement,
+  React.HTMLAttributes<HTMLTableCaptionElement>
+>(({ className, ...props }, ref) => (
+  <caption
+    ref={ref}
+    className={cn("mt-4 text-sm text-muted-foreground", className)}
+    {...props}
+  />
+));
+TableCaption.displayName = "TableCaption";
+
 const TableRow = React.forwardRef<
   HTMLTableRowElement,
   React.HTMLAttributes<HTMLTableRowElement>
@@ -81,7 +93,8 @@ export {
   Table,
   TableHeader,
   TableBody,
+  TableCaption,
   TableRow,
   TableHead,
   TableCell,
-}; 
+};

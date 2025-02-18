@@ -1,26 +1,31 @@
-import React, { createContext, useContext } from "react";
-import { useBookingsStates } from "~/hooks/useBookingsStates";
+import { createContext, useContext, ReactNode } from 'react';
 
-type BookingsContextType = {
-  state: ReturnType<typeof useBookingsStates>;
-};
+interface BookingsContextType {
+  // Add any booking-related state and functions here
+  // For example:
+  // updateBookingStatus: (bookingId: string, status: string) => Promise<void>;
+}
 
 const BookingsContext = createContext<BookingsContextType | undefined>(undefined);
 
-export const BookingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const state = useBookingsStates();
+export function BookingsProvider({ children }: { children: ReactNode }) {
+  // Add booking-related state and functions here
+
+  const value = {
+    // Add the state and functions to the context value
+  };
 
   return (
-    <BookingsContext.Provider value={{ state }}>
+    <BookingsContext.Provider value={value}>
       {children}
     </BookingsContext.Provider>
   );
-};
+}
 
-export const useBookingsContext = () => {
+export function useBookings() {
   const context = useContext(BookingsContext);
   if (context === undefined) {
-    throw new Error("useBookingsContext must be used within a BookingsProvider");
+    throw new Error('useBookings must be used within a BookingsProvider');
   }
   return context;
-}; 
+}
