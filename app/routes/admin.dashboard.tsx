@@ -1,7 +1,8 @@
-import { json, redirect } from "@remix-run/node";
+import { json, redirect, Outlet } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { AuthProvider } from "~/context/auth.context";
 import { AdminDashboardFeature } from "~/components/features/AdminDashboardFeature";
+import { AdminDashboardLayout } from "~/components/ui/AdminDashboardLayout";
 import { languages } from "~/data/data";
 
 export const loader = async ({ request }: { request: Request }) => {
@@ -20,9 +21,25 @@ export const loader = async ({ request }: { request: Request }) => {
 
 export default function AdminDashboardRoute() {
   const data = useLoaderData<typeof loader>();
+
+  const handleLogout = () => {
+    // Implement logout logic
+  };
+
+  const strings = {
+    title: "Olga Travel Admin",
+    bookings: "Bookings",
+    logout: "Logout"
+  };
+
   return (
     <AuthProvider {...data}>
-      <AdminDashboardFeature />
+      <AdminDashboardLayout
+        onLogout={handleLogout}
+        strings={strings}
+      >
+        <Outlet />
+      </AdminDashboardLayout>
     </AuthProvider>
   );
 }
