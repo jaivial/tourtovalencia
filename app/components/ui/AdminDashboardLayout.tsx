@@ -1,11 +1,10 @@
-import { Link, Outlet, useLocation } from "@remix-run/react";
+import { Link, useLocation, Outlet } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
-import { BookOpenCheck, LogOut } from "lucide-react";
+import { BookOpenCheck, LogOut, Home, Calendar } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { MobileNav } from "./MobileNav";
-import { Home, Calendar } from "lucide-react";
 
-type AdminDashboardLayoutProps = {
+export type AdminDashboardLayoutProps = {
   onLogout: () => void;
   strings: {
     title: string;
@@ -14,7 +13,7 @@ type AdminDashboardLayoutProps = {
   };
 };
 
-export const AdminDashboardLayout = ({ onLogout, strings, children }: AdminDashboardLayoutProps) => {
+export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayoutProps) {
   const location = useLocation();
   const isBookingsActive = location.pathname.includes('/admin/dashboard/bookings');
 
@@ -108,4 +107,4 @@ export const AdminDashboardLayout = ({ onLogout, strings, children }: AdminDashb
       </main>
     </div>
   );
-};
+}
