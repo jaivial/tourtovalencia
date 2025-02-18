@@ -1,4 +1,4 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useLocation } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import "./styles/globals.css";
 import { LoaderFunction } from "@remix-run/node";
@@ -45,6 +45,8 @@ export const links: LinksFunction = () => [
 
 export default function App() {
   const { initialLanguage } = useLoaderData<typeof loader>();
+  const location = useLocation();
+  const isAdminDashboard = location.pathname.includes('/admin/dashboard');
 
   return (
     <html lang="en" className="h-full">
@@ -59,7 +61,7 @@ export default function App() {
           <ArrowToTop />
           <Nav />
           <Outlet />
-          <Footer />
+          {!isAdminDashboard && <Footer />}
         </LanguageContextProvider>
         <ScrollRestoration />
         <Scripts />

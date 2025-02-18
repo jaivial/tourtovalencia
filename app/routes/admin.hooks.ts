@@ -28,17 +28,18 @@ export const useStates = (props: any) => {
     return false;
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsAuthenticated(false);
     localStorage.removeItem("isAuthenticated");
-    navigate("/admin");
+    await Promise.resolve();
+    navigate("/");
   };
 
   return {
     isAuthenticated,
     handleLogin,
     handleLogout,
-    ...props
+    ...props,
   };
 };
 

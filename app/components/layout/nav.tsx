@@ -142,14 +142,6 @@ const Nav: React.FC = () => {
                     {link.linkText}
                   </Link>
                 ))}
-                <Link
-                  to="/admin"
-                  onClick={handleLinkClick}
-                  className="text-white text-2xl hover:text-blue-200 transition-colors flex items-center gap-2"
-                >
-                  <Settings size={24} />
-                  Admin
-                </Link>
               </div>
             </div>
             <div className="w-full flex justify-between items-center">
@@ -158,6 +150,14 @@ const Nav: React.FC = () => {
                 size={80} 
                 onClick={() => setMobileNavOpen(false)} 
               />
+              <Link
+                to="/admin"
+                onClick={handleLinkClick}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-900 hover:bg-blue-950 rounded-lg transition-colors"
+              >
+                <Settings size={20} className="text-blue-100" />
+                <span className="text-blue-100 text-lg font-medium">Admin</span>
+              </Link>
             </div>
           </div>
         </div>
