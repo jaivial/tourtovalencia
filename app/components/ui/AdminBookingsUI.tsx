@@ -162,7 +162,7 @@ export const AdminBookingsUI = ({
               <CardTitle className="text-lg sm:text-xl text-primary">Daily Places Limit</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 flex items-center justify-center p-6">
-              <div className="w-full space-y-4">
+              <div className="w-full max-w-xs mx-auto space-y-4">
                 <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
                   <Input
                     type="number"
@@ -170,6 +170,7 @@ export const AdminBookingsUI = ({
                     onChange={handleMaxBookingsChange}
                     min="0"
                     className="w-full sm:w-32 text-center"
+                    aria-label="Maximum bookings per day"
                   />
                   <Button 
                     onClick={handleUpdateClick}
