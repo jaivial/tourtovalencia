@@ -30,7 +30,7 @@ const Nav: React.FC = () => {
   }, []);
 
   // Don't show nav on admin dashboard routes
-  if (location.pathname.includes('/admindashboard')) {
+  if (location.pathname.includes('/admin/dashboard')) {
     return null;
   }
 
@@ -131,33 +131,26 @@ const Nav: React.FC = () => {
               </div>
 
               {/* Regular Nav Links */}
-              {navLinks.map((item) => {
-                if (item.linkText !== "Tours") {
-                  const isActive = location.pathname === item.path;
-                  return (
-                    <Link 
-                      key={item.linkText} 
-                      to={item.path} 
-                      onClick={handleLinkClick}
-                      className={`
-                        font-sans transition-all ease-in-out duration-300 
-                        group font-semibold no-underline relative decoration-none
-                        ${clientWidth <= 350 ? "text-lg" : "text-xl"} 
-                        ${isActive ? "text-blue-50 hover:text-white hover:no-underline" : "text-blue-50 hover:text-white hover:no-underline"}
-                      `}
-                    >
-                      {item.linkText}
-                      {!isActive && (
-                        <span className="absolute left-0 bottom-[-5px] w-0 h-[5px] bg-white transition-all duration-300 group-hover:w-full"></span>
-                      )}
-                      {isActive && (
-                        <span className="absolute left-0 bottom-[-5px] h-[5px] bg-white transition-all duration-300 w-full"></span>
-                      )}
-                    </Link>
-                  );
-                }
-                return null;
-              })}
+              <div className="flex flex-col gap-6">
+                {navLinks.map((link, index) => (
+                  <Link
+                    key={index}
+                    to={link.path}
+                    onClick={handleLinkClick}
+                    className="text-white text-2xl hover:text-blue-200 transition-colors"
+                  >
+                    {link.linkText}
+                  </Link>
+                ))}
+                <Link
+                  to="/admin"
+                  onClick={handleLinkClick}
+                  className="text-white text-2xl hover:text-blue-200 transition-colors flex items-center gap-2"
+                >
+                  <Settings size={24} />
+                  Admin
+                </Link>
+              </div>
             </div>
             <div className="w-full flex justify-between items-center">
               <ArrowRightToLine 
@@ -165,14 +158,6 @@ const Nav: React.FC = () => {
                 size={80} 
                 onClick={() => setMobileNavOpen(false)} 
               />
-              <Link 
-                to="/admin-login"
-                className="text-blue-950 bg-blue-50 rounded-3xl p-4 cursor-pointer hover:bg-blue-100 transition-colors"
-                aria-label="Admin Login"
-                onClick={handleLinkClick}
-              >
-                <Settings size={30} />
-              </Link>
             </div>
           </div>
         </div>

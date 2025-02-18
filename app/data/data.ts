@@ -134,6 +134,20 @@ export type sanJuanSection3Type = {
   }[];
 };
 
+export type AdminType = {
+  login: {
+    title: string;
+    username: string;
+    password: string;
+    submit: string;
+  };
+  dashboard: {
+    title: string;
+    bookings: string;
+    logout: string;
+  };
+};
+
 export type Index = {
   heroSection: HeroSectionType;
   indexSection1: IndexSection1Type;
@@ -224,6 +238,7 @@ export type LanguageData = {
       moreDetails: string;
     };
   };
+  admin: AdminType;
 };
 
 export const languages: Record<string, LanguageData> = {
@@ -232,7 +247,7 @@ export const languages: Record<string, LanguageData> = {
       { path: "/", linkText: "Home" },
       { path: "/book", linkText: "Book Now" },
     ],
-    flag: "🇺🇸",
+    flag: "",
     currentLanguage: "English",
     index: {
       heroSection: {
@@ -339,7 +354,8 @@ export const languages: Record<string, LanguageData> = {
           country: "Spain",
           date: "June 29, 2024",
           reviewTitle: "Fantastic experience",
-          reviewText: "This experience exceeded my expectations, we had a very fun morning both on the boat inside the caves and during the car ride. Olga is definitely a girl who makes you feel comfortable, it's like traveling with a friend, she's fun and attentive. Thanks for this beautiful adventure, I highly recommend it 100% if you're looking for a different getaway.",
+          reviewText:
+            "This experience exceeded my expectations, we had a very fun morning both on the boat inside the caves and during the car ride. Olga is definitely a girl who makes you feel comfortable, it's like traveling with a friend, she's fun and attentive. Thanks for this beautiful adventure, I highly recommend it 100% if you're looking for a different getaway.",
           reviewLinkSite: "TripAdvisor",
           reviewLink: "https://www.tripadvisor.es/AttractionProductReview-g187529-d27928104-Visit_to_the_Sant_Josep_Caves-Valencia_Province_of_Valencia_Valencian_Community.html",
         },
@@ -573,6 +589,19 @@ export const languages: Record<string, LanguageData> = {
         minParticipants: "Experiences requiring a minimum number of participants will offer an alternative date/experience or full refund if canceled due to insufficient participants",
         moreDetails: "For more details, refer to the cancellation policy"
       }
+    },
+    admin: {
+      login: {
+        title: "Admin Login",
+        username: "Username",
+        password: "Password",
+        submit: "Login"
+      },
+      dashboard: {
+        title: "Dashboard",
+        bookings: "Bookings",
+        logout: "Logout"
+      }
     }
   },
   es: {
@@ -580,7 +609,7 @@ export const languages: Record<string, LanguageData> = {
       { path: "/", linkText: "Inicio" },
       { path: "/book", linkText: "Reservar" },
     ],
-    flag: "🇪🇸",
+    flag: "",
     currentLanguage: "Español",
     index: {
       heroSection: {
@@ -736,7 +765,7 @@ export const languages: Record<string, LanguageData> = {
         firstH3: "¡Excursiones Mediterráneo es fantástico!",
         firstp: "Excursiones Mediterráneo es la empresa líder en descubrir los rincones más fascinantes de Valencia.",
         secondp: "Pasión y dedicación definen cada una de nuestras experiencias. Diseñamos excursiones únicas que conectan a los viajeros con lo mejor de la ciudad: su historia, cultura, gastronomía y paisajes. Cada recorrido está pensado para adaptarse a los deseos de nuestros clientes, ofreciendo un enfoque personalizado.",
-        thirdp: "En Excursiones Mediterráneo, no solo hacemos tours, creamos momentos inolvidables para explorar Valencia como nunca antes.",
+        thirdp: "En Excursiones Mediterráneo, no solo hacemos tours; creamos momentos inolvidables para explorar Valencia como nunca antes.",
         fourthp: "¡Déjanos guiarte por los secretos mejor guardados de esta increíble ciudad!",
       },
       indexSection4: {
@@ -920,6 +949,19 @@ export const languages: Record<string, LanguageData> = {
         weather: "Las experiencias que dependen del clima ofrecerán una fecha alternativa o un reembolso completo si se cancelan debido al mal tiempo",
         minParticipants: "Las experiencias que requieren un número mínimo de participantes ofrecerán una fecha/experiencia alternativa o un reembolso completo si se cancelan debido a participantes insuficientes",
         moreDetails: "Para más detalles, consulte la política de cancelación"
+      }
+    },
+    admin: {
+      login: {
+        title: "Acceso Administrador",
+        username: "Usuario",
+        password: "Contraseña",
+        submit: "Iniciar Sesión"
+      },
+      dashboard: {
+        title: "Panel de Control",
+        bookings: "Reservas",
+        logout: "Cerrar Sesión"
       }
     }
   },
