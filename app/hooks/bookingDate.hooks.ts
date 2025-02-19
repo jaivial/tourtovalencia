@@ -1,7 +1,7 @@
 import { useFetcher } from "@remix-run/react";
 import { useEffect } from "react";
 import type { BookingContextState } from "~/context/BookingContext";
-import type { LoaderData } from "~/routes/book";
+import type { LoaderData } from "~/routes/book._index";
 
 export const useBookingDateActions = (states: BookingContextState) => {
   const fetcher = useFetcher<LoaderData>();
@@ -31,7 +31,7 @@ export const useBookingDateActions = (states: BookingContextState) => {
     });
 
     // Then fetch availability for the selected date
-    fetcher.load(`/book?date=${dateString}`);
+    fetcher.load(`/book?index&date=${dateString}`);
   };
 
   // Update availability when we get new data

@@ -62,7 +62,7 @@ export async function retrievePaymentIntent(paymentIntentId: string) {
   }
 }
 
-export async function createCheckoutSession(booking: BookingFormData) {
+export async function createCheckoutSession(booking: BookingFormData, origin?: string) {
   if (!booking.date) {
     throw new Error("Booking date is required");
   }
@@ -72,6 +72,9 @@ export async function createCheckoutSession(booking: BookingFormData) {
   try {
     // Ensure the date is a string when sending to Stripe
     const date = new Date(booking.date).toISOString();
+
+    // Use the request origin if provided, otherwise fallback to PUBLIC_URL
+    const baseUrl = origin || process.env.PUBLIC_URL || 'http://localhost:5173';
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -89,8 +92,8 @@ export async function createCheckoutSession(booking: BookingFormData) {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.PUBLIC_URL}/book/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.PUBLIC_URL}/book?error=payment-cancelled`,
+      success_url: `${baseUrl}/book/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/book?error=payment-cancelled`,
       metadata: {
         date,
         time: booking.time,

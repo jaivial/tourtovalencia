@@ -1,7 +1,7 @@
 import { json, type ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { useNavigation, Outlet } from "@remix-run/react";
 import { BookingLoading } from "~/components/_book/BookingLoading";
-import { createCheckoutSession, retrieveCheckoutSession } from "~/services/stripe.server";
+import { retrieveCheckoutSession } from "~/services/stripe.server";
 import { createBooking } from "~/services/booking.server";
 import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
@@ -16,29 +16,11 @@ export type ActionData = {
   success?: boolean;
   error?: string;
   booking?: Booking;
-  redirectUrl?: string;
-  sessionId?: string;
 };
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
-
-  if (intent === "create-checkout-session") {
-    try {
-      const bookingData = JSON.parse(formData.get("booking") as string);
-      const { url, sessionId } = await createCheckoutSession(bookingData);
-
-      if (!url) {
-        throw new Error("No redirect URL received from Stripe");
-      }
-
-      return json({ success: true, redirectUrl: url, sessionId });
-    } catch (error) {
-      console.error("Error creating checkout session:", error);
-      return json({ success: false, error: error instanceof Error ? error.message : "Failed to create checkout session" }, { status: 400 });
-    }
-  }
 
   if (intent === "confirm-payment") {
     try {

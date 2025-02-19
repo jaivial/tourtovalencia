@@ -157,7 +157,10 @@ export const useBookingActions = (context: BookingContextState) => {
       formData.append("intent", "create-checkout-session");
       formData.append("booking", JSON.stringify(context.formData));
 
-      fetcher.submit(formData, { method: "POST" });
+      fetcher.submit(formData, { 
+        method: "POST",
+        action: "/book?index"
+      });
     } catch (error) {
       context.setServerError(error instanceof Error ? error.message : "An error occurred");
       context.setIsSubmitting(false);
