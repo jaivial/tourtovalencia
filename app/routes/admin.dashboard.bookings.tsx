@@ -1,23 +1,36 @@
-import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import { AdminBookingsUI } from "~/components/ui/AdminBookingsUI";
-import { useStates } from "./admin.dashboard.bookings.hooks";
+import { json, type LoaderFunction } from "@remix-run/node";
+import { useLoaderData, useSubmit } from "@remix-run/react";
+import { AdminBookingsFeature } from "~/components/features/AdminBookingsFeature";
 import { getDb } from "~/utils/db.server";
-import { getLanguageData } from "~/data/data";
+import { getLocalMidnight, getLocalEndOfDay, formatLocalDate, parseLocalDate } from "~/utils/date";
+import type { LoaderData, BookingData } from "~/types/booking";
 
-export const loader = async () => {
+export const loader: LoaderFunction = async ({ request }) => {
   try {
+    const url = new URL(request.url);
+    const dateParam = url.searchParams.get('date');
+    
+    // Create a date object that represents midnight in the local timezone
+    let selectedDate: Date;
+    if (dateParam) {
+      selectedDate = parseLocalDate(dateParam);
+    } else {
+      // For today, use current local date at midnight
+      selectedDate = getLocalMidnight(new Date());
+    }
+
+    // Ensure the date is valid
+    if (isNaN(selectedDate.getTime())) {
+      throw new Error('Invalid date parameter');
+    }
+
     const db = await getDb();
-    const today = new Date();
 
-    // Create date objects for the start and end of today in local timezone
-    const startDate = new Date(today);
-    startDate.setHours(0, 0, 0, 0);
+    // Create date objects for the start and end of the selected date in local timezone
+    const startDate = selectedDate; // Already at midnight
+    const endDate = getLocalEndOfDay(selectedDate);
 
-    const endDate = new Date(today);
-    endDate.setHours(23, 59, 59, 999);
-
-    // Get bookings for today
+    // Get bookings for selected date
     const bookings = await db
       .collection("bookings")
       .find({
@@ -31,34 +44,41 @@ export const loader = async () => {
     // Get booking limit
     const limitDoc = await db.collection("bookingLimits").findOne({ date: { $gte: startDate, $lte: endDate } });
 
-    const maxBookings = limitDoc?.maxBookings || 20;
-    const currentBookings = bookings.length;
+    const processedBookings: BookingData[] = bookings.map(booking => ({
+      _id: booking._id.toString(),
+      name: booking.name || "",
+      email: booking.email || "",
+      date: booking.date.toISOString(),
+      tourType: booking.tourType || "",
+      numberOfPeople: Number(booking.numberOfPeople) || 1,
+      status: booking.status || "pending",
+      phoneNumber: booking.phoneNumber || "",
+      specialRequests: booking.specialRequests,
+      paid: Boolean(booking.paid),
+    }));
 
-    return json({
-      bookings: bookings.map((booking) => ({
-        _id: booking._id.toString(),
-        name: booking.name || "",
-        email: booking.email || "",
-        date: booking.date.toISOString(),
-        tourType: booking.tourType || "",
-        numberOfPeople: booking.numberOfPeople || 1,
-        status: booking.status || "pending",
-        phoneNumber: booking.phoneNumber || "",
-        specialRequests: booking.specialRequests,
-        paid: booking.paid || false,
-      })),
+    // Format the date as YYYY-MM-DD to avoid timezone issues
+    const formattedDate = formatLocalDate(selectedDate);
+
+    return json<LoaderData>({
+      bookings: processedBookings,
       limit: {
-        maxBookings,
-        currentBookings,
+        maxBookings: Number(limitDoc?.maxBookings) || 20,
+        currentBookings: bookings.length
       },
-      selectedDate: today.toISOString(),
+      selectedDate: formattedDate,
     });
   } catch (error) {
-    console.error("Error in loader:", error);
-    return json({
+    console.error("Error loading bookings:", error);
+    const today = getLocalMidnight(new Date());
+    const formattedDate = formatLocalDate(today);
+    return json<LoaderData>({
       bookings: [],
-      limit: { maxBookings: 20, currentBookings: 0 },
-      selectedDate: new Date().toISOString(),
+      limit: {
+        maxBookings: 20,
+        currentBookings: 0
+      },
+      selectedDate: formattedDate,
       error: "Failed to load bookings",
     });
   }
@@ -66,16 +86,22 @@ export const loader = async () => {
 
 export default function AdminDashboardBookings() {
   const data = useLoaderData<typeof loader>();
-  const states = useStates({
-    initialBookings: data.bookings.map((booking) => ({
-      ...booking,
-      date: new Date(booking.date),
-    })),
-    initialLimit: data.limit,
-    initialDate: new Date(data.selectedDate),
-  });
+  const submit = useSubmit();
 
-  const strings = getLanguageData("es").admin.bookings;
+  const handleDateChange = (date: Date) => {
+    // Format the date as YYYY-MM-DD in local timezone
+    const formattedDate = formatLocalDate(date);
+    
+    // Create a FormData object
+    const formData = new FormData();
+    formData.append('date', formattedDate);
+    
+    // Submit the form with the new date
+    submit(formData, {
+      method: 'get',
+      replace: true
+    });
+  };
 
-  return <AdminBookingsUI {...states} onUpdateMaxBookings={states.handleUpdateClick} strings={strings} />;
+  return <AdminBookingsFeature loaderData={data} onDateChange={handleDateChange} />;
 }

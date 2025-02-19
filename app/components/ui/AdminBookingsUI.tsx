@@ -12,7 +12,7 @@ import {
 } from "~/components/ui/table";
 import { useState } from "react";
 
-type Booking = {
+export type Booking = {
   _id: string;
   name: string;
   email: string;
@@ -25,7 +25,7 @@ type Booking = {
   paid: boolean;
 };
 
-type BookingLimit = {
+export type BookingLimit = {
   maxBookings: number;
   currentBookings: number;
 };
