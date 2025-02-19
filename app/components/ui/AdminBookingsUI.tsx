@@ -55,8 +55,17 @@ export const AdminBookingsUI = ({
 }: AdminBookingsUIProps) => {
   const [maxBookings, setMaxBookings] = useState(bookingLimit.maxBookings.toString());
 
+  // Calculate total people from all bookings
+  const totalPeople = bookings.reduce((sum, booking) => {
+    // Only count confirmed bookings
+    if (booking.status === 'confirmed') {
+      return sum + booking.numberOfPeople;
+    }
+    return sum;
+  }, 0);
+
   const completionPercentage = bookingLimit.maxBookings > 0
-    ? Math.round((bookingLimit.currentBookings / bookingLimit.maxBookings) * 100)
+    ? Math.min(100, Math.round((totalPeople / bookingLimit.maxBookings) * 100))
     : 0;
 
   const handleMaxBookingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,19 +150,43 @@ export const AdminBookingsUI = ({
                       cy="18"
                       r="16"
                       fill="none"
-                      className="stroke-current text-primary"
+                      className={`stroke-current ${
+                        completionPercentage >= 100 
+                          ? 'text-red-500' 
+                          : completionPercentage >= 90 
+                          ? 'text-yellow-500' 
+                          : 'text-primary'
+                      }`}
                       strokeWidth="3"
                       strokeDasharray={`${completionPercentage}, 100`}
                       strokeLinecap="round"
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl sm:text-3xl font-bold text-primary">{completionPercentage}%</span>
+                    <span className={`text-2xl sm:text-3xl font-bold ${
+                      completionPercentage >= 100 
+                        ? 'text-red-500' 
+                        : completionPercentage >= 90 
+                        ? 'text-yellow-500' 
+                        : 'text-primary'
+                    }`}>{completionPercentage}%</span>
                   </div>
                 </div>
-                <p className="text-sm sm:text-base text-gray-600 text-center">
-                  {bookingLimit.currentBookings} of {bookingLimit.maxBookings} places booked
-                </p>
+                <div className="flex flex-col items-center text-center space-y-1">
+                  <p className="text-sm sm:text-base text-gray-600">
+                    {totalPeople} of {bookingLimit.maxBookings} places booked
+                  </p>
+                  {completionPercentage >= 100 && (
+                    <p className="text-sm text-red-500 font-medium">
+                      Overbooking!
+                    </p>
+                  )}
+                  {completionPercentage >= 90 && completionPercentage < 100 && (
+                    <p className="text-sm text-yellow-500 font-medium">
+                      Almost full!
+                    </p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
