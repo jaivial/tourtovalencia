@@ -10,7 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 export async function createPaymentIntent(booking: BookingFormData) {
-  if (!booking.bookingDate) {
+  if (!booking.date) {
     throw new Error("Booking date is required");
   }
 
@@ -18,15 +18,17 @@ export async function createPaymentIntent(booking: BookingFormData) {
 
   try {
     // Ensure the date is a string when sending to Stripe
-    const bookingDate = booking.bookingDate instanceof Date ? booking.bookingDate.toISOString() : new Date(booking.bookingDate).toISOString();
+    const date = new Date(booking.date).toISOString();
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: totalAmount,
       currency: "eur",
       metadata: {
-        bookingDate,
+        date,
+        time: booking.time,
         customerName: booking.fullName,
         customerEmail: booking.email,
+        phoneNumber: booking.phoneNumber || "",
         partySize: booking.partySize.toString(),
       },
       automatic_payment_methods: {
@@ -61,7 +63,7 @@ export async function retrievePaymentIntent(paymentIntentId: string) {
 }
 
 export async function createCheckoutSession(booking: BookingFormData) {
-  if (!booking.bookingDate) {
+  if (!booking.date) {
     throw new Error("Booking date is required");
   }
 
@@ -69,7 +71,7 @@ export async function createCheckoutSession(booking: BookingFormData) {
 
   try {
     // Ensure the date is a string when sending to Stripe
-    const bookingDate = booking.bookingDate instanceof Date ? booking.bookingDate.toISOString() : new Date(booking.bookingDate).toISOString();
+    const date = new Date(booking.date).toISOString();
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -79,7 +81,7 @@ export async function createCheckoutSession(booking: BookingFormData) {
             currency: "eur",
             product_data: {
               name: "Excursión a Cuevas de San Jose",
-              description: `Reserva para ${booking.partySize} ${booking.partySize === 1 ? "persona" : "personas"} el ${new Date(bookingDate).toLocaleDateString("es-ES")}`,
+              description: `Reserva para ${booking.partySize} ${booking.partySize === 1 ? "persona" : "personas"} el ${new Date(date).toLocaleDateString("es-ES")}`,
             },
             unit_amount: totalAmount,
           },
@@ -90,11 +92,12 @@ export async function createCheckoutSession(booking: BookingFormData) {
       success_url: `${process.env.PUBLIC_URL}/book/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.PUBLIC_URL}/book?error=payment-cancelled`,
       metadata: {
-        bookingDate,
+        date,
+        time: booking.time,
         customerName: booking.fullName,
         customerEmail: booking.email,
+        phoneNumber: booking.phoneNumber || "",
         partySize: booking.partySize.toString(),
-        phoneNumber: booking.phone || "",
       },
       customer_email: booking.email,
     });

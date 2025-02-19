@@ -10,6 +10,7 @@ export interface BookingFormData {
   partySize: number;
   fullName: string;
   email: string;
+  emailConfirm: string;
   phoneNumber: string;
 }
 
@@ -37,7 +38,7 @@ export interface BookingActions {
 }
 
 export function useBookingStates(initialState?: {
-  serverError?: string;
+  serverError?: string | null;
   availableDates?: Array<{
     date: string;
     availablePlaces: number;
@@ -48,22 +49,19 @@ export function useBookingStates(initialState?: {
     availablePlaces: number;
     isAvailable: boolean;
   };
-}): BookingStates {
+}) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<BookingFormData>({
     date: "",
     time: "",
-    partySize: 0,
+    partySize: 1,
     fullName: "",
     email: "",
+    emailConfirm: "",
     phoneNumber: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [serverError, setServerError] = useState<string | null>(initialState?.serverError || null);
-  const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
-  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [availableDates, setAvailableDates] = useState<Array<{
     date: string;
     availablePlaces: number;
@@ -74,18 +72,31 @@ export function useBookingStates(initialState?: {
     availablePlaces: number;
     isAvailable: boolean;
   } | undefined>(initialState?.selectedDateAvailability);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
 
   return {
     currentStep,
     formData,
     errors,
-    isSubmitting,
-    isSuccess,
     serverError,
-    paymentClientSecret,
-    paymentIntentId,
     availableDates,
     selectedDateAvailability,
+    isSubmitting,
+    isSuccess,
+    paymentClientSecret,
+    paymentIntentId,
+    setCurrentStep,
+    setFormData,
+    setErrors,
+    setSelectedDateAvailability,
+    setIsSubmitting,
+    setIsSuccess,
+    setPaymentClientSecret,
+    setPaymentIntentId,
+    setServerError,
   };
 }
 
@@ -111,6 +122,8 @@ export const useBookingActions = (context: BookingContextState) => {
     if (context.currentStep === 3) {
       if (!context.formData.fullName) errors.fullName = "Name is required";
       if (!context.formData.email) errors.email = "Email is required";
+      if (!context.formData.emailConfirm) errors.emailConfirm = "Email confirmation is required";
+      if (context.formData.email !== context.formData.emailConfirm) errors.emailConfirm = "Emails do not match";
       if (!context.formData.phoneNumber) errors.phoneNumber = "Phone number is required";
       
       if (Object.keys(errors).length > 0) {

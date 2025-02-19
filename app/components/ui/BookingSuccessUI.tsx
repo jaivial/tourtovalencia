@@ -66,7 +66,7 @@ export const BookingSuccessUI = ({ booking }: BookingSuccessUIProps) => {
             <div className="py-3 flex justify-between">
               <dt className="text-sm font-medium text-gray-500">Fecha</dt>
               <dd className="text-sm text-gray-900">
-                {format(new Date(booking.bookingDate), "EEEE, d 'de' MMMM 'de' yyyy", {
+                {format(new Date(booking.date), "EEEE, d 'de' MMMM 'de' yyyy", {
                   locale: es,
                 })}
               </dd>

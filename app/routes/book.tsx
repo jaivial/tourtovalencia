@@ -90,7 +90,8 @@ export async function action({ request }: ActionFunctionArgs) {
       const bookingData = {
         fullName: session.metadata?.customerName || "",
         email: session.customer_email || session.metadata?.customerEmail || "",
-        bookingDate: session.metadata?.bookingDate ? new Date(session.metadata.bookingDate) : new Date(),
+        date: session.metadata?.date || "",
+        time: session.metadata?.time || "",
         partySize: parseInt(session.metadata?.partySize || "1", 10),
         paymentId: session.id,
         amount: session.amount_total || 0,

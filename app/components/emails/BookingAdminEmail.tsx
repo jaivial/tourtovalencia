@@ -38,7 +38,7 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
             </Text>
             <Text style={text}>
               <strong>Fecha:</strong>{" "}
-              {new Date(booking.bookingDate).toLocaleDateString("es-ES", {
+              {new Date(booking.date).toLocaleDateString("es-ES", {
                 weekday: "long",
                 year: "numeric",
                 month: "long",

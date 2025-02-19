@@ -2,28 +2,24 @@ import { useBooking } from "~/context/BookingContext";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
-export const BookingStepOne = () => {
-  const { formData, setFormData, errors } = useBooking();
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+export default function BookingStepOne() {
+  const { formData, errors, handleInputChange } = useBooking();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="fullName">Full Name</Label>
         <Input
           id="fullName"
           name="fullName"
+          type="text"
           value={formData.fullName}
           onChange={handleInputChange}
           placeholder="Enter your full name"
-          className={errors.fullName ? "border-red-500" : ""}
+          className={errors.fullName ? "border-destructive" : ""}
         />
         {errors.fullName && (
-          <p className="text-sm text-red-500">{errors.fullName}</p>
+          <p className="text-sm text-destructive">{errors.fullName}</p>
         )}
       </div>
 
@@ -36,10 +32,10 @@ export const BookingStepOne = () => {
           value={formData.email}
           onChange={handleInputChange}
           placeholder="Enter your email"
-          className={errors.email ? "border-red-500" : ""}
+          className={errors.email ? "border-destructive" : ""}
         />
         {errors.email && (
-          <p className="text-sm text-red-500">{errors.email}</p>
+          <p className="text-sm text-destructive">{errors.email}</p>
         )}
       </div>
 
@@ -52,28 +48,28 @@ export const BookingStepOne = () => {
           value={formData.emailConfirm}
           onChange={handleInputChange}
           placeholder="Confirm your email"
-          className={errors.emailConfirm ? "border-red-500" : ""}
+          className={errors.emailConfirm ? "border-destructive" : ""}
         />
         {errors.emailConfirm && (
-          <p className="text-sm text-red-500">{errors.emailConfirm}</p>
+          <p className="text-sm text-destructive">{errors.emailConfirm}</p>
         )}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phone">Phone Number</Label>
+        <Label htmlFor="phoneNumber">Phone Number</Label>
         <Input
-          id="phone"
-          name="phone"
+          id="phoneNumber"
+          name="phoneNumber"
           type="tel"
-          value={formData.phone}
+          value={formData.phoneNumber}
           onChange={handleInputChange}
           placeholder="Enter your phone number"
-          className={errors.phone ? "border-red-500" : ""}
+          className={errors.phoneNumber ? "border-destructive" : ""}
         />
-        {errors.phone && (
-          <p className="text-sm text-red-500">{errors.phone}</p>
+        {errors.phoneNumber && (
+          <p className="text-sm text-destructive">{errors.phoneNumber}</p>
         )}
       </div>
     </div>
   );
-}; 
+}

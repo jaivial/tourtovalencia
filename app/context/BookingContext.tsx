@@ -39,6 +39,7 @@ export interface BookingContextState {
   setPaymentClientSecret: (secret: string | null) => void;
   setPaymentIntentId: (id: string | null) => void;
   setServerError: (error: string | null) => void;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const BookingContext = createContext<BookingContextState | null>(null);
@@ -68,6 +69,7 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
     partySize: 1,
     fullName: "",
     email: "",
+    emailConfirm: "",
     phoneNumber: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
@@ -80,6 +82,10 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
 
   const handleSetFormData = (data: Partial<BookingFormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleSetFormData({ [e.target.name]: e.target.value });
   };
 
   return (
@@ -104,6 +110,7 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
         setPaymentClientSecret,
         setPaymentIntentId,
         setServerError,
+        handleInputChange,
       }}
     >
       {children}

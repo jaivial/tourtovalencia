@@ -2,7 +2,8 @@ export interface Booking {
   _id?: string;
   fullName: string;
   email: string;
-  bookingDate: Date;
+  date: string;
+  time: string;
   partySize: number;
   amount: number;
   paymentId: string;

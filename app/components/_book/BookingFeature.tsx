@@ -1,6 +1,6 @@
 import { useBooking } from "~/context/BookingContext";
 import { useBookingActions } from "~/hooks/book.hooks";
-import { BookingStepOne } from "./BookingStepOne";
+import BookingStepOne from "./BookingStepOne";
 import { BookingStepTwo } from "./BookingStepTwo";
 import { BookingStepThree } from "./BookingStepThree";
 import { BookingDateFeature } from "../features/BookingDateFeature";
