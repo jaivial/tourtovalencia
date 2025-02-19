@@ -11,6 +11,9 @@ import { BookingAdminEmail } from "~/emails/BookingAdminEmail";
 import type { BookingFormData } from "~/hooks/book.hooks";
 import { getAvailableDatesInRange, getDateAvailability } from "~/models/bookingAvailability.server";
 import { addMonths } from "date-fns";
+import Stripe from "stripe";
+import { createPaymentIntent, retrievePaymentIntent } from "~/services/stripe.server";
+import { createBooking } from "~/services/booking.server";
 
 // Add this directive at the top of the file to make it a client component
 'use client';
@@ -81,43 +84,73 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   try {
     const formData = await request.formData();
-    console.log(formData);
-    const booking = JSON.parse(formData.get("booking") as string) as BookingFormData;
-    const totalPrice = booking.partySize * 120;
+    const intent = formData.get("intent");
+    
+    // Create payment intent
+    if (intent === "create-payment-intent") {
+      const booking = JSON.parse(formData.get("booking") as string) as BookingFormData;
+      
+      // Validate the booking data
+      if (!booking.fullName || !booking.email || !booking.phone || !booking.bookingDate) {
+        return json(
+          { success: false, error: "Missing required fields" },
+          { status: 400 }
+        );
+      }
 
-    // Validate the booking data
-    if (!booking.fullName || !booking.email || !booking.phone || !booking.bookingDate) {
-      return json(
-        { success: false, error: "Missing required fields" },
-        { status: 400 }
-      );
+      // Create Stripe payment intent
+      const { clientSecret, paymentIntentId } = await createPaymentIntent(booking);
+
+      return json({ 
+        success: true, 
+        clientSecret,
+        paymentIntentId
+      });
+    }
+    
+    // Handle successful payment and create booking
+    if (intent === "confirm-booking") {
+      const booking = JSON.parse(formData.get("booking") as string) as BookingFormData;
+      const paymentIntentId = formData.get("paymentIntentId") as string;
+
+      // Verify payment was successful
+      const paymentIntent = await retrievePaymentIntent(paymentIntentId);
+      if (paymentIntent.status !== 'succeeded') {
+        return json(
+          { success: false, error: "Payment not completed" },
+          { status: 400 }
+        );
+      }
+
+      // Create booking in database
+      const newBooking = await createBooking(booking, paymentIntentId);
+
+      // Send confirmation emails
+      await Promise.all([
+        sendEmail({
+          to: booking.email,
+          subject: "Booking Confirmation",
+          component: BookingConfirmationEmail({
+            booking: newBooking,
+          }),
+        }),
+        sendEmail({
+          to: process.env.ADMIN_EMAIL!,
+          subject: "New Booking Received",
+          component: BookingAdminEmail({
+            booking: newBooking,
+          }),
+        }),
+      ]);
+
+      return json({ success: true });
     }
 
-    // Send confirmation email to client
-    await sendEmail({
-      to: booking.email,
-      subject: "Booking Request Received",
-      component: BookingConfirmationEmail({
-        booking,
-        totalPrice,
-      }),
-    });
-
-    // Send notification email to admin
-    await sendEmail({
-      to: "excursionesmed@gmail.com",
-      subject: `New Booking Request from ${booking.fullName}`,
-      component: BookingAdminEmail({
-        booking,
-        totalPrice,
-      }),
-    });
-
-    return json({ success: true });
+    return json({ error: "Invalid intent" }, { status: 400 });
   } catch (error) {
-    console.error("Failed to process booking:", error);
+    console.error("Error processing booking:", error);
     return json(
-      { success: false, error: "Failed to process booking. Please try again." },
+      { success: false, error: "Failed to process booking" },
       { status: 500 }
     );
   }

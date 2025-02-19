@@ -14,7 +14,12 @@ export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
   const cookieLanguage = (await languageCookie.parse(cookieHeader)) || "en";
 
-  return json({ initialLanguage: languages[cookieLanguage] || languages.en });
+  return json({ 
+    initialLanguage: languages[cookieLanguage] || languages.en,
+    ENV: {
+      STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    }
+  });
 };
 
 export const links: LinksFunction = () => [
@@ -44,9 +49,9 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
-  const { initialLanguage } = useLoaderData<typeof loader>();
+  const { initialLanguage, ENV } = useLoaderData<typeof loader>();
   const location = useLocation();
-  const isAdminDashboard = location.pathname.includes('/admin/dashboard');
+  const isAdminDashboard = location.pathname.includes("/admin/dashboard");
 
   return (
     <html lang="en" className="h-full">
@@ -64,6 +69,11 @@ export default function App() {
           {!isAdminDashboard && <Footer />}
         </LanguageContextProvider>
         <ScrollRestoration />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.ENV = ${JSON.stringify(ENV)}`,
+          }}
+        />
         <Scripts />
       </body>
     </html>
