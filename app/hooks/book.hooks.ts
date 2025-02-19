@@ -20,7 +20,7 @@ export interface BookingActions {
   handleNextStep: () => void;
   handlePreviousStep: () => void;
   handleSubmit: () => void;
-  handlePaymentSuccess: () => void;
+  handlePaymentSuccess: (bookingInfo: any) => void;
   handlePaymentError: (error: string) => void;
   setAvailableDates: (
     dates: Array<{
@@ -167,12 +167,19 @@ export const useBookingActions = (context: BookingContextState) => {
     }
   };
 
-  const handlePaymentSuccess = () => {
-    const formData = new FormData();
-    formData.append("intent", "confirm-payment");
-    formData.append("session_id", context.paymentIntentId || "");
+  const handlePaymentSuccess = async (bookingInfo: any) => {
+    try {
+      // Insert booking information into the bookings collection
+      await insertBooking(bookingInfo);
 
-    fetcher.submit(formData, { method: "POST" });
+      // Send confirmation emails
+      await sendConfirmationEmails(bookingInfo);
+
+      // Navigate to the success page
+      navigate('/book/success');
+    } catch (error) {
+      console.error('Payment processing failed', error);
+    }
   };
 
   const handlePaymentError = (error: string) => {

@@ -11,11 +11,12 @@ import {
   Receipt,
   AlertCircle
 } from "lucide-react";
+import { useNavigate } from "@remix-run/react";
 
 export const BookingStepThree = () => {
   const states = useBooking();
   const totalPrice = states.formData.partySize * 120;
-
+  const navigate = useNavigate();
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold tracking-tight">Booking Summary</h2>
@@ -85,6 +86,8 @@ export const BookingStepThree = () => {
       {states.paymentClientSecret ? (
         <PaymentFeature />
       ) : (
+        <>
+         <button className="bg-blue-500 text-white py-2 px-4 rounded mt-4" onClick={() => navigate('/book/paypal')}>Pay</button>
         <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
           <p className="text-yellow-800 text-sm flex items-center gap-2">
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -94,6 +97,7 @@ export const BookingStepThree = () => {
             </span>
           </p>
         </div>
+        </>
       )}
     </div>
   );
