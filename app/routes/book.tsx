@@ -1,6 +1,6 @@
 // Page component: just responsible for containing providers, feature components and fetch data from the ssr.
-import { json, type LoaderFunction, type ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { useActionData, useNavigation, useLoaderData } from "@remix-run/react";
+import { json, type LoaderFunction, type ActionFunctionArgs, MetaFunction, redirect } from "@remix-run/node";
+import { useActionData, useNavigation, useLoaderData, useNavigate } from "@remix-run/react";
 import { BookingProvider } from "~/context/BookingContext";
 import { BookingFeature } from "~/components/_book/BookingFeature";
 import { BookingSuccess } from "~/components/_book/BookingSuccess";
@@ -12,7 +12,7 @@ import type { BookingFormData } from "~/hooks/book.hooks";
 import { getAvailableDatesInRange, getDateAvailability } from "~/models/bookingAvailability.server";
 import { addMonths } from "date-fns";
 import Stripe from "stripe";
-import { createPaymentIntent, retrievePaymentIntent } from "~/services/stripe.server";
+import { createCheckoutSession } from "~/services/stripe.server";
 import { createBooking } from "~/services/booking.server";
 
 // Add this directive at the top of the file to make it a client component
@@ -77,58 +77,37 @@ export const loader: LoaderFunction = async ({ request }) => {
   }
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
-  if (request.method !== "POST") {
-    return json({ error: "Method not allowed" }, { status: 405 });
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+
+  if (intent === "create-checkout-session") {
+    try {
+      const bookingData = JSON.parse(formData.get("booking") as string);
+      const { url } = await createCheckoutSession(bookingData);
+      
+      return json({ success: true, redirectUrl: url });
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+      return json(
+        { success: false, error: error instanceof Error ? error.message : "Failed to create checkout session" },
+        { status: 400 }
+      );
+    }
   }
 
-  try {
-    const formData = await request.formData();
-    const intent = formData.get("intent");
-    
-    // Create payment intent
-    if (intent === "create-payment-intent") {
-      const booking = JSON.parse(formData.get("booking") as string) as BookingFormData;
-      
-      // Validate the booking data
-      if (!booking.fullName || !booking.email || !booking.phone || !booking.bookingDate) {
-        return json(
-          { success: false, error: "Missing required fields" },
-          { status: 400 }
-        );
-      }
-
-      // Create Stripe payment intent
-      const { clientSecret, paymentIntentId } = await createPaymentIntent(booking);
-
-      return json({ 
-        success: true, 
-        clientSecret,
-        paymentIntentId
-      });
-    }
-    
-    // Handle successful payment and create booking
-    if (intent === "confirm-booking") {
-      const booking = JSON.parse(formData.get("booking") as string) as BookingFormData;
-      const paymentIntentId = formData.get("paymentIntentId") as string;
-
-      // Verify payment was successful
-      const paymentIntent = await retrievePaymentIntent(paymentIntentId);
-      if (paymentIntent.status !== 'succeeded') {
-        return json(
-          { success: false, error: "Payment not completed" },
-          { status: 400 }
-        );
-      }
+  if (intent === "confirm-booking") {
+    try {
+      const bookingData = JSON.parse(formData.get("booking") as string);
+      const session_id = formData.get("session_id") as string;
 
       // Create booking in database
-      const newBooking = await createBooking(booking, paymentIntentId);
+      const newBooking = await createBooking(bookingData, session_id);
 
       // Send confirmation emails
       await Promise.all([
         sendEmail({
-          to: booking.email,
+          to: bookingData.email,
           subject: "Booking Confirmation",
           component: BookingConfirmationEmail({
             booking: newBooking,
@@ -143,18 +122,18 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         }),
       ]);
 
-      return json({ success: true });
+      return redirect('/book/success');
+    } catch (error) {
+      console.error("Error processing booking:", error);
+      return json(
+        { success: false, error: "Failed to process booking" },
+        { status: 500 }
+      );
     }
-
-    return json({ error: "Invalid intent" }, { status: 400 });
-  } catch (error) {
-    console.error("Error processing booking:", error);
-    return json(
-      { success: false, error: "Failed to process booking" },
-      { status: 500 }
-    );
   }
-};
+
+  return json({ success: false, error: "Invalid intent" }, { status: 400 });
+}
 
 type ActionData = {
   success?: boolean;
@@ -166,8 +145,13 @@ export default function Book() {
   const navigation = useNavigation();
   const loaderData = useLoaderData<typeof loader>();
   const isSubmitting = navigation.state === "submitting";
+  const navigate = useNavigate();
 
-  if (actionData?.success) {
+  if (actionData?.success && actionData.redirectUrl) {
+    navigate(actionData.redirectUrl);
+  }
+
+  if (actionData?.success && !actionData.redirectUrl) {
     return <BookingSuccess />;
   }
 

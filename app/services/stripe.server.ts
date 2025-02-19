@@ -6,23 +6,34 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2023-10-16',
+  apiVersion: '2025-01-27.acacia',
 });
 
 export async function createPaymentIntent(booking: BookingFormData) {
-  const totalAmount = booking.partySize * 120 * 100; // Convert to cents
+  if (!booking.bookingDate) {
+    throw new Error('Booking date is required');
+  }
+
+  const totalAmount = booking.partySize * 0.5 * 100; // 0.5 EUR converted to cents
 
   try {
+    // Ensure the date is a string when sending to Stripe
+    const bookingDate = booking.bookingDate instanceof Date 
+      ? booking.bookingDate.toISOString()
+      : new Date(booking.bookingDate).toISOString();
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: totalAmount,
       currency: 'eur',
       metadata: {
-        bookingDate: booking.bookingDate?.toISOString(),
+        bookingDate,
         customerName: booking.fullName,
         customerEmail: booking.email,
         partySize: booking.partySize.toString(),
       },
-      payment_method_types: ['card'],
+      automatic_payment_methods: {
+        enabled: true,
+      },
     });
 
     return {
@@ -31,6 +42,9 @@ export async function createPaymentIntent(booking: BookingFormData) {
     };
   } catch (error) {
     console.error('Error creating payment intent:', error);
+    if (error instanceof Stripe.errors.StripeError) {
+      throw new Error(`Stripe error: ${error.message}`);
+    }
     throw new Error('Failed to create payment intent');
   }
 }
@@ -41,6 +55,71 @@ export async function retrievePaymentIntent(paymentIntentId: string) {
     return paymentIntent;
   } catch (error) {
     console.error('Error retrieving payment intent:', error);
+    if (error instanceof Stripe.errors.StripeError) {
+      throw new Error(`Stripe error: ${error.message}`);
+    }
     throw new Error('Failed to retrieve payment intent');
+  }
+}
+
+export async function createCheckoutSession(booking: BookingFormData) {
+  if (!booking.bookingDate) {
+    throw new Error('Booking date is required');
+  }
+
+  const totalAmount = booking.partySize * 0.5 * 100; // 0.5 EUR converted to cents
+
+  try {
+    const bookingDate = booking.bookingDate instanceof Date 
+      ? booking.bookingDate.toISOString()
+      : new Date(booking.bookingDate).toISOString();
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: 'Excursión a Medina Azahara',
+              description: `Booking for ${booking.partySize} ${booking.partySize === 1 ? 'person' : 'people'} on ${new Date(bookingDate).toLocaleDateString()}`,
+            },
+            unit_amount: totalAmount,
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        bookingDate,
+        customerName: booking.fullName,
+        customerEmail: booking.email,
+        partySize: booking.partySize.toString(),
+      },
+      mode: 'payment',
+      success_url: `${process.env.PUBLIC_URL || 'http://localhost:5173'}/book/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.PUBLIC_URL || 'http://localhost:5173'}/book`,
+      customer_email: booking.email,
+    });
+
+    return { sessionId: session.id, url: session.url };
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    if (error instanceof Stripe.errors.StripeError) {
+      throw new Error(`Stripe error: ${error.message}`);
+    }
+    throw new Error('Failed to create checkout session');
+  }
+}
+
+export async function retrieveCheckoutSession(sessionId: string) {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    return session;
+  } catch (error) {
+    console.error('Error retrieving checkout session:', error);
+    if (error instanceof Stripe.errors.StripeError) {
+      throw new Error(`Stripe error: ${error.message}`);
+    }
+    throw new Error('Failed to retrieve checkout session');
   }
 }

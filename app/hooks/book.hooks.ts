@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { useSubmit } from "@remix-run/react";
+import { useState, useCallback, useEffect } from "react";
+import { useSubmit, useFetcher } from "@remix-run/react";
 import type { DateAvailability } from "~/models/bookingAvailability.server";
 
 export type BookingFormData = {
@@ -90,6 +90,7 @@ export function useBookingStates(initialState?: {
 
 export function useBookingActions(states: ReturnType<typeof useBookingStates>) {
   const submit = useSubmit();
+  const fetcher = useFetcher();
 
   const validateForm = useCallback(() => {
     const errors: Partial<Record<keyof BookingFormData, string>> = {};
@@ -129,51 +130,38 @@ export function useBookingActions(states: ReturnType<typeof useBookingStates>) {
     states.setServerError(null);
 
     try {
-      // First, create payment intent
+      // Create checkout session using Remix's fetcher
       const formData = new FormData();
-      formData.append("intent", "create-payment-intent");
-      formData.append("booking", JSON.stringify(states.formData));
+      formData.append("intent", "create-checkout-session");
+      formData.append("booking", JSON.stringify({
+        ...states.formData,
+        bookingDate: states.formData.bookingDate?.toISOString(),
+      }));
 
-      const response = await fetch("/book", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.error || "Failed to create payment intent");
-      }
-
-      // Store payment details
-      states.setPaymentClientSecret(data.clientSecret);
-      states.setPaymentIntentId(data.paymentIntentId);
-
+      fetcher.submit(formData, { method: "post" });
     } catch (error) {
       states.setServerError(error instanceof Error ? error.message : "An error occurred");
       states.setIsSubmitting(false);
     }
-  }, [states, validateForm]);
+  }, [states, validateForm, fetcher]);
 
-  const handlePaymentSuccess = useCallback(() => {
-    const formData = new FormData();
-    formData.append("intent", "confirm-booking");
-    formData.append("booking", JSON.stringify(states.formData));
-    formData.append("paymentIntentId", states.paymentIntentId!);
-
-    submit(formData, { method: "post" });
-  }, [states, submit]);
-
-  const handlePaymentError = useCallback((error: string) => {
-    states.setServerError(error);
-    states.setIsSubmitting(false);
-  }, [states]);
+  useEffect(() => {
+    if (fetcher.state === "submitting") {
+      states.setIsSubmitting(true);
+    } else if (fetcher.state === "idle" && fetcher.data) {
+      if (fetcher.data.success && fetcher.data.redirectUrl) {
+        // Redirect to Stripe Checkout
+        window.location.href = fetcher.data.redirectUrl;
+      } else if (fetcher.data.error) {
+        states.setServerError(fetcher.data.error);
+        states.setIsSubmitting(false);
+      }
+    }
+  }, [fetcher.state, fetcher.data, states]);
 
   return {
     handleNextStep,
     handlePreviousStep,
     handleSubmit,
-    handlePaymentSuccess,
-    handlePaymentError,
   };
 }

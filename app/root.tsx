@@ -17,7 +17,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   return json({ 
     initialLanguage: languages[cookieLanguage] || languages.en,
     ENV: {
-      STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+      STRIPE_PUBLIC_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
     }
   });
 };
