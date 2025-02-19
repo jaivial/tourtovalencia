@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+import { ensureDbIndexes } from "./db.schema.server";
 
 let db: MongoClient | null = null;
 
@@ -19,6 +20,9 @@ async function connect() {
     }
     db = global.__db;
   }
+
+  // Ensure database indexes are set up correctly
+  await ensureDbIndexes();
 
   return db;
 }

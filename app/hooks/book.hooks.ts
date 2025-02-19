@@ -14,17 +14,7 @@ export interface BookingFormData {
   phoneNumber: string;
 }
 
-export type BookingStates = Omit<BookingContextState, 
-  | "setCurrentStep" 
-  | "setFormData" 
-  | "setErrors" 
-  | "setSelectedDateAvailability" 
-  | "setIsSubmitting" 
-  | "setIsSuccess" 
-  | "setPaymentClientSecret" 
-  | "setPaymentIntentId" 
-  | "setServerError"
->;
+export type BookingStates = Omit<BookingContextState, "setCurrentStep" | "setFormData" | "setErrors" | "setSelectedDateAvailability" | "setIsSubmitting" | "setIsSuccess" | "setPaymentClientSecret" | "setPaymentIntentId" | "setServerError">;
 
 export interface BookingActions {
   handleNextStep: () => void;
@@ -32,11 +22,13 @@ export interface BookingActions {
   handleSubmit: () => void;
   handlePaymentSuccess: () => void;
   handlePaymentError: (error: string) => void;
-  setAvailableDates: (dates: Array<{
-    date: string;
-    availablePlaces: number;
-    isAvailable: boolean;
-  }>) => void;
+  setAvailableDates: (
+    dates: Array<{
+      date: string;
+      availablePlaces: number;
+      isAvailable: boolean;
+    }>
+  ) => void;
 }
 
 export function useBookingStates(initialState?: {
@@ -64,16 +56,21 @@ export function useBookingStates(initialState?: {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
   const [serverError, setServerError] = useState<string | null>(initialState?.serverError || null);
-  const [availableDates, setAvailableDates] = useState<Array<{
-    date: string;
-    availablePlaces: number;
-    isAvailable: boolean;
-  }>>(initialState?.availableDates || []);
-  const [selectedDateAvailability, setSelectedDateAvailability] = useState<{
-    date: string;
-    availablePlaces: number;
-    isAvailable: boolean;
-  } | undefined>(initialState?.selectedDateAvailability);
+  const [availableDates, setAvailableDates] = useState<
+    Array<{
+      date: string;
+      availablePlaces: number;
+      isAvailable: boolean;
+    }>
+  >(initialState?.availableDates || []);
+  const [selectedDateAvailability, setSelectedDateAvailability] = useState<
+    | {
+        date: string;
+        availablePlaces: number;
+        isAvailable: boolean;
+      }
+    | undefined
+  >(initialState?.selectedDateAvailability);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
@@ -118,13 +115,13 @@ export const useBookingActions = (context: BookingContextState) => {
   const handleNextStep = () => {
     // Validate current step
     const errors: Partial<Record<keyof BookingFormData, string>> = {};
-    
+
     if (context.currentStep === 1 && !context.formData.date) {
       errors.date = "Please select a date";
       context.setErrors(errors);
       return;
     }
-    
+
     if (context.currentStep === 2 && !context.formData.partySize) {
       errors.partySize = "Please select number of guests";
       context.setErrors(errors);
@@ -137,7 +134,7 @@ export const useBookingActions = (context: BookingContextState) => {
       if (!context.formData.emailConfirm) errors.emailConfirm = "Email confirmation is required";
       if (context.formData.email !== context.formData.emailConfirm) errors.emailConfirm = "Emails do not match";
       if (!context.formData.phoneNumber) errors.phoneNumber = "Phone number is required";
-      
+
       if (Object.keys(errors).length > 0) {
         context.setErrors(errors);
         return;
@@ -159,7 +156,7 @@ export const useBookingActions = (context: BookingContextState) => {
       const formData = new FormData();
       formData.append("intent", "create-checkout-session");
       formData.append("booking", JSON.stringify(context.formData));
-      
+
       fetcher.submit(formData, { method: "POST" });
     } catch (error) {
       context.setServerError(error instanceof Error ? error.message : "An error occurred");
@@ -171,7 +168,7 @@ export const useBookingActions = (context: BookingContextState) => {
     const formData = new FormData();
     formData.append("intent", "confirm-payment");
     formData.append("session_id", context.paymentIntentId || "");
-    
+
     fetcher.submit(formData, { method: "POST" });
   };
 
@@ -180,11 +177,13 @@ export const useBookingActions = (context: BookingContextState) => {
     context.setIsSubmitting(false);
   };
 
-  const setAvailableDates = (dates: Array<{
-    date: string;
-    availablePlaces: number;
-    isAvailable: boolean;
-  }>) => {
+  const setAvailableDates = (
+    dates: Array<{
+      date: string;
+      availablePlaces: number;
+      isAvailable: boolean;
+    }>
+  ) => {
     // This would be implemented if we need to update available dates
   };
 

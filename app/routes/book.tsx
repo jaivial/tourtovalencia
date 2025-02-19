@@ -1,60 +1,23 @@
-// Page component: just responsible for containing providers, feature components and fetch data from the ssr.
-import { json, type LoaderFunction, type ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { useActionData, useNavigation, useLoaderData, Outlet } from "@remix-run/react";
-import { BookingProvider } from "~/context/BookingContext";
-import { BookingFeature } from "~/components/_book/BookingFeature";
+import { json, type ActionFunctionArgs, MetaFunction } from "@remix-run/node";
+import { useNavigation, Outlet } from "@remix-run/react";
 import { BookingLoading } from "~/components/_book/BookingLoading";
 import { createCheckoutSession, retrieveCheckoutSession } from "~/services/stripe.server";
 import { createBooking } from "~/services/booking.server";
 import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
 import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
-import { getAvailableDatesInRange, getDateAvailability } from "~/models/bookingAvailability.server";
-import { addMonths } from "date-fns";
 import type { Booking } from "~/types/booking";
-import { BookingSuccessProvider } from "~/context/BookingSuccessContext";
-import { BookingSuccessFeature } from "~/components/features/BookingSuccessFeature";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Book Your Experience" }, { name: "description", content: "Book your unique dining experience with us" }];
 };
 
-export type LoaderData = {
-  availableDates: Array<{
-    date: string;
-    availablePlaces: number;
-    isAvailable: boolean;
-  }>;
-  selectedDateAvailability?: {
-    date: string;
-    availablePlaces: number;
-    isAvailable: boolean;
-  };
+export type ActionData = {
+  success?: boolean;
+  error?: string;
+  booking?: Booking;
+  redirectUrl?: string;
   sessionId?: string;
-};
-
-export const loader: LoaderFunction = async ({ request }) => {
-  try {
-    const url = new URL(request.url);
-    const selectedDate = url.searchParams.get("date");
-    const sessionId = url.searchParams.get("session_id");
-
-    // Get dates for the next 3 months
-    const startDate = new Date();
-    const endDate = addMonths(startDate, 3);
-
-    const availableDates = await getAvailableDatesInRange(startDate, endDate);
-
-    let selectedDateAvailability;
-    if (selectedDate) {
-      selectedDateAvailability = await getDateAvailability(new Date(selectedDate));
-    }
-
-    return json({ availableDates, selectedDateAvailability, sessionId });
-  } catch (error) {
-    console.error("Error loading booking data:", error);
-    return json({ availableDates: [], error: "Failed to load available dates" });
-  }
 };
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -130,48 +93,13 @@ export async function action({ request }: ActionFunctionArgs) {
   return json({ success: false, error: "Invalid intent" }, { status: 400 });
 }
 
-export type ActionData = {
-  success?: boolean;
-  error?: string;
-  booking?: Booking;
-  redirectUrl?: string;
-  sessionId?: string;
-};
-
 export default function Book() {
   const navigation = useNavigation();
-  const { availableDates, selectedDateAvailability, sessionId } = useLoaderData<LoaderData>();
-  const actionData = useActionData<ActionData>();
 
   // Handle loading state
   if (navigation.state === "loading") {
     return <BookingLoading />;
   }
 
-  // // Show success page if we have a confirmed booking
-  // if (actionData?.success && actionData.booking) {
-  //   return (
-  //     <BookingSuccessProvider booking={actionData.booking}>
-  //       <BookingSuccessFeature />
-  //     </BookingSuccessProvider>
-  //   );
-  // }
-
-  return (
-    <>
-      {navigation.location?.pathname === "/book" ? (
-        <BookingProvider
-          initialState={{
-            availableDates,
-            selectedDateAvailability,
-            serverError: actionData?.error || null,
-          }}
-        >
-          <BookingFeature />
-        </BookingProvider>
-      ) : (
-        <Outlet />
-      )}
-    </>
-  );
+  return <Outlet />;
 }

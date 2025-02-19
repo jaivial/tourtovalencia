@@ -12,7 +12,7 @@ export const useBookingDateActions = (states: BookingContextState) => {
       states.setFormData({
         ...states.formData,
         date: "",
-        partySize: ""
+        partySize: "",
       });
       states.setSelectedDateAvailability(undefined);
       return;
@@ -27,9 +27,9 @@ export const useBookingDateActions = (states: BookingContextState) => {
     states.setFormData({
       ...states.formData,
       date: dateString,
-      partySize: "1"
+      partySize: "1",
     });
-    
+
     // Then fetch availability for the selected date
     fetcher.load(`/book?date=${dateString}`);
   };
@@ -43,6 +43,6 @@ export const useBookingDateActions = (states: BookingContextState) => {
 
   return {
     handleDateSelect,
-    isLoading: fetcher.state === "loading"
+    isLoading: fetcher.state === "loading",
   };
 };

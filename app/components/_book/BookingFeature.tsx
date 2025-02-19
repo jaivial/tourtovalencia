@@ -42,12 +42,8 @@ export const BookingFeature = () => {
           <Users2 className="w-8 h-8 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
-            Book Your Experience
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Join us for an unforgettable culinary journey
-          </p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">Book Your Experience</h1>
+          <p className="mt-2 text-muted-foreground">Join us for an unforgettable culinary journey</p>
         </div>
         <div className="w-24 h-1 bg-gradient-to-r from-primary to-primary/60 mx-auto rounded-full" />
       </div>
@@ -59,25 +55,17 @@ export const BookingFeature = () => {
       )}
 
       <BookingProgress currentStep={context.currentStep} />
-      
+
       <div className="relative">
         {context.isSubmitting && (
           <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         )}
-        
-        <div className="mt-8">
-          {renderStep()}
-        </div>
 
-        <BookingNavigation 
-          currentStep={context.currentStep}
-          onNext={actions.handleNextStep}
-          onPrevious={actions.handlePreviousStep}
-          onSubmit={actions.handleSubmit}
-          isSubmitting={context.isSubmitting}
-        />
+        <div className="mt-8">{renderStep()}</div>
+
+        <BookingNavigation currentStep={context.currentStep} onNext={actions.handleNextStep} onPrevious={actions.handlePreviousStep} onSubmit={actions.handleSubmit} isSubmitting={context.isSubmitting} />
       </div>
     </div>
   );
