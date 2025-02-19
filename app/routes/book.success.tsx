@@ -9,6 +9,10 @@ import { BookingSuccessProvider } from "~/context/BookingSuccessContext";
 import { BookingSuccessFeature } from "~/components/features/BookingSuccessFeature";
 import type { Booking } from "~/types/booking";
 
+interface LoaderData {
+  booking: Booking;
+}
+
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const sessionId = url.searchParams.get("session_id");
@@ -29,7 +33,8 @@ export const loader: LoaderFunction = async ({ request }) => {
     const bookingData = {
       fullName: session.metadata?.customerName || "",
       email: session.customer_email || session.metadata?.customerEmail || "",
-      bookingDate: session.metadata?.bookingDate ? new Date(session.metadata.bookingDate) : new Date(),
+      date: session.metadata?.date || "",
+      time: session.metadata?.time || "",
       partySize: parseInt(session.metadata?.partySize || "1", 10),
       paymentId: session.id,
       amount: session.amount_total || 0,
@@ -58,7 +63,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       }),
     ]);
 
-    return json({ booking: newBooking });
+    return json<LoaderData>({ booking: newBooking });
   } catch (error) {
     console.error("Error processing successful payment:", error);
     return redirect("/book?error=booking-creation-failed");
@@ -66,7 +71,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function BookingSuccess() {
-  const { booking } = useLoaderData<{ booking: Booking }>();
+  const { booking } = useLoaderData<LoaderData>();
 
   return (
     <BookingSuccessProvider booking={booking}>
