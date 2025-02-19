@@ -16,10 +16,7 @@ import { BookingSuccessProvider } from "~/context/BookingSuccessContext";
 import { BookingSuccessFeature } from "~/components/features/BookingSuccessFeature";
 
 export const meta: MetaFunction = () => {
-  return [
-    { title: "Book Your Experience" },
-    { name: "description", content: "Book your unique dining experience with us" },
-  ];
+  return [{ title: "Book Your Experience" }, { name: "description", content: "Book your unique dining experience with us" }];
 };
 
 export type LoaderData = {
@@ -39,13 +36,13 @@ export type LoaderData = {
 export const loader: LoaderFunction = async ({ request }) => {
   try {
     const url = new URL(request.url);
-    const selectedDate = url.searchParams.get('date');
-    const sessionId = url.searchParams.get('session_id');
+    const selectedDate = url.searchParams.get("date");
+    const sessionId = url.searchParams.get("session_id");
 
     // Get dates for the next 3 months
     const startDate = new Date();
     const endDate = addMonths(startDate, 3);
-    
+
     const availableDates = await getAvailableDatesInRange(startDate, endDate);
 
     let selectedDateAvailability;
@@ -55,8 +52,8 @@ export const loader: LoaderFunction = async ({ request }) => {
 
     return json({ availableDates, selectedDateAvailability, sessionId });
   } catch (error) {
-    console.error('Error loading booking data:', error);
-    return json({ availableDates: [], error: 'Failed to load available dates' });
+    console.error("Error loading booking data:", error);
+    return json({ availableDates: [], error: "Failed to load available dates" });
   }
 };
 
@@ -68,7 +65,7 @@ export async function action({ request }: ActionFunctionArgs) {
     try {
       const bookingData = JSON.parse(formData.get("booking") as string);
       const { url, sessionId } = await createCheckoutSession(bookingData);
-      
+
       if (!url) {
         throw new Error("No redirect URL received from Stripe");
       }
@@ -76,10 +73,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ success: true, redirectUrl: url, sessionId });
     } catch (error) {
       console.error("Error creating checkout session:", error);
-      return json(
-        { success: false, error: error instanceof Error ? error.message : "Failed to create checkout session" },
-        { status: 400 }
-      );
+      return json({ success: false, error: error instanceof Error ? error.message : "Failed to create checkout session" }, { status: 400 });
     }
   }
 
@@ -102,7 +96,7 @@ export async function action({ request }: ActionFunctionArgs) {
         amount: session.amount_total || 0,
         phoneNumber: session.metadata?.phoneNumber || "",
         status: "confirmed",
-        paid: true
+        paid: true,
       };
 
       const newBooking = await createBooking(bookingData, session.id);
@@ -128,10 +122,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ success: true, booking: newBooking });
     } catch (error) {
       console.error("Error confirming payment:", error);
-      return json(
-        { success: false, error: error instanceof Error ? error.message : "Failed to confirm payment" },
-        { status: 400 }
-      );
+      return json({ success: false, error: error instanceof Error ? error.message : "Failed to confirm payment" }, { status: 400 });
     }
   }
 
@@ -170,7 +161,7 @@ export default function Book() {
       initialState={{
         serverError: actionData?.error,
         availableDates: loaderData.availableDates,
-        selectedDateAvailability: loaderData.selectedDateAvailability
+        selectedDateAvailability: loaderData.selectedDateAvailability,
       }}
     >
       <BookingFeature />

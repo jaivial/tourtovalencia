@@ -2,7 +2,7 @@ import { getCollection } from "~/utils/db.server";
 import { localDateToUTCMidnight } from "~/utils/date";
 
 export interface DateAvailability {
-  date: Date;
+  date: string;
   availablePlaces: number;
   isAvailable: boolean;
 }
@@ -34,7 +34,7 @@ export async function getDateAvailability(date: Date): Promise<DateAvailability>
   const availablePlaces = maxBookings === 0 ? 0 : Math.max(0, maxBookings - bookedPlaces);
 
   return {
-    date,
+    date: date.toISOString(),
     availablePlaces,
     isAvailable: maxBookings > 0 && availablePlaces > 0
   };
@@ -49,54 +49,59 @@ export async function getAvailableDatesInRange(startDate: Date, endDate: Date): 
   const utcEndDate = localDateToUTCMidnight(endDate);
 
   // Get all booking limits in range
-  const limitsInRange = await bookingLimits.find({
-    date: {
-      $gte: utcStartDate,
-      $lte: utcEndDate
-    }
-  }).toArray();
-
-  // Create a map of dates to their limits
-  const limitsByDate = limitsInRange.reduce((acc, limit) => {
-    const dateKey = limit.date.toISOString().split('T')[0];
-    acc[dateKey] = limit.maxBookings;
-    return acc;
-  }, {} as Record<string, number>);
+  const limitsInRange = await bookingLimits
+    .find({
+      date: {
+        $gte: utcStartDate,
+        $lte: utcEndDate,
+      },
+    })
+    .toArray();
 
   // Get all confirmed bookings in range
-  const bookingsInRange = await bookings.find({
-    date: {
-      $gte: utcStartDate,
-      $lte: utcEndDate
-    },
-    status: "confirmed"
-  }).toArray();
+  const bookingsInRange = await bookings
+    .find({
+      date: {
+        $gte: utcStartDate,
+        $lte: utcEndDate,
+      },
+      status: "confirmed",
+    })
+    .toArray();
 
-  // Create a map of dates to booked places
-  const bookedPlacesByDate = bookingsInRange.reduce((acc, booking) => {
-    const dateKey = booking.date.toISOString().split('T')[0];
-    acc[dateKey] = (acc[dateKey] || 0) + (booking.numberOfPeople || 0);
-    return acc;
-  }, {} as Record<string, number>);
+  // Create a map of dates to their booking counts
+  const bookingCounts = new Map<string, number>();
+  bookingsInRange.forEach((booking) => {
+    const dateStr = booking.date.toISOString().split("T")[0];
+    bookingCounts.set(
+      dateStr,
+      (bookingCounts.get(dateStr) || 0) + (booking.numberOfPeople || 0)
+    );
+  });
 
-  // Generate dates in range
+  // Create a map of dates to their booking limits
+  const bookingLimitsMap = new Map<string, number>();
+  limitsInRange.forEach((limit) => {
+    const dateStr = limit.date.toISOString().split("T")[0];
+    bookingLimitsMap.set(dateStr, limit.maxBookings);
+  });
+
+  // Generate array of dates in range
   const dates: DateAvailability[] = [];
-  let currentDate = startDate;
+  let currentDate = new Date(startDate);
   while (currentDate <= endDate) {
-    const dateKey = currentDate.toISOString().split('T')[0];
-    const maxBookings = limitsByDate[dateKey] ?? DEFAULT_DAILY_LIMIT;
-    const bookedPlaces = bookedPlacesByDate[dateKey] || 0;
-    
-    // If maxBookings is 0, the date is not available
+    const dateStr = currentDate.toISOString();
+    const maxBookings = bookingLimitsMap.get(dateStr.split("T")[0]) ?? DEFAULT_DAILY_LIMIT;
+    const bookedPlaces = bookingCounts.get(dateStr.split("T")[0]) || 0;
     const availablePlaces = maxBookings === 0 ? 0 : Math.max(0, maxBookings - bookedPlaces);
 
     dates.push({
-      date: new Date(currentDate),
+      date: dateStr,
       availablePlaces,
-      isAvailable: maxBookings > 0 && availablePlaces > 0
+      isAvailable: maxBookings > 0 && availablePlaces > 0,
     });
 
-    currentDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
+    currentDate.setDate(currentDate.getDate() + 1);
   }
 
   return dates;

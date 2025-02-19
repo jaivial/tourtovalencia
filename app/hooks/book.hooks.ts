@@ -4,54 +4,59 @@ import type { DateAvailability } from "~/models/bookingAvailability.server";
 import type { BookingContextState } from "~/context/BookingContext";
 import type { ActionData } from "~/routes/book";
 
-export type BookingFormData = {
+export interface BookingFormData {
+  date: string;
+  time: string;
+  partySize: number;
   fullName: string;
   email: string;
   phoneNumber: string;
-  bookingDate: string;
-  partySize: string;
-  amount: number;
-};
+}
 
-export type BookingStates = {
-  currentStep: number;
-  formData: BookingFormData;
-  errors: Partial<Record<keyof BookingFormData, string>>;
-  isSubmitting: boolean;
-  isSuccess: boolean;
-  serverError: string | null;
-  paymentClientSecret: string | null;
-  paymentIntentId: string | null;
-  availableDates: DateAvailability[];
-  selectedDateAvailability: DateAvailability | undefined;
-};
+export type BookingStates = Omit<BookingContextState, 
+  | "setCurrentStep" 
+  | "setFormData" 
+  | "setErrors" 
+  | "setSelectedDateAvailability" 
+  | "setIsSubmitting" 
+  | "setIsSuccess" 
+  | "setPaymentClientSecret" 
+  | "setPaymentIntentId" 
+  | "setServerError"
+>;
 
-export type BookingActions = {
-  setCurrentStep: (step: number) => void;
-  setFormData: React.Dispatch<React.SetStateAction<BookingFormData>>;
-  setErrors: React.Dispatch<React.SetStateAction<Partial<Record<keyof BookingFormData, string>>>>;
-  setIsSubmitting: (isSubmitting: boolean) => void;
-  setIsSuccess: (isSuccess: boolean) => void;
-  setServerError: (error: string | null) => void;
-  setPaymentClientSecret: (secret: string | null) => void;
-  setPaymentIntentId: (id: string | null) => void;
-  setAvailableDates: (dates: DateAvailability[]) => void;
-  setSelectedDateAvailability: (availability: DateAvailability | undefined) => void;
-};
+export interface BookingActions {
+  handleNextStep: () => void;
+  handlePreviousStep: () => void;
+  handleSubmit: () => void;
+  setAvailableDates: (dates: Array<{
+    date: string;
+    availablePlaces: number;
+    isAvailable: boolean;
+  }>) => void;
+}
 
 export function useBookingStates(initialState?: {
   serverError?: string;
-  availableDates?: DateAvailability[];
-  selectedDateAvailability?: DateAvailability;
-}): BookingStates & BookingActions {
+  availableDates?: Array<{
+    date: string;
+    availablePlaces: number;
+    isAvailable: boolean;
+  }>;
+  selectedDateAvailability?: {
+    date: string;
+    availablePlaces: number;
+    isAvailable: boolean;
+  };
+}): BookingStates {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<BookingFormData>({
+    date: "",
+    time: "",
+    partySize: 0,
     fullName: "",
     email: "",
     phoneNumber: "",
-    bookingDate: "",
-    partySize: "",
-    amount: 0,
   });
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,12 +64,16 @@ export function useBookingStates(initialState?: {
   const [serverError, setServerError] = useState<string | null>(initialState?.serverError || null);
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
-  const [availableDates, setAvailableDates] = useState<DateAvailability[]>(
-    initialState?.availableDates || []
-  );
-  const [selectedDateAvailability, setSelectedDateAvailability] = useState<DateAvailability | undefined>(
-    initialState?.selectedDateAvailability
-  );
+  const [availableDates, setAvailableDates] = useState<Array<{
+    date: string;
+    availablePlaces: number;
+    isAvailable: boolean;
+  }>>(initialState?.availableDates || []);
+  const [selectedDateAvailability, setSelectedDateAvailability] = useState<{
+    date: string;
+    availablePlaces: number;
+    isAvailable: boolean;
+  } | undefined>(initialState?.selectedDateAvailability);
 
   return {
     currentStep,
@@ -77,117 +86,77 @@ export function useBookingStates(initialState?: {
     paymentIntentId,
     availableDates,
     selectedDateAvailability,
-    setCurrentStep,
-    setFormData,
-    setErrors,
-    setIsSubmitting,
-    setIsSuccess,
-    setServerError,
-    setPaymentClientSecret,
-    setPaymentIntentId,
-    setAvailableDates,
-    setSelectedDateAvailability,
   };
 }
 
-export function useBookingActions(states: ReturnType<typeof useBookingStates>) {
-  const submit = useSubmit();
+export const useBookingActions = (context: BookingContextState) => {
   const fetcher = useFetcher<ActionData>();
 
-  useEffect(() => {
-    // If we have a sessionId from Stripe redirect, confirm the payment
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get("session_id");
-    if (sessionId) {
-      const formData = new FormData();
-      formData.append("intent", "confirm-payment");
-      formData.append("session_id", sessionId);
-      fetcher.submit(formData, { method: "POST" });
-    }
-  }, [fetcher]);
-
-  const validateForm = useCallback(() => {
+  const handleNextStep = () => {
+    // Validate current step
     const errors: Partial<Record<keyof BookingFormData, string>> = {};
     
-    if (states.currentStep === 1 && !states.formData.bookingDate) {
-      errors.bookingDate = "Please select a date";
+    if (context.currentStep === 1 && !context.formData.date) {
+      errors.date = "Please select a date";
+      context.setErrors(errors);
+      return;
     }
     
-    if (states.currentStep === 3) {
-      if (!states.formData.fullName) errors.fullName = "Name is required";
-      if (!states.formData.email) errors.email = "Email is required";
-      if (!states.formData.phoneNumber) errors.phoneNumber = "Phone number is required";
+    if (context.currentStep === 2 && !context.formData.partySize) {
+      errors.partySize = "Please select number of guests";
+      context.setErrors(errors);
+      return;
     }
-    
-    states.setErrors(errors);
-    return Object.keys(errors).length === 0;
-  }, [states]);
 
-  const handleNextStep = useCallback(() => {
-    if (validateForm()) {
-      states.setCurrentStep(states.currentStep + 1);
-    }
-  }, [states, validateForm]);
-
-  const handlePreviousStep = useCallback(() => {
-    states.setCurrentStep(states.currentStep - 1);
-  }, [states]);
-
-  const handleCreateCheckoutSession = useCallback(async (bookingData: BookingFormData) => {
-    const formData = new FormData();
-    formData.append("intent", "create-checkout-session");
-    formData.append("booking", JSON.stringify(bookingData));
-    
-    const response = await fetcher.submit(formData, { method: "POST" });
-    return response;
-  }, [fetcher]);
-
-  const handleSubmit = useCallback(async () => {
-    if (!validateForm()) return;
-
-    states.setIsSubmitting(true);
-    states.setServerError(null);
-
-    try {
-      // Create checkout session using Remix's fetcher
-      const formData = new FormData();
-      formData.append("intent", "create-checkout-session");
-      formData.append("booking", JSON.stringify({
-        ...states.formData,
-        bookingDate: states.formData.bookingDate,
-      }));
-
-      fetcher.submit(formData, { method: "post" });
-    } catch (error) {
-      states.setServerError(error instanceof Error ? error.message : "An error occurred");
-      states.setIsSubmitting(false);
-    }
-  }, [states, validateForm, fetcher]);
-
-  useEffect(() => {
-    if (fetcher.state === "submitting") {
-      states.setIsSubmitting(true);
-    } else if (fetcher.state === "idle" && fetcher.data) {
-      if (fetcher.data.success && fetcher.data.redirectUrl) {
-        // Redirect to Stripe Checkout
-        window.location.href = fetcher.data.redirectUrl;
-      } else if (fetcher.data.error) {
-        states.setServerError(fetcher.data.error);
-        states.setIsSubmitting(false);
+    if (context.currentStep === 3) {
+      if (!context.formData.fullName) errors.fullName = "Name is required";
+      if (!context.formData.email) errors.email = "Email is required";
+      if (!context.formData.phoneNumber) errors.phoneNumber = "Phone number is required";
+      
+      if (Object.keys(errors).length > 0) {
+        context.setErrors(errors);
+        return;
       }
     }
-  }, [fetcher.state, fetcher.data, states]);
+
+    context.setCurrentStep(context.currentStep + 1);
+  };
+
+  const handlePreviousStep = () => {
+    context.setCurrentStep(context.currentStep - 1);
+  };
+
+  const handleSubmit = async () => {
+    context.setIsSubmitting(true);
+    context.setServerError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("intent", "create-checkout-session");
+      formData.append("booking", JSON.stringify(context.formData));
+      
+      fetcher.submit(formData, { method: "POST" });
+    } catch (error) {
+      context.setServerError(error instanceof Error ? error.message : "An error occurred");
+      context.setIsSubmitting(false);
+    }
+  };
+
+  const setAvailableDates = (dates: Array<{
+    date: string;
+    availablePlaces: number;
+    isAvailable: boolean;
+  }>) => {
+    // This would be implemented if we need to update available dates
+  };
 
   return {
     handleNextStep,
     handlePreviousStep,
     handleSubmit,
-    handleCreateCheckoutSession,
+    setAvailableDates,
     isLoading: fetcher.state === "submitting",
     error: fetcher.data?.error,
     success: fetcher.data?.success,
-    redirectUrl: fetcher.data?.redirectUrl,
-    sessionId: fetcher.data?.sessionId,
-    booking: fetcher.data?.booking
   };
-}
+};

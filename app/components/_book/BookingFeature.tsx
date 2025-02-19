@@ -11,15 +11,15 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { Loader2, CalendarRange, Users2, Sparkles } from "lucide-react";
 
 export const BookingFeature = () => {
-  const states = useBooking();
-  const actions = useBookingActions(states);
+  const context = useBooking();
+  const actions = useBookingActions(context);
 
-  if (states.isSuccess) {
+  if (context.isSuccess) {
     return <BookingSuccess />;
   }
 
   const renderStep = () => {
-    switch (states.currentStep) {
+    switch (context.currentStep) {
       case 1:
         return <BookingDateFeature />;
       case 2:
@@ -52,16 +52,16 @@ export const BookingFeature = () => {
         <div className="w-24 h-1 bg-gradient-to-r from-primary to-primary/60 mx-auto rounded-full" />
       </div>
 
-      {states.serverError && (
+      {context.serverError && (
         <Alert variant="destructive" className="mb-6">
-          <AlertDescription>{states.serverError}</AlertDescription>
+          <AlertDescription>{context.serverError}</AlertDescription>
         </Alert>
       )}
 
-      <BookingProgress currentStep={states.currentStep} />
+      <BookingProgress currentStep={context.currentStep} />
       
       <div className="relative">
-        {states.isSubmitting && (
+        {context.isSubmitting && (
           <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
@@ -72,11 +72,11 @@ export const BookingFeature = () => {
         </div>
 
         <BookingNavigation 
-          currentStep={states.currentStep}
+          currentStep={context.currentStep}
           onNext={actions.handleNextStep}
           onPrevious={actions.handlePreviousStep}
           onSubmit={actions.handleSubmit}
-          isSubmitting={states.isSubmitting}
+          isSubmitting={context.isSubmitting}
         />
       </div>
     </div>

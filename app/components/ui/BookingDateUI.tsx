@@ -1,7 +1,7 @@
 import { Calendar } from "./calendar";
 import { Label } from "./label";
 import { cn } from "~/lib/utils";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import type { BookingFormData } from "~/hooks/book.hooks";
 import type { DateAvailability } from "~/models/bookingAvailability.server";
 
@@ -19,13 +19,13 @@ export const BookingDateUI = ({ formData, errors, availableDates = [], isLoading
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const selectedDate = formData.bookingDate ? new Date(formData.bookingDate) : undefined;
+  const selectedDate = formData.date ? (typeof formData.date === "string" ? parseISO(formData.date) : new Date(formData.date)) : undefined;
 
   return (
     <div className="flex flex-col items-center space-y-6">
       <div className="w-full max-w-sm space-y-2">
         <Label className="text-center block">Select Date</Label>
-        <div className={cn("border rounded-lg p-4", errors.bookingDate && "border-red-500")}>
+        <div className={cn("border rounded-lg p-4", errors.date && "border-red-500")}>
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -47,7 +47,7 @@ export const BookingDateUI = ({ formData, errors, availableDates = [], isLoading
             className="rounded-md"
           />
         </div>
-        {errors.bookingDate && <p className="text-sm text-red-500">{errors.bookingDate}</p>}
+        {errors.date && <p className="text-sm text-red-500">{errors.date}</p>}
         {isLoading && <p className="text-sm text-muted-foreground text-center">Checking availability...</p>}
       </div>
     </div>

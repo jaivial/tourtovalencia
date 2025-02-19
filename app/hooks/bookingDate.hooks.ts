@@ -11,7 +11,7 @@ export const useBookingDateActions = (states: BookingContextState) => {
       // Handle date deselection
       states.setFormData({
         ...states.formData,
-        bookingDate: "",
+        date: "",
         partySize: ""
       });
       states.setSelectedDateAvailability(undefined);
@@ -26,7 +26,7 @@ export const useBookingDateActions = (states: BookingContextState) => {
     // Update form data first to ensure UI updates immediately
     states.setFormData({
       ...states.formData,
-      bookingDate: dateString,
+      date: dateString,
       partySize: "1"
     });
     
