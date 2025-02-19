@@ -9,8 +9,8 @@ import { updateBookingLimit } from "~/models/bookingLimit.server";
 export const loader: LoaderFunction = async ({ request }) => {
   try {
     const url = new URL(request.url);
-    const dateParam = url.searchParams.get('date');
-    
+    const dateParam = url.searchParams.get("date");
+
     // Create a date object that represents midnight in the local timezone
     let selectedDate: Date;
     if (dateParam) {
@@ -22,7 +22,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
     // Ensure the date is valid
     if (isNaN(selectedDate.getTime())) {
-      throw new Error('Invalid date parameter');
+      throw new Error("Invalid date parameter");
     }
 
     const db = await getDb();
@@ -45,7 +45,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     // Get booking limit
     const limitDoc = await db.collection("bookingLimits").findOne({ date: { $gte: startDate, $lte: endDate } });
 
-    const processedBookings: BookingData[] = bookings.map(booking => ({
+    const processedBookings: BookingData[] = bookings.map((booking) => ({
       _id: booking._id.toString(),
       name: booking.name || "",
       email: booking.email || "",
@@ -64,8 +64,8 @@ export const loader: LoaderFunction = async ({ request }) => {
     return json<LoaderData>({
       bookings: processedBookings,
       limit: {
-        maxBookings: limitDoc?.maxBookings ?? 20, // Use nullish coalescing to only default when undefined/null
-        currentBookings: bookings.length
+        maxBookings: limitDoc?.maxBookings ?? 10, // Use nullish coalescing to only default when undefined/null
+        currentBookings: bookings.length,
       },
       selectedDate: formattedDate,
     });
@@ -77,7 +77,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       bookings: [],
       limit: {
         maxBookings: 20,
-        currentBookings: 0
+        currentBookings: 0,
       },
       selectedDate: formattedDate,
       error: "Failed to load bookings",
@@ -98,26 +98,20 @@ export const action: ActionFunction = async ({ request }) => {
     }
 
     try {
-      const result = await updateBookingLimit(
-        new Date(date.toString()),
-        parseInt(maxBookings.toString())
-      );
-      
+      const result = await updateBookingLimit(new Date(date.toString()), parseInt(maxBookings.toString()));
+
       if (result.success) {
-        return json({ 
-          success: true, 
+        return json({
+          success: true,
           message: "Booking limit updated successfully",
-          data: result.data 
+          data: result.data,
         });
       } else {
         return json({ error: "Failed to update booking limit" }, { status: 500 });
       }
     } catch (error) {
       console.error("Error updating booking limit:", error);
-      return json(
-        { error: "Failed to update booking limit" },
-        { status: 500 }
-      );
+      return json({ error: "Failed to update booking limit" }, { status: 500 });
     }
   }
 
@@ -131,15 +125,15 @@ export default function AdminDashboardBookings() {
   const handleDateChange = (date: Date) => {
     // Format the date as YYYY-MM-DD in local timezone
     const formattedDate = formatLocalDate(date);
-    
+
     // Create a FormData object
     const formData = new FormData();
-    formData.append('date', formattedDate);
-    
+    formData.append("date", formattedDate);
+
     // Submit the form with the new date
     submit(formData, {
-      method: 'get',
-      replace: true
+      method: "get",
+      replace: true,
     });
   };
 

@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export type Booking = {
   _id: string;
@@ -54,6 +54,11 @@ export const AdminBookingsUI = ({
   strings,
 }: AdminBookingsUIProps) => {
   const [maxBookings, setMaxBookings] = useState(bookingLimit.maxBookings.toString());
+
+  // Update maxBookings input when bookingLimit changes (e.g., when date changes)
+  useEffect(() => {
+    setMaxBookings(bookingLimit.maxBookings.toString());
+  }, [bookingLimit.maxBookings]);
 
   // Calculate total people from all bookings
   const totalPeople = bookings.reduce((sum, booking) => {
