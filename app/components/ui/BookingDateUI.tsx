@@ -19,6 +19,8 @@ export const BookingDateUI = ({ formData, errors, availableDates = [], isLoading
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  const selectedDate = formData.bookingDate ? new Date(formData.bookingDate) : undefined;
+
   return (
     <div className="flex flex-col items-center space-y-6">
       <div className="w-full max-w-sm space-y-2">
@@ -26,7 +28,7 @@ export const BookingDateUI = ({ formData, errors, availableDates = [], isLoading
         <div className={cn("border rounded-lg p-4", errors.bookingDate && "border-red-500")}>
           <Calendar
             mode="single"
-            selected={formData.bookingDate instanceof Date ? formData.bookingDate : undefined}
+            selected={selectedDate}
             onSelect={onDateSelect}
             fromDate={today}
             disabled={(date) => {
