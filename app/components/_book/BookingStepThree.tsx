@@ -1,6 +1,7 @@
 import { useBooking } from "~/context/BookingContext";
 import { format } from "date-fns";
 import { Card } from "~/components/ui/card";
+import { PaymentFeature } from "../features/PaymentFeature";
 import { 
   User, 
   Mail, 
@@ -12,8 +13,8 @@ import {
 } from "lucide-react";
 
 export const BookingStepThree = () => {
-  const { formData } = useBooking();
-  const totalPrice = formData.partySize * 120;
+  const states = useBooking();
+  const totalPrice = states.formData.partySize * 120;
 
   return (
     <div className="space-y-6">
@@ -30,17 +31,17 @@ export const BookingStepThree = () => {
               <User className="h-4 w-4" />
               Name:
             </span>
-            <span>{formData.fullName}</span>
+            <span>{states.formData.fullName}</span>
             <span className="text-muted-foreground flex items-center gap-2">
               <Mail className="h-4 w-4" />
               Email:
             </span>
-            <span>{formData.email}</span>
+            <span>{states.formData.email}</span>
             <span className="text-muted-foreground flex items-center gap-2">
               <Phone className="h-4 w-4" />
               Phone:
             </span>
-            <span>{formData.phone}</span>
+            <span>{states.formData.phoneNumber}</span>
           </div>
         </div>
 
@@ -54,14 +55,14 @@ export const BookingStepThree = () => {
               <Users className="h-4 w-4" />
               Party Size:
             </span>
-            <span>{formData.partySize} people</span>
+            <span>{states.formData.partySize} people</span>
             <span className="text-muted-foreground flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Date:
             </span>
             <span>
-              {formData.bookingDate
-                ? format(formData.bookingDate, "PPP")
+              {states.formData.date
+                ? format(new Date(states.formData.date), "PPP")
                 : "Not selected"}
             </span>
           </div>
@@ -76,20 +77,24 @@ export const BookingStepThree = () => {
             <span className="text-2xl font-bold">€{totalPrice}</span>
           </div>
           <p className="mt-2 text-sm text-muted-foreground pl-7">
-            Price calculation: {formData.partySize} people × €120 per person
+            Price calculation: {states.formData.partySize} people × €120 per person
           </p>
         </div>
       </Card>
 
-      <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
-        <p className="text-yellow-800 text-sm flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          <span>
-            Your booking will be confirmed via WhatsApp or email. Please wait
-            for our confirmation before making any arrangements.
-          </span>
-        </p>
-      </div>
+      {states.paymentClientSecret ? (
+        <PaymentFeature />
+      ) : (
+        <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
+          <p className="text-yellow-800 text-sm flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <span>
+              Your booking will be confirmed after successful payment.
+              Click "Book Now" to proceed to payment.
+            </span>
+          </p>
+        </div>
+      )}
     </div>
   );
-}; 
+};

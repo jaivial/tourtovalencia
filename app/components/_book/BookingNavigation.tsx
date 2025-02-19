@@ -16,6 +16,8 @@ export const BookingNavigation = ({
   onSubmit,
   isSubmitting,
 }: BookingNavigationProps) => {
+  const isLastStep = currentStep === 4;
+  
   return (
     <div className="flex justify-between mt-8 pt-4 border-t">
       {currentStep > 1 ? (
@@ -32,13 +34,13 @@ export const BookingNavigation = ({
       )}
 
       <Button
-        onClick={currentStep === 3 ? onSubmit : onNext}
+        onClick={isLastStep ? onSubmit : onNext}
         className="flex items-center gap-2"
         disabled={isSubmitting}
       >
         {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-        <span>{currentStep === 3 ? "Book Now" : "Next"}</span>
+        <span>{isLastStep ? "Book Now" : "Next"}</span>
       </Button>
     </div>
   );
-}; 
+};
