@@ -64,12 +64,16 @@ export const AdminBookingsUI = ({
     return sum;
   }, 0);
 
-  const completionPercentage = bookingLimit.maxBookings > 0
-    ? Math.min(100, Math.round((totalPeople / bookingLimit.maxBookings) * 100))
+  const completionPercentage = bookingLimit.maxBookings !== null
+    ? (bookingLimit.maxBookings === 0 ? 100 : Math.min(100, Math.round((totalPeople / bookingLimit.maxBookings) * 100)))
     : 0;
 
   const handleMaxBookingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMaxBookings(e.target.value);
+    const value = e.target.value;
+    // Allow empty string (for when user is typing) or non-negative numbers
+    if (value === '' || (!isNaN(Number(value)) && Number(value) >= 0)) {
+      setMaxBookings(value);
+    }
   };
 
   const handleUpdateClick = () => {
@@ -201,9 +205,9 @@ export const AdminBookingsUI = ({
                 <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
                   <Input
                     type="number"
+                    min="0"
                     value={maxBookings}
                     onChange={handleMaxBookingsChange}
-                    min="0"
                     className="w-full sm:w-32 text-center"
                     aria-label="Maximum bookings per day"
                     disabled={isLoading}

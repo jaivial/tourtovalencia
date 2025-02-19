@@ -1,7 +1,6 @@
-// Page component: just responsible for containing providers, feature components and fetch data drom ssr:
-// Page component: just responsible for containing providers, feature components and fectch data from the ssr.
-import { json, MetaFunction, ActionFunctionArgs } from "@remix-run/node";
-import { useActionData, useNavigation } from "@remix-run/react";
+// Page component: just responsible for containing providers, feature components and fetch data from the ssr.
+import { json, type LoaderFunction, type ActionFunctionArgs, MetaFunction } from "@remix-run/node";
+import { useActionData, useNavigation, useLoaderData } from "@remix-run/react";
 import { BookingProvider } from "~/context/BookingContext";
 import { BookingFeature } from "~/components/_book/BookingFeature";
 import { BookingSuccess } from "~/components/_book/BookingSuccess";
@@ -10,6 +9,8 @@ import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/emails/BookingConfirmationEmail";
 import { BookingAdminEmail } from "~/emails/BookingAdminEmail";
 import type { BookingFormData } from "~/hooks/book.hooks";
+import { getAvailableDatesInRange, getDateAvailability } from "~/models/bookingAvailability.server";
+import { addMonths } from "date-fns";
 
 // Add this directive at the top of the file to make it a client component
 'use client';
@@ -21,8 +22,56 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async () => {
-  return json({});
+export type LoaderData = {
+  availableDates: Array<{
+    date: string;
+    availablePlaces: number;
+    isAvailable: boolean;
+  }>;
+  selectedDateAvailability?: {
+    date: string;
+    availablePlaces: number;
+    isAvailable: boolean;
+  };
+};
+
+export const loader: LoaderFunction = async ({ request }) => {
+  try {
+    const url = new URL(request.url);
+    const selectedDate = url.searchParams.get('date');
+
+    // Get dates for the next 3 months
+    const startDate = new Date();
+    const endDate = addMonths(startDate, 3);
+    
+    const availableDates = await getAvailableDatesInRange(startDate, endDate);
+    
+    let selectedDateAvailability;
+    if (selectedDate) {
+      const dateAvailability = await getDateAvailability(new Date(selectedDate));
+      if (dateAvailability) {
+        selectedDateAvailability = {
+          date: dateAvailability.date.toISOString(),
+          availablePlaces: dateAvailability.availablePlaces,
+          isAvailable: dateAvailability.isAvailable
+        };
+      }
+    }
+
+    return json<LoaderData>({
+      availableDates: availableDates.map(d => ({
+        date: d.date.toISOString(),
+        availablePlaces: d.availablePlaces,
+        isAvailable: d.isAvailable
+      })),
+      selectedDateAvailability
+    });
+  } catch (error) {
+    console.error("Error in book loader:", error);
+    return json<LoaderData>({
+      availableDates: [],
+    });
+  }
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -74,13 +123,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 };
 
-type ActionData = 
-  | { success: true }
-  | { success: false, error: string };
+type ActionData = {
+  success?: boolean;
+  error?: string;
+};
 
 export default function Book() {
   const actionData = useActionData<typeof action>() as ActionData;
   const navigation = useNavigation();
+  const loaderData = useLoaderData<typeof loader>();
   const isSubmitting = navigation.state === "submitting";
 
   if (actionData?.success) {
@@ -90,7 +141,13 @@ export default function Book() {
   return (
     <>
       {isSubmitting && <BookingLoading />}
-      <BookingProvider initialState={{ serverError: actionData?.error }}>
+      <BookingProvider 
+        initialState={{ 
+          serverError: actionData?.error,
+          availableDates: loaderData.availableDates,
+          selectedDateAvailability: loaderData.selectedDateAvailability
+        }}
+      >
         <BookingFeature />
       </BookingProvider>
     </>

@@ -59,11 +59,17 @@ export async function getBookingLimit(localDate: Date): Promise<BookingLimit | n
     
     const limit = await bookingLimits.findOne({ date: utcDate });
     
-    // Convert the date back to local timezone before returning
-    return limit ? {
-      ...limit,
-      date: utcDateToLocalMidnight(limit.date)
-    } : null;
+    if (!limit) return null;
+
+    // Ensure all required fields are present with default values if needed
+    const bookingLimit: BookingLimit = {
+      _id: limit._id,
+      date: utcDateToLocalMidnight(limit.date),
+      maxBookings: limit.maxBookings || 0,
+      currentBookings: limit.currentBookings || 0
+    };
+    
+    return bookingLimit;
   } catch (error) {
     console.error("Error in getBookingLimit:", error);
     throw new Error("Failed to get booking limit");

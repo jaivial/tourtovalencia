@@ -3,6 +3,7 @@ import { useBookingActions } from "~/hooks/book.hooks";
 import { BookingStepOne } from "./BookingStepOne";
 import { BookingStepTwo } from "./BookingStepTwo";
 import { BookingStepThree } from "./BookingStepThree";
+import { BookingDateFeature } from "../features/BookingDateFeature";
 import { BookingNavigation } from "./BookingNavigation";
 import { BookingProgress } from "./BookingProgress";
 import { BookingSuccess } from "./BookingSuccess";
@@ -16,6 +17,21 @@ export const BookingFeature = () => {
   if (states.isSuccess) {
     return <BookingSuccess />;
   }
+
+  const renderStep = () => {
+    switch (states.currentStep) {
+      case 1:
+        return <BookingDateFeature />;
+      case 2:
+        return <BookingStepTwo />;
+      case 3:
+        return <BookingStepOne />;
+      case 4:
+        return <BookingStepThree />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className={`max-[730px]:max-w-[calc(100%-5rem)] max-w-2xl mx-auto mt-36 mb-20 px-4 sm:px-6 md:px-6`}>
@@ -51,18 +67,18 @@ export const BookingFeature = () => {
           </div>
         )}
         
-        {states.currentStep === 1 && <BookingStepOne />}
-        {states.currentStep === 2 && <BookingStepTwo />}
-        {states.currentStep === 3 && <BookingStepThree />}
+        <div className="mt-8">
+          {renderStep()}
+        </div>
+
+        <BookingNavigation 
+          currentStep={states.currentStep}
+          onNext={actions.handleNextStep}
+          onPrevious={actions.handlePreviousStep}
+          onSubmit={actions.handleSubmit}
+          isSubmitting={states.isSubmitting}
+        />
       </div>
-      
-      <BookingNavigation
-        currentStep={states.currentStep}
-        onNext={actions.handleNextStep}
-        onPrevious={actions.handlePreviousStep}
-        onSubmit={actions.handleSubmit}
-        isSubmitting={states.isSubmitting}
-      />
     </div>
   );
-}; 
+};

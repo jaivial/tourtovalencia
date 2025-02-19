@@ -5,6 +5,16 @@ interface BookingProviderProps {
   children: React.ReactNode;
   initialState?: {
     serverError?: string;
+    availableDates?: Array<{
+      date: string;
+      availablePlaces: number;
+      isAvailable: boolean;
+    }>;
+    selectedDateAvailability?: {
+      date: string;
+      availablePlaces: number;
+      isAvailable: boolean;
+    };
   };
 }
 
@@ -24,4 +34,4 @@ export const useBooking = () => {
   const context = useContext(BookingContext);
   if (!context) throw new Error("useBooking must be used within BookingProvider");
   return context;
-}; 
+};

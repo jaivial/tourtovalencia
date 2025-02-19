@@ -64,7 +64,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     return json<LoaderData>({
       bookings: processedBookings,
       limit: {
-        maxBookings: Number(limitDoc?.maxBookings) || 20,
+        maxBookings: limitDoc?.maxBookings ?? 20, // Use nullish coalescing to only default when undefined/null
         currentBookings: bookings.length
       },
       selectedDate: formattedDate,

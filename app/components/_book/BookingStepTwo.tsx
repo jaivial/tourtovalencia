@@ -1,14 +1,5 @@
 import { useBooking } from "~/context/BookingContext";
 import { Label } from "../ui/label";
-import { Calendar } from "../ui/calendar";
-import { Button } from "../ui/button";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../ui/popover";
 import {
   Select,
   SelectContent,
@@ -17,9 +8,15 @@ import {
   SelectValue,
 } from "../ui/select";
 import { cn } from "~/lib/utils";
+import { format } from "date-fns";
 
 export const BookingStepTwo = () => {
-  const { formData, setFormData, errors } = useBooking();
+  const { 
+    formData, 
+    setFormData, 
+    errors,
+    selectedDateAvailability 
+  } = useBooking();
 
   const handlePartySizeChange = (value: string) => {
     setFormData((prev) => ({
@@ -28,15 +25,39 @@ export const BookingStepTwo = () => {
     }));
   };
 
-  const handleDateSelect = (date: Date | undefined) => {
-    setFormData((prev) => ({
-      ...prev,
-      bookingDate: date || null,
-    }));
-  };
+  // If no date is selected or no availability data, show message
+  if (!formData.bookingDate || !selectedDateAvailability) {
+    return (
+      <div className="text-center text-muted-foreground">
+        Please select a date first to see available party sizes.
+      </div>
+    );
+  }
+
+  // Generate options based on available places
+  const maxPartySize = selectedDateAvailability.availablePlaces;
+  const partySizeOptions = Array.from(
+    { length: maxPartySize },
+    (_, i) => i + 1
+  );
 
   return (
     <div className="space-y-6">
+      <div className="text-center mb-4">
+        <p className="text-muted-foreground">
+          Selected date:{' '}
+          <span className="font-medium text-foreground">
+            {format(formData.bookingDate, 'MMMM d, yyyy')}
+          </span>
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Available places:{' '}
+          <span className="font-medium text-foreground">
+            {selectedDateAvailability.availablePlaces}
+          </span>
+        </p>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="partySize">Party Size</Label>
         <Select
@@ -50,57 +71,17 @@ export const BookingStepTwo = () => {
             <SelectValue placeholder="Select party size" />
           </SelectTrigger>
           <SelectContent>
-            {Array.from({ length: 10 }, (_, i) => i + 1).map((size) => (
-              <SelectItem
-                key={size}
-                value={size.toString()}
-                className="flex items-center justify-between"
-              >
-                <span>{size} {size === 1 ? 'person' : 'people'}</span>
-
+            {partySizeOptions.map((size) => (
+              <SelectItem key={size} value={size.toString()}>
+                {size} {size === 1 ? "person" : "people"}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         {errors.partySize && (
-          <p className="text-sm text-red-500">{errors.partySize.toString()}</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label>Booking Date</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !formData.bookingDate && "text-muted-foreground",
-                errors.bookingDate && "border-red-500"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {formData.bookingDate ? (
-                format(formData.bookingDate, "PPP")
-              ) : (
-                <span>Pick a date</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={formData.bookingDate || undefined}
-              onSelect={handleDateSelect}
-              disabled={(date) => date < new Date()}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-        {errors.bookingDate && (
-          <p className="text-sm text-red-500">{errors.bookingDate.toString()}</p>
+          <p className="text-sm text-red-500">{errors.partySize}</p>
         )}
       </div>
     </div>
   );
-}; 
+};

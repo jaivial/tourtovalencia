@@ -14,7 +14,17 @@ type BookingFormErrors = {
   [K in keyof BookingFormData]: string;
 };
 
-export const useBookingStates = (initialState?: { serverError?: string }) => {
+type DateAvailability = {
+  date: string;
+  availablePlaces: number;
+  isAvailable: boolean;
+};
+
+export const useBookingStates = (initialState?: { 
+  serverError?: string;
+  availableDates?: DateAvailability[];
+  selectedDateAvailability?: DateAvailability;
+}) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<BookingFormData>({
     fullName: "",
@@ -28,6 +38,12 @@ export const useBookingStates = (initialState?: { serverError?: string }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState(initialState?.serverError);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [availableDates, setAvailableDates] = useState<DateAvailability[]>(
+    initialState?.availableDates || []
+  );
+  const [selectedDateAvailability, setSelectedDateAvailability] = useState<DateAvailability | undefined>(
+    initialState?.selectedDateAvailability
+  );
 
   return {
     currentStep,
@@ -36,70 +52,86 @@ export const useBookingStates = (initialState?: { serverError?: string }) => {
     isSubmitting,
     serverError,
     isSuccess,
+    availableDates,
+    selectedDateAvailability,
     setCurrentStep,
     setFormData,
     setErrors,
     setIsSubmitting,
     setServerError,
     setIsSuccess,
+    setAvailableDates,
+    setSelectedDateAvailability,
   };
 };
 
 export const useBookingActions = (states: ReturnType<typeof useBookingStates>) => {
   const submit = useSubmit();
-  
+
+  const validateStep = () => {
+    const errors: Partial<BookingFormErrors> = {};
+    const { currentStep, formData } = states;
+
+    switch (currentStep) {
+      case 1: // Date selection
+        if (!formData.bookingDate) {
+          errors.bookingDate = "Please select a date";
+        }
+        break;
+      
+      case 2: // Party size
+        if (!formData.partySize || formData.partySize < 1) {
+          errors.partySize = "Please select party size";
+        }
+        break;
+      
+      case 3: // Personal details
+        if (!formData.fullName) {
+          errors.fullName = "Please enter your full name";
+        }
+        if (!formData.email) {
+          errors.email = "Please enter your email";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+          errors.email = "Please enter a valid email";
+        }
+        if (!formData.emailConfirm) {
+          errors.emailConfirm = "Please confirm your email";
+        } else if (formData.email !== formData.emailConfirm) {
+          errors.emailConfirm = "Emails do not match";
+        }
+        if (!formData.phone) {
+          errors.phone = "Please enter your phone number";
+        }
+        break;
+    }
+
+    states.setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleNextStep = () => {
-    if (validateCurrentStep()) {
-      states.setCurrentStep((prev) => Math.min(prev + 1, 3));
+    if (validateStep()) {
+      states.setCurrentStep((prev) => prev + 1);
     }
   };
 
   const handlePreviousStep = () => {
-    states.setCurrentStep((prev) => Math.max(prev - 1, 1));
+    states.setCurrentStep((prev) => prev - 1);
   };
 
-  const validateCurrentStep = () => {
-    const { formData, currentStep, setErrors } = states;
-    const newErrors: Partial<BookingFormErrors> = {};
-
-    switch (currentStep) {
-      case 1:
-        if (!formData.fullName) newErrors.fullName = "Name is required";
-        if (!formData.email) newErrors.email = "Email is required";
-        if (formData.email !== formData.emailConfirm) {
-          newErrors.emailConfirm = "Emails do not match";
-        }
-        if (!formData.phone) newErrors.phone = "Phone is required";
-        break;
-      case 2:
-        if (!formData.bookingDate) newErrors.bookingDate = "Date is required";
-        if (formData.partySize < 1 || formData.partySize > 10) {
-          newErrors.partySize = "Party size must be between 1 and 10";
-        }
-        break;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async () => {
-    if (!validateCurrentStep()) return;
-    
-    states.setIsSubmitting(true);
-    states.setServerError(undefined);
-
-    try {
+  const handleSubmit = () => {
+    if (validateStep()) {
       const formData = new FormData();
-      formData.append("booking", JSON.stringify(states.formData));
-      console.log(formData);
+      Object.entries(states.formData).forEach(([key, value]) => {
+        if (key === 'bookingDate' && value) {
+          formData.append(key, value.toISOString());
+        } else {
+          formData.append(key, String(value));
+        }
+      });
       
+      states.setIsSubmitting(true);
       submit(formData, { method: "post" });
-      states.setIsSuccess(true);
-    } catch (error) {
-      states.setServerError("Failed to submit booking. Please try again.");
-    } finally {
-      states.setIsSubmitting(false);
     }
   };
 
@@ -108,4 +140,4 @@ export const useBookingActions = (states: ReturnType<typeof useBookingStates>) =
     handlePreviousStep,
     handleSubmit,
   };
-}; 
+};
