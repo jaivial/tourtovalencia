@@ -74,8 +74,7 @@ export async function createCheckoutSession(booking: BookingFormData) {
       ? booking.bookingDate.toISOString()
       : new Date(booking.bookingDate).toISOString();
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+    const params: Stripe.Checkout.SessionCreateParams = {
       line_items: [
         {
           price_data: {
@@ -99,7 +98,11 @@ export async function createCheckoutSession(booking: BookingFormData) {
       success_url: `${process.env.PUBLIC_URL || 'http://localhost:5173'}/book/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.PUBLIC_URL || 'http://localhost:5173'}/book`,
       customer_email: booking.email,
-    });
+      billing_address_collection: 'auto',
+      payment_method_types: ['card'],
+    };
+
+    const session = await stripe.checkout.sessions.create(params);
 
     return { sessionId: session.id, url: session.url };
   } catch (error) {
