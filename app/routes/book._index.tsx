@@ -59,8 +59,26 @@ export async function action({ request }: ActionFunctionArgs) {
   if (intent === "create-checkout-session") {
     try {
       const bookingData = JSON.parse(formData.get("booking") as string);
-      const origin = request.headers.get("Origin") || request.headers.get("Referer") || undefined;
-      const { url, sessionId } = await createCheckoutSession(bookingData, origin);
+      
+      // Get the host and construct the base URL
+      const host = request.headers.get("host");
+      if (!host) {
+        throw new Error("No host header found");
+      }
+
+      // Determine the protocol
+      let protocol: string;
+      if (process.env.NODE_ENV === "production") {
+        protocol = "https";
+      } else {
+        protocol = "http";
+      }
+
+      // Construct the base URL
+      const baseUrl = `${protocol}://${host}`;
+      console.log('Using base URL:', baseUrl);
+
+      const { url, sessionId } = await createCheckoutSession(bookingData, baseUrl);
 
       if (!url) {
         throw new Error("No redirect URL received from Stripe");

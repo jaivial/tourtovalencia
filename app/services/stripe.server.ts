@@ -62,9 +62,13 @@ export async function retrievePaymentIntent(paymentIntentId: string) {
   }
 }
 
-export async function createCheckoutSession(booking: BookingFormData, origin?: string) {
+export async function createCheckoutSession(booking: BookingFormData, baseUrl: string) {
   if (!booking.date) {
     throw new Error("Booking date is required");
+  }
+
+  if (!baseUrl || !baseUrl.startsWith('http')) {
+    throw new Error(`Invalid base URL provided: ${baseUrl}`);
   }
 
   const totalAmount = booking.partySize * 0.5 * 100; // 0.5 EUR converted to cents
@@ -73,8 +77,9 @@ export async function createCheckoutSession(booking: BookingFormData, origin?: s
     // Ensure the date is a string when sending to Stripe
     const date = new Date(booking.date).toISOString();
 
-    // Use the request origin if provided, otherwise fallback to PUBLIC_URL
-    const baseUrl = origin || process.env.PUBLIC_URL || 'http://localhost:5173';
+    // Clean the base URL (remove trailing slashes)
+    const cleanBaseUrl = baseUrl.replace(/\/$/, "");
+    console.log('Creating Stripe session with base URL:', cleanBaseUrl);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -92,8 +97,8 @@ export async function createCheckoutSession(booking: BookingFormData, origin?: s
         },
       ],
       mode: "payment",
-      success_url: `${baseUrl}/book/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/book?error=payment-cancelled`,
+      success_url: `${cleanBaseUrl}/book/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${cleanBaseUrl}/book?error=payment-cancelled`,
       metadata: {
         date,
         time: booking.time,
