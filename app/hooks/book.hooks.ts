@@ -1,14 +1,16 @@
 import { useState, useCallback, useEffect } from "react";
 import { useSubmit, useFetcher } from "@remix-run/react";
 import type { DateAvailability } from "~/models/bookingAvailability.server";
+import type { BookingContextState } from "~/context/BookingContext";
+import type { ActionData } from "~/routes/book";
 
 export type BookingFormData = {
   fullName: string;
   email: string;
-  emailConfirm: string;
-  phone: string;
-  bookingDate: Date | null;
-  partySize: number;
+  phoneNumber: string;
+  bookingDate: string;
+  partySize: string;
+  amount: number;
 };
 
 export type BookingStates = {
@@ -46,10 +48,10 @@ export function useBookingStates(initialState?: {
   const [formData, setFormData] = useState<BookingFormData>({
     fullName: "",
     email: "",
-    emailConfirm: "",
-    phone: "",
-    bookingDate: null,
-    partySize: 1,
+    phoneNumber: "",
+    bookingDate: "",
+    partySize: "",
+    amount: 0,
   });
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,7 +92,19 @@ export function useBookingStates(initialState?: {
 
 export function useBookingActions(states: ReturnType<typeof useBookingStates>) {
   const submit = useSubmit();
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<ActionData>();
+
+  useEffect(() => {
+    // If we have a sessionId from Stripe redirect, confirm the payment
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    if (sessionId) {
+      const formData = new FormData();
+      formData.append("intent", "confirm-payment");
+      formData.append("session_id", sessionId);
+      fetcher.submit(formData, { method: "POST" });
+    }
+  }, [fetcher]);
 
   const validateForm = useCallback(() => {
     const errors: Partial<Record<keyof BookingFormData, string>> = {};
@@ -102,11 +116,7 @@ export function useBookingActions(states: ReturnType<typeof useBookingStates>) {
     if (states.currentStep === 3) {
       if (!states.formData.fullName) errors.fullName = "Name is required";
       if (!states.formData.email) errors.email = "Email is required";
-      if (!states.formData.emailConfirm) errors.emailConfirm = "Please confirm your email";
-      if (states.formData.email !== states.formData.emailConfirm) {
-        errors.emailConfirm = "Emails do not match";
-      }
-      if (!states.formData.phone) errors.phone = "Phone number is required";
+      if (!states.formData.phoneNumber) errors.phoneNumber = "Phone number is required";
     }
     
     states.setErrors(errors);
@@ -123,6 +133,15 @@ export function useBookingActions(states: ReturnType<typeof useBookingStates>) {
     states.setCurrentStep(states.currentStep - 1);
   }, [states]);
 
+  const handleCreateCheckoutSession = useCallback(async (bookingData: BookingFormData) => {
+    const formData = new FormData();
+    formData.append("intent", "create-checkout-session");
+    formData.append("booking", JSON.stringify(bookingData));
+    
+    const response = await fetcher.submit(formData, { method: "POST" });
+    return response;
+  }, [fetcher]);
+
   const handleSubmit = useCallback(async () => {
     if (!validateForm()) return;
 
@@ -135,7 +154,7 @@ export function useBookingActions(states: ReturnType<typeof useBookingStates>) {
       formData.append("intent", "create-checkout-session");
       formData.append("booking", JSON.stringify({
         ...states.formData,
-        bookingDate: states.formData.bookingDate?.toISOString(),
+        bookingDate: states.formData.bookingDate,
       }));
 
       fetcher.submit(formData, { method: "post" });
@@ -163,5 +182,12 @@ export function useBookingActions(states: ReturnType<typeof useBookingStates>) {
     handleNextStep,
     handlePreviousStep,
     handleSubmit,
+    handleCreateCheckoutSession,
+    isLoading: fetcher.state === "submitting",
+    error: fetcher.data?.error,
+    success: fetcher.data?.success,
+    redirectUrl: fetcher.data?.redirectUrl,
+    sessionId: fetcher.data?.sessionId,
+    booking: fetcher.data?.booking
   };
 }

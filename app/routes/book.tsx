@@ -1,23 +1,19 @@
 // Page component: just responsible for containing providers, feature components and fetch data from the ssr.
-import { json, type LoaderFunction, type ActionFunctionArgs, MetaFunction, redirect } from "@remix-run/node";
-import { useActionData, useNavigation, useLoaderData, useNavigate } from "@remix-run/react";
+import { json, type LoaderFunction, type ActionFunctionArgs, MetaFunction } from "@remix-run/node";
+import { useActionData, useNavigation, useLoaderData } from "@remix-run/react";
 import { BookingProvider } from "~/context/BookingContext";
 import { BookingFeature } from "~/components/_book/BookingFeature";
-import { BookingSuccess } from "~/components/_book/BookingSuccess";
 import { BookingLoading } from "~/components/_book/BookingLoading";
-import { createCheckoutSession } from "~/services/stripe.server";
+import { createCheckoutSession, retrieveCheckoutSession } from "~/services/stripe.server";
 import { createBooking } from "~/services/booking.server";
 import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
 import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
-import type { Booking } from "~/types/booking";
-import type { BookingFormData } from "~/hooks/book.hooks";
 import { getAvailableDatesInRange, getDateAvailability } from "~/models/bookingAvailability.server";
 import { addMonths } from "date-fns";
-import Stripe from "stripe";
-
-// Add this directive at the top of the file to make it a client component
-'use client';
+import type { Booking } from "~/types/booking";
+import { BookingSuccessProvider } from "~/context/BookingSuccessContext";
+import { BookingSuccessFeature } from "~/components/features/BookingSuccessFeature";
 
 export const meta: MetaFunction = () => {
   return [
@@ -37,44 +33,30 @@ export type LoaderData = {
     availablePlaces: number;
     isAvailable: boolean;
   };
+  sessionId?: string;
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
   try {
     const url = new URL(request.url);
     const selectedDate = url.searchParams.get('date');
+    const sessionId = url.searchParams.get('session_id');
 
     // Get dates for the next 3 months
     const startDate = new Date();
     const endDate = addMonths(startDate, 3);
     
     const availableDates = await getAvailableDatesInRange(startDate, endDate);
-    
+
     let selectedDateAvailability;
     if (selectedDate) {
-      const dateAvailability = await getDateAvailability(new Date(selectedDate));
-      if (dateAvailability) {
-        selectedDateAvailability = {
-          date: dateAvailability.date.toISOString(),
-          availablePlaces: dateAvailability.availablePlaces,
-          isAvailable: dateAvailability.isAvailable
-        };
-      }
+      selectedDateAvailability = await getDateAvailability(new Date(selectedDate));
     }
 
-    return json<LoaderData>({
-      availableDates: availableDates.map(d => ({
-        date: d.date.toISOString(),
-        availablePlaces: d.availablePlaces,
-        isAvailable: d.isAvailable
-      })),
-      selectedDateAvailability
-    });
+    return json({ availableDates, selectedDateAvailability, sessionId });
   } catch (error) {
-    console.error("Error in book loader:", error);
-    return json<LoaderData>({
-      availableDates: [],
-    });
+    console.error('Error loading booking data:', error);
+    return json({ availableDates: [], error: 'Failed to load available dates' });
   }
 };
 
@@ -85,9 +67,13 @@ export async function action({ request }: ActionFunctionArgs) {
   if (intent === "create-checkout-session") {
     try {
       const bookingData = JSON.parse(formData.get("booking") as string);
-      const { url } = await createCheckoutSession(bookingData);
+      const { url, sessionId } = await createCheckoutSession(bookingData);
       
-      return json({ success: true, redirectUrl: url });
+      if (!url) {
+        throw new Error("No redirect URL received from Stripe");
+      }
+
+      return json({ success: true, redirectUrl: url, sessionId });
     } catch (error) {
       console.error("Error creating checkout session:", error);
       return json(
@@ -97,50 +83,54 @@ export async function action({ request }: ActionFunctionArgs) {
     }
   }
 
-  if (intent === "confirm_booking") {
+  if (intent === "confirm-payment") {
     try {
-      const bookingData = JSON.parse(formData.get("booking") as string);
-      const session_id = formData.get("session_id") as string;
+      const sessionId = formData.get("session_id") as string;
+      const session = await retrieveCheckoutSession(sessionId);
 
-      // Prepare booking data with all required fields
-      const booking: Omit<Booking, '_id'> = {
-        fullName: bookingData.fullName,
-        email: bookingData.email,
-        bookingDate: new Date(bookingData.bookingDate),
-        partySize: parseInt(bookingData.partySize),
-        amount: bookingData.amount,
-        paymentId: session_id,
-        status: 'confirmed',
+      if (session.payment_status !== "paid") {
+        throw new Error("Payment not completed");
+      }
+
+      // Create booking in database
+      const bookingData = {
+        fullName: session.metadata?.customerName || "",
+        email: session.customer_email || session.metadata?.customerEmail || "",
+        bookingDate: session.metadata?.bookingDate ? new Date(session.metadata.bookingDate) : new Date(),
+        partySize: parseInt(session.metadata?.partySize || "1", 10),
+        paymentId: session.id,
+        amount: session.amount_total || 0,
+        phoneNumber: session.metadata?.phoneNumber || "",
+        status: "confirmed",
         paid: true
       };
 
-      // Create booking in database
-      const newBooking = await createBooking(booking, session_id);
+      const newBooking = await createBooking(bookingData, session.id);
 
       // Send confirmation emails
       await Promise.all([
         sendEmail({
-          to: booking.email,
-          subject: "Booking Confirmation",
+          to: bookingData.email,
+          subject: "Confirmación de Reserva - Medina Azahara",
           component: BookingConfirmationEmail({
             booking: newBooking,
           }),
         }),
         sendEmail({
           to: process.env.ADMIN_EMAIL!,
-          subject: "New Booking Received",
+          subject: "Nueva Reserva Recibida",
           component: BookingAdminEmail({
             booking: newBooking,
           }),
         }),
       ]);
 
-      return redirect('/book/success');
+      return json({ success: true, booking: newBooking });
     } catch (error) {
-      console.error("Error processing booking:", error);
+      console.error("Error confirming payment:", error);
       return json(
-        { success: false, error: "Failed to process booking" },
-        { status: 500 }
+        { success: false, error: error instanceof Error ? error.message : "Failed to confirm payment" },
+        { status: 400 }
       );
     }
   }
@@ -148,9 +138,12 @@ export async function action({ request }: ActionFunctionArgs) {
   return json({ success: false, error: "Invalid intent" }, { status: 400 });
 }
 
-type ActionData = {
+export type ActionData = {
   success?: boolean;
   error?: string;
+  booking?: Booking;
+  redirectUrl?: string;
+  sessionId?: string;
 };
 
 export default function Book() {
@@ -163,8 +156,13 @@ export default function Book() {
     return <BookingLoading />;
   }
 
-  if (actionData?.success) {
-    return <BookingSuccess />;
+  // Show success page if we have a confirmed booking
+  if (actionData?.success && actionData.booking) {
+    return (
+      <BookingSuccessProvider booking={actionData.booking}>
+        <BookingSuccessFeature />
+      </BookingSuccessProvider>
+    );
   }
 
   return (

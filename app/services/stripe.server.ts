@@ -1,30 +1,28 @@
-import Stripe from 'stripe';
-import { BookingFormData } from '~/hooks/book.hooks';
+import Stripe from "stripe";
+import { BookingFormData } from "~/hooks/book.hooks";
 
 if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY must be defined');
+  throw new Error("STRIPE_SECRET_KEY must be defined");
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-01-27.acacia',
+  apiVersion: "2025-01-27.acacia",
 });
 
 export async function createPaymentIntent(booking: BookingFormData) {
   if (!booking.bookingDate) {
-    throw new Error('Booking date is required');
+    throw new Error("Booking date is required");
   }
 
   const totalAmount = booking.partySize * 0.5 * 100; // 0.5 EUR converted to cents
 
   try {
     // Ensure the date is a string when sending to Stripe
-    const bookingDate = booking.bookingDate instanceof Date 
-      ? booking.bookingDate.toISOString()
-      : new Date(booking.bookingDate).toISOString();
+    const bookingDate = booking.bookingDate instanceof Date ? booking.bookingDate.toISOString() : new Date(booking.bookingDate).toISOString();
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: totalAmount,
-      currency: 'eur',
+      currency: "eur",
       metadata: {
         bookingDate,
         customerName: booking.fullName,
@@ -41,11 +39,11 @@ export async function createPaymentIntent(booking: BookingFormData) {
       paymentIntentId: paymentIntent.id,
     };
   } catch (error) {
-    console.error('Error creating payment intent:', error);
+    console.error("Error creating payment intent:", error);
     if (error instanceof Stripe.errors.StripeError) {
       throw new Error(`Stripe error: ${error.message}`);
     }
-    throw new Error('Failed to create payment intent');
+    throw new Error("Failed to create payment intent");
   }
 }
 
@@ -54,63 +52,60 @@ export async function retrievePaymentIntent(paymentIntentId: string) {
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
     return paymentIntent;
   } catch (error) {
-    console.error('Error retrieving payment intent:', error);
+    console.error("Error retrieving payment intent:", error);
     if (error instanceof Stripe.errors.StripeError) {
       throw new Error(`Stripe error: ${error.message}`);
     }
-    throw new Error('Failed to retrieve payment intent');
+    throw new Error("Failed to retrieve payment intent");
   }
 }
 
 export async function createCheckoutSession(booking: BookingFormData) {
   if (!booking.bookingDate) {
-    throw new Error('Booking date is required');
+    throw new Error("Booking date is required");
   }
 
   const totalAmount = booking.partySize * 0.5 * 100; // 0.5 EUR converted to cents
 
   try {
-    const bookingDate = booking.bookingDate instanceof Date 
-      ? booking.bookingDate.toISOString()
-      : new Date(booking.bookingDate).toISOString();
+    // Ensure the date is a string when sending to Stripe
+    const bookingDate = booking.bookingDate instanceof Date ? booking.bookingDate.toISOString() : new Date(booking.bookingDate).toISOString();
 
-    const params: Stripe.Checkout.SessionCreateParams = {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
       line_items: [
         {
           price_data: {
-            currency: 'eur',
+            currency: "eur",
             product_data: {
-              name: 'Excursión a Medina Azahara',
-              description: `Booking for ${booking.partySize} ${booking.partySize === 1 ? 'person' : 'people'} on ${new Date(bookingDate).toLocaleDateString()}`,
+              name: "Excursión a Cuevas de San Jose",
+              description: `Reserva para ${booking.partySize} ${booking.partySize === 1 ? "persona" : "personas"} el ${new Date(bookingDate).toLocaleDateString("es-ES")}`,
             },
             unit_amount: totalAmount,
           },
           quantity: 1,
         },
       ],
+      mode: "payment",
+      success_url: `${process.env.PUBLIC_URL}/book/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.PUBLIC_URL}/book?error=payment-cancelled`,
       metadata: {
         bookingDate,
         customerName: booking.fullName,
         customerEmail: booking.email,
         partySize: booking.partySize.toString(),
+        phoneNumber: booking.phone || "",
       },
-      mode: 'payment',
-      success_url: `${process.env.PUBLIC_URL || 'http://localhost:5173'}/book/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.PUBLIC_URL || 'http://localhost:5173'}/book`,
       customer_email: booking.email,
-      billing_address_collection: 'auto',
-      payment_method_types: ['card'],
-    };
-
-    const session = await stripe.checkout.sessions.create(params);
+    });
 
     return { sessionId: session.id, url: session.url };
   } catch (error) {
-    console.error('Error creating checkout session:', error);
+    console.error("Error creating checkout session:", error);
     if (error instanceof Stripe.errors.StripeError) {
       throw new Error(`Stripe error: ${error.message}`);
     }
-    throw new Error('Failed to create checkout session');
+    throw new Error("Failed to create checkout session");
   }
 }
 
@@ -119,10 +114,10 @@ export async function retrieveCheckoutSession(sessionId: string) {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     return session;
   } catch (error) {
-    console.error('Error retrieving checkout session:', error);
+    console.error("Error retrieving checkout session:", error);
     if (error instanceof Stripe.errors.StripeError) {
       throw new Error(`Stripe error: ${error.message}`);
     }
-    throw new Error('Failed to retrieve checkout session');
+    throw new Error("Failed to retrieve checkout session");
   }
 }

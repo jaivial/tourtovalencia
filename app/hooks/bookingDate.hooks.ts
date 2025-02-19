@@ -1,47 +1,43 @@
 import { useFetcher } from "@remix-run/react";
 import { useEffect } from "react";
-import type { BookingStates, BookingActions } from "./book.hooks";
+import type { BookingContextState } from "~/context/BookingContext";
 import type { LoaderData } from "~/routes/book";
 
-type BookingContext = BookingStates & BookingActions;
-
-export const useBookingDateActions = (states: BookingContext) => {
+export const useBookingDateActions = (states: BookingContextState) => {
   const fetcher = useFetcher<LoaderData>();
 
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) {
       // Handle date deselection
-      states.setFormData(prev => ({
-        ...prev,
-        bookingDate: null,
-        partySize: 1
-      }));
+      states.setFormData({
+        ...states.formData,
+        bookingDate: "",
+        partySize: ""
+      });
       states.setSelectedDateAvailability(undefined);
       return;
     }
 
-    // Ensure the date is a proper Date object
+    // Ensure the date is properly formatted
     const selectedDate = new Date(date);
     selectedDate.setHours(0, 0, 0, 0);
+    const dateString = selectedDate.toISOString();
 
     // Update form data first to ensure UI updates immediately
-    states.setFormData(prev => ({
-      ...prev,
-      bookingDate: selectedDate,
-      partySize: 1
-    }));
+    states.setFormData({
+      ...states.formData,
+      bookingDate: dateString,
+      partySize: "1"
+    });
     
     // Then fetch availability for the selected date
-    fetcher.load(`/book?date=${selectedDate.toISOString()}`);
+    fetcher.load(`/book?date=${dateString}`);
   };
 
-  // Update selectedDateAvailability when we get new data
+  // Update availability when we get new data
   useEffect(() => {
     if (fetcher.data?.selectedDateAvailability) {
-      states.setSelectedDateAvailability({
-        ...fetcher.data.selectedDateAvailability,
-        date: new Date(fetcher.data.selectedDateAvailability.date)
-      });
+      states.setSelectedDateAvailability(fetcher.data.selectedDateAvailability);
     }
   }, [fetcher.data, states.setSelectedDateAvailability]);
 
