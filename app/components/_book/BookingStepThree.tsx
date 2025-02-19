@@ -41,7 +41,7 @@ export const BookingStepThree = () => {
               <Phone className="h-4 w-4" />
               Phone:
             </span>
-            <span>{states.formData.phone}</span>
+            <span>{states.formData.phoneNumber}</span>
           </div>
         </div>
 
@@ -61,8 +61,8 @@ export const BookingStepThree = () => {
               Date:
             </span>
             <span>
-              {states.formData.bookingDate
-                ? format(states.formData.bookingDate, "PPP")
+              {states.formData.date
+                ? format(new Date(states.formData.date), "PPP")
                 : "Not selected"}
             </span>
           </div>

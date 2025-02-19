@@ -1,6 +1,6 @@
 // Page component: just responsible for containing providers, feature components and fetch data from the ssr.
 import { json, type LoaderFunction, type ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { useActionData, useNavigation, useLoaderData } from "@remix-run/react";
+import { useActionData, useNavigation, useLoaderData, Outlet } from "@remix-run/react";
 import { BookingProvider } from "~/context/BookingContext";
 import { BookingFeature } from "~/components/_book/BookingFeature";
 import { BookingLoading } from "~/components/_book/BookingLoading";
@@ -139,33 +139,39 @@ export type ActionData = {
 };
 
 export default function Book() {
-  const actionData = useActionData<typeof action>() as ActionData;
   const navigation = useNavigation();
-  const loaderData = useLoaderData<typeof loader>();
-  const isSubmitting = navigation.state === "submitting";
+  const { availableDates, selectedDateAvailability, sessionId } = useLoaderData<LoaderData>();
+  const actionData = useActionData<ActionData>();
 
-  if (isSubmitting) {
+  // Handle loading state
+  if (navigation.state === "loading") {
     return <BookingLoading />;
   }
 
-  // Show success page if we have a confirmed booking
-  if (actionData?.success && actionData.booking) {
-    return (
-      <BookingSuccessProvider booking={actionData.booking}>
-        <BookingSuccessFeature />
-      </BookingSuccessProvider>
-    );
-  }
+  // // Show success page if we have a confirmed booking
+  // if (actionData?.success && actionData.booking) {
+  //   return (
+  //     <BookingSuccessProvider booking={actionData.booking}>
+  //       <BookingSuccessFeature />
+  //     </BookingSuccessProvider>
+  //   );
+  // }
 
   return (
-    <BookingProvider
-      initialState={{
-        serverError: actionData?.error,
-        availableDates: loaderData.availableDates,
-        selectedDateAvailability: loaderData.selectedDateAvailability,
-      }}
-    >
-      <BookingFeature />
-    </BookingProvider>
+    <>
+      {navigation.location?.pathname === "/book" ? (
+        <BookingProvider
+          initialState={{
+            availableDates,
+            selectedDateAvailability,
+            serverError: actionData?.error || null,
+          }}
+        >
+          <BookingFeature />
+        </BookingProvider>
+      ) : (
+        <Outlet />
+      )}
+    </>
   );
 }

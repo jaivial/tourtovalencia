@@ -30,6 +30,8 @@ export interface BookingActions {
   handleNextStep: () => void;
   handlePreviousStep: () => void;
   handleSubmit: () => void;
+  handlePaymentSuccess: () => void;
+  handlePaymentError: (error: string) => void;
   setAvailableDates: (dates: Array<{
     date: string;
     availablePlaces: number;
@@ -103,6 +105,16 @@ export function useBookingStates(initialState?: {
 export const useBookingActions = (context: BookingContextState) => {
   const fetcher = useFetcher<ActionData>();
 
+  useEffect(() => {
+    if (fetcher.data?.redirectUrl) {
+      window.location.href = fetcher.data.redirectUrl;
+    }
+    if (fetcher.data?.error) {
+      context.setServerError(fetcher.data.error);
+      context.setIsSubmitting(false);
+    }
+  }, [fetcher.data, context]);
+
   const handleNextStep = () => {
     // Validate current step
     const errors: Partial<Record<keyof BookingFormData, string>> = {};
@@ -155,6 +167,19 @@ export const useBookingActions = (context: BookingContextState) => {
     }
   };
 
+  const handlePaymentSuccess = () => {
+    const formData = new FormData();
+    formData.append("intent", "confirm-payment");
+    formData.append("session_id", context.paymentIntentId || "");
+    
+    fetcher.submit(formData, { method: "POST" });
+  };
+
+  const handlePaymentError = (error: string) => {
+    context.setServerError(error);
+    context.setIsSubmitting(false);
+  };
+
   const setAvailableDates = (dates: Array<{
     date: string;
     availablePlaces: number;
@@ -167,6 +192,8 @@ export const useBookingActions = (context: BookingContextState) => {
     handleNextStep,
     handlePreviousStep,
     handleSubmit,
+    handlePaymentSuccess,
+    handlePaymentError,
     setAvailableDates,
     isLoading: fetcher.state === "submitting",
     error: fetcher.data?.error,
