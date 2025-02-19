@@ -8,7 +8,7 @@ export interface Booking {
   amount: number;
   paymentId: string;
   status?: string;
-  phoneNumber?: string;
+  phoneNumber: string;  
   specialRequests?: string;
   paid?: boolean;
 }

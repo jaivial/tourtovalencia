@@ -45,18 +45,23 @@ export const loader: LoaderFunction = async ({ request }) => {
     // Get booking limit
     const limitDoc = await db.collection("bookingLimits").findOne({ date: { $gte: startDate, $lte: endDate } });
 
-    const processedBookings: BookingData[] = bookings.map((booking) => ({
-      _id: booking._id.toString(),
-      name: booking.name || "",
-      email: booking.email || "",
-      date: booking.date.toISOString(),
-      tourType: booking.tourType || "",
-      numberOfPeople: Number(booking.numberOfPeople) || 1,
-      status: booking.status || "pending",
-      phoneNumber: booking.phoneNumber || "",
-      specialRequests: booking.specialRequests,
-      paid: Boolean(booking.paid),
-    }));
+    const processedBookings: BookingData[] = bookings.map((booking) => {
+      // Get phone number from either field
+      const phoneNumber = booking.phoneNumber || booking.phone || "";
+      
+      return {
+        _id: booking._id.toString(),
+        name: booking.fullName || booking.name || "",
+        email: booking.email || "",
+        date: booking.date.toISOString(),
+        tourType: booking.tourType || "",
+        numberOfPeople: Number(booking.partySize || booking.numberOfPeople) || 1,
+        status: booking.status || "pending",
+        phoneNumber: phoneNumber,  // Use the extracted phone number
+        specialRequests: booking.specialRequests,
+        paid: booking.paymentStatus === "paid" || Boolean(booking.paid),
+      };
+    });
 
     // Format the date as YYYY-MM-DD to avoid timezone issues
     const formattedDate = formatLocalDate(selectedDate);
