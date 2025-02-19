@@ -1,3 +1,17 @@
+export interface Booking {
+  _id?: string;
+  fullName: string;
+  email: string;
+  bookingDate: Date;
+  partySize: number;
+  amount: number;
+  paymentId: string;
+  status?: string;
+  phoneNumber?: string;
+  specialRequests?: string;
+  paid?: boolean;
+}
+
 export interface BookingData {
   _id: string;
   name: string;

@@ -5,15 +5,16 @@ import { BookingProvider } from "~/context/BookingContext";
 import { BookingFeature } from "~/components/_book/BookingFeature";
 import { BookingSuccess } from "~/components/_book/BookingSuccess";
 import { BookingLoading } from "~/components/_book/BookingLoading";
+import { createCheckoutSession } from "~/services/stripe.server";
+import { createBooking } from "~/services/booking.server";
 import { sendEmail } from "~/utils/email.server";
-import { BookingConfirmationEmail } from "~/emails/BookingConfirmationEmail";
-import { BookingAdminEmail } from "~/emails/BookingAdminEmail";
+import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
+import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
+import type { Booking } from "~/types/booking";
 import type { BookingFormData } from "~/hooks/book.hooks";
 import { getAvailableDatesInRange, getDateAvailability } from "~/models/bookingAvailability.server";
 import { addMonths } from "date-fns";
 import Stripe from "stripe";
-import { createCheckoutSession } from "~/services/stripe.server";
-import { createBooking } from "~/services/booking.server";
 
 // Add this directive at the top of the file to make it a client component
 'use client';
@@ -96,18 +97,30 @@ export async function action({ request }: ActionFunctionArgs) {
     }
   }
 
-  if (intent === "confirm-booking") {
+  if (intent === "confirm_booking") {
     try {
       const bookingData = JSON.parse(formData.get("booking") as string);
       const session_id = formData.get("session_id") as string;
 
+      // Prepare booking data with all required fields
+      const booking: Omit<Booking, '_id'> = {
+        fullName: bookingData.fullName,
+        email: bookingData.email,
+        bookingDate: new Date(bookingData.bookingDate),
+        partySize: parseInt(bookingData.partySize),
+        amount: bookingData.amount,
+        paymentId: session_id,
+        status: 'confirmed',
+        paid: true
+      };
+
       // Create booking in database
-      const newBooking = await createBooking(bookingData, session_id);
+      const newBooking = await createBooking(booking, session_id);
 
       // Send confirmation emails
       await Promise.all([
         sendEmail({
-          to: bookingData.email,
+          to: booking.email,
           subject: "Booking Confirmation",
           component: BookingConfirmationEmail({
             booking: newBooking,
@@ -145,28 +158,24 @@ export default function Book() {
   const navigation = useNavigation();
   const loaderData = useLoaderData<typeof loader>();
   const isSubmitting = navigation.state === "submitting";
-  const navigate = useNavigate();
 
-  if (actionData?.success && actionData.redirectUrl) {
-    navigate(actionData.redirectUrl);
+  if (isSubmitting) {
+    return <BookingLoading />;
   }
 
-  if (actionData?.success && !actionData.redirectUrl) {
+  if (actionData?.success) {
     return <BookingSuccess />;
   }
 
   return (
-    <>
-      {isSubmitting && <BookingLoading />}
-      <BookingProvider 
-        initialState={{ 
-          serverError: actionData?.error,
-          availableDates: loaderData.availableDates,
-          selectedDateAvailability: loaderData.selectedDateAvailability
-        }}
-      >
-        <BookingFeature />
-      </BookingProvider>
-    </>
+    <BookingProvider
+      initialState={{
+        serverError: actionData?.error,
+        availableDates: loaderData.availableDates,
+        selectedDateAvailability: loaderData.selectedDateAvailability
+      }}
+    >
+      <BookingFeature />
+    </BookingProvider>
   );
 }
