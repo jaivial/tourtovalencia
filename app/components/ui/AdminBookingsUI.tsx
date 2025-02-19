@@ -38,6 +38,7 @@ type AdminBookingsUIProps = {
   error: string | null;
   onDateChange: (date: Date) => void;
   onUpdateMaxBookings: (newMax: number) => void;
+  onCancelBooking?: (bookingId: string) => void;
   strings: any;
 };
 
@@ -49,6 +50,7 @@ export const AdminBookingsUI = ({
   error,
   onDateChange,
   onUpdateMaxBookings,
+  onCancelBooking,
   strings,
 }: AdminBookingsUIProps) => {
   const [maxBookings, setMaxBookings] = useState(bookingLimit.maxBookings.toString());
@@ -171,12 +173,21 @@ export const AdminBookingsUI = ({
                     min="0"
                     className="w-full sm:w-32 text-center"
                     aria-label="Maximum bookings per day"
+                    disabled={isLoading}
                   />
                   <Button 
                     onClick={handleUpdateClick}
                     className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white"
+                    disabled={isLoading}
                   >
-                    Update
+                    {isLoading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        <span>Updating...</span>
+                      </div>
+                    ) : (
+                      'Update'
+                    )}
                   </Button>
                 </div>
                 <p className="text-sm sm:text-base text-gray-600 text-center">
@@ -188,51 +199,58 @@ export const AdminBookingsUI = ({
         </div>
 
         {/* Bookings Table */}
-        <div className="bg-white shadow-lg rounded-lg overflow-x-auto">
-          <div className="min-w-[200px]">
-            <table className="w-full">
-              <thead className="bg-primary/5 border-b border-primary/10">
-                <tr>
-                  <th className="p-3 text-left text-sm font-medium text-primary">Name</th>
-                  <th className="p-3 text-left text-sm font-medium text-primary">Email</th>
-                  <th className="p-3 text-left text-sm font-medium text-primary">Phone</th>
-                  <th className="p-3 text-left text-sm font-medium text-primary">People</th>
-                  <th className="p-3 text-left text-sm font-medium text-primary">Status</th>
-                  <th className="p-3 text-left text-sm font-medium text-primary">Payment</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {bookings.map((booking) => (
-                  <tr key={booking._id} className="hover:bg-gray-50">
-                    <td className="p-3 text-sm text-gray-900">{booking.name}</td>
-                    <td className="p-3 text-sm text-gray-900">{booking.email}</td>
-                    <td className="p-3 text-sm text-gray-900">{booking.phoneNumber}</td>
-                    <td className="p-3 text-sm text-gray-900">{booking.numberOfPeople}</td>
-                    <td className="p-3">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        booking.status === 'confirmed' 
-                          ? 'bg-green-100 text-green-800' 
-                          : booking.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {booking.status}
-                      </span>
-                    </td>
-                    <td className="p-3">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        booking.paid 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {booking.paid ? 'Paid' : 'Unpaid'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>People</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Payment</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {bookings.map((booking) => (
+                <TableRow key={booking._id}>
+                  <TableCell>{booking.name}</TableCell>
+                  <TableCell>{booking.email}</TableCell>
+                  <TableCell>{booking.phoneNumber}</TableCell>
+                  <TableCell>{booking.numberOfPeople}</TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      booking.status === 'confirmed' 
+                        ? 'bg-green-100 text-green-800' 
+                        : booking.status === 'pending' 
+                        ? 'bg-yellow-100 text-yellow-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {booking.status}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      booking.paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {booking.paid ? 'Paid' : 'Unpaid'}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => onCancelBooking?.(booking._id)}
+                      disabled={booking.status === 'cancelled'}
+                    >
+                      Cancel
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>

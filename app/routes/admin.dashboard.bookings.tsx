@@ -1,9 +1,10 @@
-import { json, type LoaderFunction } from "@remix-run/node";
+import { json, type LoaderFunction, type ActionFunction } from "@remix-run/node";
 import { useLoaderData, useSubmit } from "@remix-run/react";
 import { AdminBookingsFeature } from "~/components/features/AdminBookingsFeature";
 import { getDb } from "~/utils/db.server";
 import { getLocalMidnight, getLocalEndOfDay, formatLocalDate, parseLocalDate } from "~/utils/date";
 import type { LoaderData, BookingData } from "~/types/booking";
+import { updateBookingLimit } from "~/models/bookingLimit.server";
 
 export const loader: LoaderFunction = async ({ request }) => {
   try {
@@ -82,6 +83,45 @@ export const loader: LoaderFunction = async ({ request }) => {
       error: "Failed to load bookings",
     });
   }
+};
+
+export const action: ActionFunction = async ({ request }) => {
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+
+  if (intent === "updateLimit") {
+    const date = formData.get("date");
+    const maxBookings = formData.get("maxBookings");
+
+    if (!date || !maxBookings) {
+      return json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    try {
+      const result = await updateBookingLimit(
+        new Date(date.toString()),
+        parseInt(maxBookings.toString())
+      );
+      
+      if (result.success) {
+        return json({ 
+          success: true, 
+          message: "Booking limit updated successfully",
+          data: result.data 
+        });
+      } else {
+        return json({ error: "Failed to update booking limit" }, { status: 500 });
+      }
+    } catch (error) {
+      console.error("Error updating booking limit:", error);
+      return json(
+        { error: "Failed to update booking limit" },
+        { status: 500 }
+      );
+    }
+  }
+
+  return json({ error: "Invalid intent" }, { status: 400 });
 };
 
 export default function AdminDashboardBookings() {

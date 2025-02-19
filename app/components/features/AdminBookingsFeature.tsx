@@ -4,6 +4,7 @@ import { useLanguageContext } from "~/providers/LanguageContext";
 import type { LoaderData } from "~/types/booking";
 import { useEffect } from "react";
 import { parseLocalDate } from "~/utils/date";
+import { useSubmit } from "@remix-run/react";
 
 interface AdminBookingsFeatureProps {
   loaderData: LoaderData;
@@ -12,6 +13,7 @@ interface AdminBookingsFeatureProps {
 
 export const AdminBookingsFeature = ({ loaderData, onDateChange }: AdminBookingsFeatureProps) => {
   const { state } = useLanguageContext();
+  const submit = useSubmit();
   const states = useStates({
     initialBookings: loaderData.bookings.map(booking => ({
       ...booking,
@@ -34,6 +36,21 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange }: AdminBookings
     states.setBookingLimit(loaderData.limit);
   }, [loaderData]);
 
+  const handleUpdateMaxBookings = (newMax: number) => {
+    const formData = new FormData();
+    formData.append("intent", "updateLimit");
+    formData.append("date", states.selectedDate.toISOString());
+    formData.append("maxBookings", newMax.toString());
+    submit(formData, { method: "post" });
+  };
+
+  const handleCancelBooking = (bookingId: string) => {
+    const formData = new FormData();
+    formData.append("intent", "cancelBooking");
+    formData.append("bookingId", bookingId);
+    submit(formData, { method: "post" });
+  };
+
   return (
     <AdminBookingsUI
       selectedDate={parseLocalDate(loaderData.selectedDate)}
@@ -42,7 +59,8 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange }: AdminBookings
       isLoading={states.isLoading}
       error={states.error}
       onDateChange={onDateChange}
-      onUpdateMaxBookings={states.handleUpdateClick}
+      onUpdateMaxBookings={handleUpdateMaxBookings}
+      onCancelBooking={handleCancelBooking}
       strings={state.admin.bookings}
     />
   );

@@ -28,4 +28,10 @@ export async function getDb() {
   return client.db(DB_NAME);
 }
 
+// Export a function to get a collection with proper typing
+export async function getCollection(collectionName: string) {
+  const database = await getDb();
+  return database.collection(collectionName);
+}
+
 export { db };

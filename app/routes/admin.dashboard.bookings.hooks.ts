@@ -18,18 +18,6 @@ export const useStates = ({ initialBookings, initialLimit, initialDate }: States
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleUpdateClick = async (newMax: number) => {
-    setIsLoading(true);
-    try {
-      // TODO: Implement update logic
-      setBookingLimit(prev => ({ ...prev, maxBookings: newMax }));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const getUIBookings = (): UIBooking[] => {
     return bookings.map(booking => ({
       ...booking,
@@ -45,7 +33,8 @@ export const useStates = ({ initialBookings, initialLimit, initialDate }: States
     bookingLimit,
     setBookingLimit,
     isLoading,
+    setIsLoading,
     error,
-    handleUpdateClick
+    setError
   };
 };
