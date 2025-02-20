@@ -1,10 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Alert, AlertDescription } from "~/components/ui/alert";
-import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { CheckCircle2, Loader2, AlertCircle, Home } from "lucide-react";
 import type { Booking } from "~/types/booking";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { motion } from "framer-motion";
+import { Button } from "~/components/ui/button";
+import { useNavigate } from "@remix-run/react";
+import { useEffect, useState } from "react";
 
 interface BookingSuccessUIProps {
   booking: Booking;
@@ -43,6 +46,28 @@ const iconVariants = {
 };
 
 export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps) => {
+  const navigate = useNavigate();
+  const [countdown, setCountdown] = useState(15);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          navigate("/");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [navigate]);
+
+  const handleReturnHome = () => {
+    navigate("/");
+  };
+
   return (
     <motion.div className="container mx-auto mt-32 px-4 py-12 max-w-2xl" initial="hidden" animate="visible" variants={containerVariants}>
       <Card className="shadow-xl bg-white/80 backdrop-blur-sm border-2 border-green-100">
@@ -101,6 +126,20 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
                   Se ha enviado un email de confirmación a <span className="font-medium">{booking.email}</span>
                 </AlertDescription>
               </Alert>
+            </motion.div>
+
+            <motion.div className="space-y-4 pt-4" variants={itemVariants}>
+              <p className="text-center text-sm text-slate-600">
+                Redirigiendo a la página principal en <span className="font-semibold">{countdown}</span> segundos
+              </p>
+              <Button 
+                onClick={handleReturnHome}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                size="lg"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Volver a la página principal
+              </Button>
             </motion.div>
           </motion.div>
         </CardContent>
