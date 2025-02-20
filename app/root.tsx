@@ -1,23 +1,31 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useLocation } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import "./styles/globals.css";
-import { LoaderFunction } from "@remix-run/node";
+import { LoaderFunction, json } from "@remix-run/node";
 import { languageCookie } from "~/utils/cookies";
 import { languages } from "~/data/data";
-import { json } from "@remix-run/node";
 import Nav from "~/components/layout/nav";
 import Footer from "./components/layout/footer";
 import ArrowToTop from "./components/_index/ArrowToTop";
 import { LanguageContextProvider } from "~/providers/LanguageContext";
 
+export interface RootLoaderData {
+  initialLanguage: typeof languages.en;
+  ENV: {
+    STRIPE_PUBLIC_KEY: string | undefined;
+    PAYPAL_CLIENT_ID: string | undefined;
+  };
+}
+
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
   const cookieLanguage = (await languageCookie.parse(cookieHeader)) || "en";
 
-  return json({ 
+  return json<RootLoaderData>({ 
     initialLanguage: languages[cookieLanguage] || languages.en,
     ENV: {
-      STRIPE_PUBLIC_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+      STRIPE_PUBLIC_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+      PAYPAL_CLIENT_ID: process.env.PAYPAL_CLIENT_ID
     }
   });
 };
@@ -49,7 +57,7 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
-  const { initialLanguage, ENV } = useLoaderData<typeof loader>();
+  const { initialLanguage, ENV } = useLoaderData<RootLoaderData>();
   const location = useLocation();
   const isAdminDashboard = location.pathname.includes("/admin/dashboard");
 

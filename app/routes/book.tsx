@@ -7,7 +7,6 @@ import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
 import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
 import type { Booking } from "~/types/booking";
-import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Book Your Experience" }, { name: "description", content: "Book your unique dining experience with us" }];
@@ -84,16 +83,5 @@ export default function Book() {
     return <BookingLoading />;
   }
 
-  return (
-    <PayPalScriptProvider
-      options={{
-        clientId: "AZiKH1MZ17qdaIIJ5hklPTPSGQSHPoGkJL2YeVKkElQINDN9R7e2HqK5iehvzGk3WStqQthFha_-wix6",
-        currency: "EUR",
-        intent: "capture",
-        components: "buttons,funding-eligibility",
-      }}
-    >
-      <Outlet />
-    </PayPalScriptProvider>
-  );
+  return <Outlet />;
 }
