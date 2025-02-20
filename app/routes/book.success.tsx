@@ -8,19 +8,10 @@ import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
 import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
 import { getCollection } from "~/utils/db.server";
-import type { LoaderData as BookingLoaderData } from "./book._index";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const bookingData = JSON.parse(formData.get("booking") as string) as Booking;
-  const emailConfig = JSON.parse(formData.get("emailConfig") as string) as BookingLoaderData["emailConfig"];
-
-  console.log("Booking data:", bookingData);
-  console.log("Email config:", emailConfig);
-
-  if (!emailConfig) {
-    return json({ success: false, error: "Email configuration missing" });
-  }
 
   try {
     // Save to MongoDB
@@ -44,15 +35,15 @@ export async function action({ request }: ActionFunctionArgs) {
     await bookingsCollection.insertOne(bookingRecord);
 
     // Send confirmation email to customer
-    await sendEmail(emailConfig, {
+    await sendEmail({
       to: bookingData.email,
       subject: "Confirmación de Reserva - Tour Tour Valencia",
       component: BookingConfirmationEmail({ booking: bookingData }),
     });
 
     // Send admin notification
-    await sendEmail(emailConfig, {
-      to: emailConfig.gmailUser,
+    await sendEmail({
+      to: "jaimebillanueba99@gmail.com",
       subject: "Nueva Reserva Recibida",
       component: BookingAdminEmail({ booking: bookingData }),
     });
@@ -72,6 +63,15 @@ export default function BookingSuccess() {
     navigate("/book", { replace: true });
     return null;
   }
+
+  const formData = new FormData();
+  formData.append("booking", JSON.stringify(location.state.booking));
+
+  // Submit the form data to the action
+  fetch("/book/success", {
+    method: "POST",
+    body: formData,
+  });
 
   return (
     <BookingSuccessProvider booking={location.state.booking}>

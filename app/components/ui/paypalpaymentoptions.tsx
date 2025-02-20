@@ -35,16 +35,14 @@ const PaymentOptions = () => {
       };
 
       console.log("PayPal payment success, navigating with booking data:", bookingData);
-      console.log("Email config:", states.emailConfig);
 
       // Redirect to success page with booking data
       navigate("/book/success", {
         state: {
           booking: bookingData,
           paymentMethod: "paypal",
-          emailConfig: states.emailConfig
         },
-        replace: true // Use replace to prevent back navigation to payment page
+        replace: true, // Use replace to prevent back navigation to payment page
       });
     } catch (error) {
       console.error("Error processing booking:", error);

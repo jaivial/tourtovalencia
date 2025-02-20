@@ -2,11 +2,6 @@ import nodemailer from "nodemailer";
 import { renderToString } from "react-dom/server";
 import type { ReactElement } from "react";
 
-interface EmailConfig {
-  gmailUser: string;
-  gmailAppPassword: string;
-}
-
 interface SendEmailProps {
   to: string;
   subject: string;
@@ -15,11 +10,7 @@ interface SendEmailProps {
 
 let transporter: nodemailer.Transporter | null = null;
 
-export const initializeEmailTransporter = ({ gmailUser, gmailAppPassword }: EmailConfig) => {
-  if (!gmailUser || !gmailAppPassword) {
-    throw new Error("GMAIL_USER and GMAIL_APP_PASSWORD must be provided.\n" + "Current values:\n" + `GMAIL_USER: ${gmailUser}\n` + `GMAIL_APP_PASSWORD: ${gmailAppPassword ? "set" : "not set"}`);
-  }
-
+const initializeEmailTransporter = () => {
   if (!transporter) {
     transporter = nodemailer.createTransport({
       service: "gmail",
@@ -42,14 +33,14 @@ export const initializeEmailTransporter = ({ gmailUser, gmailAppPassword }: Emai
   return transporter;
 };
 
-export const sendEmail = async (config: EmailConfig, { to, subject, component }: SendEmailProps): Promise<nodemailer.SentMessageInfo> => {
-  const emailTransporter = initializeEmailTransporter(config);
+export const sendEmail = async ({ to, subject, component }: SendEmailProps): Promise<nodemailer.SentMessageInfo> => {
+  const emailTransporter = initializeEmailTransporter();
 
   try {
     const htmlContent = renderToString(component);
 
     const info = await emailTransporter.sendMail({
-      from: `"Excursiones Tour Tour Valencia" <${config.gmailUser}>`,
+      from: `"Excursiones Tour Tour Valencia" <jaimebillanueba99@gmail.com>`,
       to,
       subject,
       html: htmlContent,
