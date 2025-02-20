@@ -3,15 +3,7 @@ import { format } from "date-fns";
 import { Card } from "~/components/ui/card";
 import { PaymentFeature } from "../features/PaymentFeature";
 import { BookingPaymentModalFeature } from "../features/BookingPaymentModalFeature";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Users, 
-  Calendar,
-  Receipt,
-  AlertCircle
-} from "lucide-react";
+import { User, Mail, Phone, Users, Calendar, Receipt, AlertCircle } from "lucide-react";
 import { useNavigate } from "@remix-run/react";
 
 export const BookingStepThree = () => {
@@ -21,7 +13,7 @@ export const BookingStepThree = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold tracking-tight">Booking Summary</h2>
-      
+
       <Card className="p-6 space-y-6">
         <div className="space-y-3">
           <h3 className="font-medium flex items-center gap-2">
@@ -62,11 +54,7 @@ export const BookingStepThree = () => {
               <Calendar className="h-4 w-4" />
               Date:
             </span>
-            <span>
-              {states.formData.date
-                ? format(new Date(states.formData.date), "PPP")
-                : "Not selected"}
-            </span>
+            <span>{states.formData.date ? format(new Date(states.formData.date), "PPP") : "Not selected"}</span>
           </div>
         </div>
 
@@ -78,9 +66,7 @@ export const BookingStepThree = () => {
             </span>
             <span className="text-2xl font-bold">€{totalPrice}</span>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground pl-7">
-            Price calculation: {states.formData.partySize} people × €120 per person
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground pl-7">Price calculation: {states.formData.partySize} people × €120 per person</p>
         </div>
       </Card>
 
@@ -88,14 +74,11 @@ export const BookingStepThree = () => {
         <PaymentFeature />
       ) : (
         <div className="space-y-4">
-          <BookingPaymentModalFeature />
+          {/* <BookingPaymentModalFeature /> */}
           <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
             <p className="text-yellow-800 text-sm flex items-center gap-2">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
-              <span>
-                Your booking will be confirmed after successful payment.
-                Click "Book Now" to proceed to payment.
-              </span>
+              <span>Your booking will be confirmed after successful payment. Click "Book Now" to proceed to payment.</span>
             </p>
           </div>
         </div>

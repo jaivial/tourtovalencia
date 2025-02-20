@@ -4,6 +4,7 @@ import { PaymentModalFeature } from "~/components/features/PaymentModalFeature";
 import { useState } from "react";
 import { PaymentModal } from "~/components/ui/PaymentModal";
 import PaymentOptions from "~/components/ui/paypalpaymentoptions";
+import { useBooking } from "~/context/BookingContext";
 
 interface BookingNavigationProps {
   currentStep: number;
@@ -18,6 +19,7 @@ export const BookingNavigation = ({ currentStep, onNext, onPrevious, onSubmit, i
   const isLastStep = currentStep === 4;
 
   const [isOpen, setIsOpen] = useState(false);
+  const { formData } = useBooking();
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
@@ -42,7 +44,13 @@ export const BookingNavigation = ({ currentStep, onNext, onPrevious, onSubmit, i
       </Button>
 
       <PaymentModal isOpen={isOpen} onClose={handleClose}>
-        <PaymentOptions />
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold">Complete Your Booking</h2>
+            <p className="text-muted-foreground mt-2">Your total amount: €{formData.partySize * 120}</p>
+          </div>
+          <PaymentOptions />
+        </div>
       </PaymentModal>
 
       {/* <Button onClick={isLastStep ? onSubmit : onNext} className="flex items-center gap-2" disabled={isSubmitting}>

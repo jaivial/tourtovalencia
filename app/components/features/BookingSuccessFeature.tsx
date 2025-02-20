@@ -7,10 +7,11 @@ export const BookingSuccessFeature = () => {
   const { booking, emailStatus, handleSendEmails } = states;
 
   useEffect(() => {
+    // Only send emails if we haven't started the process yet
     if (emailStatus === 'idle') {
       handleSendEmails();
     }
-  }, [emailStatus, handleSendEmails]);
+  }, []); // Run only once on mount
 
   return (
     <BookingSuccessUI 

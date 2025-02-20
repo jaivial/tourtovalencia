@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from "@remix-run/react";
+import { useEffect } from "react";
 import { BookingSuccessProvider } from "~/context/BookingSuccessContext";
 import { BookingSuccessFeature } from "~/components/features/BookingSuccessFeature";
 import type { Booking } from "~/types/booking";
@@ -59,19 +60,15 @@ export default function BookingSuccess() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!location.state?.booking) {
+      navigate("/book", { replace: true });
+    }
+  }, [location.state?.booking, navigate]);
+
   if (!location.state?.booking) {
-    navigate("/book", { replace: true });
     return null;
   }
-
-  const formData = new FormData();
-  formData.append("booking", JSON.stringify(location.state.booking));
-
-  // Submit the form data to the action
-  fetch("/book/success", {
-    method: "POST",
-    body: formData,
-  });
 
   return (
     <BookingSuccessProvider booking={location.state.booking}>

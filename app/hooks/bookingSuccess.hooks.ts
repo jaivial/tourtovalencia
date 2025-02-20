@@ -1,29 +1,34 @@
 import { useState, useCallback } from "react";
+import { useEffect } from "react";
 import { useFetcher } from "@remix-run/react";
 import type { Booking } from "~/types/booking";
+
+interface BookingActionResponse {
+  success: boolean;
+  error?: string;
+}
 
 export const useBookingSuccessStates = (initialBooking: Booking) => {
   const [booking] = useState(initialBooking);
   const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<BookingActionResponse>();
 
   const handleSendEmails = useCallback(() => {
-    if (emailStatus === 'idle') {
-      setEmailStatus('sending');
-      const formData = new FormData();
-      formData.set("booking", JSON.stringify(booking));
-      fetcher.submit(formData, { method: "post" });
-    }
+    // Prevent multiple submissions
+    if (emailStatus !== 'idle') return;
+
+    setEmailStatus('sending');
+    const formData = new FormData();
+    formData.set("booking", JSON.stringify(booking));
+    fetcher.submit(formData, { method: "post" });
   }, [booking, emailStatus, fetcher]);
 
-  // Update email status based on fetcher state
-  if (fetcher.data && emailStatus === 'sending') {
-    if (fetcher.data.success) {
-      setEmailStatus('sent');
-    } else {
-      setEmailStatus('error');
+  useEffect(() => {
+    // Only update status when we have a response and we're in sending state
+    if (fetcher.data && emailStatus === 'sending') {
+      setEmailStatus(fetcher.data.success ? 'sent' : 'error');
     }
-  }
+  }, [fetcher.data, emailStatus]);
 
   return {
     booking,

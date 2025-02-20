@@ -21,7 +21,7 @@ export const BookingPaymentModalFeature = () => {
 
   return (
     <>
-      <Button onClick={handleOpen} className="w-full bg-primary hover:bg-primary/90 text-white">
+      <Button onClick={handleOpen} className="w-full bg-primary hover:bg-primary/90 text-white bg-red-200">
         Book Now
       </Button>
 
