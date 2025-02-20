@@ -75,6 +75,7 @@ export function useBookingStates(initialState?: {
   const [isSuccess, setIsSuccess] = useState(false);
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
+  const [emailConfig, setEmailConfig] = useState({});
 
   return {
     currentStep,
@@ -87,6 +88,7 @@ export function useBookingStates(initialState?: {
     isSuccess,
     paymentClientSecret,
     paymentIntentId,
+    emailConfig,
     setCurrentStep,
     setFormData,
     setErrors,
@@ -96,11 +98,13 @@ export function useBookingStates(initialState?: {
     setPaymentClientSecret,
     setPaymentIntentId,
     setServerError,
+    setEmailConfig,
   };
 }
 
-export const useBookingActions = (context: BookingContextState) => {
-  const fetcher = useFetcher<ActionData>();
+export function useBookingActions(context: BookingContextState): BookingActions {
+  const submit = useSubmit();
+  const fetcher = useFetcher();
 
   useEffect(() => {
     if (fetcher.data?.redirectUrl) {
@@ -167,20 +171,25 @@ export const useBookingActions = (context: BookingContextState) => {
     }
   };
 
-  const handlePaymentSuccess = async (bookingInfo: any) => {
-    try {
-      // Insert booking information into the bookings collection
-      await insertBooking(bookingInfo);
+  const handlePaymentSuccess = useCallback(
+    (bookingInfo: any) => {
+      const formData = new FormData();
+      const booking = {
+        ...context.formData,
+        ...bookingInfo,
+      };
+      formData.append("booking", JSON.stringify(booking));
+      formData.append("emailConfig", JSON.stringify(context.emailConfig));
 
-      // Send confirmation emails
-      await sendConfirmationEmails(bookingInfo);
+      submit(formData, {
+        method: "post",
+        action: "/book/success",
+      });
 
-      // Navigate to the success page
-      navigate('/book/success');
-    } catch (error) {
-      console.error('Payment processing failed', error);
-    }
-  };
+      context.setIsSuccess(true);
+    },
+    [context, submit]
+  );
 
   const handlePaymentError = (error: string) => {
     context.setServerError(error);

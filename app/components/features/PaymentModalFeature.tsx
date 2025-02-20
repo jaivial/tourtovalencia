@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { PaymentModal } from "~/components/ui/PaymentModal";
 import { Button } from "~/components/ui/button";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import PaymentOptions from "~/routes/book.paypal";
+import PaymentOptions from "~/components/ui/paypalpaymentoptions";
 import { useMatches } from "@remix-run/react";
 import type { RootLoaderData } from "~/root";
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PaymentModal } from "~/components/ui/PaymentModal";
 import { Button } from "~/components/ui/button";
-import PaymentOptions from "~/routes/book.paypal";
+import PaymentOptions from "~/components/ui/paypalpaymentoptions";
 import { useBooking } from "~/context/BookingContext";
 
 export const BookingPaymentModalFeature = () => {
@@ -21,10 +21,7 @@ export const BookingPaymentModalFeature = () => {
 
   return (
     <>
-      <Button 
-        onClick={handleOpen}
-        className="w-full bg-primary hover:bg-primary/90 text-white"
-      >
+      <Button onClick={handleOpen} className="w-full bg-primary hover:bg-primary/90 text-white">
         Book Now
       </Button>
 
@@ -32,9 +29,7 @@ export const BookingPaymentModalFeature = () => {
         <div className="space-y-6">
           <div className="text-center">
             <h2 className="text-2xl font-semibold">Complete Your Booking</h2>
-            <p className="text-muted-foreground mt-2">
-              Your total amount: €{formData.partySize * 120}
-            </p>
+            <p className="text-muted-foreground mt-2">Your total amount: €{formData.partySize * 120}</p>
           </div>
           <PaymentOptions />
         </div>

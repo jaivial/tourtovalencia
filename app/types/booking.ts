@@ -1,16 +1,15 @@
 export interface Booking {
-  _id?: string;
   fullName: string;
   email: string;
-  date: string;
-  time: string;
+  date: string | Date;
   partySize: number;
   amount: number;
-  paymentId: string;
-  status?: string;
-  phoneNumber: string;  
-  specialRequests?: string;
-  paid?: boolean;
+  paymentIntentId: string;
+  phoneNumber: string;
+  status?: 'confirmed' | 'pending' | 'cancelled';
+  paymentStatus?: 'paid' | 'pending' | 'failed';
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface BookingData {

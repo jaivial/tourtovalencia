@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 import { PaymentModalFeature } from "~/components/features/PaymentModalFeature";
 import { useState } from "react";
 import { PaymentModal } from "~/components/ui/PaymentModal";
-import PaymentOptions from "~/routes/book.paypal";
+import PaymentOptions from "~/components/ui/paypalpaymentoptions";
 
 interface BookingNavigationProps {
   currentStep: number;

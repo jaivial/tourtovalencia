@@ -1,0 +1,95 @@
+import React from "react";
+import { useNavigate } from "@remix-run/react";
+import { PayPalButtons } from "@paypal/react-paypal-js";
+import type { CreateOrderActions, OnApproveData, OnApproveActions, OrderResponseBody } from "@paypal/paypal-js";
+import { useBooking } from "~/context/BookingContext";
+
+const PaymentOptions = () => {
+  const navigate = useNavigate();
+  const states = useBooking();
+
+  const handlePaymentSuccess = async (details: OrderResponseBody) => {
+    try {
+      const amount = details.purchase_units?.[0]?.amount?.value;
+      if (!amount) {
+        throw new Error("Invalid payment amount received from PayPal");
+      }
+
+      const paymentId = details.id;
+      if (!paymentId) {
+        throw new Error("No payment ID received from PayPal");
+      }
+
+      // Create booking data
+      const bookingData = {
+        ...states.formData,
+        status: "confirmed",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        paymentIntentId: paymentId,
+        paymentStatus: "paid",
+        totalAmount: Number(amount),
+        amount: Number(amount), // Required by Booking interface
+        paymentId, // Required by Booking interface
+        paid: true,
+      };
+
+      console.log("PayPal payment success, navigating with booking data:", bookingData);
+      console.log("Email config:", states.emailConfig);
+
+      // Redirect to success page with booking data
+      navigate("/book/success", {
+        state: {
+          booking: bookingData,
+          paymentMethod: "paypal",
+          emailConfig: states.emailConfig
+        },
+        replace: true // Use replace to prevent back navigation to payment page
+      });
+    } catch (error) {
+      console.error("Error processing booking:", error);
+      navigate("/book?error=payment-failed");
+    }
+  };
+
+  return (
+    <div className="p-12 mt-0">
+      <h1 className="text-xl font-bold mb-4 text-center">Choose a Payment Method</h1>
+      <div className="space-y-4">
+        <PayPalButtons
+          style={{ layout: "vertical", color: "blue", shape: "pill", label: "paypal" }}
+          createOrder={async (data, actions: CreateOrderActions) => {
+            return actions.order.create({
+              intent: "CAPTURE",
+              purchase_units: [
+                {
+                  amount: {
+                    currency_code: "EUR",
+                    value: "0.01",
+                  },
+                },
+              ],
+            });
+          }}
+          onApprove={async (data: OnApproveData, actions: OnApproveActions) => {
+            if (actions.order) {
+              try {
+                const details = await actions.order.capture();
+                await handlePaymentSuccess(details);
+              } catch (error) {
+                console.error("Payment capture failed:", error);
+                navigate("/book?error=payment-failed");
+              }
+            }
+          }}
+          onError={(err) => {
+            console.error("PayPal error:", err);
+            navigate("/book?error=payment-failed");
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default PaymentOptions;

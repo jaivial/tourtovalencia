@@ -1,13 +1,14 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useLocation } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import "./styles/globals.css";
-import { LoaderFunction, json } from "@remix-run/node";
+import { json, type LoaderArgs } from "@remix-run/node";
 import { languageCookie } from "~/utils/cookies";
 import { languages } from "~/data/data";
 import Nav from "~/components/layout/nav";
 import Footer from "./components/layout/footer";
 import ArrowToTop from "./components/_index/ArrowToTop";
 import { LanguageContextProvider } from "~/providers/LanguageContext";
+import { MotionProvider } from "~/providers/MotionProvider";
 
 export interface RootLoaderData {
   initialLanguage: typeof languages.en;
@@ -17,7 +18,7 @@ export interface RootLoaderData {
   };
 }
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader = async ({ request }: LoaderArgs) => {
   const cookieHeader = request.headers.get("Cookie");
   const cookieLanguage = (await languageCookie.parse(cookieHeader)) || "en";
 
@@ -70,12 +71,14 @@ export default function App() {
         <Links />
       </head>
       <body className="h-full bg-background text-foreground">
-        <LanguageContextProvider initialState={initialLanguage}>
-          <ArrowToTop />
-          <Nav />
-          <Outlet />
-          {!isAdminDashboard && <Footer />}
-        </LanguageContextProvider>
+        <MotionProvider>
+          <LanguageContextProvider initialState={initialLanguage}>
+            <ArrowToTop />
+            <Nav />
+            <Outlet />
+            {!isAdminDashboard && <Footer />}
+          </LanguageContextProvider>
+        </MotionProvider>
         <ScrollRestoration />
         <script
           dangerouslySetInnerHTML={{

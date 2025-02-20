@@ -23,6 +23,10 @@ export type LoaderData = {
   };
   paypalClientId?: string;
   error?: string;
+  emailConfig?: {
+    gmailUser: string;
+    gmailAppPassword: string;
+  };
 };
 
 export type ActionData = {
@@ -49,9 +53,25 @@ export const loader: LoaderFunction = async ({ request }) => {
       selectedDateAvailability = await getDateAvailability(new Date(selectedDate));
     }
 
+    // Get email configuration
+    const gmailUser = process.env.GMAIL_USER;
+    const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
+
+    if (!gmailUser || !gmailAppPassword) {
+      throw new Error("Missing email configuration");
+    }
+
     const paypalClientId = process.env.PAYPAL_CLIENT_ID;
 
-    return json<LoaderData>({ availableDates, selectedDateAvailability, paypalClientId });
+    return json<LoaderData>({
+      availableDates,
+      selectedDateAvailability,
+      paypalClientId,
+      emailConfig: {
+        gmailUser,
+        gmailAppPassword,
+      },
+    });
   } catch (error) {
     console.error("Error loading booking data:", error);
     return json<LoaderData>({ availableDates: [], error: "Failed to load available dates" });
@@ -101,10 +121,8 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function BookIndex() {
-  const { availableDates, selectedDateAvailability, paypalClientId } = useLoaderData<typeof loader>();
-  useEffect(() => {
-    console.log("paypalClientId", paypalClientId);
-  }, [paypalClientId]);
+  const { availableDates, selectedDateAvailability, paypalClientId, emailConfig } = useLoaderData<typeof loader>();
+
   return (
     <BookingProvider
       initialState={{
@@ -112,6 +130,7 @@ export default function BookIndex() {
         selectedDateAvailability,
         serverError: null,
         paypalClientId,
+        emailConfig,
       }}
     >
       <div className="container mx-auto px-4 py-8">

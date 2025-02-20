@@ -1,16 +1,11 @@
 import nodemailer from "nodemailer";
 import { renderToString } from "react-dom/server";
-import { ReactElement } from "react";
+import type { ReactElement } from "react";
 
-// Create reusable transporter
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_USER,
-    // Use App Password if 2FA is enabled: https://myaccount.google.com/apppasswords
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
+interface EmailConfig {
+  gmailUser: string;
+  gmailAppPassword: string;
+}
 
 interface SendEmailProps {
   to: string;
@@ -18,24 +13,60 @@ interface SendEmailProps {
   component: ReactElement;
 }
 
-export const sendEmail = async ({ to, subject, component }: SendEmailProps) => {
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-    throw new Error("Email credentials are not set");
+let transporter: nodemailer.Transporter | null = null;
+
+export const initializeEmailTransporter = ({ gmailUser, gmailAppPassword }: EmailConfig) => {
+  if (!gmailUser || !gmailAppPassword) {
+    throw new Error("GMAIL_USER and GMAIL_APP_PASSWORD must be provided.\n" + "Current values:\n" + `GMAIL_USER: ${gmailUser}\n` + `GMAIL_APP_PASSWORD: ${gmailAppPassword ? "set" : "not set"}`);
   }
+
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "jaimebillanueba99@gmail.com",
+        pass: "kkpu opyf opsm ouxj",
+      },
+    });
+
+    // Verify connection configuration
+    transporter.verify(function (error, success) {
+      if (error) {
+        console.log("SMTP Connection Error:", error);
+      } else {
+        console.log("Server is ready to take our messages");
+      }
+    });
+  }
+
+  return transporter;
+};
+
+export const sendEmail = async (config: EmailConfig, { to, subject, component }: SendEmailProps): Promise<nodemailer.SentMessageInfo> => {
+  const emailTransporter = initializeEmailTransporter(config);
 
   try {
     const htmlContent = renderToString(component);
-    
-    const info = await transporter.sendMail({
-      from: `"Your Restaurant" <${process.env.GMAIL_USER}>`,
+
+    const info = await emailTransporter.sendMail({
+      from: `"Excursiones Tour Tour Valencia" <${config.gmailUser}>`,
       to,
       subject,
       html: htmlContent,
     });
 
-    return { success: true, data: info };
+    console.log("Reserva Confirmada con éxito:", info.messageId);
+    return info;
   } catch (error) {
-    console.error("Failed to send email:", error);
+    console.error("Fallo al enviar el correo:", error);
     throw error;
   }
-}; 
+};
+
+// Clean up function to close the pool when the app shuts down
+export const closeEmailTransporter = () => {
+  if (transporter) {
+    transporter.close();
+    transporter = null;
+  }
+};
