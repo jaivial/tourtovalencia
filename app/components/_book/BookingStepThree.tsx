@@ -2,6 +2,7 @@ import { useBooking } from "~/context/BookingContext";
 import { format } from "date-fns";
 import { Card } from "~/components/ui/card";
 import { PaymentFeature } from "../features/PaymentFeature";
+import { BookingPaymentModalFeature } from "../features/BookingPaymentModalFeature";
 import { 
   User, 
   Mail, 
@@ -86,18 +87,18 @@ export const BookingStepThree = () => {
       {states.paymentClientSecret ? (
         <PaymentFeature />
       ) : (
-        <>
-         <button className="bg-blue-500 text-white py-2 px-4 rounded mt-4" onClick={() => navigate('/book/paypal')}>Pay</button>
-        <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
-          <p className="text-yellow-800 text-sm flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
-            <span>
-              Your booking will be confirmed after successful payment.
-              Click "Book Now" to proceed to payment.
-            </span>
-          </p>
+        <div className="space-y-4">
+          <BookingPaymentModalFeature />
+          <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
+            <p className="text-yellow-800 text-sm flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <span>
+                Your booking will be confirmed after successful payment.
+                Click "Book Now" to proceed to payment.
+              </span>
+            </p>
+          </div>
         </div>
-        </>
       )}
     </div>
   );

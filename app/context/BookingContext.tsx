@@ -19,6 +19,7 @@ export interface BookingContextState {
     isAvailable: boolean;
   };
   isSubmitting: boolean;
+  paypalClientId: string | undefined;
   isSuccess: boolean;
   paymentClientSecret: string | null;
   paymentIntentId: string | null;
@@ -58,6 +59,7 @@ interface BookingProviderProps {
       availablePlaces: number;
       isAvailable: boolean;
     };
+    paypalClientId?: string;
   };
 }
 
@@ -101,6 +103,7 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
         isSuccess,
         paymentClientSecret,
         paymentIntentId,
+        paypalClientId: initialState.paypalClientId,
         setCurrentStep,
         setFormData: handleSetFormData,
         setErrors,

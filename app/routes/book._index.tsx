@@ -111,10 +111,10 @@ export default function BookIndex() {
         availableDates,
         selectedDateAvailability,
         serverError: null,
+        paypalClientId,
       }}
     >
       <div className="container mx-auto px-4 py-8">
-        <BookingFeature />
         <div className="mt-8 flex justify-center">
           <PayPalScriptProvider
             options={{
@@ -124,7 +124,7 @@ export default function BookIndex() {
               components: "buttons,funding-eligibility",
             }}
           >
-            <PaymentModalFeature paypalClientId={paypalClientId} />
+            <BookingFeature />
           </PayPalScriptProvider>
         </div>
       </div>

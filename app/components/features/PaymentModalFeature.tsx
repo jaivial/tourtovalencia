@@ -6,9 +6,8 @@ import PaymentOptions from "~/routes/book.paypal";
 import { useMatches } from "@remix-run/react";
 import type { RootLoaderData } from "~/root";
 
-export const PaymentModalFeature = ({ paypalClientId }: { paypalClientId: string }) => {
+export const PaymentModalFeature = ({ paypalClientId }: { paypalClientId: string | undefined }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const matches = useMatches();
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
