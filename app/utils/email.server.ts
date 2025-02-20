@@ -14,6 +14,7 @@ const initializeEmailTransporter = () => {
   if (!transporter) {
     transporter = nodemailer.createTransport({
       service: "gmail",
+      pool: true,
       auth: {
         user: "jaimebillanueba99@gmail.com",
         pass: "kkpu opyf opsm ouxj",
