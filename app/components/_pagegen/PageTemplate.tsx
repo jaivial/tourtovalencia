@@ -3,15 +3,17 @@ import { Switch } from "@heroui/switch";
 import { Label } from "~/components/ui/label";
 import { Input } from "@heroui/input";
 import { Textarea } from "@heroui/input";
-import IndexSection5 from "../_index/IndexSection5";
+import EditableIndexSection5 from "./EditableIndexSection5";
 import EditableSanJuanSection1 from "./EditableSanJuanSection1";
 import EditableSanJuanSection2 from "./EditableSanJuanSection2";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { sanJuanSection1Type, sanJuansection2Type } from "~/data/data";
+import { IndexSection5Type, sanJuanSection1Type, sanJuansection2Type } from "~/data/data";
 
 export type PageTemplateProps = {
   status: 'active' | 'upcoming';
   onStatusChange: (value: boolean) => void;
+  indexSection5Data: IndexSection5Type;
+  onIndexSection5Update: (field: keyof IndexSection5Type, value: string) => void;
   section1Data: sanJuanSection1Type;
   onSection1Update: (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => void;
   section2Data: sanJuansection2Type;
@@ -21,6 +23,8 @@ export type PageTemplateProps = {
 const PageTemplate: React.FC<PageTemplateProps> = ({
   status,
   onStatusChange,
+  indexSection5Data,
+  onIndexSection5Update,
   section1Data,
   onSection1Update,
   section2Data,
@@ -40,7 +44,11 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
         </div>
       </div>
 
-      <IndexSection5 width={width} indexSection5Text={indexSection5Text} />
+      <EditableIndexSection5
+        width={width}
+        data={indexSection5Data}
+        onUpdate={onIndexSection5Update}
+      />
       
       <EditableSanJuanSection1
         width={width}

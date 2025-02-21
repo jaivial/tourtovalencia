@@ -135,6 +135,79 @@ Development tracking for the new "Generador de páginas" section in the admin da
   - [ ] Update testing guidelines
   - [ ] Document breaking changes
 
+## Common Issues and Solutions
+
+#### 1. Adding New Editable Sections
+When adding a new editable section to the page generator, follow these steps to avoid common issues:
+
+1. **Data Type Definition**
+   - Add the new section's type to `data.ts`
+   - Define default values in `admin.dashboard.pagegen.tsx`
+   ```typescript
+   const DEFAULT_NEW_SECTION_DATA: NewSectionType = {
+     field1: "",
+     field2: "",
+     // ...other fields
+   };
+   ```
+
+2. **State Management**
+   - Add state in `admin.dashboard.pagegen.tsx`
+   ```typescript
+   const [newSectionData, setNewSectionData] = useState<NewSectionType>(DEFAULT_NEW_SECTION_DATA);
+   ```
+   - Create update handler
+   ```typescript
+   const handleNewSectionUpdate = (field: keyof NewSectionType, value: string) => {
+     setNewSectionData(prev => ({
+       ...prev,
+       [field]: value
+     }));
+   };
+   ```
+
+3. **Component Props**
+   - Update `PageTemplate` props type
+   ```typescript
+   export type PageTemplateProps = {
+     // ...existing props
+     newSectionData: NewSectionType;
+     onNewSectionUpdate: (field: keyof NewSectionType, value: string) => void;
+   };
+   ```
+   - Pass props in `PageTemplate` usage
+   ```typescript
+   <PageTemplate
+     // ...existing props
+     newSectionData={newSectionData}
+     onNewSectionUpdate={handleNewSectionUpdate}
+   />
+   ```
+
+4. **Event Handlers**
+   - ⚠️ **IMPORTANT**: When replacing static components with editable ones, ensure all event handlers are properly transferred
+   - Common issue: Missing status change handler when adding new sections
+   ```typescript
+   // Always include this in admin.dashboard.pagegen.tsx
+   const handleStatusChange = (checked: boolean) => {
+     setStatus(checked ? 'active' : 'upcoming');
+   };
+   ```
+
+5. **Component Creation**
+   - Create new editable component in `_pagegen` directory
+   - Follow existing component patterns for consistency
+   - Maintain original styling and animations
+   - Use `EditableText` for text fields
+
+6. **Testing**
+   - Test all editable fields
+   - Verify state updates
+   - Check styling and animations
+   - Ensure proper error handling
+
+Following these steps will help avoid common issues like undefined handlers, missing props, and state management problems when adding new editable sections.
+
 ## Notes
 - Following Remix best practices for data handling
 - Implementing proper loading states

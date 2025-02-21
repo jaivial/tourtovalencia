@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import PageTemplate from "~/components/_pagegen/PageTemplate";
-import { sanJuanSection1Type, sanJuansection2Type } from "~/data/data";
+import { IndexSection5Type, sanJuanSection1Type, sanJuansection2Type } from "~/data/data";
 
 type Section = {
   id: string;
@@ -40,6 +40,11 @@ const DEFAULT_SECTION2_DATA: sanJuansection2Type = {
   }
 };
 
+const DEFAULT_INDEX_SECTION5_DATA: IndexSection5Type = {
+  firstH3: "",
+  secondH3: ""
+};
+
 export default function PageGeneratorRoute() {
   const [step, setStep] = useState<'options' | 'name' | 'preview'>('options');
   const [pageName, setPageName] = useState('');
@@ -47,6 +52,7 @@ export default function PageGeneratorRoute() {
   const [status, setStatus] = useState<'active' | 'upcoming'>('upcoming');
   const [section1Data, setSection1Data] = useState<sanJuanSection1Type>(DEFAULT_SECTION1_DATA);
   const [section2Data, setSection2Data] = useState<sanJuansection2Type>(DEFAULT_SECTION2_DATA);
+  const [indexSection5Data, setIndexSection5Data] = useState<IndexSection5Type>(DEFAULT_INDEX_SECTION5_DATA);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -70,6 +76,13 @@ export default function PageGeneratorRoute() {
     setSections(sections.map(section => 
       section.id === id ? { ...section, [field]: value } : section
     ));
+  };
+
+  const handleIndexSection5Update = (field: keyof IndexSection5Type, value: string) => {
+    setIndexSection5Data(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleSection1Update = (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
@@ -102,6 +115,10 @@ export default function PageGeneratorRoute() {
     } else if (step === 'preview') {
       setStep('name');
     }
+  };
+
+  const handleCreate = () => {
+    setStep('name');
   };
 
   const handleStatusChange = (checked: boolean) => {
@@ -185,6 +202,8 @@ export default function PageGeneratorRoute() {
             <PageTemplate
               status={status}
               onStatusChange={handleStatusChange}
+              indexSection5Data={indexSection5Data}
+              onIndexSection5Update={handleIndexSection5Update}
               section1Data={section1Data}
               onSection1Update={handleSection1Update}
               section2Data={section2Data}
