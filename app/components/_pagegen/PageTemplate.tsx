@@ -1,0 +1,60 @@
+import { useWindowSize } from "@uidotdev/usehooks";
+import { Switch } from "@heroui/switch";
+import { Label } from "~/components/ui/label";
+import { Input } from "~/components/ui/input";
+import { Textarea } from "@heroui/input";
+import IndexSection5 from "../_index/IndexSection5";
+import { useLanguageContext } from "~/providers/LanguageContext";
+
+type SectionProps = {
+  title: string;
+  content: string;
+  onTitleChange: (value: string) => void;
+  onContentChange: (value: string) => void;
+};
+
+const Section: React.FC<SectionProps & { width: number }> = ({ title, content, onTitleChange, onContentChange, width }) => (
+  <div className="w-full flex flex-col items-center gap-6 px-4 py-12">
+    <div className="w-full max-w-4xl space-y-4">
+      <Input value={title} onChange={(e) => onTitleChange(e.target.value)} placeholder="Título de la sección" className="text-2xl font-bold" />
+      <Textarea value={content} onChange={(e) => onContentChange(e.target.value)} placeholder="Contenido de la sección" className="min-h-[200px]" />
+    </div>
+  </div>
+);
+
+export type PageTemplateProps = {
+  sections: Array<{
+    id: string;
+    title: string;
+    content: string;
+  }>;
+  onUpdateSection: (id: string, field: "title" | "content", value: string) => void;
+  status: "active" | "upcoming";
+  onStatusChange: (value: boolean) => void;
+};
+
+const PageTemplate: React.FC<PageTemplateProps> = ({ sections, onUpdateSection, status, onStatusChange }) => {
+  const size = useWindowSize();
+  const width = size.width ?? 0;
+  const { state } = useLanguageContext();
+  const indexSection5Text = state.index.indexSection5;
+
+  return (
+    <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden gap-12 pt-[100px]">
+      <div className="w-full flex justify-center px-4">
+        <div className="w-full max-w-4xl flex items-center justify-end space-x-2">
+          <Switch id="page-status" checked={status === "active"} onCheckedChange={onStatusChange} />
+          <Label htmlFor="page-status">{status === "active" ? "Activo" : "Proximamente"}</Label>
+        </div>
+      </div>
+
+      <IndexSection5 width={width} indexSection5Text={indexSection5Text} />
+
+      {sections.map((section) => (
+        <Section key={section.id} width={width} title={section.title} content={section.content} onTitleChange={(value) => onUpdateSection(section.id, "title", value)} onContentChange={(value) => onUpdateSection(section.id, "content", value)} />
+      ))}
+    </div>
+  );
+};
+
+export default PageTemplate;

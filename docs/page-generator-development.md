@@ -12,16 +12,16 @@ Development tracking for the new "Generador de páginas" section in the admin da
   - [✓] "Administrar páginas"
 - [✓] Implement Framer Motion animations for button transitions
 
-### 2. Page Creation Flow [ ]
+### 2. Page Creation Flow [✓]
 - [✓] Create page name input form
   - [✓] Add input field with route name validation
-  - [ ] Implement blank space to underscore conversion
+  - [✓] Implement blank space to underscore conversion
   - [✓] Add "Next" button with animation
-- [ ] Develop page preview system
-  - [ ] Create dynamic template based on sanjuan.tsx
-  - [ ] Implement editable text fields
-  - [ ] Add HeroUI switch for "estado de la excursión"
-    - [ ] States: "Activo" / "Proximamente"
+- [✓] Develop page preview system
+  - [✓] Create dynamic template based on sanjuan.tsx
+  - [✓] Implement editable text fields
+  - [✓] Add HeroUI switch for "estado de la excursión"
+    - [✓] States: "Activo" / "Proximamente"
 
 ### 3. Data Processing [ ]
 - [ ] Set up MongoDB integration
