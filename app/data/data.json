@@ -643,13 +643,13 @@
         "firstH3": "Explora Las Cuevas de San José",
         "secondH3": "Una aventura subterránea única con salida desde Valencia"
       },
-      "indexSection6": {
+      "indexFeatures": {
         "firstSquareTitle": "Reservas",
-        "firstSquareDescription": "Normalmente aceptaremos reservas al menos 24 horas antes del tour. La edad legal mínima para un pasajero es de más de 2 años.",
+        "firstSquareDescription": "Normalmente aceptamos reservas con al menos 24 horas de antelación. La edad mínima legal para un pasajero es de más de 2 años.",
         "secondSquareTitle": "Precios",
         "secondSquareDescription": "120€ por persona. El número máximo de participantes por tour es de 10 personas.",
         "thirdSquareTitle": "Idiomas",
-        "thirdSquareDescription": "Todos nuestros tours pueden ser narrados en español e inglés.",
+        "thirdSquareDescription": "Todos nuestros tours pueden narrarse en español e inglés.",
         "fourthSquareTitle": "Mascotas",
         "fourthSquareDescription": "No se permiten mascotas durante el tour."
       }
