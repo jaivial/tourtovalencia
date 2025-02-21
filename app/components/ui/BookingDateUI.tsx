@@ -63,7 +63,7 @@ export const BookingDateUI = ({ formData, errors, availableDates = [], isLoading
           />
         </div>
         {errors.date && <p className="text-sm text-red-500 text-center">{errors.date}</p>}
-        {isLoading && <p className="text-sm text-muted-foreground text-center">Checking availability...</p>}
+        {/* {isLoading && <p className="text-sm text-muted-foreground text-center">Checking availability...</p>} */}
       </div>
     </div>
   );

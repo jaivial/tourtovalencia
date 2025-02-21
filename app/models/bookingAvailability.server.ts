@@ -28,15 +28,15 @@ export async function getDateAvailability(date: Date): Promise<DateAvailability>
 
   // Calculate total booked places
   const bookedPlaces = dateBookings.reduce((sum, booking) => 
-    sum + (booking.numberOfPeople || 0), 0);
+    sum + (booking.partySize || 0), 0);
 
-  // If maxBookings is 0, the date is not available regardless of booked places
-  const availablePlaces = maxBookings === 0 ? 0 : Math.max(0, maxBookings - bookedPlaces);
+  // If maxBookings is 0 or bookedPlaces >= maxBookings, the date is not available
+  const availablePlaces = maxBookings === 0 || bookedPlaces >= maxBookings ? 0 : maxBookings - bookedPlaces;
 
   return {
     date: date.toISOString(),
     availablePlaces,
-    isAvailable: maxBookings > 0 && availablePlaces > 0
+    isAvailable: maxBookings > 0 && bookedPlaces < maxBookings
   };
 }
 
@@ -75,7 +75,7 @@ export async function getAvailableDatesInRange(startDate: Date, endDate: Date): 
     const dateStr = booking.date.toISOString().split("T")[0];
     bookingCounts.set(
       dateStr,
-      (bookingCounts.get(dateStr) || 0) + (booking.numberOfPeople || 0)
+      (bookingCounts.get(dateStr) || 0) + (booking.partySize || 0)
     );
   });
 
@@ -93,12 +93,14 @@ export async function getAvailableDatesInRange(startDate: Date, endDate: Date): 
     const dateStr = currentDate.toISOString();
     const maxBookings = bookingLimitsMap.get(dateStr.split("T")[0]) ?? DEFAULT_DAILY_LIMIT;
     const bookedPlaces = bookingCounts.get(dateStr.split("T")[0]) || 0;
-    const availablePlaces = maxBookings === 0 ? 0 : Math.max(0, maxBookings - bookedPlaces);
+    
+    // If maxBookings is 0 or bookedPlaces >= maxBookings, the date is not available
+    const availablePlaces = maxBookings === 0 || bookedPlaces >= maxBookings ? 0 : maxBookings - bookedPlaces;
 
     dates.push({
       date: dateStr,
       availablePlaces,
-      isAvailable: maxBookings > 0 && availablePlaces > 0,
+      isAvailable: maxBookings > 0 && bookedPlaces < maxBookings
     });
 
     currentDate.setDate(currentDate.getDate() + 1);
