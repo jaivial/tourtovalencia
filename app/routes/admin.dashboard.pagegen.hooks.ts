@@ -145,6 +145,14 @@ export const usePageGenerator = () => {
     }));
   };
 
+  // Index Section 5 handler
+  const handleIndexSection5Update = (field: keyof IndexSection5Type, value: string) => {
+    setIndexSection5Data(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   // Navigation handlers
   const handleNext = () => {
     if (step === 'name') {
@@ -190,5 +198,6 @@ export const usePageGenerator = () => {
     handleSection3ImageRemove,
     handleSection4Update,
     handleSection5Update,
+    handleIndexSection5Update,
   };
 };

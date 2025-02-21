@@ -13,6 +13,8 @@ export default function PageGeneratorRoute() {
     section3Data,
     section4Data,
     section5Data,
+    indexSection5Data,
+    handleIndexSection5Update,
     setPageName,
     setStatus,
     handleNext,
@@ -98,6 +100,8 @@ export default function PageGeneratorRoute() {
             onSection4Update={handleSection4Update}
             section5Data={section5Data}
             onSection5Update={handleSection5Update}
+            indexSection5Data={indexSection5Data}
+            onIndexSection5Update={handleIndexSection5Update}
           />
         </motion.div>
       )}
