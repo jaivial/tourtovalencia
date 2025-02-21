@@ -39,13 +39,14 @@ export type PageTemplateProps = {
 const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, indexSection5Data, onIndexSection5Update, section1Data, onSection1Update, section2Data, onSection2Update, section3Data, onSection3ImageUpdate, onSection3ImageRemove, section4Data, onSection4Update, section5Data, onSection5Update, section6Data, onSection6Update, pageName }) => {
   const size = useWindowSize();
   const { isModalOpen, openModal, closeModal } = usePublishModal();
-  const { handleCreatePage, isCreating, status: pageCreationStatus } = usePageCreation();
+  const { handleCreatePage, isCreating, error } = usePageCreation();
   const width = size.width ?? 0;
   const { state } = useLanguageContext();
   const indexSection5Text = state.index.indexSection5;
 
   const handleCreatePageClick = () => {
     const pageContent = {
+      indexSection5: indexSection5Data,
       section1: section1Data,
       section2: section2Data,
       section3: section3Data,
@@ -102,14 +103,27 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
         </div>
       </div>
 
-      <div className="flex justify-end gap-4 mt-8">
-        <button
-          onClick={handleCreatePageClick}
-          disabled={isCreating}
-          className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
-        >
-          {isCreating ? "Creando Página..." : "Crear Página"}
-        </button>
+      <div className="flex flex-col gap-4 mt-8">
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        )}
+        <div className="flex justify-end">
+          <button
+            onClick={handleCreatePageClick}
+            disabled={isCreating}
+            className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isCreating && (
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
+            {isCreating ? "Creando Página..." : "Crear Página"}
+          </button>
+        </div>
       </div>
 
       <PublishModal

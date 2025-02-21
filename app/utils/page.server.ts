@@ -10,7 +10,10 @@ export function generateSlug(name: string): string {
     .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 }
 
-export async function createPage(name: string, content: Record<string, string>): Promise<Page> {
+export async function createPage(
+  name: string, 
+  content: Record<string, any>
+): Promise<Page> {
   const pagesCollection = await getPagesCollection();
   
   // Generate initial slug
@@ -28,7 +31,7 @@ export async function createPage(name: string, content: Record<string, string>):
     name,
     content: {
       es: content,
-      en: {} // Will be populated with translations later
+      en: content // Use same content for both languages
     },
     createdAt: new Date(),
     updatedAt: new Date()

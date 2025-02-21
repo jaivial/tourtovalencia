@@ -52,7 +52,9 @@ export async function ensureDbIndexes() {
   await db.collection("pages").createIndexes([
     // Unique index for page slugs
     { key: { slug: 1 }, unique: true },
-    // Index for quick listing by creation date
+    // Index for searching by name
+    { key: { name: 1 } },
+    // Index for sorting by creation date
     { key: { createdAt: -1 } }
   ]);
 }
