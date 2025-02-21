@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import PageTemplate from "~/components/_pagegen/PageTemplate";
-import { IndexSection5Type, sanJuanSection1Type, sanJuansection2Type } from "~/data/data";
+import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type } from "~/data/data";
 
 type Section = {
   id: string;
@@ -45,6 +45,12 @@ const DEFAULT_INDEX_SECTION5_DATA: IndexSection5Type = {
   secondH3: ""
 };
 
+const DEFAULT_SECTION3_DATA: sanJuanSection3Type = {
+  images: Array(8).fill({ source: "", alt: "Gallery image" }),
+  source: "",
+  alt: ""
+};
+
 export default function PageGeneratorRoute() {
   const [step, setStep] = useState<'options' | 'name' | 'preview'>('options');
   const [pageName, setPageName] = useState('');
@@ -52,6 +58,7 @@ export default function PageGeneratorRoute() {
   const [status, setStatus] = useState<'active' | 'upcoming'>('upcoming');
   const [section1Data, setSection1Data] = useState<sanJuanSection1Type>(DEFAULT_SECTION1_DATA);
   const [section2Data, setSection2Data] = useState<sanJuansection2Type>(DEFAULT_SECTION2_DATA);
+  const [section3Data, setSection3Data] = useState<sanJuanSection3Type>(DEFAULT_SECTION3_DATA);
   const [indexSection5Data, setIndexSection5Data] = useState<IndexSection5Type>(DEFAULT_INDEX_SECTION5_DATA);
 
   const containerVariants = {
@@ -99,6 +106,25 @@ export default function PageGeneratorRoute() {
     }));
   };
 
+  const handleSection3ImageUpdate = (index: number, file: File) => {
+    const preview = URL.createObjectURL(file);
+    setSection3Data(prev => ({
+      ...prev,
+      images: prev.images.map((img, i) => 
+        i === index ? { ...img, source: preview } : img
+      )
+    }));
+  };
+
+  const handleSection3ImageRemove = (index: number) => {
+    setSection3Data(prev => ({
+      ...prev,
+      images: prev.images.map((img, i) => 
+        i === index ? { ...img, source: "" } : img
+      )
+    }));
+  };
+
   const handleNext = () => {
     if (step === 'name') {
       if (!pageName.trim()) {
@@ -126,92 +152,93 @@ export default function PageGeneratorRoute() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Generador de páginas</h1>
-      
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        className="space-y-8"
-      >
-        {step === 'options' && (
-          <motion.div
-            variants={buttonVariants}
-            className="space-y-4"
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      className="w-full h-full flex flex-col items-center justify-start p-8"
+    >
+      {step === 'options' && (
+        <motion.div
+          variants={buttonVariants}
+          className="flex flex-col items-center gap-4"
+        >
+          <Button
+            size="lg"
+            onClick={handleCreate}
+            className="bg-blue-900 hover:bg-blue-800 text-white font-medium px-8 py-6 rounded-full"
           >
-            <Button 
-              onClick={() => setStep('name')}
-              className="w-full py-8 text-xl"
-            >
-              Crear nueva página
-            </Button>
-            <Button 
-              variant="outline"
-              className="w-full py-8 text-xl"
-            >
-              Administrar páginas
-            </Button>
-          </motion.div>
-        )}
-
-        {step === 'name' && (
-          <motion.div
-            variants={formVariants}
-            className="space-y-4"
+            Crear nueva página
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="text-blue-900 hover:bg-blue-100"
           >
-            <div className="space-y-2">
-              <label htmlFor="pageName" className="text-lg font-medium">
-                Nombre de la página
-              </label>
-              <input
-                id="pageName"
-                type="text"
-                value={pageName}
-                onChange={(e) => setPageName(e.target.value.replace(/\s+/g, '_'))}
-                className="w-full p-2 border rounded"
-                placeholder="mi_nueva_pagina"
-              />
-            </div>
-            <div className="flex justify-between">
-              <Button onClick={handleBack} variant="outline">
-                Atrás
-              </Button>
-              <Button onClick={handleNext}>
-                Siguiente
-              </Button>
-            </div>
-          </motion.div>
-        )}
+            Administrar páginas
+          </Button>
+        </motion.div>
+      )}
 
-        {step === 'preview' && (
-          <motion.div
-            variants={formVariants}
-            className="space-y-8"
-          >
-            <div className="flex justify-between mb-4">
-              <Button onClick={handleBack} variant="outline">
-                Atrás
-              </Button>
-              <Button>
-                Guardar página
-              </Button>
-            </div>
-
-            <PageTemplate
-              status={status}
-              onStatusChange={handleStatusChange}
-              indexSection5Data={indexSection5Data}
-              onIndexSection5Update={handleIndexSection5Update}
-              section1Data={section1Data}
-              onSection1Update={handleSection1Update}
-              section2Data={section2Data}
-              onSection2Update={handleSection2Update}
+      {step === 'name' && (
+        <motion.div
+          variants={formVariants}
+          className="w-full max-w-xl flex flex-col gap-6"
+        >
+          <div className="flex flex-col gap-2">
+            <label htmlFor="page-name" className="text-sm font-medium text-gray-700">
+              Nombre de la página
+            </label>
+            <input
+              id="page-name"
+              type="text"
+              value={pageName}
+              onChange={(e) => setPageName(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Ejemplo: excursion-san-juan"
             />
-          </motion.div>
-        )}
-      </motion.div>
-    </div>
+          </div>
+          <div className="flex justify-between">
+            <Button onClick={handleBack} variant="outline">
+              Atrás
+            </Button>
+            <Button onClick={handleNext} className="bg-blue-900 hover:bg-blue-800">
+              Siguiente
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
+      {step === 'preview' && (
+        <motion.div
+          variants={formVariants}
+          className="w-full flex flex-col gap-6"
+        >
+          <div className="w-full flex justify-between mb-4">
+            <Button onClick={handleBack} variant="outline">
+              Atrás
+            </Button>
+            <Button className="bg-blue-900 hover:bg-blue-800">
+              Guardar página
+            </Button>
+          </div>
+
+          <PageTemplate
+            status={status}
+            onStatusChange={handleStatusChange}
+            indexSection5Data={indexSection5Data}
+            onIndexSection5Update={handleIndexSection5Update}
+            section1Data={section1Data}
+            onSection1Update={handleSection1Update}
+            section2Data={section2Data}
+            onSection2Update={handleSection2Update}
+            section3Data={section3Data}
+            onSection3ImageUpdate={handleSection3ImageUpdate}
+            onSection3ImageRemove={handleSection3ImageRemove}
+          />
+        </motion.div>
+      )}
+    </motion.div>
   );
 }
