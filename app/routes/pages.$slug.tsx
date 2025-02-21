@@ -1,7 +1,7 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { getPageBySlug } from "~/utils/page.server";
-import { useLanguageContext } from "~/providers/LanguageContext";
+import DynamicPageContainer from "~/components/_pages/DynamicPageContainer";
 
 // Error boundary component
 export function ErrorBoundary() {
@@ -36,23 +36,6 @@ export async function loader({ params }: LoaderFunctionArgs) {
 // Page component
 export default function DynamicPage() {
   const { page } = useLoaderData<typeof loader>();
-  const { state } = useLanguageContext();
-  const content = page.content[state.language] || page.content.es;
-
-  return (
-    <div className="w-full min-h-screen bg-gray-100">
-      <div className="w-full max-w-7xl mx-auto p-4">
-        <div className="flex flex-col items-center justify-center gap-6 mb-8 p-8 bg-white rounded-lg shadow-sm">
-          <h1 className="text-3xl font-bold text-gray-900">{page.name}</h1>
-          
-          {/* Render dynamic content sections */}
-          {Object.entries(content).map(([key, value]) => (
-            <div key={key} className="w-full max-w-4xl">
-              {value}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  
+  return <DynamicPageContainer page={page} />;
 }
