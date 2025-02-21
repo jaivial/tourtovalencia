@@ -6,25 +6,48 @@ import { BookingPaymentModalFeature } from "../features/BookingPaymentModalFeatu
 import { User, Mail, Phone, Users, Calendar, Receipt, AlertCircle } from "lucide-react";
 import { useNavigate } from "@remix-run/react";
 
-export const BookingStepThree = () => {
+interface BookingStepThreeProps {
+  bookingStepThreeText: {
+    bookingSummary: string;
+    personalDetails: string;
+    bookingDetails: string;
+    labels: {
+      name: string;
+      email: string;
+      phone: string;
+      partySize: string;
+      date: string;
+      totalPrice: string;
+    };
+    notSelected: string;
+    people: string;
+    priceCalculation: string;
+    paymentMessage: string;
+  };
+}
+
+export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps) => {
   const states = useBooking();
   const totalPrice = states.formData.partySize * 120;
   const navigate = useNavigate();
+
+  const priceCalculation = bookingStepThreeText.priceCalculation.replace('{partySize}', states.formData.partySize.toString());
+
   return (
     <div className="space-y-6 flex flex-col items-center">
-      <h2 className="text-2xl font-semibold tracking-tight text-center sm:text-left">Booking Summary</h2>
+      <h2 className="text-2xl font-semibold tracking-tight text-center sm:text-left">{bookingStepThreeText.bookingSummary}</h2>
 
       <Card className="p-6 space-y-6 w-full max-w-2xl">
         <div className="space-y-3">
           <h3 className="font-medium flex items-center gap-2 justify-center sm:justify-start">
             <User className="h-4 w-4" />
-            Personal Details
+            {bookingStepThreeText.personalDetails}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <div className="flex flex-col space-y-1 sm:space-y-0 items-center sm:items-start">
               <span className="text-muted-foreground flex items-center gap-2">
                 <User className="h-4 w-4" />
-                Name:
+                {bookingStepThreeText.labels.name}
               </span>
               <span className="sm:hidden">{states.formData.fullName}</span>
             </div>
@@ -33,7 +56,7 @@ export const BookingStepThree = () => {
             <div className="flex flex-col space-y-1 sm:space-y-0 items-center sm:items-start">
               <span className="text-muted-foreground flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                Email:
+                {bookingStepThreeText.labels.email}
               </span>
               <span className="sm:hidden break-all text-center">{states.formData.email}</span>
             </div>
@@ -42,7 +65,7 @@ export const BookingStepThree = () => {
             <div className="flex flex-col space-y-1 sm:space-y-0 items-center sm:items-start">
               <span className="text-muted-foreground flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                Phone:
+                {bookingStepThreeText.labels.phone}
               </span>
               <span className="sm:hidden">{states.formData.phoneNumber}</span>
             </div>
@@ -53,26 +76,26 @@ export const BookingStepThree = () => {
         <div className="space-y-3">
           <h3 className="font-medium flex items-center gap-2 justify-center sm:justify-start">
             <Calendar className="h-4 w-4" />
-            Booking Details
+            {bookingStepThreeText.bookingDetails}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <div className="flex flex-col space-y-1 sm:space-y-0 items-center sm:items-start">
               <span className="text-muted-foreground flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                Party Size:
+                {bookingStepThreeText.labels.partySize}
               </span>
-              <span className="sm:hidden">{states.formData.partySize} people</span>
+              <span className="sm:hidden">{states.formData.partySize} {bookingStepThreeText.people}</span>
             </div>
-            <span className="hidden sm:block">{states.formData.partySize} people</span>
+            <span className="hidden sm:block">{states.formData.partySize} {bookingStepThreeText.people}</span>
             
             <div className="flex flex-col space-y-1 sm:space-y-0 items-center sm:items-start">
               <span className="text-muted-foreground flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Date:
+                {bookingStepThreeText.labels.date}
               </span>
-              <span className="sm:hidden">{states.formData.date ? format(new Date(states.formData.date), "PPP") : "Not selected"}</span>
+              <span className="sm:hidden">{states.formData.date ? format(new Date(states.formData.date), "PPP") : bookingStepThreeText.notSelected}</span>
             </div>
-            <span className="hidden sm:block">{states.formData.date ? format(new Date(states.formData.date), "PPP") : "Not selected"}</span>
+            <span className="hidden sm:block">{states.formData.date ? format(new Date(states.formData.date), "PPP") : bookingStepThreeText.notSelected}</span>
           </div>
         </div>
 
@@ -80,11 +103,11 @@ export const BookingStepThree = () => {
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
             <span className="text-lg font-medium flex items-center gap-2 justify-center sm:justify-start">
               <Receipt className="h-5 w-5" />
-              Total Price:
+              {bookingStepThreeText.labels.totalPrice}
             </span>
             <span className="text-2xl font-bold text-center sm:text-left">€{totalPrice}</span>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground text-center sm:text-left">Price calculation: {states.formData.partySize} people × €120 per person</p>
+          <p className="mt-2 text-sm text-muted-foreground text-center sm:text-left">{priceCalculation}</p>
         </div>
       </Card>
 
@@ -98,7 +121,7 @@ export const BookingStepThree = () => {
           <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
             <p className="text-yellow-800 text-sm flex items-center gap-2">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
-              <span>Your booking will be confirmed after successful payment. Click "Book Now" to proceed to payment.</span>
+              <span>{bookingStepThreeText.paymentMessage}</span>
             </p>
           </div>
         </div>

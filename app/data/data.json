@@ -512,6 +512,23 @@
           "emailConfirm": "Confirm your email",
           "phoneNumber": "Enter your phone number"
         }
+      },
+      "bookingStepThree": {
+        "bookingSummary": "Booking Summary",
+        "personalDetails": "Personal Details",
+        "bookingDetails": "Booking Details",
+        "labels": {
+          "name": "Name:",
+          "email": "Email:",
+          "phone": "Phone:",
+          "partySize": "Party Size:",
+          "date": "Date:",
+          "totalPrice": "Total Price:"
+        },
+        "notSelected": "Not selected",
+        "people": "people",
+        "priceCalculation": "Price calculation: {partySize} people × €120 per person",
+        "paymentMessage": "Your booking will be confirmed after successful payment. Click \"Book Now\" to proceed to payment."
       }
     }
   },
@@ -1028,6 +1045,23 @@
           "emailConfirm": "Confirma tu correo electrónico",
           "phoneNumber": "Introduce tu número de teléfono"
         }
+      },
+      "bookingStepThree": {
+        "bookingSummary": "Resumen de la Reserva",
+        "personalDetails": "Datos Personales",
+        "bookingDetails": "Detalles de la Reserva",
+        "labels": {
+          "name": "Nombre:",
+          "email": "Correo:",
+          "phone": "Teléfono:",
+          "partySize": "Número de Personas:",
+          "date": "Fecha:",
+          "totalPrice": "Precio Total:"
+        },
+        "notSelected": "No seleccionado",
+        "people": "personas",
+        "priceCalculation": "Cálculo del precio: {partySize} personas × €120 por persona",
+        "paymentMessage": "Tu reserva se confirmará después del pago exitoso. Haz clic en \"Reservar Ahora\" para proceder al pago."
       }
     }
   }

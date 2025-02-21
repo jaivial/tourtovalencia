@@ -18,6 +18,7 @@ export const BookingFeature = () => {
   const bookingFeatureText = state.booking.feature;
   const bookingProgressSteps = state.booking.progress.steps;
   const bookingStepOneText = state.booking.bookingStepOne;
+  const bookingStepThreeText = state.booking.bookingStepThree;
 
   const context = useBooking();
   const actions = useBookingActions(context);
@@ -39,7 +40,7 @@ export const BookingFeature = () => {
       case 3:
         return <BookingStepOne bookingStepOneText={bookingStepOneText} />;
       case 4:
-        return <BookingStepThree />;
+        return <BookingStepThree bookingStepThreeText={bookingStepThreeText} />;
       default:
         return null;
     }
