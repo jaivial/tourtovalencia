@@ -9,6 +9,7 @@ import { BookingProgress } from "./BookingProgress";
 import { BookingSuccess } from "./BookingSuccess";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Loader2, CalendarRange, Users2, Sparkles } from "lucide-react";
+import { HeroUIProvider } from "@heroui/react";
 
 export const BookingFeature = () => {
   const context = useBooking();
@@ -21,7 +22,11 @@ export const BookingFeature = () => {
   const renderStep = () => {
     switch (context.currentStep) {
       case 1:
-        return <BookingDateFeature />;
+        return (
+          <HeroUIProvider>
+            <BookingDateFeature />
+          </HeroUIProvider>
+        );
       case 2:
         return <BookingStepTwo />;
       case 3:
@@ -34,7 +39,7 @@ export const BookingFeature = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-xl max-[800px]:bg-red-200 px-4 sm:px-6 lg:px-8 py-8 sm:py-12 mt-24 sm:mt-32 mb-12 sm:mb-20 bg-white/95 backdrop-blur-sm rounded-lg shadow-md">
+    <div className="container mx-auto max-w-xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 mt-24 sm:mt-32 mb-12 sm:mb-20 bg-white/95 backdrop-blur-sm rounded-lg shadow-md">
       <div className="text-center mb-12 space-y-6">
         <div className="flex justify-center gap-4">
           <CalendarRange className="w-8 h-8 text-primary" />

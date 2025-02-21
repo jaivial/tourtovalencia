@@ -47,7 +47,7 @@
 ## Localization
 
 ### String Management
-- Store in `app/data/data.json`
+- Store in `app/data/data.ts`
 - Support multiple languages
 - Access via context states
 

@@ -3,7 +3,7 @@ import type { LinksFunction } from "@remix-run/node";
 import "./styles/globals.css";
 import { json, type LoaderArgs } from "@remix-run/node";
 import { languageCookie } from "~/utils/cookies";
-import { languages } from "~/data/data";
+import languageData from "~/data/data.json";
 import Nav from "~/components/layout/nav";
 import Footer from "./components/layout/footer";
 import ArrowToTop from "./components/_index/ArrowToTop";
@@ -11,7 +11,7 @@ import { LanguageContextProvider } from "~/providers/LanguageContext";
 import { MotionProvider } from "~/providers/MotionProvider";
 
 export interface RootLoaderData {
-  initialLanguage: typeof languages.en;
+  initialLanguage: typeof languageData.en;
   ENV: {
     STRIPE_PUBLIC_KEY: string | undefined;
     PAYPAL_CLIENT_ID: string | undefined;
@@ -21,9 +21,10 @@ export interface RootLoaderData {
 export const loader = async ({ request }: LoaderArgs) => {
   const cookieHeader = request.headers.get("Cookie");
   const cookieLanguage = (await languageCookie.parse(cookieHeader)) || "en";
+  const language = cookieLanguage as keyof typeof languageData;
 
   return json<RootLoaderData>({ 
-    initialLanguage: languages[cookieLanguage] || languages.en,
+    initialLanguage: languageData[language] || languageData.en,
     ENV: {
       STRIPE_PUBLIC_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
       PAYPAL_CLIENT_ID: process.env.PAYPAL_CLIENT_ID
