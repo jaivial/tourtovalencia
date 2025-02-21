@@ -1,5 +1,6 @@
 import { MongoClient } from "mongodb";
 import { ensureDbIndexes } from "./db.schema.server";
+import type { Translation } from "./db.schema.server";
 
 let db: MongoClient | null = null;
 
@@ -33,9 +34,14 @@ export async function getDb() {
 }
 
 // Export a function to get a collection with proper typing
-export async function getCollection(collectionName: string) {
+export async function getCollection<T>(collectionName: string) {
   const database = await getDb();
-  return database.collection(collectionName);
+  return database.collection<T>(collectionName);
+}
+
+// Type-safe collection getters
+export async function getTranslationsCollection() {
+  return getCollection<Translation>("translations");
 }
 
 export { db };
