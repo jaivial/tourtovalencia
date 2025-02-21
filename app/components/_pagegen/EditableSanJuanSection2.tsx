@@ -1,15 +1,14 @@
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { sanJuansection2Type } from "~/data/data";
 import EditableText from "./EditableText";
+import ImageUpload from "./ImageUpload";
 
-// Child Props type
 type ChildProps = {
   width: number;
   height: number;
   SanJuanSection2Text: sanJuansection2Type;
-  onTextUpdate: (key: keyof sanJuansection2Type, value: string) => void;
+  onTextUpdate: (key: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => void;
 };
 
 const EditableSanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2Text, onTextUpdate }) => {
@@ -23,6 +22,11 @@ const EditableSanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanS
   `;
 
   const getResponsiveTextSize = (small: string, medium: string, large: string) => `${width <= 350 ? small : width <= 450 ? medium : large}`;
+
+  const handleImageChange = (file: File) => {
+    const preview = URL.createObjectURL(file);
+    onTextUpdate('sectionImage', { file, preview });
+  };
 
   return (
     <div ref={ref} className="w-full overflow-x-hidden">
@@ -44,19 +48,18 @@ const EditableSanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanS
           className={`
             w-full max-w-[620px] min-h-[300px] 
             flex flex-col justify-center items-center gap-6 
-            ${width <= 1280 ? "p-4 -mt-16" : "p-6 -mt-28"} 
+            ${width <= 1280 ? "p-4 mt-16" : "p-6 mt-28"} 
           `}
         >
           <motion.div animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }} initial={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.5, delay: 0.3 }} className="w-full flex justify-center">
-            <DotLottieReact
-              src="https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie"
-              loop
-              autoplay
-              className={`
-                translate-y-[50px] mb-4
-                ${width <= 450 ? "w-[300px]" : "w-[400px]"}
-              `}
-            />
+            <div className="w-[400px] h-[300px] relative rounded-lg overflow-hidden">
+              <ImageUpload 
+                imageUrl={SanJuanSection2Text.sectionImage?.preview || ""} 
+                onImageChange={handleImageChange}
+                onImageRemove={() => onTextUpdate("sectionImage", { preview: "" })} 
+                className="w-full h-full object-cover" 
+              />
+            </div>
           </motion.div>
 
           {[

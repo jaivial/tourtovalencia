@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 import { sanJuanSection1Type } from "~/data/data";
-import { useImageUpload } from "./EditableSanJuanSection1.hooks";
 import ImageUpload from "./ImageUpload";
 import EditableText from "./EditableText";
 
@@ -18,28 +17,9 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
   data,
   onUpdate
 }) => {
-  const { imagePreview, handleImageChange, handleImageRemove } = useImageUpload();
-
-  const handleImageUpdate = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    handleImageChange(event);
-    
-    // Create preview URL for the parent component
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      onUpdate('backgroundImage', {
-        file,
-        preview: reader.result as string
-      });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleImageRemoveClick = () => {
-    handleImageRemove();
-    onUpdate('backgroundImage', { preview: '/olgaphoto3.jpeg' });
+  const handleImageChange = (file: File) => {
+    const preview = URL.createObjectURL(file);
+    onUpdate('backgroundImage', { file, preview });
   };
 
   const handleTextUpdate = (field: keyof sanJuanSection1Type) => (value: string) => {
@@ -58,9 +38,10 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
         {/* Background image with overlay */}
         <div className="w-full h-[600px] relative bg-white rounded-2xl overflow-hidden mb-0 px-12">
           <ImageUpload
-            imagePreview={imagePreview ?? data.backgroundImage?.preview ?? null}
-            onImageChange={handleImageUpdate}
-            onImageRemove={handleImageRemoveClick}
+            imageUrl={data.backgroundImage?.preview || ""}
+            onImageChange={handleImageChange}
+            onImageRemove={() => onUpdate('backgroundImage', { preview: "" })}
+            className="w-full h-full object-cover"
           />
         </div>
 
@@ -80,8 +61,8 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
             className="w-full"
           >
             <EditableText
-              value={data.firstH3}
-              onChange={handleTextUpdate('firstH3')}
+              text={data.firstH3}
+              onUpdate={handleTextUpdate('firstH3')}
               placeholder="Título principal"
               className={`max-w-3xl font-medium ${
                 width <= 350 ? "text-xl" : 
@@ -106,14 +87,14 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
             ].map((fields, index) => (
               <div key={index} className="bg-blue-50/50 rounded-xl p-6 transform hover:scale-105 transition-transform">
                 <EditableText
-                  value={data[fields.titleField as keyof sanJuanSection1Type] as string}
-                  onChange={handleTextUpdate(fields.titleField as keyof sanJuanSection1Type)}
+                  text={data[fields.titleField as keyof sanJuanSection1Type] as string}
+                  onUpdate={handleTextUpdate(fields.titleField as keyof sanJuanSection1Type)}
                   placeholder="Título de característica"
                   className="text-2xl font-bold text-blue-900 mb-2"
                 />
                 <EditableText
-                  value={data[fields.descField as keyof sanJuanSection1Type] as string}
-                  onChange={handleTextUpdate(fields.descField as keyof sanJuanSection1Type)}
+                  text={data[fields.descField as keyof sanJuanSection1Type] as string}
+                  onUpdate={handleTextUpdate(fields.descField as keyof sanJuanSection1Type)}
                   placeholder="Descripción de característica"
                   className="text-blue-800"
                   multiline={true}
@@ -131,8 +112,8 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
           >
             <div className="group relative">
               <EditableText
-                value={data.button}
-                onChange={handleTextUpdate('button')}
+                text={data.button}
+                onUpdate={handleTextUpdate('button')}
                 placeholder="Texto del botón"
                 className="bg-blue-900 hover:bg-blue-800 text-white px-8 py-6 text-xl rounded-full transition-all duration-300 hover:shadow-lg cursor-pointer inline-block min-w-[200px]"
               />

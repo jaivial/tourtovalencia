@@ -34,7 +34,10 @@ const DEFAULT_SECTION1_DATA: sanJuanSection1Type = {
 const DEFAULT_SECTION2_DATA: sanJuansection2Type = {
   firstH3: "",
   secondH3: "",
-  thirdH3: ""
+  thirdH3: "",
+  sectionImage: {
+    preview: '/olgaphoto3.jpeg'
+  }
 };
 
 export default function PageGeneratorRoute() {
@@ -76,7 +79,7 @@ export default function PageGeneratorRoute() {
     }));
   };
 
-  const handleSection2Update = (field: keyof sanJuansection2Type, value: string) => {
+  const handleSection2Update = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
     setSection2Data(prev => ({
       ...prev,
       [field]: value

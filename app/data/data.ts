@@ -89,12 +89,18 @@ export type sanJuansection2Type = {
   firstH3: string;
   secondH3: string;
   thirdH3: string;
+  sectionImage: {
+    file?: File;
+    preview: string;
+  };
 };
+
 export type sanJuansection4Type = {
   firstH3: string;
   secondH3: string;
   thirdH3: string;
 };
+
 export type sanJuanSection5Type = {
   firstH3: string;
   secondH3: string;
@@ -107,6 +113,7 @@ export type SanJuanSection6listType = {
   li: string;
   index: number;
 };
+
 export type SanJuanSection6Type = {
   cardTitle: string;
   cardDescription: string;
@@ -476,6 +483,10 @@ export const languages: Record<string, LanguageData> = {
         firstH3: "Enjoy a relaxing boat ride through one of the most spectacular underground rivers!",
         secondH3: "You'll travel 800 meters by boat.",
         thirdH3: "Did you know it's the longest navigable underground river in Europe?",
+        sectionImage: {
+          file: undefined,
+          preview: "",
+        },
       },
       sanJuanSection3: {
         images: [
@@ -864,6 +875,10 @@ export const languages: Record<string, LanguageData> = {
         firstH3: "Disfruta de un relajante paseo en barca a través de uno de los ríos subterráneos más espectaculares.",
         secondH3: "Viajarás 800 metros en barca.",
         thirdH3: "¿Sabías que es el río subterráneo navegable más largo de Europa?",
+        sectionImage: {
+          file: undefined,
+          preview: "",
+        },
       },
       sanJuanSection3: {
         images: [

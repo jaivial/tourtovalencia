@@ -15,7 +15,7 @@ export type PageTemplateProps = {
   section1Data: sanJuanSection1Type;
   onSection1Update: (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => void;
   section2Data: sanJuansection2Type;
-  onSection2Update: (field: keyof sanJuansection2Type, value: string) => void;
+  onSection2Update: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => void;
 };
 
 const PageTemplate: React.FC<PageTemplateProps> = ({
@@ -52,7 +52,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
         width={width}
         height={0}
         SanJuanSection2Text={section2Data}
-        onTextUpdate={onSection2Update}
+        onTextUpdate={(field, value) => onSection2Update(field, typeof value === 'string' ? value : { file: value.file, preview: value.preview })}
       />
     </div>
   );
