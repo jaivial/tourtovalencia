@@ -134,12 +134,11 @@ export const usePageGenerator = () => {
   };
 
   // Section 3 handlers
-  const handleSection3ImageUpdate = (index: number, file: File) => {
-    const preview = URL.createObjectURL(file);
+  const handleSection3ImageUpdate = (index: number, base64String: string) => {
     setSection3Data(prev => ({
       ...prev,
       images: prev.images.map((img, i) => 
-        i === index ? { source: preview, alt: "Gallery image" } : img
+        i === index ? { source: base64String, alt: "Gallery image" } : img
       )
     }));
   };

@@ -7,8 +7,17 @@ import { sanJuanSection3Type } from "~/data/data";
 type EditableSanJuanSection3Props = {
   width: number;
   data: sanJuanSection3Type;
-  onUpdate: (index: number, file: File) => void;
+  onUpdate: (index: number, file: string) => void;
   onRemove: (index: number) => void;
+};
+
+const convertToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 };
 
 const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({ 
@@ -25,6 +34,11 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
   const handleImageClick = (index: number) => {
     setSelectedImageIndex(index);
     setModalOpen(true);
+  };
+
+  const handleImageUpdate = async (index: number, file: File) => {
+    const base64 = await convertToBase64(file);
+    onUpdate(index, base64 as any); // Using any here since we're changing the type
   };
 
   return (
@@ -52,7 +66,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
               >
                 <ImageUpload
                   imageUrl={data.images[0]?.source || ""}
-                  onImageChange={(file) => onUpdate(0, file)}
+                  onImageChange={(file) => handleImageUpdate(0, file)}
                   onImageRemove={() => onRemove(0)}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -68,7 +82,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
               >
                 <ImageUpload
                   imageUrl={data.images[1]?.source || ""}
-                  onImageChange={(file) => onUpdate(1, file)}
+                  onImageChange={(file) => handleImageUpdate(1, file)}
                   onImageRemove={() => onRemove(1)}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -84,7 +98,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
               >
                 <ImageUpload
                   imageUrl={data.images[2]?.source || ""}
-                  onImageChange={(file) => onUpdate(2, file)}
+                  onImageChange={(file) => handleImageUpdate(2, file)}
                   onImageRemove={() => onRemove(2)}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -99,7 +113,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
               >
                 <ImageUpload
                   imageUrl={data.images[3]?.source || ""}
-                  onImageChange={(file) => onUpdate(3, file)}
+                  onImageChange={(file) => handleImageUpdate(3, file)}
                   onImageRemove={() => onRemove(3)}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -117,7 +131,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
                 >
                   <ImageUpload
                     imageUrl={data.images[index]?.source || ""}
-                    onImageChange={(file) => onUpdate(index, file)}
+                    onImageChange={(file) => handleImageUpdate(index, file)}
                     onImageRemove={() => onRemove(index)}
                     className="absolute inset-0 w-full h-full object-cover"
                   />
@@ -138,7 +152,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
                   >
                     <ImageUpload
                       imageUrl={data.images[index]?.source || ""}
-                      onImageChange={(file) => onUpdate(index, file)}
+                      onImageChange={(file) => handleImageUpdate(index, file)}
                       onImageRemove={() => onRemove(index)}
                       className="absolute inset-0 w-full h-full object-cover"
                     />
