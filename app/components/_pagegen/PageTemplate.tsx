@@ -14,7 +14,7 @@ import { useLanguageContext } from "~/providers/LanguageContext";
 import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 
 export type PageTemplateProps = {
-  status: 'active' | 'upcoming';
+  status: "active" | "upcoming";
   onStatusChange?: (checked: boolean) => void;
   indexSection5Data?: IndexSection5Type;
   onIndexSection5Update?: (field: keyof IndexSection5Type, value: string) => void;
@@ -31,27 +31,10 @@ export type PageTemplateProps = {
   onSection5Update: (field: keyof SanJuanSection5Type, value: string) => void;
   section6Data?: SanJuanSection6Type;
   onSection6Update: (field: keyof SanJuanSection6Type, value: string) => void;
+  pageName: string;
 };
 
-const PageTemplate: React.FC<PageTemplateProps> = ({
-  status,
-  onStatusChange,
-  indexSection5Data,
-  onIndexSection5Update,
-  section1Data,
-  onSection1Update,
-  section2Data,
-  onSection2Update,
-  section3Data,
-  onSection3ImageUpdate,
-  onSection3ImageRemove,
-  section4Data,
-  onSection4Update,
-  section5Data,
-  onSection5Update,
-  section6Data,
-  onSection6Update
-}) => {
+const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, indexSection5Data, onIndexSection5Update, section1Data, onSection1Update, section2Data, onSection2Update, section3Data, onSection3ImageUpdate, onSection3ImageRemove, section4Data, onSection4Update, section5Data, onSection5Update, section6Data, onSection6Update, pageName }) => {
   const size = useWindowSize();
   const width = size.width ?? 0;
   const { state } = useLanguageContext();
@@ -60,35 +43,46 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   return (
     <div className="w-full min-h-screen bg-gray-100">
       <div className="w-full max-w-7xl mx-auto p-4">
-        <div className="flex items-center justify-end gap-2 mb-8 p-4 bg-white rounded-lg shadow-sm">
-          <Label htmlFor="status" className="text-sm font-medium text-gray-700">
-            {status === 'active' ? 'Active' : 'Coming Soon'}
-          </Label>
-          <Switch
-            id="status"
-            checked={status === 'active'}
-            onCheckedChange={onStatusChange}
-            className={`
-              ${status === 'active' ? 'bg-blue-600' : 'bg-gray-200'}
-              relative inline-flex h-6 w-11 items-center rounded-full
-              transition-colors focus:outline-none focus:ring-2
-              focus:ring-blue-500 focus:ring-offset-2
-            `}
-          >
-            <span
+        <div className="flex flex-col items-center justify-center gap-6 mb-8 p-8 bg-white rounded-lg shadow-sm">
+          <h2 className="text-3xl font-bold text-gray-900">{pageName}</h2>
+          
+          <div className="max-w-2xl text-center space-y-2 text-gray-600">
+            <p className="text-sm">
+              Para editar el contenido, haz clic en cualquier texto que desees modificar.
+            </p>
+            <p className="text-sm">
+              Para cambiar las imágenes, pasa el cursor sobre ellas y haz clic en el icono de la cámara.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Label htmlFor="status" className="text-sm font-medium text-gray-700">
+              {status === "active" ? "Activo" : "Proximamente"}
+            </Label>
+            <Switch
+              id="status"
+              checked={status === "active"}
+              onCheckedChange={onStatusChange}
               className={`
-                ${status === 'active' ? 'translate-x-6' : 'translate-x-1'}
-                inline-block h-4 w-4 transform rounded-full
-                bg-white transition-transform
+                ${status === "active" ? "bg-blue-600" : "bg-gray-200"}
+                relative inline-flex h-6 w-11 items-center rounded-full
+                transition-colors focus:outline-none focus:ring-2
+                focus:ring-blue-500 focus:ring-offset-2
               `}
-            />
-          </Switch>
+            >
+              <span
+                className={`
+                  ${status === "active" ? "translate-x-6" : "translate-x-1"}
+                  inline-block h-4 w-4 transform rounded-full
+                  bg-white transition-transform
+                `}
+              />
+            </Switch>
+          </div>
         </div>
 
         <div className="w-full flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
-          {indexSection5Data && onIndexSection5Update && (
-            <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />
-          )}
+          {indexSection5Data && onIndexSection5Update && <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />}
 
           {section1Data && <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={onSection1Update} />}
 

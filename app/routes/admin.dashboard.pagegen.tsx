@@ -64,12 +64,12 @@ export default function PageGeneratorRoute() {
             <Button onClick={handleBack} variant="outline">
               Back
             </Button>
-            <h2 className="text-2xl font-bold text-gray-900">{pageName}</h2>
             <div className="w-[100px]" /> {/* Spacer for alignment */}
           </div>
 
           <PageTemplate
             status="active"
+            pageName={pageName}
             indexSection5Data={indexSection5Data}
             onIndexSection5Update={handleIndexSection5Update}
             section1Data={section1Data}
