@@ -58,7 +58,7 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
               >
                 <CardTitle>
                   <EditableText
-                    text={data.cardTitle}
+                    value={data.cardTitle}
                     onUpdate={handleTextUpdate("cardTitle")}
                     className={`
                       text-center bg-gradient-to-r from-blue-900 to-blue-600 
@@ -78,7 +78,7 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
               >
                 <CardDescription>
                   <EditableText
-                    text={data.cardDescription}
+                    value={data.cardDescription}
                     onUpdate={handleTextUpdate("cardDescription")}
                     className={`
                       text-center text-blue-800/80
@@ -99,7 +99,7 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
                 className="font-semibold text-blue-900 text-xl mb-6"
               >
                 <EditableText
-                  text={data.firstH4}
+                  value={data.firstH4}
                   onUpdate={handleTextUpdate("firstH4")}
                   className="font-semibold text-blue-900 text-xl"
                 />
@@ -129,7 +129,7 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
                       <Check className="h-5 w-5 text-blue-700" />
                     </motion.div>
                     <EditableText
-                      text={li.li}
+                      value={li.li}
                       onUpdate={(value) => {
                         const newList = [...data.list];
                         newList[index] = { ...li, li: value };
@@ -159,14 +159,14 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
                   `}
                 >
                   <EditableText
-                    text={data.secondH4}
+                    value={data.secondH4}
                     onUpdate={handleTextUpdate("secondH4")}
                     className="font-extrabold tracking-wider text-blue-900"
                   />
                 </motion.h4>
                 <span className="text-sm font-medium text-blue-600 mt-2 block">
                   <EditableText
-                    text={data.secondH4span}
+                    value={data.secondH4span}
                     onUpdate={handleTextUpdate("secondH4span")}
                     className="text-sm font-medium text-blue-600"
                   />
@@ -187,7 +187,7 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
                   ${width <= 350 ? "px-6 py-5 text-base" : "px-8 py-6 text-lg"}
                 `}>
                   <EditableText
-                    text={data.button}
+                    value={data.button}
                     onUpdate={handleTextUpdate("button")}
                     className="text-white"
                   />
