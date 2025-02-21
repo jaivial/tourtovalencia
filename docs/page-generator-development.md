@@ -254,6 +254,60 @@ When implementing SanJuanSection4, follow these steps:
    - Implement proper state debouncing
    - Add responsive class overrides for edit mode
 
+## Error Prevention
+
+### Common Issues and Solutions
+
+1. **Undefined Props Error Prevention**
+   - Always provide default values for section data in the route component
+   - Implement proper type checking in components
+   - Use optional chaining when accessing nested properties
+   - Example for section data:
+   ```typescript
+   // In PageTemplate.tsx
+   type PageTemplateProps = {
+     section5Data?: sanJuanSection5Type; // Make prop optional
+     // ...other props
+   };
+
+   // In EditableSanJuanSection5.tsx
+   interface EditableSanJuanSection5Props {
+     data?: sanJuanSection5Type; // Make prop optional
+     // ...other props
+   }
+
+   const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({ 
+     data = DEFAULT_SECTION5_DATA, // Provide default value
+     // ...other props 
+   }) => {
+     // Use data safely here
+   };
+   ```
+
+2. **State Management Best Practices**
+   - Initialize state with default values in hooks
+   - Use TypeScript to ensure type safety
+   - Implement proper error boundaries
+   - Example:
+   ```typescript
+   // In [component].hooks.ts
+   export const useEditableSection = (initialData?: SectionType) => {
+     const [data, setData] = useState<SectionType>(initialData ?? DEFAULT_DATA);
+     // ...rest of the hook
+   };
+   ```
+
+3. **Component Initialization**
+   - Always check if required props are available
+   - Provide meaningful error messages
+   - Use React.Suspense for loading states
+   - Example:
+   ```typescript
+   if (!data) {
+     return <div>Loading section data...</div>;
+   }
+   ```
+
 ## Notes
 - Following Remix best practices for data handling
 - Implementing proper loading states
