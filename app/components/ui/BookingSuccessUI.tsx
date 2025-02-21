@@ -47,7 +47,7 @@ const iconVariants = {
 
 export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps) => {
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(15);
+  const [countdown, setCountdown] = useState(200000);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -92,8 +92,8 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
               },
             }}
           >
-            <motion.div className="bg-slate-50/80 backdrop-blur-sm p-8 rounded-xl border border-slate-200 shadow-inner" variants={itemVariants}>
-              <h3 className="text-xl font-semibold text-slate-800 mb-6 flex items-center gap-2">
+            <motion.div className="bg-slate-50/80 backdrop-blur-sm p-4 sm:p-8 rounded-xl border border-slate-200 shadow-inner" variants={itemVariants}>
+              <h3 className="text-xl font-semibold text-slate-800 mb-6 flex items-center gap-2 justify-center sm:justify-start">
                 <span>Detalles de la Reserva</span>
               </h3>
               <div className="space-y-4">
@@ -111,9 +111,16 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
                     highlight: true,
                   },
                 ].map((item, index) => (
-                  <motion.div key={item.label} className="grid grid-cols-[140px,1fr] gap-4 items-center border-b border-slate-100 pb-4 last:border-0 last:pb-0" variants={itemVariants} custom={index}>
-                    <span className="text-slate-500 font-medium">{item.label}:</span>
-                    <span className={`font-semibold ${item.highlight ? "text-xl text-green-700" : "text-slate-700"}`}>{item.value}</span>
+                  <motion.div 
+                    key={item.label} 
+                    className="flex flex-col sm:grid sm:grid-cols-[140px,1fr] gap-2 sm:gap-4 items-center sm:items-start border-b border-slate-100 pb-4 last:border-0 last:pb-0" 
+                    variants={itemVariants} 
+                    custom={index}
+                  >
+                    <span className="text-slate-500 font-medium text-center sm:text-left">{item.label}:</span>
+                    <span className={`font-semibold ${item.highlight ? "text-xl text-green-700" : "text-slate-700"} text-center sm:text-left break-all`}>
+                      {item.value}
+                    </span>
                   </motion.div>
                 ))}
               </div>
@@ -122,8 +129,8 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
             <motion.div className="space-y-3" variants={itemVariants}>
               <Alert className="bg-green-50 border-green-200 shadow-sm">
                 <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
-                <AlertDescription className="text-green-700">
-                  Se ha enviado un email de confirmación a <span className="font-medium">{booking.email}</span>
+                <AlertDescription className="text-green-700 text-center sm:text-left">
+                  Se ha enviado un email de confirmación a <span className="font-medium break-all">{booking.email}</span>
                 </AlertDescription>
               </Alert>
             </motion.div>
@@ -132,11 +139,7 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
               <p className="text-center text-sm text-slate-600">
                 Redirigiendo a la página principal en <span className="font-semibold">{countdown}</span> segundos
               </p>
-              <Button 
-                onClick={handleReturnHome}
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-                size="lg"
-              >
+              <Button onClick={handleReturnHome} className="w-full bg-green-600 hover:bg-green-700 text-white" size="lg">
                 <Home className="w-4 h-4 mr-2" />
                 Volver a la página principal
               </Button>
