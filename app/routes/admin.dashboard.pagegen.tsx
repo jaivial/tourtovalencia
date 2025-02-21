@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import PageTemplate from "~/components/_pagegen/PageTemplate";
 import { usePageGenerator } from "./admin.dashboard.pagegen.hooks";
 
@@ -7,7 +9,6 @@ export default function PageGeneratorRoute() {
   const {
     step,
     pageName,
-    status,
     section1Data,
     section2Data,
     section3Data,
@@ -17,7 +18,6 @@ export default function PageGeneratorRoute() {
     indexSection5Data,
     handleIndexSection5Update,
     setPageName,
-    setStatus,
     handleNext,
     handleBack,
     handleSection1Update,
@@ -36,65 +36,46 @@ export default function PageGeneratorRoute() {
   const containerVariants = {
     hidden: { opacity: 0, x: -20 },
     visible: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: 20 }
+    exit: { opacity: 0, x: 20 },
   };
 
   return (
     <div className="w-full min-h-screen bg-gray-100 p-8">
-      {step === 'name' ? (
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6"
-        >
-          <h2 className="text-2xl font-bold mb-4">Nombre de la página</h2>
-          <input
-            type="text"
-            value={pageName}
-            onChange={(e) => setPageName(e.target.value.replace(/\s+/g, '_'))}
-            placeholder="Nombre de la página (sin espacios)"
-            className="w-full p-2 border rounded mb-4"
-          />
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <label className="font-medium">Estado:</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as 'active' | 'upcoming')}
-                className="p-2 border rounded"
-              >
-                <option value="active">Activo</option>
-                <option value="upcoming">Próximamente</option>
-              </select>
+      {step === "name" ? (
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Page</h2>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="page-name" className="block text-sm font-medium text-gray-700">
+                Page Name
+              </Label>
+              <Input id="page-name" value={pageName} onChange={(e) => setPageName(e.target.value)} className="mt-1 block w-full" placeholder="Enter page name..." />
             </div>
-            <Button onClick={handleNext} disabled={!pageName.trim()}>
-              Siguiente
-            </Button>
+            <div className="flex justify-end">
+              <Button onClick={handleNext} disabled={!pageName.trim()}>
+                Next
+              </Button>
+            </div>
           </div>
         </motion.div>
       ) : (
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          className="relative"
-        >
-          <Button onClick={handleBack} className="absolute top-4 left-4 z-10">
-            Volver
-          </Button>
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full">
+          <div className="flex justify-between items-center mb-6">
+            <Button onClick={handleBack} variant="outline">
+              Back
+            </Button>
+            <h2 className="text-2xl font-bold text-gray-900">{pageName}</h2>
+            <div className="w-[100px]" /> {/* Spacer for alignment */}
+          </div>
+
           <PageTemplate
-            status={status}
+            status="active"
+            indexSection5Data={indexSection5Data}
+            onIndexSection5Update={handleIndexSection5Update}
             section1Data={section1Data}
             onSection1Update={handleSection1Update}
-            onSection1ImageUpdate={handleSection1ImageUpdate}
-            onSection1ImageRemove={handleSection1ImageRemove}
             section2Data={section2Data}
             onSection2Update={handleSection2Update}
-            onSection2ImageUpdate={handleSection2ImageUpdate}
-            onSection2ImageRemove={handleSection2ImageRemove}
             section3Data={section3Data}
             onSection3ImageUpdate={handleSection3ImageUpdate}
             onSection3ImageRemove={handleSection3ImageRemove}
@@ -104,8 +85,6 @@ export default function PageGeneratorRoute() {
             onSection5Update={handleSection5Update}
             section6Data={section6Data}
             onSection6Update={handleSection6Update}
-            indexSection5Data={indexSection5Data}
-            onIndexSection5Update={handleIndexSection5Update}
           />
         </motion.div>
       )}

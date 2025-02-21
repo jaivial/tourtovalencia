@@ -28,7 +28,7 @@ export type PageTemplateProps = {
   section4Data?: sanJuansection4Type;
   onSection4Update: (field: keyof sanJuansection4Type, value: string) => void;
   section5Data?: sanJuanSection5Type;
-  onSection5Update: (field: keyof sanJuanSection5Type, value: string) => void;
+  onSection5Update: (field: keyof SanJuanSection5Type, value: string) => void;
   section6Data?: SanJuanSection6Type;
   onSection6Update: (field: keyof SanJuanSection6Type, value: string) => void;
 };
@@ -58,32 +58,50 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   const indexSection5Text = state.index.indexSection5;
 
   return (
-    <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden gap-12 pt-[100px]">
-      <div className="w-full flex justify-center px-4">
-        <div className="w-full max-w-4xl flex items-center justify-end space-x-2">
-          <Switch checked={status === "active"} onChange={onStatusChange} className={`${status === "active" ? "bg-blue-900" : "bg-gray-200"} relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none`}>
-            <span className={`${status === "active" ? "translate-x-6" : "translate-x-1"} inline-block h-4 w-4 transform rounded-full bg-white transition-transform`} />
+    <div className="w-full min-h-screen bg-gray-100">
+      <div className="w-full max-w-7xl mx-auto p-4">
+        <div className="flex items-center justify-end gap-2 mb-8 p-4 bg-white rounded-lg shadow-sm">
+          <Label htmlFor="status" className="text-sm font-medium text-gray-700">
+            {status === 'active' ? 'Active' : 'Coming Soon'}
+          </Label>
+          <Switch
+            id="status"
+            checked={status === 'active'}
+            onCheckedChange={onStatusChange}
+            className={`
+              ${status === 'active' ? 'bg-blue-600' : 'bg-gray-200'}
+              relative inline-flex h-6 w-11 items-center rounded-full
+              transition-colors focus:outline-none focus:ring-2
+              focus:ring-blue-500 focus:ring-offset-2
+            `}
+          >
+            <span
+              className={`
+                ${status === 'active' ? 'translate-x-6' : 'translate-x-1'}
+                inline-block h-4 w-4 transform rounded-full
+                bg-white transition-transform
+              `}
+            />
           </Switch>
-          <Label htmlFor="page-status">{status === "active" ? "Activo" : "Proximamente"}</Label>
         </div>
-      </div>
 
-      <div className="w-full flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
-        {indexSection5Data && onIndexSection5Update && (
-          <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />
-        )}
+        <div className="w-full flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
+          {indexSection5Data && onIndexSection5Update && (
+            <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />
+          )}
 
-        {section1Data && <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={onSection1Update} />}
+          {section1Data && <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={onSection1Update} />}
 
-        {section2Data && <EditableSanJuanSection2 width={width} height={0} data={section2Data} onUpdate={onSection2Update} />}
+          {section2Data && <EditableSanJuanSection2 width={width} height={0} data={section2Data} onUpdate={onSection2Update} />}
 
-        {section3Data && <EditableSanJuanSection3 width={width} data={section3Data} onUpdate={onSection3ImageUpdate} onRemove={onSection3ImageRemove} />}
+          {section3Data && <EditableSanJuanSection3 width={width} data={section3Data} onUpdate={onSection3ImageUpdate} onRemove={onSection3ImageRemove} />}
 
-        {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
+          {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
 
-        {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} />}
+          {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} />}
 
-        {section6Data && <EditableSanJuanSection6 width={width} data={section6Data} onUpdate={onSection6Update} />}
+          {section6Data && <EditableSanJuanSection6 width={width} data={section6Data} onUpdate={onSection6Update} />}
+        </div>
       </div>
     </div>
   );

@@ -76,7 +76,6 @@ const DEFAULT_INDEX_SECTION5_DATA: IndexSection5Type = {
 export const usePageGenerator = () => {
   const [step, setStep] = useState<'name' | 'template'>('name');
   const [pageName, setPageName] = useState('');
-  const [status, setStatus] = useState<'active' | 'upcoming'>('active');
   
   // Section states
   const [section1Data, setSection1Data] = useState<sanJuanSection1Type>(DEFAULT_SECTION1_DATA);
@@ -213,7 +212,6 @@ export const usePageGenerator = () => {
     // States
     step,
     pageName,
-    status,
     section1Data,
     section2Data,
     section3Data,
@@ -224,7 +222,6 @@ export const usePageGenerator = () => {
 
     // Setters
     setPageName,
-    setStatus,
 
     // Handlers
     handleNext,
