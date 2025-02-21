@@ -135,6 +135,38 @@ Development tracking for the new "Generador de páginas" section in the admin da
   - [ ] Update testing guidelines
   - [ ] Document breaking changes
 
+## Page Generator Implementation Guide
+
+## 1. Add Confirmation Modal
+- [ ] Create Modal component
+- [ ] Add open/close state management
+- [ ] Implement translation-ready text
+
+## 2. Database Operations
+- [ ] Create Page schema
+- [ ] Implement insert logic
+- [ ] Add unique page identifier
+
+## 3. Route Generation
+- [ ] Create dynamic route template
+- [ ] Implement slug formatting
+- [ ] Add route registration
+
+## 4. Navigation Updates
+- [ ] Fetch generated pages
+- [ ] Add dynamic links
+- [ ] Maintain existing links
+
+## 5. Localization System
+- [ ] Store translations
+- [ ] Implement language toggle
+- [ ] Connect to text display
+
+## 6. Testing
+- [ ] End-to-end publish flow
+- [ ] Route accessibility
+- [ ] Translation validation
+
 ## Common Issues and Solutions
 
 #### 1. Adding New Editable Sections

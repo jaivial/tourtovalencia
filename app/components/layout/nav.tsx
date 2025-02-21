@@ -3,9 +3,15 @@ import { useState, useEffect } from "react";
 import { Menu, ArrowRightToLine, ChevronDown, Settings } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { useFetcher, Link, useLocation } from "@remix-run/react";
+import { useFetcher, Link, useLocation, useLoaderData } from "@remix-run/react";
+import { DynamicNavLinks } from "./DynamicNavLinks";
+import type { Page } from "~/utils/db.schema.server";
 
-const Nav: React.FC = () => {
+interface NavProps {
+  pages: Page[];
+}
+
+const Nav: React.FC<NavProps> = ({ pages }) => {
   const { state, dispatch } = useLanguageContext();
   const fetcher = useFetcher();
   const navLinks = state.links;
@@ -91,6 +97,7 @@ const Nav: React.FC = () => {
                   <Link to="/sanjuan" onClick={handleLinkClick} className="pl-4 text-blue-50 hover:text-blue-200 transition-colors font-sans text-lg block py-2">
                     {state.common.toursMenu.caves}
                   </Link>
+                  <DynamicNavLinks pages={pages} onLinkClick={handleLinkClick} />
                 </div>
               </div>
 

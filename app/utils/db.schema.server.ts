@@ -1,4 +1,13 @@
 import { getDb } from "./db.server";
+import { 
+  IndexSection5Type, 
+  sanJuanSection1Type, 
+  sanJuanSection3Type, 
+  sanJuansection2Type, 
+  sanJuansection4Type, 
+  sanJuanSection5Type, 
+  SanJuanSection6Type 
+} from "~/data/data";
 
 // Translation interface for MongoDB
 export interface Translation {
@@ -8,6 +17,36 @@ export interface Translation {
   language: string;
   value: string;
   lastUpdated: Date;
+}
+
+// Page interface for MongoDB
+export interface Page {
+  _id?: string;
+  slug: string;
+  name: string;
+  content: {
+    es: {
+      indexSection5?: IndexSection5Type;
+      section1?: sanJuanSection1Type;
+      section2?: sanJuansection2Type;
+      section3?: sanJuanSection3Type;
+      section4?: sanJuansection4Type;
+      section5?: sanJuanSection5Type;
+      section6?: SanJuanSection6Type;
+    };
+    en: {
+      indexSection5?: IndexSection5Type;
+      section1?: sanJuanSection1Type;
+      section2?: sanJuansection2Type;
+      section3?: sanJuanSection3Type;
+      section4?: sanJuansection4Type;
+      section5?: sanJuanSection5Type;
+      section6?: SanJuanSection6Type;
+    };
+  };
+  status: 'active' | 'upcoming';
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export async function ensureDbIndexes() {
@@ -33,5 +72,15 @@ export async function ensureDbIndexes() {
     { key: { language: 1 } },
     // Index for last update tracking
     { key: { lastUpdated: -1 } }
+  ]);
+
+  // Create indexes for pages collection
+  await db.collection("pages").createIndexes([
+    // Unique index for page slugs
+    { key: { slug: 1 }, unique: true },
+    // Index for searching by name
+    { key: { name: 1 } },
+    // Index for sorting by creation date
+    { key: { createdAt: -1 } }
   ]);
 }

@@ -9,6 +9,7 @@ import Footer from "./components/layout/footer";
 import ArrowToTop from "./components/_index/ArrowToTop";
 import { LanguageContextProvider } from "~/providers/LanguageContext";
 import { MotionProvider } from "~/providers/MotionProvider";
+import { getAllPages } from "~/utils/page.server";
 
 export interface RootLoaderData {
   initialLanguage: typeof languageData.en;
@@ -16,6 +17,7 @@ export interface RootLoaderData {
     STRIPE_PUBLIC_KEY: string | undefined;
     PAYPAL_CLIENT_ID: string | undefined;
   };
+  pages: Awaited<ReturnType<typeof getAllPages>>;
 }
 
 export const loader = async ({ request }: LoaderArgs) => {
@@ -23,12 +25,15 @@ export const loader = async ({ request }: LoaderArgs) => {
   const cookieLanguage = (await languageCookie.parse(cookieHeader)) || "en";
   const language = cookieLanguage as keyof typeof languageData;
 
-  return json<RootLoaderData>({ 
+  const pages = await getAllPages();
+
+  return json<RootLoaderData>({
     initialLanguage: languageData[language] || languageData.en,
     ENV: {
       STRIPE_PUBLIC_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
       PAYPAL_CLIENT_ID: process.env.PAYPAL_CLIENT_ID
-    }
+    },
+    pages,
   });
 };
 
@@ -59,7 +64,7 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
-  const { initialLanguage, ENV } = useLoaderData<RootLoaderData>();
+  const { initialLanguage, ENV, pages } = useLoaderData<RootLoaderData>();
   const location = useLocation();
   const isAdminDashboard = location.pathname.includes("/admin/dashboard");
 
@@ -75,7 +80,7 @@ export default function App() {
         <MotionProvider>
           <LanguageContextProvider initialState={initialLanguage}>
             <ArrowToTop />
-            <Nav />
+            <Nav pages={pages} />
             <Outlet />
             {!isAdminDashboard && <Footer />}
           </LanguageContextProvider>
