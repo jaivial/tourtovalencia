@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type } from "~/data/data";
+import { 
+  IndexSection5Type, 
+  sanJuanSection1Type, 
+  sanJuanSection3Type, 
+  sanJuansection2Type, 
+  sanJuansection4Type, 
+  sanJuanSection5Type, 
+  SanJuanSection6Type 
+} from "~/data/data";
 
 // Default data
 const DEFAULT_SECTION1_DATA: sanJuanSection1Type = {
@@ -45,6 +53,21 @@ const DEFAULT_SECTION5_DATA: sanJuanSection5Type = {
   fifthH3: "Tendremos tiempo libre para explorar el pueblo"
 };
 
+const DEFAULT_SECTION6_DATA: SanJuanSection6Type = {
+  cardTitle: "Información importante",
+  cardDescription: "Todo lo que necesitas saber sobre la excursión",
+  firstH4: "Qué incluye",
+  list: [
+    { li: "Transporte en barco", index: 0 },
+    { li: "Guía experto", index: 1 },
+    { li: "Equipo de snorkel", index: 2 },
+    { li: "Seguro de viaje", index: 3 }
+  ],
+  secondH4: "Precio",
+  secondH4span: "50€ por persona",
+  button: "Reservar ahora"
+};
+
 const DEFAULT_INDEX_SECTION5_DATA: IndexSection5Type = {
   firstH3: "",
   secondH3: ""
@@ -61,6 +84,7 @@ export const usePageGenerator = () => {
   const [section3Data, setSection3Data] = useState<sanJuanSection3Type>(DEFAULT_SECTION3_DATA);
   const [section4Data, setSection4Data] = useState<sanJuansection4Type>(DEFAULT_SECTION4_DATA);
   const [section5Data, setSection5Data] = useState<sanJuanSection5Type>(DEFAULT_SECTION5_DATA);
+  const [section6Data, setSection6Data] = useState<SanJuanSection6Type>(DEFAULT_SECTION6_DATA);
   const [indexSection5Data, setIndexSection5Data] = useState<IndexSection5Type>(DEFAULT_INDEX_SECTION5_DATA);
 
   // Section 1 handlers
@@ -145,6 +169,22 @@ export const usePageGenerator = () => {
     }));
   };
 
+  // Section 6 handler
+  const handleSection6Update = (field: keyof SanJuanSection6Type, value: string) => {
+    if (field === "list") {
+      // Handle list updates separately since it's an array
+      setSection6Data(prev => ({
+        ...prev,
+        list: JSON.parse(value)
+      }));
+    } else {
+      setSection6Data(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
+  };
+
   // Index Section 5 handler
   const handleIndexSection5Update = (field: keyof IndexSection5Type, value: string) => {
     setIndexSection5Data(prev => ({
@@ -179,6 +219,7 @@ export const usePageGenerator = () => {
     section3Data,
     section4Data,
     section5Data,
+    section6Data,
     indexSection5Data,
 
     // Setters
@@ -198,6 +239,7 @@ export const usePageGenerator = () => {
     handleSection3ImageRemove,
     handleSection4Update,
     handleSection5Update,
+    handleSection6Update,
     handleIndexSection5Update,
   };
 };

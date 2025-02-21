@@ -13,6 +13,7 @@ export default function PageGeneratorRoute() {
     section3Data,
     section4Data,
     section5Data,
+    section6Data,
     indexSection5Data,
     handleIndexSection5Update,
     setPageName,
@@ -29,6 +30,7 @@ export default function PageGeneratorRoute() {
     handleSection3ImageRemove,
     handleSection4Update,
     handleSection5Update,
+    handleSection6Update,
   } = usePageGenerator();
 
   const containerVariants = {
@@ -100,6 +102,8 @@ export default function PageGeneratorRoute() {
             onSection4Update={handleSection4Update}
             section5Data={section5Data}
             onSection5Update={handleSection5Update}
+            section6Data={section6Data}
+            onSection6Update={handleSection6Update}
             indexSection5Data={indexSection5Data}
             onIndexSection5Update={handleIndexSection5Update}
           />

@@ -9,8 +9,9 @@ import EditableSanJuanSection2 from "./EditableSanJuanSection2";
 import EditableSanJuanSection3 from "./EditableSanJuanSection3";
 import EditableSanJuanSection4 from "./EditableSanJuanSection4";
 import EditableSanJuanSection5 from "./EditableSanJuanSection5";
+import EditableSanJuanSection6 from "./EditableSanJuanSection6";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type } from "~/data/data";
+import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 
 export type PageTemplateProps = {
   status: 'active' | 'upcoming';
@@ -28,6 +29,8 @@ export type PageTemplateProps = {
   onSection4Update: (field: keyof sanJuansection4Type, value: string) => void;
   section5Data?: sanJuanSection5Type;
   onSection5Update: (field: keyof sanJuanSection5Type, value: string) => void;
+  section6Data?: SanJuanSection6Type;
+  onSection6Update: (field: keyof SanJuanSection6Type, value: string) => void;
 };
 
 const PageTemplate: React.FC<PageTemplateProps> = ({
@@ -45,7 +48,9 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   section4Data,
   onSection4Update,
   section5Data,
-  onSection5Update
+  onSection5Update,
+  section6Data,
+  onSection6Update
 }) => {
   const size = useWindowSize();
   const width = size.width ?? 0;
@@ -77,6 +82,8 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
         {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
 
         {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} />}
+
+        {section6Data && <EditableSanJuanSection6 width={width} data={section6Data} onUpdate={onSection6Update} />}
       </div>
     </div>
   );
