@@ -12,6 +12,8 @@ import EditableSanJuanSection5 from "./EditableSanJuanSection5";
 import EditableSanJuanSection6 from "./EditableSanJuanSection6";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
+import { PublishModal } from './PublishModal';
+import { usePublishModal } from './PageTemplate.hooks';
 
 export type PageTemplateProps = {
   status: "active" | "upcoming";
@@ -39,46 +41,71 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
   const width = size.width ?? 0;
   const { state } = useLanguageContext();
   const indexSection5Text = state.index.indexSection5;
+  const { isModalOpen, openModal, closeModal } = usePublishModal();
 
   return (
-    <div className="w-full min-h-screen bg-gray-100">
-      <div className="w-full max-w-7xl mx-auto p-4">
-        <div className="flex flex-col items-center justify-center gap-6 mb-8 p-8 bg-white rounded-lg shadow-sm">
-          <h2 className="text-3xl font-bold text-gray-900">{pageName}</h2>
+    <div className="space-y-6">
+      <div className="w-full min-h-screen bg-gray-100">
+        <div className="w-full max-w-7xl mx-auto p-4">
+          <div className="flex flex-col items-center justify-center gap-6 mb-8 p-8 bg-white rounded-lg shadow-sm">
+            <h2 className="text-3xl font-bold text-gray-900">{pageName}</h2>
 
-          <div className="max-w-2xl text-center space-y-2 text-gray-600">
-            <p className="text-sm">Para editar el contenido, haz clic en cualquier texto que desees modificar.</p>
-            <p className="text-sm">Para cambiar las imágenes, pasa el cursor sobre ellas y haz clic en el icono de la cámara.</p>
+            <div className="max-w-2xl text-center space-y-2 text-gray-600">
+              <p className="text-sm">Para editar el contenido, haz clic en cualquier texto que desees modificar.</p>
+              <p className="text-sm">Para cambiar las imágenes, pasa el cursor sobre ellas y haz clic en el icono de la cámara.</p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Label htmlFor="status" className="text-sm font-medium text-gray-700">
+                {status === "active" ? "Activo" : "Proximamente"}
+              </Label>
+              <Switch
+                id="status"
+                checked={status === "active"}
+                onCheckedChange={onStatusChange}
+              />
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Label htmlFor="status" className="text-sm font-medium text-gray-700">
-              {status === "active" ? "Activo" : "Proximamente"}
-            </Label>
-            <Switch
-              id="status"
-              checked={status === "active"}
-              onCheckedChange={onStatusChange}
-            />
+          <div className="w-full flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
+            {indexSection5Data && onIndexSection5Update && <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />}
+
+            {section1Data && <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={onSection1Update} />}
+
+            {section2Data && <EditableSanJuanSection2 width={width} height={0} data={section2Data} onUpdate={onSection2Update} />}
+
+            {section3Data && <EditableSanJuanSection3 width={width} data={section3Data} onUpdate={onSection3ImageUpdate} onRemove={onSection3ImageRemove} />}
+
+            {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
+
+            {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} />}
+
+            {section6Data && <EditableSanJuanSection6 width={width} data={section6Data} onUpdate={onSection6Update} />}
           </div>
-        </div>
-
-        <div className="w-full flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
-          {indexSection5Data && onIndexSection5Update && <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />}
-
-          {section1Data && <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={onSection1Update} />}
-
-          {section2Data && <EditableSanJuanSection2 width={width} height={0} data={section2Data} onUpdate={onSection2Update} />}
-
-          {section3Data && <EditableSanJuanSection3 width={width} data={section3Data} onUpdate={onSection3ImageUpdate} onRemove={onSection3ImageRemove} />}
-
-          {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
-
-          {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} />}
-
-          {section6Data && <EditableSanJuanSection6 width={width} data={section6Data} onUpdate={onSection6Update} />}
         </div>
       </div>
+
+      <button
+        onClick={openModal}
+        className="fixed bottom-8 left-1/2 transform -translate-x-1/2 py-3 px-8 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-lg z-40"
+      >
+        Crear Página
+      </button>
+
+      <PublishModal
+        isOpen={isModalOpen}
+        onConfirm={() => {
+          // Will implement publish logic next
+          closeModal();
+        }}
+        onCancel={closeModal}
+        translations={{
+          title: 'Confirmar publicación',
+          description: '¿Seguro que todos los datos están correctos y quieres proceder a publicar la página?',
+          confirmText: 'Sí, publicar',
+          cancelText: 'Cancelar'
+        }}
+      />
     </div>
   );
 };
