@@ -2,20 +2,35 @@ import { useBooking } from "~/context/BookingContext";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
-export default function BookingStepOne() {
+interface BookingStepOneProps {
+  bookingStepOneText: {
+    fullName: string;
+    email: string;
+    emailConfirm: string;
+    phoneNumber: string;
+    placeholders: {
+      fullName: string;
+      email: string;
+      emailConfirm: string;
+      phoneNumber: string;
+    };
+  };
+}
+
+export default function BookingStepOne({ bookingStepOneText }: BookingStepOneProps) {
   const { formData, errors, handleInputChange } = useBooking();
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="fullName">Full Name</Label>
+        <Label htmlFor="fullName">{bookingStepOneText.fullName}</Label>
         <Input
           id="fullName"
           name="fullName"
           type="text"
           value={formData.fullName}
           onChange={handleInputChange}
-          placeholder="Enter your full name"
+          placeholder={bookingStepOneText.placeholders.fullName}
           className={errors.fullName ? "border-destructive" : ""}
         />
         {errors.fullName && (
@@ -24,14 +39,14 @@ export default function BookingStepOne() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{bookingStepOneText.email}</Label>
         <Input
           id="email"
           name="email"
           type="email"
           value={formData.email}
           onChange={handleInputChange}
-          placeholder="Enter your email"
+          placeholder={bookingStepOneText.placeholders.email}
           className={errors.email ? "border-destructive" : ""}
         />
         {errors.email && (
@@ -40,14 +55,14 @@ export default function BookingStepOne() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="emailConfirm">Confirm Email</Label>
+        <Label htmlFor="emailConfirm">{bookingStepOneText.emailConfirm}</Label>
         <Input
           id="emailConfirm"
           name="emailConfirm"
           type="email"
           value={formData.emailConfirm}
           onChange={handleInputChange}
-          placeholder="Confirm your email"
+          placeholder={bookingStepOneText.placeholders.emailConfirm}
           className={errors.emailConfirm ? "border-destructive" : ""}
         />
         {errors.emailConfirm && (
@@ -56,14 +71,14 @@ export default function BookingStepOne() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phoneNumber">Phone Number</Label>
+        <Label htmlFor="phoneNumber">{bookingStepOneText.phoneNumber}</Label>
         <Input
           id="phoneNumber"
           name="phoneNumber"
           type="tel"
           value={formData.phoneNumber}
           onChange={handleInputChange}
-          placeholder="Enter your phone number"
+          placeholder={bookingStepOneText.placeholders.phoneNumber}
           className={errors.phoneNumber ? "border-destructive" : ""}
         />
         {errors.phoneNumber && (

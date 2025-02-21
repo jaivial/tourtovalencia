@@ -500,6 +500,18 @@
         "selectNumberOfPeople": "Select number of people",
         "person": "Person",
         "people": "People"
+      },
+      "bookingStepOne": {
+        "fullName": "Full Name",
+        "email": "Email",
+        "emailConfirm": "Confirm Email",
+        "phoneNumber": "Phone Number",
+        "placeholders": {
+          "fullName": "Enter your full name",
+          "email": "Enter your email",
+          "emailConfirm": "Confirm your email",
+          "phoneNumber": "Enter your phone number"
+        }
       }
     }
   },
@@ -1004,6 +1016,18 @@
         "selectNumberOfPeople": "Selecciona número de personas",
         "person": "Persona",
         "people": "Personas"
+      },
+      "bookingStepOne": {
+        "fullName": "Nombre Completo",
+        "email": "Correo Electrónico",
+        "emailConfirm": "Confirmar Correo",
+        "phoneNumber": "Número de Teléfono",
+        "placeholders": {
+          "fullName": "Introduce tu nombre completo",
+          "email": "Introduce tu correo electrónico",
+          "emailConfirm": "Confirma tu correo electrónico",
+          "phoneNumber": "Introduce tu número de teléfono"
+        }
       }
     }
   }
