@@ -15,6 +15,8 @@ import { useLanguageContext } from "~/providers/LanguageContext";
 export const BookingFeature = () => {
   const { state } = useLanguageContext();
   const bookingNavigationText = state.booking.navigation;
+  const bookingFeatureText = state.booking.feature;
+  const bookingProgressSteps = state.booking.progress.steps;
 
   const context = useBooking();
   const actions = useBookingActions(context);
@@ -51,8 +53,8 @@ export const BookingFeature = () => {
           <Users2 className="w-8 h-8 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">Book Your Experience</h1>
-          <p className="mt-2 text-muted-foreground">Join us for an unforgettable culinary journey</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">{bookingFeatureText.title}</h1>
+          <p className="mt-2 text-muted-foreground">{bookingFeatureText.subtitle}</p>
         </div>
         <div className="w-24 h-1 bg-gradient-to-r from-primary to-primary/60 mx-auto rounded-full" />
       </div>
@@ -63,7 +65,7 @@ export const BookingFeature = () => {
         </Alert>
       )}
 
-      <BookingProgress currentStep={context.currentStep} />
+      <BookingProgress currentStep={context.currentStep} steps={bookingProgressSteps} />
 
       <div className="relative">
         {context.isSubmitting && (

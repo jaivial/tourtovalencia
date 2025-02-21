@@ -12,9 +12,10 @@ interface BookingDateUIProps {
   availableDates: DateAvailability[] | undefined;
   isLoading: boolean;
   onDateSelect: (date: Date | null) => void;
+  bookingDateText: string;
 }
 
-export const BookingDateUI = ({ formData, errors, availableDates = [], isLoading, onDateSelect }: BookingDateUIProps) => {
+export const BookingDateUI = ({ formData, errors, availableDates = [], isLoading, onDateSelect, bookingDateText }: BookingDateUIProps) => {
   const todayDate = today(getLocalTimeZone());
 
   const selectedDate = formData.date ? parseDate(format(typeof formData.date === "string" ? parseISO(formData.date) : new Date(formData.date), "yyyy-MM-dd")) : null;
@@ -46,7 +47,7 @@ export const BookingDateUI = ({ formData, errors, availableDates = [], isLoading
   return (
     <div className="flex flex-col items-center space-y-6">
       <div className="w-full max-w-sm space-y-2">
-        <Label className="text-center block text-lg font-medium">Select Date</Label>
+        <Label className="text-center block text-lg font-medium">{bookingDateText}</Label>
         <div className={cn("rounded-lg p-0 flex flex-col items-center justify-center mx-auto bg-white", errors.date ? "border-red-500" : "border-gray-200")}>
           <Calendar
             value={selectedDate}

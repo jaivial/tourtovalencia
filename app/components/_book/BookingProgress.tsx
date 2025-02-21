@@ -2,16 +2,13 @@ import { Check } from "lucide-react";
 
 interface BookingProgressProps {
   currentStep: number;
+  steps: Array<{
+    number: number;
+    label: string;
+  }>;
 }
 
-export const BookingProgress = ({ currentStep }: BookingProgressProps) => {
-  const steps = [
-    { number: 1, label: "Select Date" },
-    { number: 2, label: "Party Size" },
-    { number: 3, label: "Personal Details" },
-    { number: 4, label: "Confirm" },
-  ];
-
+export const BookingProgress = ({ currentStep, steps }: BookingProgressProps) => {
   return (
     <div className="relative">
       <div className="absolute top-5 left-14 right-[2.85rem] h-0.5 bg-muted-foreground/20">
@@ -36,7 +33,7 @@ export const BookingProgress = ({ currentStep }: BookingProgressProps) => {
               </div>
               <span
                 className={`
-                  text-sm font-medium
+                  text-sm font-medium text-center
                   ${isCompleted || isCurrent ? "text-foreground" : "text-muted-foreground/40"}
                 `}
               >

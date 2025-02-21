@@ -467,6 +467,39 @@
         "bookNow": "Book Now",
         "completeBooking": "Complete Your Booking",
         "totalAmount": "Your total amount:"
+      },
+      "feature": {
+        "title": "Book Your Experience",
+        "subtitle": "Join us for an unforgettable journey"
+      },
+      "progress": {
+        "steps": [
+          {
+            "number": 1,
+            "label": "Select Date"
+          },
+          {
+            "number": 2,
+            "label": "Party Size"
+          },
+          {
+            "number": 3,
+            "label": "Personal Details"
+          },
+          {
+            "number": 4,
+            "label": "Confirm"
+          }
+        ]
+      },
+      "date": {
+        "selectLabel": "Select Date"
+      },
+      "bookingStepTwo": {
+        "numberOfPeople": "Number of People",
+        "selectNumberOfPeople": "Select number of people",
+        "person": "Person",
+        "people": "People"
       }
     }
   },
@@ -938,6 +971,39 @@
         "bookNow": "Reservar Ahora",
         "completeBooking": "Completar tu Reserva",
         "totalAmount": "Importe total:"
+      },
+      "feature": {
+        "title": "Reserva tu Experiencia",
+        "subtitle": "Únete a nosotros para un viaje inolvidable"
+      },
+      "progress": {
+        "steps": [
+          {
+            "number": 1,
+            "label": "Seleccionar Fecha"
+          },
+          {
+            "number": 2,
+            "label": "Número de Personas"
+          },
+          {
+            "number": 3,
+            "label": "Datos Personales"
+          },
+          {
+            "number": 4,
+            "label": "Confirmar"
+          }
+        ]
+      },
+      "date": {
+        "selectLabel": "Seleccionar Fecha"
+      },
+      "bookingStepTwo": {
+        "numberOfPeople": "Número de Personas",
+        "selectNumberOfPeople": "Selecciona número de personas",
+        "person": "Persona",
+        "people": "Personas"
       }
     }
   }
