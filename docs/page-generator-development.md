@@ -3,6 +3,51 @@
 ## Overview
 Development tracking for the new "Generador de páginas" section in the admin dashboard. This feature will allow users to create new pages using existing templates and manage them.
 
+## Architecture Guidelines
+
+### Component Architecture
+1. Route Components (admin.dashboard.pagegen.tsx)
+   - Handle server-side data fetching via `loader`
+   - Return only context providers with feature components
+   - Pass loader data as props to context providers
+
+2. Feature Components (_pagegen/*)
+   - Import context and hooks from `[route].hooks.ts`
+   - No direct state management or functions
+   - Return UI Components with minimal wrapping HTML
+   - Example: `PageTemplate.tsx`
+
+3. UI Components (_pagegen/*)
+   - Pure presentation components
+   - Receive all data via props
+   - No hooks, state, or logic
+   - Example: `EditableText.tsx`, `ImageUpload.tsx`
+
+### State Management
+1. Context
+   - One context provider per route
+   - Receives server data from loader
+   - Uses `useStates` hook from `[route].hooks.ts`
+
+2. Custom Hooks
+   - Defined in `[route].hooks.ts`
+   - Handle all state and functions
+   - Example: `EditableSanJuanSection1.hooks.ts`
+
+### Code Style Guidelines
+1. General
+   - Use early returns
+   - Implement TailwindCSS for styling
+   - Use `class:` over ternary operators
+   - Prefix event handlers with "handle"
+   - Implement accessibility features
+   - Use const arrow functions
+
+2. Performance
+   - Use `useMemo` and `useCallback` where beneficial
+   - Implement proper loading states
+   - Optimize data fetching
+
 ## Development Steps
 
 ### 1. Admin Dashboard UI Setup [✓]
@@ -26,26 +71,30 @@ Development tracking for the new "Generador de páginas" section in the admin da
 ### 3. Template Integration [ ]
 - [✓] Integrate San Juan template sections
   - [✓] Add SanJuanSection1 with editable text fields
-  - [ ] Add SanJuanSection2 with editable text fields
+  - [✓] Add SanJuanSection2 with editable text fields
+    - [✓] Create EditableSanJuanSection2 component
+    - [✓] Add EditableText integration
+    - [✓] Preserve Framer Motion animations
+    - [✓] Maintain responsive design
   - [ ] Add SanJuanSection3 with image upload functionality
-    - [ ] Create image upload interface
-    - [ ] Add image preview grid
+    - [✓] Create image upload interface
+    - [✓] Add image preview functionality
     - [ ] Implement drag-and-drop functionality
-    - [ ] Add image deletion capability
+    - [✓] Add image deletion capability
   - [ ] Add SanJuanSection4 with editable text fields
   - [ ] Add SanJuanSection5 with editable text fields
   - [ ] Add SanJuanSection6 with editable text fields
 - [ ] Integrate IndexSection5 with editable text fields
-- [ ] Create unified text editing interface
-  - [ ] Add text preview functionality
-  - [ ] Implement rich text editing where needed
-  - [ ] Add character count and validation
+- [✓] Create unified text editing interface
+  - [✓] Add text preview functionality
+  - [✓] Implement inline editing with style preservation
+  - [✓] Add proper focus and blur handling
 
 ### 4. Image Management [ ]
-- [ ] Set up image upload system
-  - [ ] Create image upload endpoint
-  - [ ] Implement image optimization
-  - [ ] Set up image storage solution
+- [✓] Set up image upload system
+  - [✓] Create image upload interface
+  - [✓] Implement image preview
+  - [✓] Set up temporary storage
 - [ ] Implement image preview system
   - [ ] Add image cropping functionality
   - [ ] Add image resize functionality
@@ -71,17 +120,20 @@ Development tracking for the new "Generador de páginas" section in the admin da
   - [ ] Test data processing
   - [ ] Test translations
 - [ ] Integration Tests
-  - [ ] Test full page creation workflow
-  - [ ] Test image management system
-  - [ ] Test MongoDB integration
-  - [ ] Test data.json updates
+  - [ ] Test complete user flows
+  - [ ] Test data fetching
+  - [ ] Test form submissions
 
 ### 7. Documentation [ ]
-- [ ] Update API documentation
-- [ ] Add user guide for page creation
-- [ ] Document image upload requirements
-- [ ] Document MongoDB schema
-- [ ] Document translation process
+- [ ] Code Documentation
+  - [ ] Document complex logic
+  - [ ] Document API integrations
+  - [ ] Document state management
+  - [ ] Keep README updated
+- [ ] New Features
+  - [ ] Document solutions in rules
+  - [ ] Update testing guidelines
+  - [ ] Document breaking changes
 
 ## Notes
 - Following Remix best practices for data handling

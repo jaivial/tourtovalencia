@@ -5,14 +5,17 @@ import { Input } from "@heroui/input";
 import { Textarea } from "@heroui/input";
 import IndexSection5 from "../_index/IndexSection5";
 import EditableSanJuanSection1 from "./EditableSanJuanSection1";
+import EditableSanJuanSection2 from "./EditableSanJuanSection2";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { sanJuanSection1Type } from "~/data/data";
+import { sanJuanSection1Type, sanJuansection2Type } from "~/data/data";
 
 export type PageTemplateProps = {
   status: 'active' | 'upcoming';
   onStatusChange: (value: boolean) => void;
   section1Data: sanJuanSection1Type;
-  onSection1Update: (field: keyof sanJuanSection1Type, value: string) => void;
+  onSection1Update: (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => void;
+  section2Data: sanJuansection2Type;
+  onSection2Update: (field: keyof sanJuansection2Type, value: string) => void;
 };
 
 const PageTemplate: React.FC<PageTemplateProps> = ({
@@ -20,6 +23,8 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   onStatusChange,
   section1Data,
   onSection1Update,
+  section2Data,
+  onSection2Update,
 }) => {
   const size = useWindowSize();
   const width = size.width ?? 0;
@@ -41,6 +46,13 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
         width={width}
         data={section1Data}
         onUpdate={onSection1Update}
+      />
+
+      <EditableSanJuanSection2
+        width={width}
+        height={0}
+        SanJuanSection2Text={section2Data}
+        onTextUpdate={onSection2Update}
       />
     </div>
   );

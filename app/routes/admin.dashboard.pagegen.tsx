@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import PageTemplate from "~/components/_pagegen/PageTemplate";
-import { sanJuanSection1Type } from "~/data/data";
+import { sanJuanSection1Type, sanJuansection2Type } from "~/data/data";
 
 type Section = {
   id: string;
@@ -31,12 +31,19 @@ const DEFAULT_SECTION1_DATA: sanJuanSection1Type = {
   }
 };
 
+const DEFAULT_SECTION2_DATA: sanJuansection2Type = {
+  firstH3: "",
+  secondH3: "",
+  thirdH3: ""
+};
+
 export default function PageGeneratorRoute() {
   const [step, setStep] = useState<'options' | 'name' | 'preview'>('options');
   const [pageName, setPageName] = useState('');
   const [sections, setSections] = useState<Section[]>(DEFAULT_SECTIONS);
   const [status, setStatus] = useState<'active' | 'upcoming'>('upcoming');
   const [section1Data, setSection1Data] = useState<sanJuanSection1Type>(DEFAULT_SECTION1_DATA);
+  const [section2Data, setSection2Data] = useState<sanJuansection2Type>(DEFAULT_SECTION2_DATA);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -64,6 +71,13 @@ export default function PageGeneratorRoute() {
 
   const handleSection1Update = (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
     setSection1Data(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSection2Update = (field: keyof sanJuansection2Type, value: string) => {
+    setSection2Data(prev => ({
       ...prev,
       [field]: value
     }));
@@ -100,81 +114,79 @@ export default function PageGeneratorRoute() {
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="space-y-6"
+        className="space-y-8"
       >
-        {step === 'options' ? (
+        {step === 'options' && (
           <motion.div
             variants={buttonVariants}
-            className="flex flex-col space-y-4"
+            className="space-y-4"
           >
-            <Button
+            <Button 
               onClick={() => setStep('name')}
-              size="lg"
               className="w-full py-8 text-xl"
             >
               Crear nueva página
             </Button>
-            <Button
+            <Button 
               variant="outline"
-              size="lg"
               className="w-full py-8 text-xl"
             >
               Administrar páginas
             </Button>
           </motion.div>
-        ) : step === 'name' ? (
+        )}
+
+        {step === 'name' && (
           <motion.div
             variants={formVariants}
-            className="bg-white p-6 rounded-lg shadow-lg"
+            className="space-y-4"
           >
-            <h2 className="text-xl font-semibold mb-4">Nombre de la página</h2>
-            <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="pageName" className="text-lg font-medium">
+                Nombre de la página
+              </label>
               <input
+                id="pageName"
                 type="text"
-                placeholder="Ingrese el nombre de la página"
-                className="w-full p-3 border rounded-md"
                 value={pageName}
                 onChange={(e) => setPageName(e.target.value.replace(/\s+/g, '_'))}
+                className="w-full p-2 border rounded"
+                placeholder="mi_nueva_pagina"
               />
-              <div className="flex justify-end space-x-3">
-                <Button
-                  variant="outline"
-                  onClick={handleBack}
-                >
-                  Volver
-                </Button>
-                <Button onClick={handleNext}>
-                  Siguiente
-                </Button>
-              </div>
+            </div>
+            <div className="flex justify-between">
+              <Button onClick={handleBack} variant="outline">
+                Atrás
+              </Button>
+              <Button onClick={handleNext}>
+                Siguiente
+              </Button>
             </div>
           </motion.div>
-        ) : (
+        )}
+
+        {step === 'preview' && (
           <motion.div
             variants={formVariants}
-            className="bg-white rounded-lg shadow-lg overflow-hidden"
+            className="space-y-8"
           >
-            <div className="p-4 border-b flex justify-between items-center">
-              <Button
-                variant="outline"
-                onClick={handleBack}
-              >
-                Volver
+            <div className="flex justify-between mb-4">
+              <Button onClick={handleBack} variant="outline">
+                Atrás
               </Button>
               <Button>
                 Guardar página
               </Button>
             </div>
-            <div className="bg-blue-50">
-              <PageTemplate
-                sections={sections}
-                onUpdateSection={handleUpdateSection}
-                status={status}
-                onStatusChange={handleStatusChange}
-                section1Data={section1Data}
-                onSection1Update={handleSection1Update}
-              />
-            </div>
+
+            <PageTemplate
+              status={status}
+              onStatusChange={handleStatusChange}
+              section1Data={section1Data}
+              onSection1Update={handleSection1Update}
+              section2Data={section2Data}
+              onSection2Update={handleSection2Update}
+            />
           </motion.div>
         )}
       </motion.div>
