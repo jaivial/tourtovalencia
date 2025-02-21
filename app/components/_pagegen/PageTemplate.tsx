@@ -57,7 +57,8 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
 
     handleCreatePage({
       name: pageName,
-      content: pageContent
+      content: pageContent,
+      status: status
     });
   };
 

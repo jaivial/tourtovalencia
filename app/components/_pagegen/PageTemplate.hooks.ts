@@ -74,6 +74,7 @@ export const usePageCreation = () => {
   const handleCreatePage = async (pageData: {
     name: string;
     content: Record<string, any>;
+    status: 'active' | 'upcoming';
   }) => {
     setIsCreating(true);
     setError(null);
@@ -85,7 +86,8 @@ export const usePageCreation = () => {
       fetcher.submit(
         { 
           name: pageData.name,
-          content: JSON.stringify(processedContent)
+          content: JSON.stringify(processedContent),
+          status: pageData.status
         },
         { 
           method: 'post',

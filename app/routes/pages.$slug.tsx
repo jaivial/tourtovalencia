@@ -6,6 +6,7 @@ import DynamicPageSkeleton from "~/components/_pages/DynamicPageSkeleton";
 import { useWindowSize } from "@uidotdev/usehooks";
 import SanJuanSection3Dynamic from "~/components/_sanjuan/SanJuanSection3Dynamic";
 import { useLanguageContext } from "~/providers/LanguageContext";
+import ComingSoonCard from "~/components/_cards/ComingSoonCard";
 
 // Error boundary component
 export function ErrorBoundary() {
@@ -138,10 +139,17 @@ export default function DynamicPage() {
       )}
       
       {content.section6 && (
-        <DynamicPageContainer.Section6 
-          width={width} 
-          SanJuanSection6Text={content.section6} 
-        />
+        page.status === 'upcoming' ? (
+          <ComingSoonCard 
+            width={width}
+            language={state.language}
+          />
+        ) : (
+          <DynamicPageContainer.Section6 
+            width={width} 
+            SanJuanSection6Text={content.section6} 
+          />
+        )
       )}
     </div>
   );

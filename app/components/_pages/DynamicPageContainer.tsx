@@ -5,6 +5,7 @@ import SanJuanSection3 from "../_sanjuan/SanJuanSection3";
 import SanJuanSection4 from "../_sanjuan/SanJuanSection4";
 import SanJuanSection5 from "../_sanjuan/SanJuanSection5";
 import SanJuanSection6 from "../_sanjuan/SanJuanSection6";
+import ComingSoonCard from "../_cards/ComingSoonCard";
 import IndexSection5 from "../_index/IndexSection5";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import type { Page } from "~/utils/db.schema.server";
@@ -77,10 +78,17 @@ const DynamicPageContainer: React.FC<DynamicPageContainerProps> = ({ page }) => 
       )}
       
       {content.section6 && (
-        <SanJuanSection6 
-          width={width} 
-          SanJuanSection6Text={content.section6} 
-        />
+        page.status === 'upcoming' ? (
+          <ComingSoonCard 
+            width={width}
+            language={state.language}
+          />
+        ) : (
+          <SanJuanSection6 
+            width={width} 
+            SanJuanSection6Text={content.section6} 
+          />
+        )
       )}
     </div>
   );

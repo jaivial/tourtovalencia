@@ -1,4 +1,13 @@
 import { getDb } from "./db.server";
+import { 
+  IndexSection5Type, 
+  sanJuanSection1Type, 
+  sanJuanSection3Type, 
+  sanJuansection2Type, 
+  sanJuansection4Type, 
+  sanJuanSection5Type, 
+  SanJuanSection6Type 
+} from "~/data/data";
 
 // Translation interface for MongoDB
 export interface Translation {
@@ -16,9 +25,26 @@ export interface Page {
   slug: string;
   name: string;
   content: {
-    es: Record<string, string>;
-    en: Record<string, string>;
+    es: {
+      indexSection5?: IndexSection5Type;
+      section1?: sanJuanSection1Type;
+      section2?: sanJuansection2Type;
+      section3?: sanJuanSection3Type;
+      section4?: sanJuansection4Type;
+      section5?: sanJuanSection5Type;
+      section6?: SanJuanSection6Type;
+    };
+    en: {
+      indexSection5?: IndexSection5Type;
+      section1?: sanJuanSection1Type;
+      section2?: sanJuansection2Type;
+      section3?: sanJuanSection3Type;
+      section4?: sanJuansection4Type;
+      section5?: sanJuanSection5Type;
+      section6?: SanJuanSection6Type;
+    };
   };
+  status: 'active' | 'upcoming';
   createdAt: Date;
   updatedAt: Date;
 }
