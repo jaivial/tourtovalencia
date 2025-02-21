@@ -75,11 +75,11 @@ export const BookingDateStep = () => {
               // Table styles
               "[&_.rdp-table]:w-full [&_.rdp-tbody]:divide-y",
               // Cell and button sizing
-              "[&_.rdp-cell]:text-center [&_.rdp-cell]:p-0",
-              "[&_.rdp-button]:w-8 [&_.rdp-button]:h-8",
-              "[&_.rdp-button]:xs:w-9 [&_.rdp-button]:xs:h-9",
-              "[&_.rdp-button]:sm:w-10 [&_.rdp-button]:sm:h-10",
-              "[&_.rdp-button]:md:w-12 [&_.rdp-button]:md:h-12",
+              "[&_.rdp-cell]:w-[14.28%] [&_.rdp-cell]:text-center [&_.rdp-cell]:p-0",
+              "[&_.rdp-button]:w-full [&_.rdp-button]:h-8",
+              "[&_.rdp-button]:xs:h-9",
+              "[&_.rdp-button]:sm:h-10",
+              "[&_.rdp-button]:md:h-12",
               // Text sizing
               "[&_.rdp-day_span]:text-xs",
               "[&_.rdp-day_span]:xs:text-sm",
