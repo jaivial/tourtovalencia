@@ -47,59 +47,9 @@
 ## Localization
 
 ### String Management
-- Store in `app/data/data.ts`
+- Store in `app/data/data.json`
 - Support multiple languages
 - Access via context states
-
-## Language Optimization
-
-### JSON-based Approach
-- Split language files into route-specific JSON files
-- Store in `public/locales/{lang}/{route}.json`
-- Implement dynamic imports for lazy loading
-- Cache loaded translations
-
-### Database Approach (Recommended)
-- Store translations in MongoDB collections
-- Structure:
-  ```typescript
-  interface Translation {
-    key: string;
-    route: string;
-    language: string;
-    value: string;
-    lastUpdated: Date;
-  }
-  ```
-- Benefits:
-  - Faster initial load time
-  - Dynamic updates without deployment
-  - Version control for translations
-  - Cache management
-  - Analytics capabilities
-
-### Implementation Guidelines
-1. **Route-Level Loading**
-   - Load translations only for active route
-   - Implement background loading for linked routes
-   - Cache in localStorage with version control
-
-2. **Caching Strategy**
-   - Cache translations in browser
-   - Implement version checking
-   - Clear cache on language updates
-   - Use service worker for offline support
-
-3. **Performance Monitoring**
-   - Track translation load times
-   - Monitor cache hit rates
-   - Set up alerts for slow loads
-
-### Migration Steps
-1. Move from `data.ts` to database storage
-2. Implement caching layer
-3. Add background preloading
-4. Set up monitoring
 
 ## Database Guidelines
 
@@ -109,19 +59,7 @@
 - Implement connection pooling
 
 ### Model Structure
-```typescript
-// Base structure for models
-interface BaseDocument {
-  _id: ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Model implementation
-interface YourModel extends BaseDocument {
-  // model properties
-}
-```
+- use file on 'utils/db.server'
 
 ## Remix Best Practices
 
