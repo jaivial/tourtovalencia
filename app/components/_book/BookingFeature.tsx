@@ -9,6 +9,7 @@ import { BookingProgress } from "./BookingProgress";
 import { BookingSuccess } from "./BookingSuccess";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Loader2, CalendarRange, Users2, Sparkles } from "lucide-react";
+import { HeroUIProvider } from "@heroui/react";
 
 export const BookingFeature = () => {
   const context = useBooking();
@@ -21,7 +22,11 @@ export const BookingFeature = () => {
   const renderStep = () => {
     switch (context.currentStep) {
       case 1:
-        return <BookingDateFeature />;
+        return (
+          <HeroUIProvider>
+            <BookingDateFeature />
+          </HeroUIProvider>
+        );
       case 2:
         return <BookingStepTwo />;
       case 3:
