@@ -2,10 +2,13 @@ import { json, type LoaderFunction, type ActionFunctionArgs } from "@remix-run/n
 import { useLoaderData } from "@remix-run/react";
 import { BookingProvider } from "~/context/BookingContext";
 import { BookingFeature } from "~/components/_book/BookingFeature";
+import { PaymentModalFeature } from "~/components/features/PaymentModalFeature";
 import { getAvailableDatesInRange, getDateAvailability } from "~/models/bookingAvailability.server";
 import { createCheckoutSession } from "~/services/stripe.server";
 import { addMonths } from "date-fns";
 import type { Booking } from "~/types/booking";
+import { useEffect } from "react";
+import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 
 export type LoaderData = {
   availableDates: Array<{
@@ -18,7 +21,12 @@ export type LoaderData = {
     availablePlaces: number;
     isAvailable: boolean;
   };
+  paypalClientId?: string;
   error?: string;
+  emailConfig?: {
+    gmailUser: string;
+    gmailAppPassword: string;
+  };
 };
 
 export type ActionData = {
@@ -45,7 +53,25 @@ export const loader: LoaderFunction = async ({ request }) => {
       selectedDateAvailability = await getDateAvailability(new Date(selectedDate));
     }
 
-    return json<LoaderData>({ availableDates, selectedDateAvailability });
+    // Get email configuration
+    const gmailUser = process.env.GMAIL_USER;
+    const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
+
+    if (!gmailUser || !gmailAppPassword) {
+      throw new Error("Missing email configuration");
+    }
+
+    const paypalClientId = process.env.PAYPAL_CLIENT_ID;
+
+    return json<LoaderData>({
+      availableDates,
+      selectedDateAvailability,
+      paypalClientId,
+      emailConfig: {
+        gmailUser,
+        gmailAppPassword,
+      },
+    });
   } catch (error) {
     console.error("Error loading booking data:", error);
     return json<LoaderData>({ availableDates: [], error: "Failed to load available dates" });
@@ -59,7 +85,7 @@ export async function action({ request }: ActionFunctionArgs) {
   if (intent === "create-checkout-session") {
     try {
       const bookingData = JSON.parse(formData.get("booking") as string);
-      
+
       // Get the host and construct the base URL
       const host = request.headers.get("host");
       if (!host) {
@@ -76,7 +102,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
       // Construct the base URL
       const baseUrl = `${protocol}://${host}`;
-      console.log('Using base URL:', baseUrl);
+      console.log("Using base URL:", baseUrl);
 
       const { url, sessionId } = await createCheckoutSession(bookingData, baseUrl);
 
@@ -95,7 +121,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function BookIndex() {
-  const { availableDates, selectedDateAvailability } = useLoaderData<typeof loader>();
+  const { availableDates, selectedDateAvailability, paypalClientId, emailConfig } = useLoaderData<typeof loader>();
 
   return (
     <BookingProvider
@@ -103,9 +129,24 @@ export default function BookIndex() {
         availableDates,
         selectedDateAvailability,
         serverError: null,
+        paypalClientId,
+        emailConfig,
       }}
     >
-      <BookingFeature />
+      <div className="container mx-auto px-4 py-8">
+        <div className="mt-8 flex justify-center">
+          <PayPalScriptProvider
+            options={{
+              clientId: paypalClientId,
+              currency: "EUR",
+              intent: "capture",
+              components: "buttons,funding-eligibility",
+            }}
+          >
+            <BookingFeature />
+          </PayPalScriptProvider>
+        </div>
+      </div>
     </BookingProvider>
   );
 }

@@ -19,9 +19,14 @@ export interface BookingContextState {
     isAvailable: boolean;
   };
   isSubmitting: boolean;
+  paypalClientId: string | undefined;
   isSuccess: boolean;
   paymentClientSecret: string | null;
   paymentIntentId: string | null;
+  emailConfig?: {
+    gmailUser: string;
+    gmailAppPassword: string;
+  };
   setCurrentStep: (step: number) => void;
   setFormData: (data: Partial<BookingFormData>) => void;
   setErrors: (errors: Partial<Record<keyof BookingFormData, string>>) => void;
@@ -39,6 +44,10 @@ export interface BookingContextState {
   setPaymentClientSecret: (secret: string | null) => void;
   setPaymentIntentId: (id: string | null) => void;
   setServerError: (error: string | null) => void;
+  setEmailConfig: (config: {
+    gmailUser: string;
+    gmailAppPassword: string;
+  } | undefined) => void;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -57,6 +66,11 @@ interface BookingProviderProps {
       date: string;
       availablePlaces: number;
       isAvailable: boolean;
+    };
+    paypalClientId?: string;
+    emailConfig?: {
+      gmailUser: string;
+      gmailAppPassword: string;
     };
   };
 }
@@ -79,6 +93,7 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(initialState.serverError || null);
+  const [emailConfig, setEmailConfig] = useState(initialState.emailConfig);
 
   const handleSetFormData = (data: Partial<BookingFormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -101,6 +116,8 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
         isSuccess,
         paymentClientSecret,
         paymentIntentId,
+        paypalClientId: initialState.paypalClientId,
+        emailConfig,
         setCurrentStep,
         setFormData: handleSetFormData,
         setErrors,
@@ -110,6 +127,7 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
         setPaymentClientSecret,
         setPaymentIntentId,
         setServerError,
+        setEmailConfig,
         handleInputChange,
       }}
     >

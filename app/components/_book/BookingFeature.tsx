@@ -34,7 +34,7 @@ export const BookingFeature = () => {
   };
 
   return (
-    <div className={`max-[730px]:max-w-[calc(100%-5rem)] max-w-2xl mx-auto mt-36 mb-20 px-4 sm:px-6 md:px-6`}>
+    <div className="container mx-auto max-w-xl max-[800px]:bg-red-200 px-4 sm:px-6 lg:px-8 py-8 sm:py-12 mt-24 sm:mt-32 mb-12 sm:mb-20 bg-white/95 backdrop-blur-sm rounded-lg shadow-md">
       <div className="text-center mb-12 space-y-6">
         <div className="flex justify-center gap-4">
           <CalendarRange className="w-8 h-8 text-primary" />
@@ -65,7 +65,7 @@ export const BookingFeature = () => {
 
         <div className="mt-8">{renderStep()}</div>
 
-        <BookingNavigation currentStep={context.currentStep} onNext={actions.handleNextStep} onPrevious={actions.handlePreviousStep} onSubmit={actions.handleSubmit} isSubmitting={context.isSubmitting} />
+        <BookingNavigation currentStep={context.currentStep} onNext={actions.handleNextStep} onPrevious={actions.handlePreviousStep} onSubmit={actions.handleSubmit} isSubmitting={context.isSubmitting} paypalClientId={context.paypalClientId} />
       </div>
     </div>
   );

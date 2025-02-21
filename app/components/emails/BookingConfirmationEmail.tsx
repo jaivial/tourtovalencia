@@ -16,6 +16,7 @@ interface BookingConfirmationEmailProps {
 
 export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailProps) => {
   const previewText = `Confirmación de reserva para la Excursión a Medina Azahara`;
+  const bookingDate = new Date(booking.date);
 
   return (
     <Html>
@@ -36,11 +37,17 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
 
             <Section style={detailsSection}>
               <Text style={detailText}>
-                <strong>Fecha:</strong> {new Date(booking.bookingDate).toLocaleDateString('es-ES', {
+                <strong>Fecha:</strong> {bookingDate.toLocaleDateString('es-ES', {
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric'
+                })}
+              </Text>
+              <Text style={detailText}>
+                <strong>Hora:</strong> {bookingDate.toLocaleTimeString('es-ES', {
+                  hour: '2-digit',
+                  minute: '2-digit'
                 })}
               </Text>
               <Text style={detailText}>
@@ -52,19 +59,15 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
             </Section>
 
             <Text style={text}>
-              Punto de encuentro: Parada de autobús frente al Centro de Recepción de Visitantes de Medina Azahara.
+              Por favor, preséntate en el punto de encuentro 10 minutos antes de la hora indicada.
             </Text>
 
             <Text style={text}>
-              Por favor, llegue 10 minutos antes de la hora programada. Si necesita cancelar o modificar su reserva, contáctenos lo antes posible.
+              Si tienes alguna pregunta o necesitas hacer cambios en tu reserva, no dudes en contactarnos.
             </Text>
 
             <Text style={text}>
-              Para cualquier consulta, no dude en contactarnos en excursionesmed@gmail.com
-            </Text>
-
-            <Text style={text}>
-              ¡Esperamos verle pronto!
+              ¡Esperamos verte pronto!
             </Text>
           </Section>
         </Container>
@@ -90,6 +93,13 @@ const section = {
   padding: "0 48px",
 };
 
+const detailsSection = {
+  padding: "24px",
+  backgroundColor: "#f6f9fc",
+  borderRadius: "4px",
+  margin: "16px 0",
+};
+
 const h1 = {
   color: "#333",
   fontSize: "24px",
@@ -106,16 +116,7 @@ const text = {
   margin: "16px 0",
 };
 
-const detailsSection = {
-  backgroundColor: "#f6f9fc",
-  borderRadius: "4px",
-  padding: "24px",
-  margin: "24px 0",
-};
-
 const detailText = {
-  color: "#333",
-  fontSize: "14px",
-  lineHeight: "24px",
+  ...text,
   margin: "8px 0",
 };

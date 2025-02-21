@@ -1,80 +1,77 @@
-import { json, redirect, type LoaderFunction } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import { retrieveCheckoutSession } from "~/services/stripe.server";
-import { createBooking } from "~/services/booking.server";
-import { sendEmail } from "~/utils/email.server";
-import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
-import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
+import { useNavigate, useLocation } from "@remix-run/react";
+import { useEffect } from "react";
 import { BookingSuccessProvider } from "~/context/BookingSuccessContext";
 import { BookingSuccessFeature } from "~/components/features/BookingSuccessFeature";
 import type { Booking } from "~/types/booking";
+import { json } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
+import { sendEmail } from "~/utils/email.server";
+import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
+import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
+import { getCollection } from "~/utils/db.server";
 
-interface LoaderData {
-  booking: Booking;
-}
-
-export const loader: LoaderFunction = async ({ request }) => {
-  const url = new URL(request.url);
-  const sessionId = url.searchParams.get("session_id");
-
-  if (!sessionId) {
-    return redirect("/book");
-  }
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const bookingData = JSON.parse(formData.get("booking") as string) as Booking;
 
   try {
-    // Retrieve the checkout session to get payment and customer details
-    const session = await retrieveCheckoutSession(sessionId);
+    // Save to MongoDB
+    const bookingsCollection = await getCollection("bookings");
+    const now = new Date();
 
-    if (session.payment_status !== "paid") {
-      return redirect("/book?error=payment-failed");
-    }
-
-    // Create booking in database
-    const bookingData = {
-      fullName: session.metadata?.customerName || "",
-      email: session.customer_email || session.metadata?.customerEmail || "",
-      date: session.metadata?.date || "",
-      time: session.metadata?.time || "",
-      partySize: parseInt(session.metadata?.partySize || "1", 10),
-      paymentId: session.id,
-      amount: session.amount_total || 0,
-      phoneNumber: session.metadata?.phoneNumber || "",
+    const bookingRecord = {
+      fullName: bookingData.fullName,
+      email: bookingData.email,
+      date: new Date(bookingData.date),
+      partySize: bookingData.partySize,
       status: "confirmed",
-      paid: true
+      createdAt: now,
+      updatedAt: now,
+      paymentIntentId: bookingData.paymentIntentId,
+      paymentStatus: "paid",
+      totalAmount: bookingData.amount / 100, // Convert from cents to euros
+      phoneNumber: bookingData.phoneNumber,
     };
 
-    const newBooking = await createBooking(bookingData, session.id);
+    await bookingsCollection.insertOne(bookingRecord);
 
-    // Send confirmation emails
-    await Promise.all([
-      sendEmail({
-        to: bookingData.email,
-        subject: "Confirmación de Reserva - Medina Azahara",
-        component: BookingConfirmationEmail({
-          booking: newBooking,
-        }),
-      }),
-      sendEmail({
-        to: process.env.ADMIN_EMAIL!,
-        subject: "Nueva Reserva Recibida",
-        component: BookingAdminEmail({
-          booking: newBooking,
-        }),
-      }),
-    ]);
+    // Send confirmation email to customer
+    await sendEmail({
+      to: bookingData.email,
+      subject: "Confirmación de Reserva - Tour Tour Valencia",
+      component: BookingConfirmationEmail({ booking: bookingData }),
+    });
 
-    return json<LoaderData>({ booking: newBooking });
+    // Send admin notification
+    await sendEmail({
+      to: "jaimebillanueba99@gmail.com",
+      subject: "Nueva Reserva Recibida",
+      component: BookingAdminEmail({ booking: bookingData }),
+    });
+
+    return json({ success: true });
   } catch (error) {
-    console.error("Error processing successful payment:", error);
-    return redirect("/book?error=booking-creation-failed");
+    console.error("Error processing booking:", error);
+    return json({ success: false, error: "Failed to process booking" });
   }
-};
+}
 
 export default function BookingSuccess() {
-  const { booking } = useLoaderData<LoaderData>();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!location.state?.booking) {
+      navigate("/book", { replace: true });
+    }
+  }, [location.state?.booking, navigate]);
+
+  if (!location.state?.booking) {
+    return null;
+  }
 
   return (
-    <BookingSuccessProvider booking={booking}>
+    <BookingSuccessProvider booking={location.state.booking}>
       <BookingSuccessFeature />
     </BookingSuccessProvider>
   );

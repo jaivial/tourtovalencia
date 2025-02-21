@@ -1,100 +1,149 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "@remix-run/react";
-import { Booking } from "~/types/booking";
-import { Button } from "./button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Alert, AlertDescription } from "~/components/ui/alert";
+import { CheckCircle2, Loader2, AlertCircle, Home } from "lucide-react";
+import type { Booking } from "~/types/booking";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { motion } from "framer-motion";
+import { Button } from "~/components/ui/button";
+import { useNavigate } from "@remix-run/react";
+import { useEffect, useState } from "react";
 
 interface BookingSuccessUIProps {
   booking: Booking;
+  emailStatus: "idle" | "sending" | "sent" | "error";
 }
 
-export const BookingSuccessUI = ({ booking }: BookingSuccessUIProps) => {
+const containerVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.5 },
+  },
+};
+
+const iconVariants = {
+  hidden: { scale: 0 },
+  visible: {
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 200,
+      damping: 20,
+      delay: 0.2,
+    },
+  },
+};
+
+export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps) => {
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(15);
 
   useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      navigate("/");
-    }
-  }, [countdown, navigate]);
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          navigate("/");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-  const handleContinue = () => {
+    return () => clearInterval(timer);
+  }, [navigate]);
+
+  const handleReturnHome = () => {
     navigate("/");
   };
 
   return (
-    <div className="min-h-screen bg-background py-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-      <div className="max-w-lg w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-        <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-            <svg
-              className="h-6 w-6 text-green-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4.5 12.75l6 6 9-13.5"
-              />
-            </svg>
-          </div>
-          <h1 className="mt-4 text-2xl font-bold tracking-tight text-gray-900">
-            ¡Reserva Confirmada!
-          </h1>
-          <p className="mt-2 text-base text-gray-600">
-            Gracias por tu reserva. Hemos enviado un email de confirmación a{" "}
-            <span className="font-medium">{booking.email}</span>
-          </p>
-        </div>
+    <motion.div className="container mx-auto mt-32 px-4 py-12 max-w-2xl" initial="hidden" animate="visible" variants={containerVariants}>
+      <Card className="shadow-xl bg-white/80 backdrop-blur-sm border-2 border-green-100">
+        <CardHeader className="text-center space-y-2 bg-gradient-to-r from-green-50 to-green-100 rounded-t-lg border-b pb-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,255,0,0.1),transparent)] animate-pulse" />
+          <motion.div variants={iconVariants}>
+            <CheckCircle2 className="w-20 h-20 text-green-500 mx-auto mb-4" />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <CardTitle className="text-4xl font-bold text-green-700 mb-2">¡Reserva Confirmada!</CardTitle>
+            <CardDescription className="text-xl text-green-600">Gracias por reservar con Tour Tour Valencia</CardDescription>
+          </motion.div>
+        </CardHeader>
+        <CardContent className="pt-8 px-8">
+          <motion.div
+            className="space-y-6"
+            variants={{
+              visible: {
+                transition: {
+                  staggerChildren: 0.1,
+                },
+              },
+            }}
+          >
+            <motion.div className="bg-slate-50/80 backdrop-blur-sm p-8 rounded-xl border border-slate-200 shadow-inner" variants={itemVariants}>
+              <h3 className="text-xl font-semibold text-slate-800 mb-6 flex items-center gap-2">
+                <span>Detalles de la Reserva</span>
+              </h3>
+              <div className="space-y-4">
+                {[
+                  { label: "Nombre", value: booking.fullName },
+                  { label: "Email", value: booking.email },
+                  {
+                    label: "Fecha",
+                    value: format(new Date(booking.date), "EEEE, d 'de' MMMM 'de' yyyy", { locale: es }),
+                  },
+                  { label: "Personas", value: booking.partySize },
+                  {
+                    label: "Total",
+                    value: `€${booking.amount.toFixed(2)}`,
+                    highlight: true,
+                  },
+                ].map((item, index) => (
+                  <motion.div key={item.label} className="grid grid-cols-[140px,1fr] gap-4 items-center border-b border-slate-100 pb-4 last:border-0 last:pb-0" variants={itemVariants} custom={index}>
+                    <span className="text-slate-500 font-medium">{item.label}:</span>
+                    <span className={`font-semibold ${item.highlight ? "text-xl text-green-700" : "text-slate-700"}`}>{item.value}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
 
-        <div className="border-t border-gray-200 pt-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">
-            Detalles de la Reserva
-          </h2>
-          <dl className="divide-y divide-gray-200">
-            <div className="py-3 flex justify-between">
-              <dt className="text-sm font-medium text-gray-500">Nombre</dt>
-              <dd className="text-sm text-gray-900">{booking.fullName}</dd>
-            </div>
-            <div className="py-3 flex justify-between">
-              <dt className="text-sm font-medium text-gray-500">Fecha</dt>
-              <dd className="text-sm text-gray-900">
-                {format(new Date(booking.date), "EEEE, d 'de' MMMM 'de' yyyy", {
-                  locale: es,
-                })}
-              </dd>
-            </div>
-            <div className="py-3 flex justify-between">
-              <dt className="text-sm font-medium text-gray-500">
-                Número de Personas
-              </dt>
-              <dd className="text-sm text-gray-900">{booking.partySize}</dd>
-            </div>
-            <div className="py-3 flex justify-between">
-              <dt className="text-sm font-medium text-gray-500">Total Pagado</dt>
-              <dd className="text-sm text-gray-900">
-                €{(booking.amount / 100).toFixed(2)}
-              </dd>
-            </div>
-          </dl>
-        </div>
+            <motion.div className="space-y-3" variants={itemVariants}>
+              <Alert className="bg-green-50 border-green-200 shadow-sm">
+                <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
+                <AlertDescription className="text-green-700">
+                  Se ha enviado un email de confirmación a <span className="font-medium">{booking.email}</span>
+                </AlertDescription>
+              </Alert>
+            </motion.div>
 
-        <div className="mt-6 space-y-4">
-          <div className="text-center text-sm text-gray-600">
-            Redirigiendo a la página principal en {countdown} segundos...
-          </div>
-          <Button onClick={handleContinue} className="w-full">
-            Volver al Inicio
-          </Button>
-        </div>
-      </div>
-    </div>
+            <motion.div className="space-y-4 pt-4" variants={itemVariants}>
+              <p className="text-center text-sm text-slate-600">
+                Redirigiendo a la página principal en <span className="font-semibold">{countdown}</span> segundos
+              </p>
+              <Button 
+                onClick={handleReturnHome}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                size="lg"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Volver a la página principal
+              </Button>
+            </motion.div>
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };

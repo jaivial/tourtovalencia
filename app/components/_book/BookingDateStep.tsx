@@ -43,10 +43,10 @@ export const BookingDateStep = () => {
   }, [fetcher.data, setSelectedDateAvailability]);
 
   return (
-    <div className="flex flex-col items-center space-y-6">
-      <div className="w-full max-w-sm space-y-2">
-        <Label className="text-center block">Select Date</Label>
-        <div className="border rounded-lg p-4">
+    <div className="flex flex-col items-center w-full space-y-6">
+      <div className="w-full max-w-md space-y-2">
+        <Label className="text-center block text-lg font-medium">Selecciona una fecha</Label>
+        <div className="border rounded-lg p-2 sm:p-4 md:p-6 bg-white">
           <Calendar
             mode="single"
             selected={formData.bookingDate || undefined}
@@ -70,19 +70,41 @@ export const BookingDateStep = () => {
               }
             }}
             className={cn(
-              "mx-auto",
+              // Base styles
+              "w-full mx-auto",
+              // Table styles
+              "[&_.rdp-table]:w-full [&_.rdp-tbody]:divide-y",
+              // Cell and button sizing
+              "[&_.rdp-cell]:w-[14.28%] [&_.rdp-cell]:text-center [&_.rdp-cell]:p-0",
+              "[&_.rdp-button]:w-full [&_.rdp-button]:h-8",
+              "[&_.rdp-button]:xs:h-9",
+              "[&_.rdp-button]:sm:h-10",
+              "[&_.rdp-button]:md:h-12",
+              // Text sizing
+              "[&_.rdp-day_span]:text-xs",
+              "[&_.rdp-day_span]:xs:text-sm",
+              "[&_.rdp-day_span]:sm:text-base",
+              // Navigation
+              "[&_.rdp-nav]:m-0 [&_.rdp-nav]:mb-1",
+              "[&_.rdp-caption_label]:text-sm [&_.rdp-caption_label]:sm:text-base",
+              // Head cells
+              "[&_.rdp-head_cell]:p-0 [&_.rdp-head_cell]:text-xs [&_.rdp-head_cell]:sm:text-sm",
+              // States
+              "[&_.rdp-button:hover:not([disabled])]:bg-primary/90 [&_.rdp-button:hover:not([disabled])]:text-primary-foreground",
+              "[&_.rdp-button_selected]:bg-primary [&_.rdp-button_selected]:text-primary-foreground",
+              // Error state
               errors.bookingDate ? "border-red-500" : ""
             )}
           />
         </div>
         {errors.bookingDate && (
-          <p className="text-sm text-red-500 text-center">{errors.bookingDate}</p>
+          <p className="text-sm text-red-500 text-center mt-2">{errors.bookingDate}</p>
         )}
       </div>
 
       {fetcher.state === "loading" && (
         <div className="text-sm text-muted-foreground text-center">
-          Checking availability...
+          Comprobando disponibilidad...
         </div>
       )}
     </div>

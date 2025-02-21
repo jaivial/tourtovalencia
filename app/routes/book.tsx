@@ -1,5 +1,5 @@
 import { json, type ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { useNavigation, Outlet } from "@remix-run/react";
+import { useNavigation, Outlet, useNavigate } from "@remix-run/react";
 import { BookingLoading } from "~/components/_book/BookingLoading";
 import { retrieveCheckoutSession } from "~/services/stripe.server";
 import { createBooking } from "~/services/booking.server";
