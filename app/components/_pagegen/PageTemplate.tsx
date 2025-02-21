@@ -1,6 +1,6 @@
 import { useWindowSize } from "@uidotdev/usehooks";
-import { Switch } from "@heroui/switch";
 import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 import { Input } from "@heroui/input";
 import { Textarea } from "@heroui/input";
 import EditableIndexSection5 from "./EditableIndexSection5";
@@ -45,14 +45,10 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
       <div className="w-full max-w-7xl mx-auto p-4">
         <div className="flex flex-col items-center justify-center gap-6 mb-8 p-8 bg-white rounded-lg shadow-sm">
           <h2 className="text-3xl font-bold text-gray-900">{pageName}</h2>
-          
+
           <div className="max-w-2xl text-center space-y-2 text-gray-600">
-            <p className="text-sm">
-              Para editar el contenido, haz clic en cualquier texto que desees modificar.
-            </p>
-            <p className="text-sm">
-              Para cambiar las imágenes, pasa el cursor sobre ellas y haz clic en el icono de la cámara.
-            </p>
+            <p className="text-sm">Para editar el contenido, haz clic en cualquier texto que desees modificar.</p>
+            <p className="text-sm">Para cambiar las imágenes, pasa el cursor sobre ellas y haz clic en el icono de la cámara.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -63,21 +59,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
               id="status"
               checked={status === "active"}
               onCheckedChange={onStatusChange}
-              className={`
-                ${status === "active" ? "bg-blue-600" : "bg-gray-200"}
-                relative inline-flex h-6 w-11 items-center rounded-full
-                transition-colors focus:outline-none focus:ring-2
-                focus:ring-blue-500 focus:ring-offset-2
-              `}
-            >
-              <span
-                className={`
-                  ${status === "active" ? "translate-x-6" : "translate-x-1"}
-                  inline-block h-4 w-4 transform rounded-full
-                  bg-white transition-transform
-                `}
-              />
-            </Switch>
+            />
           </div>
         </div>
 

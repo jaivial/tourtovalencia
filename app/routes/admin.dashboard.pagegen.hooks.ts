@@ -76,6 +76,7 @@ const DEFAULT_INDEX_SECTION5_DATA: IndexSection5Type = {
 export const usePageGenerator = () => {
   const [step, setStep] = useState<'name' | 'template'>('name');
   const [pageName, setPageName] = useState('');
+  const [status, setStatus] = useState<'active' | 'upcoming'>('active');
   
   // Section states
   const [section1Data, setSection1Data] = useState<sanJuanSection1Type>(DEFAULT_SECTION1_DATA);
@@ -192,6 +193,11 @@ export const usePageGenerator = () => {
     }));
   };
 
+  // Status handler
+  const handleStatusChange = (checked: boolean) => {
+    setStatus(checked ? 'active' : 'upcoming');
+  };
+
   // Navigation handlers
   const handleNext = () => {
     if (step === 'name') {
@@ -212,6 +218,7 @@ export const usePageGenerator = () => {
     // States
     step,
     pageName,
+    status,
     section1Data,
     section2Data,
     section3Data,
@@ -238,5 +245,6 @@ export const usePageGenerator = () => {
     handleSection5Update,
     handleSection6Update,
     handleIndexSection5Update,
+    handleStatusChange,
   };
 };

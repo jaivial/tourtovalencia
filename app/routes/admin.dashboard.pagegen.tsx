@@ -9,6 +9,7 @@ export default function PageGeneratorRoute() {
   const {
     step,
     pageName,
+    status,
     section1Data,
     section2Data,
     section3Data,
@@ -20,6 +21,7 @@ export default function PageGeneratorRoute() {
     setPageName,
     handleNext,
     handleBack,
+    handleStatusChange,
     handleSection1Update,
     handleSection1ImageUpdate,
     handleSection1ImageRemove,
@@ -68,7 +70,8 @@ export default function PageGeneratorRoute() {
           </div>
 
           <PageTemplate
-            status="active"
+            status={status}
+            onStatusChange={handleStatusChange}
             pageName={pageName}
             indexSection5Data={indexSection5Data}
             onIndexSection5Update={handleIndexSection5Update}
