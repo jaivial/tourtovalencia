@@ -21,8 +21,17 @@ export const BookingDateUI = ({ formData, errors, availableDates = [], isLoading
 
   const isDateUnavailable = (date: CalendarDate) => {
     const jsDate = new Date(date.year, date.month - 1, date.day);
-    // Disable dates with no availability
-    return (availableDates || []).filter((d) => !d.isAvailable).some((disabledDate) => format(new Date(disabledDate.date), "yyyy-MM-dd") === format(jsDate, "yyyy-MM-dd"));
+    const formattedDate = format(jsDate, "yyyy-MM-dd");
+    const dateInfo = (availableDates || []).find((d) => format(new Date(d.date), "yyyy-MM-dd") === formattedDate);
+    // Date is unavailable if it's in our list and has no available places
+    return dateInfo ? !dateInfo.isAvailable : false;
+  };
+
+  const getDateUnavailableStyle = (date: CalendarDate) => {
+    const jsDate = new Date(date.year, date.month - 1, date.day);
+    const formattedDate = format(jsDate, "yyyy-MM-dd");
+    const dateInfo = (availableDates || []).find((d) => format(new Date(d.date), "yyyy-MM-dd") === formattedDate);
+    return dateInfo && !dateInfo.isAvailable ? "bg-red-50 text-red-500" : "";
   };
 
   const handleDateSelect = (date: CalendarDate | null) => {
@@ -49,10 +58,15 @@ export const BookingDateUI = ({ formData, errors, availableDates = [], isLoading
             calendarWidth="100%"
             showShadow
             minValue={todayDate}
+            renderDay={(date) => {
+              const dayNumber = date.day;
+              const unavailableStyle = getDateUnavailableStyle(date);
+              return <div className={cn("w-full h-full flex items-center justify-center", unavailableStyle)}>{dayNumber}</div>;
+            }}
             classNames={{
               base: "w-fit",
               cell: "text-center",
-              cellButton: cn("w-10 h-10 rounded-full", "hover:bg-primary-100 focus:bg-primary-200", "disabled:opacity-50 disabled:cursor-not-allowed", "aria-selected:bg-primary-500 aria-selected:text-white", "aria-unavailable:line-through aria-unavailable:text-red-500"),
+              cellButton: cn("w-10 h-10 rounded-full", "hover:bg-primary-100 focus:bg-primary-200", "disabled:opacity-100 disabled:cursor-not-allowed", "aria-selected:bg-primary-500 aria-selected:text-white", "aria-unavailable:bg-red-50 aria-unavailable:text-red-500 aria-unavailable:line-through", "aria-unavailable:hover:bg-red-100 aria-unavailable:hover:text-red-600"),
               headerWrapper: "mb-4",
               title: "text-lg font-semibold",
               prevButton: "hover:bg-gray-100 rounded-full p-1",
