@@ -79,8 +79,11 @@ export type sanJuanSection1Type = {
   thirdSquareH3: string;
   thirdSquareP: string;
   button: string;
+  backgroundImage?: {
+    file?: File;
+    preview: string;
+  };
 };
-
 
 export type sanJuansection2Type = {
   firstH3: string;

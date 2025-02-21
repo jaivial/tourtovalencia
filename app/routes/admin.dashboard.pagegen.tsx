@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import PageTemplate from "~/components/_pagegen/PageTemplate";
+import { sanJuanSection1Type } from "~/data/data";
 
 type Section = {
   id: string;
@@ -16,11 +17,26 @@ const DEFAULT_SECTIONS: Section[] = [
   { id: 'section4', title: '', content: '' },
 ];
 
+const DEFAULT_SECTION1_DATA: sanJuanSection1Type = {
+  firstH3: "",
+  firstSquareH3: "",
+  firstSquareP: "",
+  secondSquareH3: "",
+  secondSquareP: "",
+  thirdSquareH3: "",
+  thirdSquareP: "",
+  button: "",
+  backgroundImage: {
+    preview: '/olgaphoto3.jpeg'
+  }
+};
+
 export default function PageGeneratorRoute() {
   const [step, setStep] = useState<'options' | 'name' | 'preview'>('options');
   const [pageName, setPageName] = useState('');
   const [sections, setSections] = useState<Section[]>(DEFAULT_SECTIONS);
   const [status, setStatus] = useState<'active' | 'upcoming'>('upcoming');
+  const [section1Data, setSection1Data] = useState<sanJuanSection1Type>(DEFAULT_SECTION1_DATA);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -44,6 +60,13 @@ export default function PageGeneratorRoute() {
     setSections(sections.map(section => 
       section.id === id ? { ...section, [field]: value } : section
     ));
+  };
+
+  const handleSection1Update = (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
+    setSection1Data(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleNext = () => {
@@ -148,6 +171,8 @@ export default function PageGeneratorRoute() {
                 onUpdateSection={handleUpdateSection}
                 status={status}
                 onStatusChange={handleStatusChange}
+                section1Data={section1Data}
+                onSection1Update={handleSection1Update}
               />
             </div>
           </motion.div>

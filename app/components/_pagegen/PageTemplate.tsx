@@ -1,39 +1,26 @@
 import { useWindowSize } from "@uidotdev/usehooks";
 import { Switch } from "@heroui/switch";
 import { Label } from "~/components/ui/label";
-import { Input } from "~/components/ui/input";
+import { Input } from "@heroui/input";
 import { Textarea } from "@heroui/input";
 import IndexSection5 from "../_index/IndexSection5";
+import EditableSanJuanSection1 from "./EditableSanJuanSection1";
 import { useLanguageContext } from "~/providers/LanguageContext";
-
-type SectionProps = {
-  title: string;
-  content: string;
-  onTitleChange: (value: string) => void;
-  onContentChange: (value: string) => void;
-};
-
-const Section: React.FC<SectionProps & { width: number }> = ({ title, content, onTitleChange, onContentChange, width }) => (
-  <div className="w-full flex flex-col items-center gap-6 px-4 py-12">
-    <div className="w-full max-w-4xl space-y-4">
-      <Input value={title} onChange={(e) => onTitleChange(e.target.value)} placeholder="Título de la sección" className="text-2xl font-bold" />
-      <Textarea value={content} onChange={(e) => onContentChange(e.target.value)} placeholder="Contenido de la sección" className="min-h-[200px]" />
-    </div>
-  </div>
-);
+import { sanJuanSection1Type } from "~/data/data";
 
 export type PageTemplateProps = {
-  sections: Array<{
-    id: string;
-    title: string;
-    content: string;
-  }>;
-  onUpdateSection: (id: string, field: "title" | "content", value: string) => void;
-  status: "active" | "upcoming";
+  status: 'active' | 'upcoming';
   onStatusChange: (value: boolean) => void;
+  section1Data: sanJuanSection1Type;
+  onSection1Update: (field: keyof sanJuanSection1Type, value: string) => void;
 };
 
-const PageTemplate: React.FC<PageTemplateProps> = ({ sections, onUpdateSection, status, onStatusChange }) => {
+const PageTemplate: React.FC<PageTemplateProps> = ({
+  status,
+  onStatusChange,
+  section1Data,
+  onSection1Update,
+}) => {
   const size = useWindowSize();
   const width = size.width ?? 0;
   const { state } = useLanguageContext();
@@ -49,10 +36,12 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ sections, onUpdateSection, 
       </div>
 
       <IndexSection5 width={width} indexSection5Text={indexSection5Text} />
-
-      {sections.map((section) => (
-        <Section key={section.id} width={width} title={section.title} content={section.content} onTitleChange={(value) => onUpdateSection(section.id, "title", value)} onContentChange={(value) => onUpdateSection(section.id, "content", value)} />
-      ))}
+      
+      <EditableSanJuanSection1
+        width={width}
+        data={section1Data}
+        onUpdate={onSection1Update}
+      />
     </div>
   );
 };
