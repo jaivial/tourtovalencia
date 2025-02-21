@@ -22,7 +22,8 @@ export default function AdminDashboardRoute() {
   const strings = {
     title: "Olga Travel Admin",
     bookings: "Bookings",
-    logout: "Logout"
+    logout: "Logout",
+    pageGenerator: "Generador de páginas"
   };
 
   return (

@@ -5,18 +5,18 @@ Development tracking for the new "Generador de páginas" section in the admin da
 
 ## Development Steps
 
-### 1. Admin Dashboard UI Setup [ ]
-- [ ] Create new section "Generador de páginas" in admin.dashboard.tsx
-- [ ] Add main option buttons:
-  - [ ] "Crear nueva página"
-  - [ ] "Administrar páginas"
-- [ ] Implement Framer Motion animations for button transitions
+### 1. Admin Dashboard UI Setup [✓]
+- [✓] Create new section "Generador de páginas" in admin.dashboard.tsx
+- [✓] Add main option buttons:
+  - [✓] "Crear nueva página"
+  - [✓] "Administrar páginas"
+- [✓] Implement Framer Motion animations for button transitions
 
 ### 2. Page Creation Flow [ ]
-- [ ] Create page name input form
-  - [ ] Add input field with route name validation
+- [✓] Create page name input form
+  - [✓] Add input field with route name validation
   - [ ] Implement blank space to underscore conversion
-  - [ ] Add "Next" button with animation
+  - [✓] Add "Next" button with animation
 - [ ] Develop page preview system
   - [ ] Create dynamic template based on sanjuan.tsx
   - [ ] Implement editable text fields
