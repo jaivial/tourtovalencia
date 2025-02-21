@@ -3,6 +3,9 @@ import { useLoaderData, useNavigation } from "@remix-run/react";
 import { getPageBySlug } from "~/utils/page.server";
 import DynamicPageContainer from "~/components/_pages/DynamicPageContainer";
 import DynamicPageSkeleton from "~/components/_pages/DynamicPageSkeleton";
+import { useWindowSize } from "@uidotdev/usehooks";
+import SanJuanSection3Dynamic from "~/components/_sanjuan/SanJuanSection3Dynamic";
+import { useLanguageContext } from "~/providers/LanguageContext";
 
 // Error boundary component
 export function ErrorBoundary() {
@@ -74,10 +77,72 @@ export default function DynamicPage() {
   const { page } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "loading";
+  const { width = 0 } = useWindowSize();
+  const { state } = useLanguageContext();
   
   if (isLoading) {
     return <DynamicPageSkeleton />;
   }
 
-  return <DynamicPageContainer page={page} />;
+  // Get content based on current language, fallback to Spanish
+  const content = page.content[state.language] || page.content.es;
+
+  // If this is not a dynamic page that uses section3, render the normal container
+  if (!content?.section3?.images) {
+    return <DynamicPageContainer page={page} />;
+  }
+
+  return (
+    <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
+      {content.indexSection5 && (
+        <DynamicPageContainer.IndexSection 
+          width={width} 
+          indexSection5Text={content.indexSection5} 
+        />
+      )}
+      
+      {content.section1 && (
+        <DynamicPageContainer.Section1 
+          width={width} 
+          sanJuanSection1Text={content.section1} 
+        />
+      )}
+      
+      {content.section2 && (
+        <DynamicPageContainer.Section2 
+          width={width} 
+          SanJuanSection2Text={content.section2} 
+        />
+      )}
+      
+      {/* Render our dynamic section3 */}
+      {content.section3 && (
+        <SanJuanSection3Dynamic 
+          width={width} 
+          images={content.section3.images} 
+        />
+      )}
+
+      {content.section4 && (
+        <DynamicPageContainer.Section4 
+          width={width} 
+          SanJuanSection4Text={content.section4} 
+        />
+      )}
+      
+      {content.section5 && (
+        <DynamicPageContainer.Section5 
+          width={width} 
+          SanJuanSection5Text={content.section5} 
+        />
+      )}
+      
+      {content.section6 && (
+        <DynamicPageContainer.Section6 
+          width={width} 
+          SanJuanSection6Text={content.section6} 
+        />
+      )}
+    </div>
+  );
 }
