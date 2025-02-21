@@ -3,17 +3,24 @@ import { useRef } from "react";
 import { sanJuansection2Type } from "~/data/data";
 import EditableText from "./EditableText";
 import ImageUpload from "./ImageUpload";
+import { useEditableSanJuanSection2 } from "./EditableSanJuanSection2.hooks";
 
-type ChildProps = {
+interface EditableSanJuanSection2Props {
   width: number;
   height: number;
-  SanJuanSection2Text: sanJuansection2Type;
-  onTextUpdate: (key: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => void;
-};
+  data: sanJuansection2Type;
+  onUpdate: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => void;
+}
 
-const EditableSanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2Text, onTextUpdate }) => {
+const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({ 
+  width, 
+  height, 
+  data, 
+  onUpdate 
+}) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
+  const { handleTextUpdate, handleImageChange, handleImageRemove } = useEditableSanJuanSection2(data);
 
   const commonH3Styles = `
     transition-all duration-500 ease-in-out 
@@ -21,12 +28,8 @@ const EditableSanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanS
     leading-normal hover:text-blue-900
   `;
 
-  const getResponsiveTextSize = (small: string, medium: string, large: string) => `${width <= 350 ? small : width <= 450 ? medium : large}`;
-
-  const handleImageChange = (file: File) => {
-    const preview = URL.createObjectURL(file);
-    onTextUpdate('sectionImage', { file, preview });
-  };
+  const getResponsiveTextSize = (small: string, medium: string, large: string) => 
+    `${width <= 350 ? small : width <= 450 ? medium : large}`;
 
   return (
     <div ref={ref} className="w-full overflow-x-hidden">
@@ -51,21 +54,33 @@ const EditableSanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanS
             ${width <= 1280 ? "p-4 mt-16" : "p-6 mt-28"} 
           `}
         >
-          <motion.div animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }} initial={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.5, delay: 0.3 }} className="w-full flex justify-center">
+          <motion.div 
+            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }} 
+            initial={{ opacity: 0, scale: 0.9 }} 
+            transition={{ duration: 0.5, delay: 0.3 }} 
+            className="w-full flex justify-center"
+          >
             <div className="w-[400px] h-[300px] relative rounded-lg overflow-hidden">
               <ImageUpload 
-                imageUrl={SanJuanSection2Text.sectionImage?.preview || ""} 
-                onImageChange={handleImageChange}
-                onImageRemove={() => onTextUpdate("sectionImage", { preview: "" })} 
+                imageUrl={data.sectionImage?.preview || ""} 
+                onImageChange={(file) => {
+                  handleImageChange(file);
+                  const preview = URL.createObjectURL(file);
+                  onUpdate('sectionImage', { file, preview });
+                }}
+                onImageRemove={() => {
+                  handleImageRemove();
+                  onUpdate("sectionImage", { preview: "" });
+                }} 
                 className="w-full h-full object-cover" 
               />
             </div>
           </motion.div>
 
           {[
-            { text: SanJuanSection2Text.firstH3, key: "firstH3" },
-            { text: SanJuanSection2Text.secondH3, key: "secondH3" },
-            { text: SanJuanSection2Text.thirdH3, key: "thirdH3" },
+            { text: data.firstH3, key: "firstH3" },
+            { text: data.secondH3, key: "secondH3" },
+            { text: data.thirdH3, key: "thirdH3" },
           ].map(({ text, key }, index) => (
             <motion.div
               key={index}
@@ -82,7 +97,14 @@ const EditableSanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanS
                 ${getResponsiveTextSize("text-[1.3rem]", "text-[1.4rem]", "text-[1.5rem]")}
               `}
             >
-              <EditableText text={text} onUpdate={(newText) => onTextUpdate(key as keyof sanJuansection2Type, newText)} className={commonH3Styles} placeholder={`Editable Text ${index + 1}`} />
+              <EditableText 
+                value={text} 
+                onUpdate={(newText) => {
+                  handleTextUpdate(key as keyof sanJuansection2Type, newText);
+                  onUpdate(key as keyof sanJuansection2Type, newText);
+                }} 
+                className={commonH3Styles} 
+              />
             </motion.div>
           ))}
         </motion.div>

@@ -208,6 +208,52 @@ When adding a new editable section to the page generator, follow these steps to 
 
 Following these steps will help avoid common issues like undefined handlers, missing props, and state management problems when adding new editable sections.
 
+#### 4. Adding SanJuanSection4
+When implementing SanJuanSection4, follow these steps:
+
+1. **Component Structure**
+   ```typescript
+   // EditableSanJuanSection4.tsx
+   interface EditableSanJuanSection4Props {
+     data: sanJuanSection4Type;
+     onUpdate: (field: keyof sanJuanSection4Type, value: string) => void;
+   }
+   ```
+
+2. **State Management**
+   - Create `EditableSanJuanSection4.hooks.ts` for state logic
+   - Add section4 state to `admin.dashboard.pagegen.tsx`
+   ```typescript
+   const DEFAULT_SECTION4_DATA: sanJuanSection4Type = {
+     title: "",
+     description: "",
+     // Add other fields based on design
+   };
+   ```
+
+3. **Integration Steps**
+   - Create base component preserving original styling
+   - Add EditableText components for text fields
+   - Preserve Framer Motion animations
+   - Maintain responsive design
+   - Add to PageTemplate component
+
+4. **Testing Points**
+   - Verify text editing functionality
+   - Check animation preservation
+   - Test responsive behavior
+   - Validate state updates
+
+5. **Common Issues**
+   - Animation conflicts with editable fields
+   - State synchronization delays
+   - Responsive layout breaks during editing
+
+6. **Solutions**
+   - Use layoutId for smooth animation transitions
+   - Implement proper state debouncing
+   - Add responsive class overrides for edit mode
+
 ## Notes
 - Following Remix best practices for data handling
 - Implementing proper loading states

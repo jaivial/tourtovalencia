@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 type EditableTextProps = {
   value: string;
-  onChange: (value: string) => void;
+  onUpdate: (value: string) => void;
   placeholder?: string;
   className?: string;
   multiline?: boolean;
@@ -10,7 +10,7 @@ type EditableTextProps = {
 
 const EditableText: React.FC<EditableTextProps> = ({
   value,
-  onChange,
+  onUpdate,
   placeholder = 'Click to edit...',
   className = '',
   multiline = false
@@ -34,7 +34,7 @@ const EditableText: React.FC<EditableTextProps> = ({
   const handleBlur = () => {
     setIsEditing(false);
     if (inputRef.current) {
-      onChange(inputRef.current.innerText);
+      onUpdate(inputRef.current.innerText);
     }
   };
 
@@ -55,9 +55,7 @@ const EditableText: React.FC<EditableTextProps> = ({
       onFocus={() => setIsEditing(true)}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
-      className={`outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 min-h-[1.5em] ${
-        !value ? 'text-gray-400' : ''
-      } ${className}`}
+      className={`outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 min-h-[1.5em] ${className}`}
       suppressContentEditableWarning={true}
     >
       {value || placeholder}

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { sanJuansection2Type } from "~/data/data";
 
-export const useEditableSanJuanSection2 = (initialText: sanJuansection2Type) => {
-  const [sectionText, setSectionText] = useState<sanJuansection2Type>(initialText);
+export const useEditableSanJuanSection2 = (initialData: sanJuansection2Type) => {
+  const [sectionData, setSectionData] = useState<sanJuansection2Type>(initialData);
 
-  const handleTextUpdate = (key: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
-    setSectionText(prev => ({
+  const handleTextUpdate = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
+    setSectionData(prev => ({
       ...prev,
-      [key]: value
+      [field]: value
     }));
   };
 
@@ -21,7 +21,7 @@ export const useEditableSanJuanSection2 = (initialText: sanJuansection2Type) => 
   };
 
   return {
-    sectionText,
+    sectionData,
     handleTextUpdate,
     handleImageChange,
     handleImageRemove

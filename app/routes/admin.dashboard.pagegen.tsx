@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import PageTemplate from "~/components/_pagegen/PageTemplate";
-import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type } from "~/data/data";
+import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type } from "~/data/data";
 
 type Section = {
   id: string;
@@ -51,6 +51,12 @@ const DEFAULT_SECTION3_DATA: sanJuanSection3Type = {
   alt: ""
 };
 
+const DEFAULT_SECTION4_DATA: sanJuansection4Type = {
+  firstH3: "",
+  secondH3: "",
+  thirdH3: ""
+};
+
 export default function PageGeneratorRoute() {
   const [step, setStep] = useState<'options' | 'name' | 'preview'>('options');
   const [pageName, setPageName] = useState('');
@@ -59,6 +65,7 @@ export default function PageGeneratorRoute() {
   const [section1Data, setSection1Data] = useState<sanJuanSection1Type>(DEFAULT_SECTION1_DATA);
   const [section2Data, setSection2Data] = useState<sanJuansection2Type>(DEFAULT_SECTION2_DATA);
   const [section3Data, setSection3Data] = useState<sanJuanSection3Type>(DEFAULT_SECTION3_DATA);
+  const [section4Data, setSection4Data] = useState<sanJuansection4Type>(DEFAULT_SECTION4_DATA);
   const [indexSection5Data, setIndexSection5Data] = useState<IndexSection5Type>(DEFAULT_INDEX_SECTION5_DATA);
 
   const containerVariants = {
@@ -122,6 +129,13 @@ export default function PageGeneratorRoute() {
       images: prev.images.map((img, i) => 
         i === index ? { ...img, source: "" } : img
       )
+    }));
+  };
+
+  const handleSection4Update = (field: keyof sanJuansection4Type, value: string) => {
+    setSection4Data(prev => ({
+      ...prev,
+      [field]: value
     }));
   };
 
@@ -236,6 +250,8 @@ export default function PageGeneratorRoute() {
             section3Data={section3Data}
             onSection3ImageUpdate={handleSection3ImageUpdate}
             onSection3ImageRemove={handleSection3ImageRemove}
+            section4Data={section4Data}
+            onSection4Update={handleSection4Update}
           />
         </motion.div>
       )}

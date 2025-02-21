@@ -7,12 +7,13 @@ import EditableIndexSection5 from "./EditableIndexSection5";
 import EditableSanJuanSection1 from "./EditableSanJuanSection1";
 import EditableSanJuanSection2 from "./EditableSanJuanSection2";
 import EditableSanJuanSection3 from "./EditableSanJuanSection3";
+import EditableSanJuanSection4 from "./EditableSanJuanSection4";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type } from "~/data/data";
+import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type } from "~/data/data";
 
 export type PageTemplateProps = {
   status: 'active' | 'upcoming';
-  onStatusChange: (value: boolean) => void;
+  onStatusChange: (checked: boolean) => void;
   indexSection5Data: IndexSection5Type;
   onIndexSection5Update: (field: keyof IndexSection5Type, value: string) => void;
   section1Data: sanJuanSection1Type;
@@ -22,6 +23,8 @@ export type PageTemplateProps = {
   section3Data: sanJuanSection3Type;
   onSection3ImageUpdate: (index: number, file: File) => void;
   onSection3ImageRemove: (index: number) => void;
+  section4Data: sanJuansection4Type;
+  onSection4Update: (field: keyof sanJuansection4Type, value: string) => void;
 };
 
 const PageTemplate: React.FC<PageTemplateProps> = ({
@@ -36,6 +39,8 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   section3Data,
   onSection3ImageUpdate,
   onSection3ImageRemove,
+  section4Data,
+  onSection4Update
 }) => {
   const size = useWindowSize();
   const width = size.width ?? 0;
@@ -46,36 +51,24 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden gap-12 pt-[100px]">
       <div className="w-full flex justify-center px-4">
         <div className="w-full max-w-4xl flex items-center justify-end space-x-2">
-          <Switch id="page-status" checked={status === "active"} onCheckedChange={onStatusChange} />
+          <Switch checked={status === "active"} onChange={onStatusChange} className={`${status === "active" ? "bg-blue-900" : "bg-gray-200"} relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none`}>
+            <span className={`${status === "active" ? "translate-x-6" : "translate-x-1"} inline-block h-4 w-4 transform rounded-full bg-white transition-transform`} />
+          </Switch>
           <Label htmlFor="page-status">{status === "active" ? "Activo" : "Proximamente"}</Label>
         </div>
       </div>
 
-      <EditableIndexSection5
-        width={width}
-        data={indexSection5Data}
-        onUpdate={onIndexSection5Update}
-      />
-      
-      <EditableSanJuanSection1
-        width={width}
-        data={section1Data}
-        onUpdate={onSection1Update}
-      />
+      <div className="w-full flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
+        <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />
 
-      <EditableSanJuanSection2
-        width={width}
-        height={0}
-        SanJuanSection2Text={section2Data}
-        onTextUpdate={(field, value) => onSection2Update(field, typeof value === 'string' ? value : { file: value.file, preview: value.preview })}
-      />
+        <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={onSection1Update} />
 
-      <EditableSanJuanSection3
-        width={width}
-        data={section3Data}
-        onUpdate={onSection3ImageUpdate}
-        onRemove={onSection3ImageRemove}
-      />
+        <EditableSanJuanSection2 width={width} height={0} data={section2Data} onUpdate={onSection2Update} />
+
+        <EditableSanJuanSection3 width={width} data={section3Data} onImageUpdate={onSection3ImageUpdate} onImageRemove={onSection3ImageRemove} />
+
+        <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />
+      </div>
     </div>
   );
 };
