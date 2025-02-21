@@ -5,6 +5,7 @@ import { useState } from "react";
 import { PaymentModal } from "~/components/ui/PaymentModal";
 import PaymentOptions from "~/components/ui/paypalpaymentoptions";
 import { useBooking } from "~/context/BookingContext";
+import { useLanguageContext } from "~/providers/LanguageContext";
 
 interface BookingNavigationProps {
   currentStep: number;
@@ -17,7 +18,7 @@ interface BookingNavigationProps {
 
 export const BookingNavigation = ({ currentStep, onNext, onPrevious, onSubmit, isSubmitting, paypalClientId }: BookingNavigationProps) => {
   const isLastStep = currentStep === 4;
-
+  const { state } = useLanguageContext();
   const [isOpen, setIsOpen] = useState(false);
   const { formData } = useBooking();
 
@@ -33,21 +34,23 @@ export const BookingNavigation = ({ currentStep, onNext, onPrevious, onSubmit, i
     <div className="flex justify-between mt-8 pt-4 border-t">
       {currentStep > 1 ? (
         <Button variant="outline" onClick={onPrevious} className="flex items-center gap-2" disabled={isSubmitting}>
-          <span>Previous</span>
+          <span>{state.booking.navigation.previous}</span>
         </Button>
       ) : (
         <div /> // Empty div for spacing
       )}
       <Button onClick={isLastStep ? handleOpen : onNext} className="bg-primary hover:bg-primary/90 text-white" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-        <span>{isLastStep ? "Book Now" : "Next"}</span>
+        <span>{isLastStep ? state.booking.navigation.bookNow : state.booking.navigation.next}</span>
       </Button>
 
       <PaymentModal isOpen={isOpen} onClose={handleClose}>
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold">Complete Your Booking</h2>
-            <p className="text-muted-foreground mt-2">Your total amount: €{formData.partySize * 120}</p>
+            <h2 className="text-2xl font-semibold">{state.booking.navigation.completeBooking}</h2>
+            <p className="text-muted-foreground mt-2">
+              {state.booking.navigation.totalAmount} €{formData.partySize * 120}
+            </p>
           </div>
           <PaymentOptions />
         </div>

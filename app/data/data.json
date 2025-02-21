@@ -459,6 +459,15 @@
           "unpaid": "Unpaid"
         }
       }
+    },
+    "booking": {
+      "navigation": {
+        "previous": "Previous",
+        "next": "Next",
+        "bookNow": "Book Now",
+        "completeBooking": "Complete Your Booking",
+        "totalAmount": "Your total amount:"
+      }
     }
   },
   "es": {
@@ -920,6 +929,15 @@
           "paid": "Pagado",
           "unpaid": "No Pagado"
         }
+      }
+    },
+    "booking": {
+      "navigation": {
+        "previous": "Anterior",
+        "next": "Siguiente",
+        "bookNow": "Reservar Ahora",
+        "completeBooking": "Completar tu Reserva",
+        "totalAmount": "Importe total:"
       }
     }
   }
