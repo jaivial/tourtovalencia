@@ -13,7 +13,7 @@ import EditableSanJuanSection6 from "./EditableSanJuanSection6";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 import { PublishModal } from './PublishModal';
-import { usePublishModal } from './PageTemplate.hooks';
+import { usePublishModal, usePageCreation } from './PageTemplate.hooks';
 
 export type PageTemplateProps = {
   status: "active" | "upcoming";
@@ -38,10 +38,27 @@ export type PageTemplateProps = {
 
 const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, indexSection5Data, onIndexSection5Update, section1Data, onSection1Update, section2Data, onSection2Update, section3Data, onSection3ImageUpdate, onSection3ImageRemove, section4Data, onSection4Update, section5Data, onSection5Update, section6Data, onSection6Update, pageName }) => {
   const size = useWindowSize();
+  const { isModalOpen, openModal, closeModal } = usePublishModal();
+  const { handleCreatePage, isCreating, status: pageCreationStatus } = usePageCreation();
   const width = size.width ?? 0;
   const { state } = useLanguageContext();
   const indexSection5Text = state.index.indexSection5;
-  const { isModalOpen, openModal, closeModal } = usePublishModal();
+
+  const handleCreatePageClick = () => {
+    const pageContent = {
+      section1: section1Data,
+      section2: section2Data,
+      section3: section3Data,
+      section4: section4Data,
+      section5: section5Data,
+      section6: section6Data
+    };
+
+    handleCreatePage({
+      name: pageName,
+      content: pageContent
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -85,12 +102,15 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
         </div>
       </div>
 
-      <button
-        onClick={openModal}
-        className="fixed bottom-8 left-1/2 transform -translate-x-1/2 py-3 px-8 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-lg z-40"
-      >
-        Crear Página
-      </button>
+      <div className="flex justify-end gap-4 mt-8">
+        <button
+          onClick={handleCreatePageClick}
+          disabled={isCreating}
+          className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isCreating ? "Creando Página..." : "Crear Página"}
+        </button>
+      </div>
 
       <PublishModal
         isOpen={isModalOpen}

@@ -10,6 +10,19 @@ export interface Translation {
   lastUpdated: Date;
 }
 
+// Page interface for MongoDB
+export interface Page {
+  _id?: string;
+  slug: string;
+  name: string;
+  content: {
+    es: Record<string, string>;
+    en: Record<string, string>;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export async function ensureDbIndexes() {
   const db = await getDb();
   
@@ -33,5 +46,13 @@ export async function ensureDbIndexes() {
     { key: { language: 1 } },
     // Index for last update tracking
     { key: { lastUpdated: -1 } }
+  ]);
+
+  // Create indexes for pages collection
+  await db.collection("pages").createIndexes([
+    // Unique index for page slugs
+    { key: { slug: 1 }, unique: true },
+    // Index for quick listing by creation date
+    { key: { createdAt: -1 } }
   ]);
 }

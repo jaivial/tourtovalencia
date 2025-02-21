@@ -15,36 +15,38 @@
 
 ## 2. Database Operations
 ✅ Page Schema Definition
-	- [ ] Create `types/Page.ts` interface
-	- [ ] Define MongoDB schema in `utils/db.server`
-	- [ ] Add unique slug field validation
+	- [x] Create Page interface in `db.schema.server.ts`
+	- [x] Add MongoDB indexes
+	- [x] Add type-safe collection getter
 
 ✅ Insert Logic
-	- [ ] Create `api/create-page.ts` endpoint
-	- [ ] Handle Spanish/English translations
-	- [ ] Implement error handling
+	- [x] Create `page.server.ts` utilities
+	- [x] Implement slug generation
+	- [x] Add page creation function
+	- [x] Handle duplicate slugs
 
 ## 3. Dynamic Route Creation
 ✅ Route Template
-	- [ ] Create `routes/pages/$slug.tsx`
-	- [ ] Add loader for database fetch
-	- [ ] Implement fallback error boundary
+	- [x] Create `routes/pages/$slug.tsx`
+	- [x] Add loader for database fetch
+	- [x] Implement error boundary
+	- [x] Handle language switching
 
 ✅ Slug Generation
-	- [ ] Add slug formatting utility
-	- [ ] Handle special characters
-	- [ ] Validate uniqueness
+	- [x] Add slug formatting utility
+	- [x] Handle special characters
+	- [x] Validate uniqueness
 
 ## 4. Navigation Updates
 ✅ Dynamic Links
-	- [ ] Create `components/layout/DynamicNavLinks.tsx`
-	- [ ] Fetch pages from DB in loader
-	- [ ] Merge with existing San Juan link
+	- [x] Create `DynamicNavLinks` component
+	- [x] Add pages loader to root
+	- [x] Pass pages to Nav component
 
-✅ Language Switching
-	- [ ] Add language context provider
-	- [ ] Connect nav toggle to content
-	- [ ] Store preference in localStorage
+✅ Integration
+	- [x] Add to tours dropdown
+	- [x] Preserve San Juan link
+	- [x] Handle link clicks
 
 ## 5. Testing Phase
 ✅ Unit Tests
