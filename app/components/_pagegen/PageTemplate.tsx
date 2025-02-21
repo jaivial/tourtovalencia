@@ -72,7 +72,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
 
         {section2Data && <EditableSanJuanSection2 width={width} height={0} data={section2Data} onUpdate={onSection2Update} />}
 
-        {section3Data && <EditableSanJuanSection3 width={width} data={section3Data} onImageUpdate={onSection3ImageUpdate} onImageRemove={onSection3ImageRemove} />}
+        {section3Data && <EditableSanJuanSection3 width={width} data={section3Data} onUpdate={onSection3ImageUpdate} onRemove={onSection3ImageRemove} />}
 
         {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
 
