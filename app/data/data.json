@@ -529,6 +529,28 @@
         "people": "people",
         "priceCalculation": "Price calculation: {partySize} people × €120 per person",
         "paymentMessage": "Your booking will be confirmed after successful payment. Click \"Book Now\" to proceed to payment."
+      },
+      "payment": {
+        "buttons": {
+          "payNow": "Pay Now",
+          "processing": "Processing..."
+        },
+        "errors": {
+          "stripeInit": "Stripe has not been properly initialized",
+          "paymentFailed": "Payment failed. Please try again.",
+          "configError": "Payment system is not properly configured. Please contact support.",
+          "initError": "Unable to initialize payment. Please try again."
+        }
+      },
+      "paypalPayment": {
+        "title": "Choose a Payment Method",
+        "errors": {
+          "invalidAmount": "Invalid payment amount received from PayPal",
+          "noPaymentId": "No payment ID received from PayPal",
+          "processingError": "Error processing booking",
+          "captureError": "Payment capture failed",
+          "paypalError": "PayPal error"
+        }
       }
     }
   },
@@ -1062,6 +1084,28 @@
         "people": "personas",
         "priceCalculation": "Cálculo del precio: {partySize} personas × €120 por persona",
         "paymentMessage": "Tu reserva se confirmará después del pago exitoso. Haz clic en \"Reservar Ahora\" para proceder al pago."
+      },
+      "payment": {
+        "buttons": {
+          "payNow": "Pagar Ahora",
+          "processing": "Procesando..."
+        },
+        "errors": {
+          "stripeInit": "Stripe no se ha inicializado correctamente",
+          "paymentFailed": "El pago falló. Por favor, inténtalo de nuevo.",
+          "configError": "El sistema de pago no está configurado correctamente. Por favor, contacta con soporte.",
+          "initError": "No se pudo inicializar el pago. Por favor, inténtalo de nuevo."
+        }
+      },
+      "paypalPayment": {
+        "title": "Elige un Método de Pago",
+        "errors": {
+          "invalidAmount": "Cantidad de pago inválida recibida de PayPal",
+          "noPaymentId": "No se recibió ID de pago de PayPal",
+          "processingError": "Error al procesar la reserva",
+          "captureError": "Error al capturar el pago",
+          "paypalError": "Error de PayPal"
+        }
       }
     }
   }

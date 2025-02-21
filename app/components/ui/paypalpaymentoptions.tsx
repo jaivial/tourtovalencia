@@ -3,21 +3,24 @@ import { useNavigate } from "@remix-run/react";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import type { CreateOrderActions, OnApproveData, OnApproveActions, OrderResponseBody } from "@paypal/paypal-js";
 import { useBooking } from "~/context/BookingContext";
+import { useLanguageContext } from "~/providers/LanguageContext";
 
 const PaymentOptions = () => {
   const navigate = useNavigate();
   const states = useBooking();
+  const { state } = useLanguageContext();
+  const paypalText = state.booking.paypalPayment;
 
   const handlePaymentSuccess = async (details: OrderResponseBody) => {
     try {
       const amount = details.purchase_units?.[0]?.amount?.value;
       if (!amount) {
-        throw new Error("Invalid payment amount received from PayPal");
+        throw new Error(paypalText.errors.invalidAmount);
       }
 
       const paymentId = details.id;
       if (!paymentId) {
-        throw new Error("No payment ID received from PayPal");
+        throw new Error(paypalText.errors.noPaymentId);
       }
 
       // Create booking data
@@ -45,14 +48,14 @@ const PaymentOptions = () => {
         replace: true, // Use replace to prevent back navigation to payment page
       });
     } catch (error) {
-      console.error("Error processing booking:", error);
+      console.error(paypalText.errors.processingError, error);
       navigate("/book?error=payment-failed");
     }
   };
 
   return (
     <div className="p-12 mt-0">
-      <h1 className="text-xl font-bold mb-4 text-center">Choose a Payment Method</h1>
+      <h1 className="text-xl font-bold mb-4 text-center">{paypalText.title}</h1>
       <div className="space-y-4">
         <PayPalButtons
           style={{ layout: "vertical", color: "blue", shape: "pill", label: "paypal" }}
@@ -75,13 +78,13 @@ const PaymentOptions = () => {
                 const details = await actions.order.capture();
                 await handlePaymentSuccess(details);
               } catch (error) {
-                console.error("Payment capture failed:", error);
+                console.error(paypalText.errors.captureError, error);
                 navigate("/book?error=payment-failed");
               }
             }
           }}
           onError={(err) => {
-            console.error("PayPal error:", err);
+            console.error(paypalText.errors.paypalError, err);
             navigate("/book?error=payment-failed");
           }}
         />

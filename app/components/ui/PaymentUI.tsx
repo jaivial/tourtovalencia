@@ -17,9 +17,21 @@ interface PaymentFormProps {
   onSuccess: () => void;
   onError: (error: string) => void;
   isSubmitting: boolean;
+  paymentText: {
+    buttons: {
+      payNow: string;
+      processing: string;
+    };
+    errors: {
+      stripeInit: string;
+      paymentFailed: string;
+      configError: string;
+      initError: string;
+    };
+  };
 }
 
-const PaymentForm = ({ onSuccess, onError, isSubmitting }: PaymentFormProps) => {
+const PaymentForm = ({ onSuccess, onError, isSubmitting, paymentText }: PaymentFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -28,7 +40,7 @@ const PaymentForm = ({ onSuccess, onError, isSubmitting }: PaymentFormProps) => 
     e.preventDefault();
 
     if (!stripe || !elements) {
-      onError("Stripe has not been properly initialized");
+      onError(paymentText.errors.stripeInit);
       return;
     }
 
@@ -44,13 +56,13 @@ const PaymentForm = ({ onSuccess, onError, isSubmitting }: PaymentFormProps) => 
 
       if (error) {
         console.error("Payment error:", error);
-        onError(error.message || "An error occurred during payment");
+        onError(error.message || paymentText.errors.paymentFailed);
       } else {
         onSuccess();
       }
     } catch (error) {
       console.error("Payment error:", error);
-      onError("Payment failed. Please try again.");
+      onError(paymentText.errors.paymentFailed);
     } finally {
       setIsProcessing(false);
     }
@@ -67,10 +79,10 @@ const PaymentForm = ({ onSuccess, onError, isSubmitting }: PaymentFormProps) => 
         {isProcessing || isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Processing...
+            {paymentText.buttons.processing}
           </>
         ) : (
-          'Pay Now'
+          paymentText.buttons.payNow
         )}
       </Button>
     </form>
@@ -82,16 +94,28 @@ interface PaymentUIProps {
   onSuccess: () => void;
   onError: (error: string) => void;
   isSubmitting: boolean;
+  paymentText: {
+    buttons: {
+      payNow: string;
+      processing: string;
+    };
+    errors: {
+      stripeInit: string;
+      paymentFailed: string;
+      configError: string;
+      initError: string;
+    };
+  };
 }
 
-export const PaymentUI = ({ clientSecret, onSuccess, onError, isSubmitting }: PaymentUIProps) => {
+export const PaymentUI = ({ clientSecret, onSuccess, onError, isSubmitting, paymentText }: PaymentUIProps) => {
   if (!window.ENV?.STRIPE_PUBLIC_KEY) {
     console.error("Stripe publishable key is not set");
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Payment system is not properly configured. Please contact support.
+          {paymentText.errors.configError}
         </AlertDescription>
       </Alert>
     );
@@ -102,7 +126,7 @@ export const PaymentUI = ({ clientSecret, onSuccess, onError, isSubmitting }: Pa
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Unable to initialize payment. Please try again.
+          {paymentText.errors.initError}
         </AlertDescription>
       </Alert>
     );
@@ -122,6 +146,7 @@ export const PaymentUI = ({ clientSecret, onSuccess, onError, isSubmitting }: Pa
         onSuccess={onSuccess}
         onError={onError}
         isSubmitting={isSubmitting}
+        paymentText={paymentText}
       />
     </Elements>
   );
