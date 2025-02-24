@@ -61,6 +61,7 @@
     "react-flagpack": "^2.0.6",
     "resend": "^2.1.0",
     "rsuite": "^5.77.1",
+    "sharp": "^0.33.2",
     "stripe": "^17.6.0",
     "tailwind-merge": "^2.6.0"
   },
