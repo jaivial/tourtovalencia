@@ -12,8 +12,9 @@ import EditableSanJuanSection5 from "./EditableSanJuanSection5";
 import EditableSanJuanSection6 from "./EditableSanJuanSection6";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
-import { PublishModal } from './PublishModal';
-import { usePublishModal, usePageCreation } from './PageTemplate.hooks';
+import { PublishModal } from "./PublishModal";
+import { usePublishModal, usePageCreation } from "./PageTemplate.hooks";
+import { useEffect, useState } from "react";
 
 export type PageTemplateProps = {
   status: "active" | "upcoming";
@@ -43,6 +44,21 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
   const width = size.width ?? 0;
   const { state } = useLanguageContext();
   const indexSection5Text = state.index.indexSection5;
+  const [loadingMessage, setLoadingMessage] = useState("Creando página...");
+
+  useEffect(() => {
+    if (!isCreating) return;
+
+    const messages = ["Creando página...", "Subiendo imágenes...", "Traduciendo texto..."];
+    let currentIndex = 0;
+
+    const interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % messages.length;
+      setLoadingMessage(messages[currentIndex]);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isCreating]);
 
   const handleCreatePageClick = () => {
     const pageContent = {
@@ -52,13 +68,13 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
       section3: section3Data,
       section4: section4Data,
       section5: section5Data,
-      section6: section6Data
+      section6: section6Data,
     };
 
     handleCreatePage({
       name: pageName,
       content: pageContent,
-      status: status
+      status: status,
     });
   };
 
@@ -78,11 +94,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
               <Label htmlFor="status" className="text-sm font-medium text-gray-700">
                 {status === "active" ? "Activo" : "Proximamente"}
               </Label>
-              <Switch
-                id="status"
-                checked={status === "active"}
-                onCheckedChange={onStatusChange}
-              />
+              <Switch id="status" checked={status === "active"} onCheckedChange={onStatusChange} />
             </div>
           </div>
 
@@ -103,19 +115,21 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
           </div>
         </div>
       </div>
-
-      <div className="flex flex-col gap-4 mt-8">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
+      {isCreating && (
+        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-lg shadow-lg flex items-center gap-3">
+            <svg className="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span className="text-gray-700 font-medium">{loadingMessage}</span>
           </div>
-        )}
+        </div>
+      )}
+      <div className="flex flex-col gap-4 mt-8">
+        {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>}
         <div className="flex justify-end">
-          <button
-            onClick={handleCreatePageClick}
-            disabled={isCreating}
-            className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
+          <button onClick={handleCreatePageClick} disabled={isCreating} className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
             {isCreating && (
               <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -135,10 +149,10 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
         }}
         onCancel={closeModal}
         translations={{
-          title: 'Confirmar publicación',
-          description: '¿Seguro que todos los datos están correctos y quieres proceder a publicar la página?',
-          confirmText: 'Sí, publicar',
-          cancelText: 'Cancelar'
+          title: "Confirmar publicación",
+          description: "¿Seguro que todos los datos están correctos y quieres proceder a publicar la página?",
+          confirmText: "Sí, publicar",
+          cancelText: "Cancelar",
         }}
       />
     </div>
