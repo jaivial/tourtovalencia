@@ -7,8 +7,8 @@ export const loader = async () => {
   return json({
     user: {
       id: "1",
-      name: "Admin"
-    }
+      name: "Admin",
+    },
   });
 };
 
@@ -23,15 +23,12 @@ export default function AdminDashboardRoute() {
     title: "Olga Travel Admin",
     bookings: "Bookings",
     logout: "Logout",
-    pageGenerator: "Generador de páginas"
+    pageGenerator: "Generador de páginas",
   };
 
   return (
     <AuthProvider {...data}>
-      <AdminDashboardLayout
-        onLogout={handleLogout}
-        strings={strings}
-      />
+      <AdminDashboardLayout onLogout={handleLogout} strings={strings} />
     </AuthProvider>
   );
 }

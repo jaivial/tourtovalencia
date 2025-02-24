@@ -11,7 +11,7 @@ export function MobileNav({ children }: MobileNavProps) {
 
   return (
     <div className="min-[700px]:hidden">
-      <button onClick={() => setIsOpen(!isOpen)} className="fixed top-4 left-4 z-50 flex items-center justify-center w-10 h-10 bg-primary text-white rounded-r-full">
+      <button onClick={() => setIsOpen(!isOpen)} className="fixed top-4 left-0 z-50 flex items-center justify-center w-10 h-10 bg-primary text-white rounded-r-full">
         <Menu className={cn("h-6 w-6 transition-transform", isOpen && "rotate-90")} />
       </button>
 
