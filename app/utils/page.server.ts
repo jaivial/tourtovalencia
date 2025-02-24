@@ -63,17 +63,18 @@ async function optimizeImage(base64Data: string): Promise<string> {
   }
 }
 
-function processContent(content: any): any {
+async function processContent(content: any): Promise<any> {
   if (!content) return content;
 
   // If it's an array, process each item
   if (Array.isArray(content)) {
-    return content.map((item) => processContent(item));
+    return Promise.all(content.map((item) => processContent(item)));
   }
 
   // If it's an object, process each property
   if (typeof content === "object") {
     const processed: any = {};
+
     for (const [key, value] of Object.entries(content)) {
       // Skip null or undefined values
       if (value == null) continue;
@@ -81,18 +82,22 @@ function processContent(content: any): any {
       // Handle base64 images
       if (typeof value === "string" && value.startsWith("data:image")) {
         const size = Buffer.from(value.split(",")[1], "base64").length;
-        if (size > MAX_IMAGE_SIZE) {
-          // Instead of throwing an error, optimize the image
-          processed[key] = optimizeImage(value);
-        } else {
-          // Even if under size limit, still convert to WebP for consistency
-          processed[key] = optimizeImage(value);
-        }
+        processed[key] = size > MAX_IMAGE_SIZE || true ? await optimizeImage(value) : value;
+      } else if (typeof value === "string" && value.trim() !== "") {
+        // For text content, translate to English
+        processed[key] = await translateText(value);
+      } else if (typeof value === "object") {
+        processed[key] = await processContent(value);
       } else {
-        processed[key] = processContent(value);
+        processed[key] = value;
       }
     }
     return processed;
+  }
+
+  // If it's a non-empty string and not an image, translate it
+  if (typeof content === "string" && content.trim() !== "" && !content.startsWith("data:image")) {
+    return await translateText(content);
   }
 
   return content;
@@ -182,47 +187,33 @@ async function translateContent(content: Record<string, any>): Promise<Record<st
 }
 
 export async function createPage(name: string, content: Record<string, any>, status: "active" | "upcoming"): Promise<Page> {
-  const pagesCollection = await getPagesCollection();
+  const collection = await getPagesCollection();
+  const slug = generateSlug(name);
 
-  // Generate initial slug
-  let slug = generateSlug(name);
+  // Start with the original Spanish content
+  const bilingual = {
+    es: content,
+    en: {},
+  };
 
-  // Check if slug exists and append number if needed
-  let counter = 1;
-  while (await pagesCollection.findOne({ slug })) {
-    slug = `${generateSlug(name)}-${counter}`;
-    counter++;
-  }
+  // Process and translate the content
+  const processedContent = await processContent(content);
 
-  try {
-    // Process the Spanish content
-    const processedContentEs = processContent(content.es || content);
+  // Create the final page object
+  const page: Page = {
+    name,
+    slug,
+    content: {
+      es: content, // Original Spanish content
+      en: processedContent, // Translated English content
+    },
+    status,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
-    // Translate Spanish content to English using OpenRouter with free model
-    const processedContentEn = await translateContent(processedContentEs);
-
-    const processedContent = {
-      es: processedContentEs,
-      en: processedContentEn,
-    };
-
-    const page: Omit<Page, "_id"> = {
-      slug,
-      name,
-      content: processedContent,
-      status,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const result = await pagesCollection.insertOne(page as Page);
-    return { ...page, _id: result.insertedId } as Page;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Error creating page: ${error.message}`);
-    }
-    throw error;
-  }
+  await collection.insertOne(page);
+  return page;
 }
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {
