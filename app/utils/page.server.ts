@@ -63,12 +63,12 @@ async function optimizeImage(base64Data: string): Promise<string> {
   }
 }
 
-async function processContent(content: any): Promise<any> {
+async function processContent(content: any, translate: boolean = true): Promise<any> {
   if (!content) return content;
 
   // If it's an array, process each item
   if (Array.isArray(content)) {
-    return Promise.all(content.map((item) => processContent(item)));
+    return Promise.all(content.map((item) => processContent(item, translate)));
   }
 
   // If it's an object, process each property
@@ -84,10 +84,10 @@ async function processContent(content: any): Promise<any> {
         const size = Buffer.from(value.split(",")[1], "base64").length;
         processed[key] = size > MAX_IMAGE_SIZE || true ? await optimizeImage(value) : value;
       } else if (typeof value === "string" && value.trim() !== "") {
-        // For text content, translate to English
-        processed[key] = await translateText(value);
+        // For text content, only translate if translate flag is true
+        processed[key] = translate ? await translateText(value) : value;
       } else if (typeof value === "object") {
-        processed[key] = await processContent(value);
+        processed[key] = await processContent(value, translate);
       } else {
         processed[key] = value;
       }
@@ -95,9 +95,9 @@ async function processContent(content: any): Promise<any> {
     return processed;
   }
 
-  // If it's a non-empty string and not an image, translate it
+  // If it's a non-empty string and not an image, translate it if translate flag is true
   if (typeof content === "string" && content.trim() !== "" && !content.startsWith("data:image")) {
-    return await translateText(content);
+    return translate ? await translateText(content) : content;
   }
 
   return content;
@@ -105,56 +105,70 @@ async function processContent(content: any): Promise<any> {
 
 // Helper function to translate text using OpenRouter API with a free model
 async function translateText(text: string, retryCount = 0): Promise<string> {
-  if (!text.trim()) return text;
+  // Skip translation for empty strings or image paths
+  if (!text.trim() || text.startsWith("/")) return text;
+
+  // Skip translation for "Gallery image" text
+  if (text.toLowerCase() === "gallery image") return text;
 
   try {
+    console.log("Translating text:", text);
     const response = await axios.post(
       OPENROUTER_API_URL,
       {
-        model: "deepseek/deepseek-chat:free",
+        model: "google/gemini-2.0-flash-001",
         messages: [
           {
             role: "system",
-            content: "You are a translator. Translate Spanish to English. Output only the translation.",
+            content: "You are a translator. Translate the following Spanish text to English. Respond only with the English translation, no additional text.",
           },
           {
             role: "user",
-            content: text,
+            content: `Translate to English: "${text}"`,
           },
         ],
-        temperature: 0.1, // Even lower temperature for direct translations
-        max_tokens: 50, // Reduced tokens to encourage brevity
+        temperature: 0.1,
+        max_tokens: 150,
       },
       {
         headers: {
           Authorization: `Bearer ${OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "your-site-url", // Replace with your site URL
-          "X-Title": "Page Creator",
+          "HTTP-Referer": `${process.env.SITE_URL || "http://localhost:3000"}`,
+          "X-Title": "Viajes Olga Translator",
         },
       }
     );
 
-    return response.data.choices[0].message.content.trim();
+    // Add detailed logging for debugging
+    console.log("API Response:", JSON.stringify(response.data, null, 2));
+
+    // Safely access the response data
+    if (response.data?.choices?.[0]?.message?.content) {
+      const translation = response.data.choices[0].message.content.trim();
+      console.log("Translated text:", translation);
+      return translation;
+    } else {
+      console.error("Unexpected API response format:", response.data);
+      return text;
+    }
   } catch (error: any) {
+    console.error("Translation error details:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+      stack: error.stack,
+    });
+
     if (error.response?.status === 429 && retryCount < 3) {
-      // Rate limit hit, wait and retry
+      console.log(`Rate limit hit, retrying in ${retryCount + 1} seconds...`);
       await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1)));
       return translateText(text, retryCount + 1);
     }
-    console.error("Translation error:", error);
-    return text; // Fallback to original text
+
+    console.error("Translation failed, returning original text");
+    return text;
   }
-}
-
-// Helper function to check if a string is image-related
-function isImageRelatedString(str: string): boolean {
-  // Check for common image extensions
-  const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i;
-  // Check for image-related keywords
-  const imageKeywords = /(image|photo|picture|preview|thumbnail|icon)/i;
-
-  return imageExtensions.test(str) || imageKeywords.test(str);
 }
 
 // Helper function to recursively translate content
@@ -167,45 +181,68 @@ async function translateContent(content: Record<string, any>): Promise<Record<st
       continue;
     }
 
-    if (Array.isArray(value)) {
-      translated[key] = await Promise.all(value.map(async (item) => (typeof item === "object" ? await translateContent(item) : item)));
-    } else if (typeof value === "object") {
-      translated[key] = await translateContent(value);
-    } else if (typeof value === "string") {
-      // Skip translation for image-related strings
-      if (isImageRelatedString(value) || value.startsWith("data:image")) {
-        translated[key] = value;
+    try {
+      if (Array.isArray(value)) {
+        translated[key] = await Promise.all(
+          value.map(async (item) => {
+            if (typeof item === "object" && item !== null) {
+              return await translateContent(item);
+            } else if (typeof item === "string") {
+              return isImageRelatedString(item) ? item : await translateText(item);
+            }
+            return item;
+          })
+        );
+      } else if (typeof value === "object") {
+        translated[key] = await translateContent(value);
+      } else if (typeof value === "string") {
+        translated[key] = isImageRelatedString(value) || value.startsWith("data:image") ? value : await translateText(value);
       } else {
-        translated[key] = await translateText(value);
+        translated[key] = value;
       }
-    } else {
-      translated[key] = value;
+    } catch (error) {
+      console.error(`Error translating key "${key}":`, error);
+      translated[key] = value; // Fallback to original value on error
     }
   }
 
   return translated;
 }
 
+// Helper function to check if a string is image-related
+function isImageRelatedString(str: string): boolean {
+  // Check for common image extensions
+  const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i;
+  // Check for image-related keywords
+  const imageKeywords = /(image|photo|picture|preview|thumbnail|icon)/i;
+
+  return imageExtensions.test(str) || imageKeywords.test(str);
+}
+
 export async function createPage(name: string, content: Record<string, any>, status: "active" | "upcoming"): Promise<Page> {
   const collection = await getPagesCollection();
   const slug = generateSlug(name);
 
-  // Start with the original Spanish content
-  const bilingual = {
-    es: content,
-    en: {},
-  };
+  // Process the Spanish content (only optimize images, no translation)
+  console.log("Processing Spanish content...");
+  const processedSpanishContent = await processContent(content, false);
 
-  // Process and translate the content
-  const processedContent = await processContent(content);
+  // Create English content by translating a copy of the Spanish content
+  console.log("Translating content to English...");
+  const englishContent = await translateContent({ ...processedSpanishContent });
 
-  // Create the final page object
+  // Verify we have different content for each language
+  console.log("Verifying translations...");
+  console.log("Spanish content sample:", JSON.stringify(processedSpanishContent).slice(0, 100));
+  console.log("English content sample:", JSON.stringify(englishContent).slice(0, 100));
+
+  // Create the final page object with both language versions
   const page: Page = {
     name,
     slug,
     content: {
-      es: content, // Original Spanish content
-      en: processedContent, // Translated English content
+      es: processedSpanishContent,
+      en: englishContent,
     },
     status,
     createdAt: new Date(),

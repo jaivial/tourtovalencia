@@ -1,0 +1,222 @@
+{
+    "_id": {
+        "$oid": "67bcde3b8d3fee658c33d69f"
+    },
+    "name": "xocas",
+    "slug": "xocas",
+    "content": {
+        "es": {
+            "indexSection5": {
+                "firstH3": "Mi nombre es Jaime y soy un aventurero",
+                "secondH3": "Vente de aventuras conmigo"
+            },
+            "section1": {
+                "firstH3": "",
+                "firstSquareH3": "",
+                "firstSquareP": "",
+                "secondSquareH3": "",
+                "secondSquareP": "",
+                "thirdSquareH3": "",
+                "thirdSquareP": "",
+                "button": "",
+                "backgroundImage": {
+                    "preview": "/olgaphoto3.jpeg"
+                }
+            },
+            "section2": {
+                "firstH3": "",
+                "secondH3": "",
+                "thirdH3": "",
+                "sectionImage": {
+                    "preview": "/olgaphoto3.jpeg"
+                }
+            },
+            "section3": {
+                "images": [
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    }
+                ],
+                "source": "",
+                "alt": ""
+            },
+            "section4": {
+                "firstH3": "¿Qué incluye la excursión en barco en San Juan?",
+                "secondH3": "Excursión de 6 horas",
+                "thirdH3": "Salida desde Valencia"
+            },
+            "section5": {
+                "firstH3": "¿Qué haremos en San Juan?",
+                "secondH3": "Nos bañaremos en las aguas cristalinas de la playa de San Juan",
+                "thirdH3": "Disfrutaremos de un día de playa y relax",
+                "fourthH3": "Podremos practicar snorkel y ver los peces",
+                "fifthH3": "Tendremos tiempo libre para explorar el pueblo"
+            },
+            "section6": {
+                "cardTitle": "Información importante",
+                "cardDescription": "Todo lo que necesitas saber sobre la excursión",
+                "firstH4": "Qué incluye",
+                "list": [
+                    {
+                        "li": "Transporte en barco",
+                        "index": 0
+                    },
+                    {
+                        "li": "Guía experto",
+                        "index": 1
+                    },
+                    {
+                        "li": "Equipo de snorkel",
+                        "index": 2
+                    },
+                    {
+                        "li": "Seguro de viaje",
+                        "index": 3
+                    }
+                ],
+                "secondH4": "Precio",
+                "secondH4span": "50€ por persona",
+                "button": "Reservar ahora"
+            }
+        },
+        "en": {
+            "indexSection5": {
+                "firstH3": "My name is Jaime and I am an adventurer.",
+                "secondH3": "Come on an adventure with me."
+            },
+            "section1": {
+                "firstH3": "",
+                "firstSquareH3": "",
+                "firstSquareP": "",
+                "secondSquareH3": "",
+                "secondSquareP": "",
+                "thirdSquareH3": "",
+                "thirdSquareP": "",
+                "button": "",
+                "backgroundImage": {
+                    "preview": "/olgaphoto3.jpeg"
+                }
+            },
+            "section2": {
+                "firstH3": "",
+                "secondH3": "",
+                "thirdH3": "",
+                "sectionImage": {
+                    "preview": "/olgaphoto3.jpeg"
+                }
+            },
+            "section3": {
+                "images": [
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    },
+                    {
+                        "source": "",
+                        "alt": "Gallery image"
+                    }
+                ],
+                "source": "",
+                "alt": ""
+            },
+            "section4": {
+                "firstH3": "What does the boat tour in San Juan include?",
+                "secondH3": "6-hour excursion",
+                "thirdH3": "Departure from Valencia"
+            },
+            "section5": {
+                "firstH3": "What will we do in San Juan?",
+                "secondH3": "We will bathe in the crystal-clear waters of San Juan beach.",
+                "thirdH3": "We will enjoy a day at the beach and relaxation.",
+                "fourthH3": "We will be able to practice snorkeling and see the fish.",
+                "fifthH3": "We will have free time to explore the town."
+            },
+            "section6": {
+                "cardTitle": "Información importante",
+                "cardDescription": "Todo lo que necesitas saber sobre la excursión",
+                "firstH4": "Qué incluye",
+                "list": [
+                    {
+                        "li": "Transporte en barco",
+                        "index": 0
+                    },
+                    {
+                        "li": "Guía experto",
+                        "index": 1
+                    },
+                    {
+                        "li": "Equipo de snorkel",
+                        "index": 2
+                    },
+                    {
+                        "li": "Seguro de viaje",
+                        "index": 3
+                    }
+                ],
+                "secondH4": "Precio",
+                "secondH4span": "50€ por persona",
+                "button": "Reservar ahora"
+            }
+        }
+    },
+    "status": "active",
+    "createdAt": {
+        "$date": "2025-02-24T21:01:47.503Z"
+    },
+    "updatedAt": {
+        "$date": "2025-02-24T21:01:47.503Z"
+    }
+}
