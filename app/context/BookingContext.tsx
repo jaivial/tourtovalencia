@@ -1,7 +1,6 @@
 import { createContext, useContext, useState } from "react";
-import { useBookingStates } from "~/hooks/book.hooks";
-import type { DateAvailability } from "~/models/bookingAvailability.server";
 import type { BookingFormData } from "~/hooks/book.hooks";
+import type { Tour } from "~/routes/book";
 
 export interface BookingContextState {
   currentStep: number;
@@ -27,6 +26,8 @@ export interface BookingContextState {
     gmailUser: string;
     gmailAppPassword: string;
   };
+  tours: Tour[];
+  selectedTour: Tour | null;
   setCurrentStep: (step: number) => void;
   setFormData: (data: Partial<BookingFormData>) => void;
   setErrors: (errors: Partial<Record<keyof BookingFormData, string>>) => void;
@@ -48,6 +49,7 @@ export interface BookingContextState {
     gmailUser: string;
     gmailAppPassword: string;
   } | undefined) => void;
+  setSelectedTour: (tour: Tour | null) => void;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -72,6 +74,7 @@ interface BookingProviderProps {
       gmailUser: string;
       gmailAppPassword: string;
     };
+    tours: Tour[];
   };
 }
 
@@ -85,6 +88,7 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
     email: "",
     emailConfirm: "",
     phoneNumber: "",
+    tourSlug: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
   const [selectedDateAvailability, setSelectedDateAvailability] = useState(initialState.selectedDateAvailability);
@@ -94,6 +98,7 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(initialState.serverError || null);
   const [emailConfig, setEmailConfig] = useState(initialState.emailConfig);
+  const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
 
   const handleSetFormData = (data: Partial<BookingFormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -118,6 +123,8 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
         paymentIntentId,
         paypalClientId: initialState.paypalClientId,
         emailConfig,
+        tours: initialState.tours,
+        selectedTour,
         setCurrentStep,
         setFormData: handleSetFormData,
         setErrors,
@@ -128,6 +135,7 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
         setPaymentIntentId,
         setServerError,
         setEmailConfig,
+        setSelectedTour,
         handleInputChange,
       }}
     >

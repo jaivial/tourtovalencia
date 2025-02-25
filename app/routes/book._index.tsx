@@ -9,6 +9,8 @@ import { addMonths } from "date-fns";
 import type { Booking } from "~/types/booking";
 import { useEffect } from "react";
 import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+import type { Tour } from "./book";
+import { getDb } from "~/utils/db.server";
 
 export type LoaderData = {
   availableDates: Array<{
@@ -27,6 +29,7 @@ export type LoaderData = {
     gmailUser: string;
     gmailAppPassword: string;
   };
+  tours: Tour[];
 };
 
 export type ActionData = {
@@ -63,6 +66,17 @@ export const loader: LoaderFunction = async ({ request }) => {
 
     const paypalClientId = process.env.PAYPAL_CLIENT_ID;
 
+    // Get tours from the database
+    const db = await getDb();
+    const tours = await db.collection("pages").find({ template: "tour" }).toArray();
+    
+    const formattedTours = tours.map(tour => ({
+      _id: tour._id.toString(),
+      slug: tour.slug,
+      name: tour.name,
+      content: tour.content
+    }));
+
     return json<LoaderData>({
       availableDates,
       selectedDateAvailability,
@@ -71,10 +85,11 @@ export const loader: LoaderFunction = async ({ request }) => {
         gmailUser,
         gmailAppPassword,
       },
+      tours: formattedTours,
     });
   } catch (error) {
     console.error("Error loading booking data:", error);
-    return json<LoaderData>({ availableDates: [], error: "Failed to load available dates" });
+    return json<LoaderData>({ availableDates: [], tours: [], error: "Failed to load available dates" });
   }
 };
 
@@ -121,7 +136,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function BookIndex() {
-  const { availableDates, selectedDateAvailability, paypalClientId, emailConfig } = useLoaderData<typeof loader>();
+  const { availableDates, selectedDateAvailability, paypalClientId, emailConfig, tours } = useLoaderData<typeof loader>();
 
   return (
     <BookingProvider
@@ -131,6 +146,7 @@ export default function BookIndex() {
         serverError: null,
         paypalClientId,
         emailConfig,
+        tours,
       }}
     >
       <div className="container mx-auto px-4 py-8">

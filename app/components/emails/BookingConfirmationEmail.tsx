@@ -15,7 +15,7 @@ interface BookingConfirmationEmailProps {
 }
 
 export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailProps) => {
-  const previewText = `Confirmación de reserva para la Excursión a Medina Azahara`;
+  const previewText = `Confirmación de reserva para ${booking.tourName || 'la Excursión a Medina Azahara'}`;
   const bookingDate = new Date(booking.date);
 
   return (
@@ -32,10 +32,15 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
             </Text>
             
             <Text style={text}>
-              ¡Gracias por reservar tu excursión a Medina Azahara! A continuación encontrarás los detalles de tu reserva:
+              ¡Gracias por reservar tu excursión{booking.tourName ? ` a ${booking.tourName}` : ' a Medina Azahara'}! A continuación encontrarás los detalles de tu reserva:
             </Text>
 
             <Section style={detailsSection}>
+              {booking.tourName && (
+                <Text style={detailText}>
+                  <strong>Tour:</strong> {booking.tourName}
+                </Text>
+              )}
               <Text style={detailText}>
                 <strong>Fecha:</strong> {bookingDate.toLocaleDateString('es-ES', {
                   weekday: 'long',

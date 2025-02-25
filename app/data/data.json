@@ -506,11 +506,13 @@
         "email": "Email",
         "emailConfirm": "Confirm Email",
         "phoneNumber": "Phone Number",
+        "tourSelector": "Select Tour",
         "placeholders": {
           "fullName": "Enter your full name",
           "email": "Enter your email",
           "emailConfirm": "Confirm your email",
-          "phoneNumber": "Enter your phone number"
+          "phoneNumber": "Enter your phone number",
+          "tourSelector": "Choose a tour experience"
         }
       },
       "bookingStepThree": {
@@ -1059,13 +1061,15 @@
       "bookingStepOne": {
         "fullName": "Nombre Completo",
         "email": "Correo Electrónico",
-        "emailConfirm": "Confirmar Correo",
+        "emailConfirm": "Confirmar Correo Electrónico",
         "phoneNumber": "Número de Teléfono",
+        "tourSelector": "Seleccionar Tour",
         "placeholders": {
-          "fullName": "Introduce tu nombre completo",
-          "email": "Introduce tu correo electrónico",
-          "emailConfirm": "Confirma tu correo electrónico",
-          "phoneNumber": "Introduce tu número de teléfono"
+          "fullName": "Ingrese su nombre completo",
+          "email": "Ingrese su correo electrónico",
+          "emailConfirm": "Confirme su correo electrónico",
+          "phoneNumber": "Ingrese su número de teléfono",
+          "tourSelector": "Elija una experiencia de tour"
         }
       },
       "bookingStepThree": {

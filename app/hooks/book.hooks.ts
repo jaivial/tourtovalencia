@@ -12,6 +12,7 @@ export interface BookingFormData {
   email: string;
   emailConfirm: string;
   phoneNumber: string;
+  tourSlug: string;
 }
 
 export type BookingStates = Omit<BookingContextState, "setCurrentStep" | "setFormData" | "setErrors" | "setSelectedDateAvailability" | "setIsSubmitting" | "setIsSuccess" | "setPaymentClientSecret" | "setPaymentIntentId" | "setServerError">;
@@ -53,6 +54,7 @@ export function useBookingStates(initialState?: {
     email: "",
     emailConfirm: "",
     phoneNumber: "",
+    tourSlug: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
   const [serverError, setServerError] = useState<string | null>(initialState?.serverError || null);

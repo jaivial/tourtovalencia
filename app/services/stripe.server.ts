@@ -71,7 +71,26 @@ export async function createCheckoutSession(booking: BookingFormData, baseUrl: s
     throw new Error(`Invalid base URL provided: ${baseUrl}`);
   }
 
-  const totalAmount = booking.partySize * 0.5 * 100; // 0.5 EUR converted to cents
+  // Get tour information from the database if tourSlug is provided
+  let tourName = "Excursión a Cuevas de San Jose";
+  let tourPrice = 0.5; // Default price in EUR
+  
+  if (booking.tourSlug) {
+    try {
+      const db = await import("~/utils/db.server").then(module => module.getDb());
+      const tour = await db.collection("pages").findOne({ slug: booking.tourSlug, template: "tour" });
+      
+      if (tour) {
+        tourName = tour.content.en.title;
+        tourPrice = tour.content.en.price || tourPrice;
+      }
+    } catch (error) {
+      console.error("Error fetching tour information:", error);
+      // Continue with default values if there's an error
+    }
+  }
+
+  const totalAmount = booking.partySize * tourPrice * 100; // Convert to cents
 
   try {
     // Ensure the date is a string when sending to Stripe
@@ -88,10 +107,10 @@ export async function createCheckoutSession(booking: BookingFormData, baseUrl: s
           price_data: {
             currency: "eur",
             product_data: {
-              name: "Excursión a Cuevas de San Jose",
+              name: tourName,
               description: `Reserva para ${booking.partySize} ${booking.partySize === 1 ? "persona" : "personas"} el ${new Date(date).toLocaleDateString("es-ES")}`,
             },
-            unit_amount: totalAmount,
+            unit_amount: Math.round(totalAmount), // Ensure it's an integer
           },
           quantity: 1,
         },
@@ -106,6 +125,8 @@ export async function createCheckoutSession(booking: BookingFormData, baseUrl: s
         customerEmail: booking.email,
         phoneNumber: booking.phoneNumber || "",
         partySize: booking.partySize.toString(),
+        tourSlug: booking.tourSlug || "",
+        tourName: tourName,
       },
       customer_email: booking.email,
     });

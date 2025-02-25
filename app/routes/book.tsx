@@ -1,5 +1,6 @@
-import { json, type ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { useNavigation, Outlet, useNavigate } from "@remix-run/react";
+import { json } from "@remix-run/node";
+import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
+import { useNavigation, Outlet } from "@remix-run/react";
 import { BookingLoading } from "~/components/_book/BookingLoading";
 import { retrieveCheckoutSession } from "~/services/stripe.server";
 import { createBooking } from "~/services/booking.server";
@@ -7,6 +8,7 @@ import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
 import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
 import type { Booking } from "~/types/booking";
+import { getDb } from "~/utils/db.server";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Book Your Experience" }, { name: "description", content: "Book your unique dining experience with us" }];
@@ -17,6 +19,43 @@ export type ActionData = {
   error?: string;
   booking?: Booking;
 };
+
+export type Tour = {
+  _id: string;
+  slug: string;
+  name?: string;
+  content: {
+    en: {
+      title: string;
+      price: number;
+      [key: string]: string | number | boolean | object;
+    };
+    es: {
+      title: string;
+      price: number;
+      [key: string]: string | number | boolean | object;
+    };
+  };
+};
+
+export async function loader() {
+  try {
+    const db = await getDb();
+    const tours = await db.collection("pages").find({ template: "tour" }).toArray();
+    
+    return json({ 
+      tours: tours.map(tour => ({
+        _id: tour._id.toString(),
+        slug: tour.slug,
+        name: tour.name,
+        content: tour.content
+      }))
+    });
+  } catch (error) {
+    console.error("Error loading tours:", error);
+    return json({ tours: [] });
+  }
+}
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -38,11 +77,12 @@ export async function action({ request }: ActionFunctionArgs) {
         date: session.metadata?.date || "",
         time: session.metadata?.time || "",
         partySize: parseInt(session.metadata?.partySize || "1", 10),
-        paymentId: session.id,
+        paymentIntentId: session.id,
         amount: session.amount_total || 0,
         phoneNumber: session.metadata?.phoneNumber || "",
-        status: "confirmed",
-        paid: true,
+        status: "confirmed" as const,
+        tourSlug: session.metadata?.tourSlug || "",
+        tourName: session.metadata?.tourName || "",
       };
 
       const newBooking = await createBooking(bookingData, session.id);

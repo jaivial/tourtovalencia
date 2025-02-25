@@ -31,6 +31,8 @@ export async function action({ request }: ActionFunctionArgs) {
       paymentStatus: "paid",
       totalAmount: bookingData.amount / 100, // Convert from cents to euros
       phoneNumber: bookingData.phoneNumber,
+      tourSlug: bookingData.tourSlug || "",
+      tourName: bookingData.tourName || "",
     };
 
     await bookingsCollection.insertOne(bookingRecord);
@@ -38,18 +40,18 @@ export async function action({ request }: ActionFunctionArgs) {
     // Send confirmation email to customer
     await sendEmail({
       to: bookingData.email,
-      subject: "Confirmación de Reserva - Tour Tour Valencia",
+      subject: "Confirmación de Reserva - Tour Valencia",
       component: BookingConfirmationEmail({ booking: bookingData }),
     });
 
     // Send admin notification
     await sendEmail({
-      to: "jaimebillanueba99@gmail.com",
+      to: process.env.ADMIN_EMAIL || "jaimebillanueba99@gmail.com",
       subject: "Nueva Reserva Recibida",
       component: BookingAdminEmail({ booking: bookingData }),
     });
 
-    return json({ success: true });
+    return json({ success: true, booking: bookingData });
   } catch (error) {
     console.error("Error processing booking:", error);
     return json({ success: false, error: "Failed to process booking" });

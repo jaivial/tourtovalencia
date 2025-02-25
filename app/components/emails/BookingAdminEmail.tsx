@@ -36,6 +36,11 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
             <Text style={text}>
               <strong>Email:</strong> {booking.email}
             </Text>
+            {booking.tourName && (
+              <Text style={text}>
+                <strong>Tour:</strong> {booking.tourName}
+              </Text>
+            )}
             <Text style={text}>
               <strong>Fecha:</strong>{" "}
               {new Date(booking.date).toLocaleDateString("es-ES", {
@@ -52,7 +57,10 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
               <strong>Total Pagado:</strong> €{(booking.amount / 100).toFixed(2)}
             </Text>
             <Text style={text}>
-              <strong>ID de Pago:</strong> {booking.paymentId}
+              <strong>ID de Pago:</strong> {booking.paymentIntentId}
+            </Text>
+            <Text style={text}>
+              <strong>Teléfono:</strong> {booking.phoneNumber}
             </Text>
           </Section>
         </Container>
