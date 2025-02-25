@@ -4,6 +4,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import PageTemplate from "~/components/_pagegen/PageTemplate";
 import { usePageGenerator } from "./admin.dashboard.pagegen.hooks";
+import { ArrowLeftIcon } from "lucide-react";
 
 export default function PageGeneratorRoute() {
   const {
@@ -62,11 +63,11 @@ export default function PageGeneratorRoute() {
         </motion.div>
       ) : (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full">
-          <div className="flex justify-between items-center mb-6">
-            <Button onClick={handleBack} variant="outline">
+          <div className="flex justify-start items-center mb-6 px-8 mt-8">
+            <Button onClick={handleBack} variant="outline" className="flex items-center gap-2">
+              <ArrowLeftIcon className="h-4 w-4" />
               Atrás
             </Button>
-            <div className="w-[100px]" /> {/* Spacer for alignment */}
           </div>
 
           <div className="w-full">
