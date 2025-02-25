@@ -115,6 +115,17 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
 
           {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} />}
 
+        {timelineData && onTimelineUpdate && (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-2xl font-bold mb-6">Línea de Tiempo</h2>
+            <EditableTimelineFeature 
+              timelineData={timelineData}
+              onTimelineUpdate={onTimelineUpdate}
+            />
+          </div>
+        )}
+
+
           {section6Data && <EditableSanJuanSection6 width={width} data={section6Data} onUpdate={onSection6Update} />}
         </div>
       </div>
@@ -161,17 +172,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
         }}
       />
 
-      <div className="grid grid-cols-1 gap-8 mb-8">
-        {timelineData && onTimelineUpdate && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-2xl font-bold mb-6">Línea de Tiempo</h2>
-            <EditableTimelineFeature 
-              timelineData={timelineData}
-              onTimelineUpdate={onTimelineUpdate}
-            />
-          </div>
-        )}
-      </div>
+     
     </div>
   );
 };

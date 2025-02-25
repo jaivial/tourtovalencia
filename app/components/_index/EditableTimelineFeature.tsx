@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { TimelineUI } from "./TimelineUI";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
-import { PlusIcon, TrashIcon } from "lucide-react";
-import { Label } from "../ui/label";
+import { motion } from "framer-motion";
+import { MutableRefObject } from "react";
+import EditableText from "../_pagegen/EditableText";
 
 export type TimelineDataType = {
   title: string;
@@ -12,12 +9,190 @@ export type TimelineDataType = {
   steps: {
     title: string;
     description: string;
+    isActive?: boolean;
   }[];
 };
 
 type EditableTimelineFeatureProps = {
   timelineData: TimelineDataType;
   onTimelineUpdate: (field: keyof TimelineDataType, value: string | Array<{title: string, description: string}>) => void;
+};
+
+// Editable version of TimelineUI that allows inline editing
+const EditableTimelineUI = ({ 
+  timelineData, 
+  onTimelineUpdate,
+  stepsRefs 
+}: { 
+  timelineData: TimelineDataType; 
+  onTimelineUpdate: EditableTimelineFeatureProps['onTimelineUpdate']; 
+  stepsRefs: MutableRefObject<(HTMLDivElement | null)[]>;
+}) => {
+  const handleTitleUpdate = (value: string) => {
+    onTimelineUpdate('title', value);
+  };
+
+  const handleSubtitleUpdate = (value: string) => {
+    onTimelineUpdate('subtitle', value);
+  };
+
+  const handleStepTitleUpdate = (index: number) => (value: string) => {
+    const updatedSteps = [...timelineData.steps];
+    updatedSteps[index] = { ...updatedSteps[index], title: value };
+    onTimelineUpdate('steps', updatedSteps);
+  };
+
+  const handleStepDescriptionUpdate = (index: number) => (value: string) => {
+    const updatedSteps = [...timelineData.steps];
+    updatedSteps[index] = { ...updatedSteps[index], description: value };
+    onTimelineUpdate('steps', updatedSteps);
+  };
+
+  const handleAddStep = () => {
+    const updatedSteps = [...timelineData.steps, { title: "New Step", description: "Step description" }];
+    onTimelineUpdate('steps', updatedSteps);
+  };
+
+  const handleRemoveStep = (index: number) => {
+    const updatedSteps = timelineData.steps.filter((_, i) => i !== index);
+    onTimelineUpdate('steps', updatedSteps);
+  };
+
+  return (
+    <section className="py-12">
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl md:text-5xl font-bold text-center mb-3 text-blue-800 tracking-tight"
+        >
+          <EditableText
+            value={timelineData.title}
+            onUpdate={handleTitleUpdate}
+            placeholder="Timeline Title"
+            className="text-4xl md:text-5xl font-bold text-center text-blue-800 tracking-tight"
+          />
+        </motion.div>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="text-xl md:text-2xl text-blue-600 text-center mb-16 px-4 font-light leading-relaxed"
+        >
+          <EditableText
+            value={timelineData.subtitle}
+            onUpdate={handleSubtitleUpdate}
+            placeholder="Timeline Subtitle"
+            className="text-xl md:text-2xl text-blue-600 text-center font-light leading-relaxed"
+          />
+        </motion.div>
+        
+        <div className="relative">
+          {/* Vertical line - hidden on mobile */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gray-200 rounded-full hidden md:block" />
+          
+          {/* Mobile vertical line */}
+          <div className="absolute left-4 sm:left-8 transform -translate-x-1/2 h-full w-1 bg-gray-200 rounded-full md:hidden" />
+          
+          {timelineData.steps.map((step, index) => (
+            <motion.div
+              key={index}
+              ref={el => stepsRefs.current[index] = el}
+              className={`flex items-start mb-16 last:mb-0 ${
+                // Mobile: always left-aligned, Desktop: alternating
+                index % 2 === 0 
+                  ? "flex-col md:flex-row" 
+                  : "flex-col md:flex-row-reverse"
+              }`}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ 
+                opacity: step.isActive ? 1 : 0.7,
+                y: 0
+              }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+            >
+              {/* Mobile timeline dot */}
+              <div className="relative flex items-center h-12 md:hidden ml-4 sm:ml-8">
+                <div className={`w-6 h-6 rounded-full ${
+                  step.isActive ? "bg-blue-600" : "bg-gray-300"
+                } transition-all duration-500`} />
+                <div className={`absolute w-12 h-12 rounded-full ${
+                  step.isActive ? "bg-blue-100" : "bg-gray-100"
+                } -z-10 -translate-x-3`} />
+              </div>
+
+              {/* Content box - full width on mobile */}
+              <div className="w-full md:w-1/2 px-4 sm:px-12 ml-8 md:ml-0 relative">
+                <div className={`${
+                  step.isActive 
+                    ? "bg-blue-600 shadow-blue-200" 
+                    : "bg-gray-300"
+                } p-6 sm:p-8 rounded-xl shadow-lg transition-all duration-500 transform ${
+                  step.isActive ? "scale-[1.02]" : "scale-100"
+                }`}>
+                  <EditableText
+                    value={step.title}
+                    onUpdate={handleStepTitleUpdate(index)}
+                    placeholder="Step Title"
+                    className="text-xl sm:text-2xl font-bold mb-3 text-white"
+                  />
+                  <EditableText
+                    value={step.description}
+                    onUpdate={handleStepDescriptionUpdate(index)}
+                    placeholder="Step Description"
+                    className="text-gray-100 text-base sm:text-lg leading-relaxed"
+                    multiline={true}
+                  />
+                </div>
+                
+                {/* Remove step button */}
+                <button 
+                  onClick={() => handleRemoveStep(index)}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
+                  aria-label="Remove step"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Desktop timeline dot */}
+              <div className="relative hidden md:flex items-center justify-center w-12 h-12">
+                <div className={`w-6 h-6 rounded-full ${
+                  step.isActive ? "bg-blue-600" : "bg-gray-300"
+                } transition-all duration-500 transform ${
+                  step.isActive ? "scale-125" : "scale-100"
+                }`} />
+                <div className={`absolute w-12 h-12 rounded-full ${
+                  step.isActive ? "bg-blue-100" : "bg-gray-100"
+                } -z-10 transition-all duration-500 transform ${
+                  step.isActive ? "scale-110" : "scale-100"
+                }`} />
+              </div>
+              
+              {/* Spacer div - only visible on desktop */}
+              <div className="hidden md:block md:w-1/2" />
+            </motion.div>
+          ))}
+        </div>
+        
+        {/* Add step button */}
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={handleAddStep}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            Add Step
+          </button>
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export const EditableTimelineFeature = ({ timelineData, onTimelineUpdate }: EditableTimelineFeatureProps) => {
@@ -44,135 +219,23 @@ export const EditableTimelineFeature = ({ timelineData, onTimelineUpdate }: Edit
     isActive: activeSteps[index] || false
   }));
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onTimelineUpdate('title', e.target.value);
-  };
-
-  const handleSubtitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onTimelineUpdate('subtitle', e.target.value);
-  };
-
-  const handleStepTitleChange = (index: number, value: string) => {
-    const updatedSteps = [...timelineData.steps];
-    updatedSteps[index] = { ...updatedSteps[index], title: value };
-    onTimelineUpdate('steps', updatedSteps);
-  };
-
-  const handleStepDescriptionChange = (index: number, value: string) => {
-    const updatedSteps = [...timelineData.steps];
-    updatedSteps[index] = { ...updatedSteps[index], description: value };
-    onTimelineUpdate('steps', updatedSteps);
-  };
-
-  const handleAddStep = () => {
-    const updatedSteps = [...timelineData.steps, { title: "", description: "" }];
-    onTimelineUpdate('steps', updatedSteps);
-  };
-
-  const handleRemoveStep = (index: number) => {
-    const updatedSteps = timelineData.steps.filter((_, i) => i !== index);
-    onTimelineUpdate('steps', updatedSteps);
+  // Update the timelineData with active steps
+  const timelineDataWithActive = {
+    ...timelineData,
+    steps: stepsWithActive
   };
 
   return (
-    <div className="w-full bg-white p-6 rounded-lg shadow-sm">
-      <h2 className="text-2xl font-bold mb-6">Editar Línea de Tiempo</h2>
-      
-      <div className="space-y-6 mb-8">
-        <div>
-          <Label htmlFor="timeline-title" className="block text-sm font-medium text-gray-700 mb-1">
-            Título
-          </Label>
-          <Input 
-            id="timeline-title" 
-            value={timelineData.title} 
-            onChange={handleTitleChange}
-            placeholder="Título de la línea de tiempo"
-            className="w-full"
-          />
-        </div>
-        
-        <div>
-          <Label htmlFor="timeline-subtitle" className="block text-sm font-medium text-gray-700 mb-1">
-            Subtítulo
-          </Label>
-          <Input 
-            id="timeline-subtitle" 
-            value={timelineData.subtitle} 
-            onChange={handleSubtitleChange}
-            placeholder="Subtítulo de la línea de tiempo"
-            className="w-full"
-          />
-        </div>
-      </div>
-      
-      <h3 className="text-xl font-semibold mb-4">Pasos</h3>
-      
-      <div className="space-y-6 mb-6">
-        {timelineData.steps.map((step, index) => (
-          <div key={index} className="p-4 border rounded-lg bg-gray-50 relative">
-            <button 
-              onClick={() => handleRemoveStep(index)}
-              className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-              type="button"
-              aria-label="Eliminar paso"
-            >
-              <TrashIcon size={18} />
-            </button>
-            
-            <div className="mb-4">
-              <Label htmlFor={`step-title-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-                Título del Paso {index + 1}
-              </Label>
-              <Input 
-                id={`step-title-${index}`} 
-                value={step.title} 
-                onChange={(e) => handleStepTitleChange(index, e.target.value)}
-                placeholder="Título del paso"
-                className="w-full"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor={`step-description-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-                Descripción del Paso {index + 1}
-              </Label>
-              <Textarea 
-                id={`step-description-${index}`} 
-                value={step.description} 
-                onChange={(e) => handleStepDescriptionChange(index, e.target.value)}
-                placeholder="Descripción del paso"
-                className="w-full"
-                rows={3}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-      
-      <Button 
-        onClick={handleAddStep}
-        type="button"
-        variant="outline"
-        className="w-full flex items-center justify-center gap-2"
+    <div className="w-full bg-blue-50">
+      <div 
+        ref={sectionRef} 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16"
       >
-        <PlusIcon size={16} />
-        Añadir Paso
-      </Button>
-      
-      <div className="mt-8 border-t pt-8">
-        <h3 className="text-xl font-semibold mb-4">Vista Previa</h3>
-        <div 
-          ref={sectionRef} 
-          className="bg-blue-50 p-6 rounded-lg"
-        >
-          <TimelineUI
-            title={timelineData.title}
-            subtitle={timelineData.subtitle}
-            steps={stepsWithActive}
-            stepsRefs={stepsRefs}
-          />
-        </div>
+        <EditableTimelineUI
+          timelineData={timelineDataWithActive}
+          onTimelineUpdate={onTimelineUpdate}
+          stepsRefs={stepsRefs}
+        />
       </div>
     </div>
   );
