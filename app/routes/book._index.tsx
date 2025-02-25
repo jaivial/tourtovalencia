@@ -71,6 +71,8 @@ export async function loader({ request }: { request: Request }) {
     const selectedDate = url.searchParams.get("date");
     const tourSlug = url.searchParams.get("tourSlug");
 
+    console.log("Loader called with date:", selectedDate, "and tourSlug:", tourSlug);
+
     // Get dates for the next 3 months
     const startDate = new Date();
     const endDate = addMonths(startDate, 3);
@@ -80,18 +82,41 @@ export async function loader({ request }: { request: Request }) {
     
     // If a tour is selected, get available dates for that specific tour
     if (tourSlug) {
+      console.log("Getting available dates for tour:", tourSlug);
       availableDates = await getAvailableDatesForTour(tourSlug);
     } else {
       // Otherwise, get general availability
+      console.log("Getting general availability for all tours");
       availableDates = await getAvailableDatesInRange(startDate, endDate);
     }
 
     // Get availability for the selected date if provided
     let selectedDateAvailability;
-    if (selectedDate) {
-      const date = new Date(selectedDate);
-      if (!isNaN(date.getTime())) {
-        selectedDateAvailability = await getDateAvailability(date, tourSlug || undefined);
+    if (selectedDate && tourSlug) {
+      console.log("Checking availability for date:", selectedDate, "and tour:", tourSlug);
+      try {
+        const date = new Date(selectedDate);
+        if (!isNaN(date.getTime())) {
+          selectedDateAvailability = await getDateAvailability(date, tourSlug);
+          console.log("Date availability result:", selectedDateAvailability);
+        } else {
+          console.error("Invalid date format:", selectedDate);
+        }
+      } catch (error) {
+        console.error("Error getting date availability:", error);
+      }
+    } else if (selectedDate) {
+      console.log("Checking general availability for date:", selectedDate);
+      try {
+        const date = new Date(selectedDate);
+        if (!isNaN(date.getTime())) {
+          selectedDateAvailability = await getDateAvailability(date);
+          console.log("General date availability result:", selectedDateAvailability);
+        } else {
+          console.error("Invalid date format:", selectedDate);
+        }
+      } catch (error) {
+        console.error("Error getting general date availability:", error);
       }
     }
 
