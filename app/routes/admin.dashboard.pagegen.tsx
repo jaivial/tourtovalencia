@@ -19,6 +19,7 @@ export default function PageGeneratorRoute() {
     section6Data,
     indexSection5Data,
     timelineData,
+    price,
     setPageName,
     handleNext,
     handleBack,
@@ -36,6 +37,7 @@ export default function PageGeneratorRoute() {
     handleSection6Update,
     handleIndexSection5Update,
     handleTimelineUpdate,
+    handlePriceChange,
   } = usePageGenerator();
 
   const containerVariants = {
@@ -77,6 +79,8 @@ export default function PageGeneratorRoute() {
               status={status}
               onStatusChange={handleStatusChange}
               pageName={pageName}
+              price={price}
+              onPriceChange={handlePriceChange}
               indexSection5Data={indexSection5Data}
               onIndexSection5Update={handleIndexSection5Update}
               section1Data={section1Data}

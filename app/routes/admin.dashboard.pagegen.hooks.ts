@@ -101,6 +101,7 @@ export const usePageGenerator = () => {
   const [section6Data, setSection6Data] = useState<SanJuanSection6Type>(DEFAULT_SECTION6_DATA);
   const [indexSection5Data, setIndexSection5Data] = useState<IndexSection5Type>(DEFAULT_INDEX_SECTION5_DATA);
   const [timelineData, setTimelineData] = useState<TimelineDataType>(DEFAULT_TIMELINE_DATA);
+  const [price, setPrice] = useState<number>(0);
 
   // Section 1 handlers
   const handleSection1Update = (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
@@ -220,6 +221,11 @@ export const usePageGenerator = () => {
     }));
   };
 
+  // Price handler
+  const handlePriceChange = (value: number) => {
+    setPrice(value);
+  };
+
   // Status handler
   const handleStatusChange = (checked: boolean) => {
     setStatus(checked ? 'active' : 'upcoming');
@@ -254,6 +260,7 @@ export const usePageGenerator = () => {
     section6Data,
     indexSection5Data,
     timelineData,
+    price,
 
     // Setters
     setPageName,
@@ -275,5 +282,6 @@ export const usePageGenerator = () => {
     handleIndexSection5Update,
     handleTimelineUpdate,
     handleStatusChange,
+    handlePriceChange,
   };
 };
