@@ -34,9 +34,7 @@ const DEFAULT_SECTION2_DATA: sanJuansection2Type = {
 };
 
 const DEFAULT_SECTION3_DATA: sanJuanSection3Type = {
-  images: Array(8).fill({ source: "", alt: "Gallery image" }),
-  source: "",
-  alt: ""
+  images: Array(8).fill({ source: "", alt: "Gallery image" })
 };
 
 const DEFAULT_SECTION4_DATA: sanJuansection4Type = {
@@ -88,7 +86,7 @@ export const usePageGenerator = () => {
   const [indexSection5Data, setIndexSection5Data] = useState<IndexSection5Type>(DEFAULT_INDEX_SECTION5_DATA);
 
   // Section 1 handlers
-  const handleSection1Update = (field: keyof sanJuanSection1Type, value: string) => {
+  const handleSection1Update = (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
     setSection1Data(prev => ({
       ...prev,
       [field]: value
@@ -111,7 +109,7 @@ export const usePageGenerator = () => {
   };
 
   // Section 2 handlers
-  const handleSection2Update = (field: keyof sanJuansection2Type, value: string) => {
+  const handleSection2Update = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
     setSection2Data(prev => ({
       ...prev,
       [field]: value
@@ -134,13 +132,18 @@ export const usePageGenerator = () => {
   };
 
   // Section 3 handlers
-  const handleSection3ImageUpdate = (index: number, base64String: string) => {
-    setSection3Data(prev => ({
-      ...prev,
-      images: prev.images.map((img, i) => 
-        i === index ? { source: base64String, alt: "Gallery image" } : img
-      )
-    }));
+  const handleSection3ImageUpdate = (index: number, file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64String = e.target?.result as string;
+      setSection3Data(prev => ({
+        ...prev,
+        images: prev.images.map((img, i) => 
+          i === index ? { source: base64String, alt: "Gallery image" } : img
+        )
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSection3ImageRemove = (index: number) => {

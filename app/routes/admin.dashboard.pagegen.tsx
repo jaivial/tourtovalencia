@@ -42,20 +42,20 @@ export default function PageGeneratorRoute() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-100 p-0">
+    <div className="w-full min-h-screen bg-gray-100 p-0 flex items-center justify-center">
       {step === "name" ? (
-        <motion.div variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Page</h2>
-          <div className="space-y-4">
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="max-w-3xl w-full mx-auto bg-white rounded-lg shadow-lg p-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Crear Nueva Página</h2>
+          <div className="space-y-6">
             <div>
-              <Label htmlFor="page-name" className="block text-sm font-medium text-gray-700">
-                Page Name
+              <Label htmlFor="page-name" className="block text-lg font-medium text-gray-700 mb-2">
+                Nombre de la Página
               </Label>
-              <Input id="page-name" value={pageName} onChange={(e) => setPageName(e.target.value)} className="mt-1 block w-full" placeholder="Enter page name..." />
+              <Input id="page-name" value={pageName} onChange={(e) => setPageName(e.target.value)} className="mt-1 block w-full text-lg p-3" placeholder="Ingrese el nombre de la página..." />
             </div>
-            <div className="flex justify-end">
-              <Button onClick={handleNext} disabled={!pageName.trim()}>
-                Next
+            <div className="flex justify-end mt-8">
+              <Button onClick={handleNext} disabled={!pageName.trim()} className="text-lg px-6 py-3">
+                Siguiente
               </Button>
             </div>
           </div>
@@ -64,7 +64,7 @@ export default function PageGeneratorRoute() {
         <motion.div variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full">
           <div className="flex justify-between items-center mb-6">
             <Button onClick={handleBack} variant="outline">
-              Back
+              Atrás
             </Button>
             <div className="w-[100px]" /> {/* Spacer for alignment */}
           </div>

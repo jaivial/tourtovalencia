@@ -79,7 +79,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
 
   return (
     <div className="space-y-6">
-      <div className="w-full min-h-screen bg-gray-900 overflow-x-hidden">
+      <div className="w-full min-h-screen bg-gray-100 overflow-x-hidden">
         <div className="w-full mx-auto p-4 mb-8">
           <div className="flex flex-col items-center justify-center gap-6 p-8 bg-white rounded-lg shadow-sm">
             <h2 className="text-3xl font-bold text-gray-900">{pageName}</h2>
@@ -98,7 +98,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
           </div>
         </div>
 
-        <div className="w-full flex flex-col items-start z-0 bg-blue-500 overflow-x-hidden animate-fadeIn gap-12">
+        <div className="w-full flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
           {indexSection5Data && onIndexSection5Update && <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />}
 
           {section1Data && <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={onSection1Update} />}
