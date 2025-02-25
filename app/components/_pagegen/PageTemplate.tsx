@@ -97,19 +97,19 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
               <p className="text-sm">Para cambiar las imágenes, pasa el cursor sobre ellas y haz clic en el icono de la cámara.</p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-6 w-full max-w-md">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center gap-6 w-full max-w-md">
+              <div className="flex flex-col items-center gap-3">
                 <Label htmlFor="status" className="text-sm font-medium text-gray-700">
                   {status === "active" ? "Activo" : "Proximamente"}
                 </Label>
                 <Switch id="status" checked={status === "active"} onCheckedChange={onStatusChange} />
               </div>
               
-              <div className="flex flex-col w-full sm:w-auto">
-                <Label htmlFor="price" className="text-sm font-medium text-gray-700 mb-1">
+              <div className="flex flex-col w-full sm:w-auto items-center">
+                <Label htmlFor="price" className="text-sm font-medium text-gray-700 mb-1 text-center">
                   Precio (€)
                 </Label>
-                <div className="relative">
+                <div className="relative flex justify-center">
                   <Input
                     id="price"
                     type="number"
@@ -117,7 +117,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
                     step="0.01"
                     value={price.toString()}
                     onChange={(e) => onPriceChange(parseFloat(e.target.value))}
-                    className="w-full sm:w-32 pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full sm:w-32 pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
                     placeholder="0.00"
                   />
                   <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500">€</span>
