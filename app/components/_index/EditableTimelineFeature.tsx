@@ -226,10 +226,10 @@ export const EditableTimelineFeature = ({ timelineData, onTimelineUpdate }: Edit
   };
 
   return (
-    <div className="w-full bg-blue-50">
+    <div className="w-full mx-auto max-w-[95%]">
       <div 
         ref={sectionRef} 
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16"
+        className="w-full px-4 py-8"
       >
         <EditableTimelineUI
           timelineData={timelineDataWithActive}
