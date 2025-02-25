@@ -28,8 +28,8 @@ export async function action({ request }: ActionFunctionArgs) {
         const toursCollection = await getCollection("tours");
         const tour = await toursCollection.findOne({ slug: bookingData.tourSlug });
         if (tour) {
-          // Use type assertion to access tourName property
-          const typedTour = tour as { tourName: { en: string; es: string } };
+          // Fix the type conversion by first casting to unknown
+          const typedTour = tour as unknown as { tourName: { en: string; es: string } };
           tourName = typedTour.tourName.en;
         }
       } catch (error) {
@@ -58,18 +58,34 @@ export async function action({ request }: ActionFunctionArgs) {
     await bookingsCollection.insertOne(bookingRecord);
 
     // Send confirmation email to customer
-    await sendEmail({
-      to: bookingData.email,
-      subject: "Confirmación de Reserva - Tour Valencia",
-      component: BookingConfirmationEmail({ booking: bookingData }),
-    });
+    try {
+      await sendEmail({
+        to: bookingData.email,
+        subject: "Confirmación de Reserva - Excursiones Mediterráneo",
+        component: BookingConfirmationEmail({ booking: bookingData }),
+      });
+      console.log(`✅ Customer confirmation email sent to ${bookingData.email}`);
+    } catch (emailError) {
+      console.error("Error sending customer confirmation email:", emailError);
+      // Continue execution even if customer email fails
+    }
 
-    // Send admin notification
-    await sendEmail({
-      to: process.env.ADMIN_EMAIL || "jaimebillanueba99@gmail.com",
-      subject: "Nueva Reserva Recibida",
-      component: BookingAdminEmail({ booking: bookingData }),
-    });
+    // Send admin notification with better error handling
+    try {
+      // Get admin email with fallback and logging
+      const adminEmail = process.env.ADMIN_EMAIL || "jaimebillanueba99@gmail.com";
+      console.log(`Attempting to send admin notification to: ${adminEmail}`);
+      
+      await sendEmail({
+        to: adminEmail,
+        subject: `Nueva Reserva: ${bookingData.fullName} - ${tourName || 'Excursiones Mediterráneo'}`,
+        component: BookingAdminEmail({ booking: bookingData }),
+      });
+      console.log(`✅ Admin notification email sent to ${adminEmail}`);
+    } catch (adminEmailError) {
+      console.error("Error sending admin notification email:", adminEmailError);
+      // Continue execution even if admin email fails
+    }
 
     return json({ success: true, booking: bookingData });
   } catch (error) {
