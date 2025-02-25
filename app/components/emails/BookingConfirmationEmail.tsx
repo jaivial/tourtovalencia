@@ -62,21 +62,62 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
             <Section style={detailsSection}>
               <Heading as="h2" style={detailsHeading}>Detalles de tu Reserva</Heading>
               
-              <Section style={detailsGrid}>
-                <Text style={detailLabel}>Referencia:</Text>
-                <Text style={detailValue}>{booking.paymentIntentId?.substring(0, 8) || 'N/A'}</Text>
+              <Section style={detailsContainer}>
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>ID de Reserva:</Text>
+                  <Text style={detailValue}>{booking.paymentIntentId || 'N/A'}</Text>
+                </Text>
                 
-                <Text style={detailLabel}>Tour:</Text>
-                <Text style={detailValue}>{booking.tourName || 'Excursiones Mediterráneo'}</Text>
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Fecha de Reserva:</Text>
+                  <Text style={detailValue}>{new Date().toLocaleDateString("es-ES")}</Text>
+                </Text>
                 
-                <Text style={detailLabel}>Fecha:</Text>
-                <Text style={detailValue}>{formattedDate}</Text>
+                <Hr style={dividerSmall} />
                 
-                <Text style={detailLabel}>Personas:</Text>
-                <Text style={detailValue}>{booking.partySize}</Text>
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Nombre:</Text>
+                  <Text style={detailValue}>{booking.fullName}</Text>
+                </Text>
                 
-                <Text style={detailLabel}>Total Pagado:</Text>
-                <Text style={detailValueHighlight}>€{totalPrice}</Text>
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Email:</Text>
+                  <Text style={detailValue}>{booking.email}</Text>
+                </Text>
+                
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Teléfono:</Text>
+                  <Text style={detailValue}>{booking.phoneNumber}</Text>
+                </Text>
+                
+                <Hr style={dividerSmall} />
+                
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Tour:</Text>
+                  <Text style={detailValue}>{booking.tourName || 'Excursiones Mediterráneo'}</Text>
+                </Text>
+                
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Fecha del Tour:</Text>
+                  <Text style={detailValue}>{formattedDate}</Text>
+                </Text>
+                
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Personas:</Text>
+                  <Text style={detailValue}>{booking.partySize}</Text>
+                </Text>
+                
+                <Hr style={dividerSmall} />
+                
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Total Pagado:</Text>
+                  <Text style={detailValueHighlight}>€{totalPrice}</Text>
+                </Text>
+                
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Estado de Pago:</Text>
+                  <Text style={detailValueHighlight}>✓ Confirmado</Text>
+                </Text>
               </Section>
             </Section>
 
@@ -171,6 +212,7 @@ const heroHeading = {
 
 const section = {
   padding: "32px 24px",
+  textAlign: "center" as const,
 };
 
 const greeting = {
@@ -178,6 +220,7 @@ const greeting = {
   lineHeight: "26px",
   color: "#333",
   marginBottom: "24px",
+  textAlign: "center" as const,
 };
 
 const text = {
@@ -185,6 +228,7 @@ const text = {
   lineHeight: "24px",
   color: "#4a4a4a",
   margin: "16px 0",
+  textAlign: "center" as const,
 };
 
 const detailsSection = {
@@ -203,30 +247,48 @@ const detailsHeading = {
   textAlign: "center" as const,
 };
 
-const detailsGrid = {
-  display: "grid",
-  gridTemplateColumns: "1fr 2fr",
-  gap: "8px 16px",
+const detailsContainer = {
+  display: "flex",
+  flexDirection: "column" as const,
+  alignItems: "center",
+  gap: "16px",
+};
+
+const detailItem = {
+  display: "flex",
+  flexDirection: "column" as const,
+  alignItems: "center",
+  margin: "8px 0",
+  width: "100%",
 };
 
 const detailLabel = {
   fontSize: "14px",
   color: "#666",
   fontWeight: "bold",
-  margin: "8px 0",
+  margin: "4px 0",
+  textAlign: "center" as const,
 };
 
 const detailValue = {
-  fontSize: "14px",
+  fontSize: "16px",
   color: "#333",
-  margin: "8px 0",
+  margin: "4px 0",
+  textAlign: "center" as const,
 };
 
 const detailValueHighlight = {
-  fontSize: "16px",
+  fontSize: "18px",
   fontWeight: "bold",
   color: "#0056b3",
-  margin: "8px 0",
+  margin: "4px 0",
+  textAlign: "center" as const,
+};
+
+const dividerSmall = {
+  borderTop: "1px dashed #eaeaea",
+  margin: "16px 0",
+  width: "100%",
 };
 
 const infoSection = {
@@ -238,6 +300,7 @@ const infoHeading = {
   fontWeight: "bold",
   color: "#333",
   margin: "0 0 16px 0",
+  textAlign: "center" as const,
 };
 
 const divider = {
@@ -250,6 +313,7 @@ const contactInfo = {
   lineHeight: "24px",
   color: "#4a4a4a",
   margin: "8px 0",
+  textAlign: "center" as const,
 };
 
 const link = {
@@ -263,6 +327,7 @@ const thankYou = {
   color: "#333",
   margin: "32px 0 16px 0",
   fontWeight: "bold",
+  textAlign: "center" as const,
 };
 
 const signature = {
@@ -270,6 +335,7 @@ const signature = {
   color: "#666",
   fontStyle: "italic",
   margin: "16px 0 0 0",
+  textAlign: "center" as const,
 };
 
 const footer = {

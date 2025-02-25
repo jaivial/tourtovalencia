@@ -58,49 +58,71 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
             <Section style={detailsSection}>
               <Heading as="h2" style={detailsHeading}>Detalles de la Reserva</Heading>
               
-              <Section style={detailsGrid}>
-                <Text style={detailLabel}>ID de Reserva:</Text>
-                <Text style={detailValue}>{booking.paymentIntentId || 'N/A'}</Text>
-                
-                <Text style={detailLabel}>Fecha de Reserva:</Text>
-                <Text style={detailValue}>{new Date().toLocaleDateString("es-ES")}</Text>
-                
-                <Hr style={dividerSmall} />
-                
-                <Text style={detailLabel}>Nombre:</Text>
-                <Text style={detailValue}>{booking.fullName}</Text>
-                
-                <Text style={detailLabel}>Email:</Text>
-                <Text style={detailValue}>
-                  <Link href={`mailto:${booking.email}`} style={link}>{booking.email}</Link>
+              <Section style={detailsContainer}>
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>ID de Reserva:</Text>
+                  <Text style={detailValue}>{booking.paymentIntentId || 'N/A'}</Text>
                 </Text>
                 
-                <Text style={detailLabel}>Teléfono:</Text>
-                <Text style={detailValue}>
-                  <Link href={`tel:${booking.phoneNumber}`} style={link}>{booking.phoneNumber}</Link>
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Fecha de Reserva:</Text>
+                  <Text style={detailValue}>{new Date().toLocaleDateString("es-ES")}</Text>
                 </Text>
                 
                 <Hr style={dividerSmall} />
                 
-                <Text style={detailLabel}>Tour:</Text>
-                <Text style={detailValue}>{booking.tourName || 'Excursiones Mediterráneo'}</Text>
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Nombre:</Text>
+                  <Text style={detailValue}>{booking.fullName}</Text>
+                </Text>
                 
-                <Text style={detailLabel}>Fecha del Tour:</Text>
-                <Text style={detailValue}>{formattedDate}</Text>
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Email:</Text>
+                  <Text style={detailValue}>
+                    <Link href={`mailto:${booking.email}`} style={link}>{booking.email}</Link>
+                  </Text>
+                </Text>
                 
-                <Text style={detailLabel}>Personas:</Text>
-                <Text style={detailValue}>{booking.partySize}</Text>
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Teléfono:</Text>
+                  <Text style={detailValue}>
+                    <Link href={`tel:${booking.phoneNumber}`} style={link}>{booking.phoneNumber}</Link>
+                  </Text>
+                </Text>
                 
                 <Hr style={dividerSmall} />
                 
-                <Text style={detailLabel}>Total Pagado:</Text>
-                <Text style={detailValueHighlight}>€{totalPrice}</Text>
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Tour:</Text>
+                  <Text style={detailValue}>{booking.tourName || 'Excursiones Mediterráneo'}</Text>
+                </Text>
                 
-                <Text style={detailLabel}>Estado de Pago:</Text>
-                <Text style={detailValueSuccess}>✓ Pagado</Text>
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Fecha del Tour:</Text>
+                  <Text style={detailValue}>{formattedDate}</Text>
+                </Text>
                 
-                <Text style={detailLabel}>ID de Pago:</Text>
-                <Text style={detailValue}>{booking.paymentIntentId}</Text>
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Personas:</Text>
+                  <Text style={detailValue}>{booking.partySize}</Text>
+                </Text>
+                
+                <Hr style={dividerSmall} />
+                
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Total Pagado:</Text>
+                  <Text style={detailValueHighlight}>€{totalPrice}</Text>
+                </Text>
+                
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Estado de Pago:</Text>
+                  <Text style={detailValueSuccess}>✓ Pagado</Text>
+                </Text>
+                
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>ID de Pago:</Text>
+                  <Text style={detailValue}>{booking.paymentIntentId}</Text>
+                </Text>
               </Section>
             </Section>
             
@@ -171,6 +193,7 @@ const alertHeading = {
 
 const section = {
   padding: "32px 24px",
+  textAlign: "center" as const,
 };
 
 const text = {
@@ -178,6 +201,7 @@ const text = {
   lineHeight: "24px",
   color: "#4a4a4a",
   margin: "16px 0",
+  textAlign: "center" as const,
 };
 
 const detailsSection = {
@@ -196,43 +220,56 @@ const detailsHeading = {
   textAlign: "center" as const,
 };
 
-const detailsGrid = {
-  display: "grid",
-  gridTemplateColumns: "1fr 2fr",
-  gap: "8px 16px",
+const detailsContainer = {
+  display: "flex",
+  flexDirection: "column" as const,
+  alignItems: "center",
+  gap: "16px",
+};
+
+const detailItem = {
+  display: "flex",
+  flexDirection: "column" as const,
+  alignItems: "center",
+  margin: "8px 0",
+  width: "100%",
 };
 
 const detailLabel = {
   fontSize: "14px",
   color: "#666",
   fontWeight: "bold",
-  margin: "8px 0",
+  margin: "4px 0",
+  textAlign: "center" as const,
 };
 
 const detailValue = {
-  fontSize: "14px",
+  fontSize: "16px",
   color: "#333",
-  margin: "8px 0",
+  margin: "4px 0",
+  textAlign: "center" as const,
 };
 
 const detailValueHighlight = {
-  fontSize: "16px",
+  fontSize: "18px",
   fontWeight: "bold",
   color: "#0056b3",
-  margin: "8px 0",
+  margin: "4px 0",
+  textAlign: "center" as const,
 };
 
 const detailValueSuccess = {
-  fontSize: "14px",
+  fontSize: "16px",
   fontWeight: "bold",
   color: "#2e7d32",
-  margin: "8px 0",
+  margin: "4px 0",
+  textAlign: "center" as const,
 };
 
 const dividerSmall = {
   borderTop: "1px dashed #eaeaea",
-  margin: "8px 0",
-  gridColumn: "1 / span 2",
+  margin: "16px 0",
+  width: "100%",
 };
 
 const actionSection = {
@@ -245,6 +282,7 @@ const actionText = {
   lineHeight: "24px",
   color: "#4a4a4a",
   margin: "0 0 24px 0",
+  textAlign: "center" as const,
 };
 
 const actionButton = {
