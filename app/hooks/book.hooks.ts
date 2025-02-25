@@ -12,6 +12,7 @@ export interface BookingFormData {
   email: string;
   emailConfirm: string;
   phoneNumber: string;
+  tourSlug: string;
 }
 
 export type BookingStates = Omit<BookingContextState, "setCurrentStep" | "setFormData" | "setErrors" | "setSelectedDateAvailability" | "setIsSubmitting" | "setIsSuccess" | "setPaymentClientSecret" | "setPaymentIntentId" | "setServerError">;
@@ -53,6 +54,7 @@ export function useBookingStates(initialState?: {
     email: "",
     emailConfirm: "",
     phoneNumber: "",
+    tourSlug: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
   const [serverError, setServerError] = useState<string | null>(initialState?.serverError || null);
@@ -120,16 +122,41 @@ export function useBookingActions(context: BookingContextState): BookingActions 
     // Validate current step
     const errors: Partial<Record<keyof BookingFormData, string>> = {};
 
-    if (context.currentStep === 1 && !context.formData.date) {
-      errors.date = "Please select a date";
-      context.setErrors(errors);
-      return;
+    if (context.currentStep === 1) {
+      if (!context.formData.date) {
+        errors.date = "Please select a date";
+        context.setErrors(errors);
+        return;
+      }
+      
+      if (!context.formData.tourSlug) {
+        errors.tourSlug = "Please select a tour";
+        context.setErrors(errors);
+        return;
+      }
     }
 
-    if (context.currentStep === 2 && !context.formData.partySize) {
-      errors.partySize = "Please select number of guests";
-      context.setErrors(errors);
-      return;
+    if (context.currentStep === 2) {
+      if (!context.formData.partySize) {
+        errors.partySize = "Please select number of guests";
+        context.setErrors(errors);
+        return;
+      }
+      
+      // Validate party size against available places
+      if (context.selectedDateAvailability) {
+        const { availablePlaces } = context.selectedDateAvailability;
+        if (context.formData.partySize > availablePlaces) {
+          errors.partySize = `Maximum number of guests for this date is ${availablePlaces}`;
+          context.setErrors(errors);
+          return;
+        }
+      } else {
+        // If availability data is not loaded, don't proceed
+        errors.partySize = "Please wait for availability data to load";
+        context.setErrors(errors);
+        return;
+      }
     }
 
     if (context.currentStep === 3) {

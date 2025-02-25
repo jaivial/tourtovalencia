@@ -12,6 +12,9 @@ import {
 } from "~/components/ui/table";
 import { useState, useEffect } from "react";
 import type { PaginationInfo } from "~/types/booking";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Label } from "~/components/ui/label";
+import type { TourOption } from "~/routes/admin.dashboard.bookings.hooks";
 
 export type Booking = {
   _id: string;
@@ -38,10 +41,13 @@ type AdminBookingsUIProps = {
   pagination: PaginationInfo;
   isLoading: boolean;
   error: string | null;
+  tours: TourOption[];
+  selectedTourSlug: string;
   onDateChange: (date: Date) => void;
   onUpdateMaxBookings: (newMax: number) => void;
   onCancelBooking?: (bookingId: string) => void;
   onPageChange: (page: number) => void;
+  onTourChange: (tourSlug: string) => void;
   strings: Record<string, unknown>;
 };
 
@@ -51,10 +57,13 @@ export const AdminBookingsUI = ({
   bookingLimit,
   pagination,
   isLoading,
+  tours,
+  selectedTourSlug,
   onDateChange,
   onUpdateMaxBookings,
   onCancelBooking,
   onPageChange,
+  onTourChange,
 }: AdminBookingsUIProps) => {
   const [maxBookings, setMaxBookings] = useState(bookingLimit.maxBookings.toString());
 
@@ -89,6 +98,10 @@ export const AdminBookingsUI = ({
     if (!isNaN(newMax) && newMax >= 0) {
       onUpdateMaxBookings(newMax);
     }
+  };
+
+  const handleTourChange = (value: string) => {
+    onTourChange(value);
   };
 
   // Generate pagination buttons
@@ -331,6 +344,27 @@ export const AdminBookingsUI = ({
             </CardHeader>
             <CardContent className="flex-1 flex items-center justify-center p-6">
               <div className="w-full max-w-xs mx-auto space-y-4">
+                {/* Tour Selector */}
+                <div className="space-y-2">
+                  <Label htmlFor="tour-selector">Select Tour</Label>
+                  <Select
+                    value={selectedTourSlug || "all"}
+                    onValueChange={handleTourChange}
+                  >
+                    <SelectTrigger id="tour-selector">
+                      <SelectValue placeholder="Select a tour" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Tours</SelectItem>
+                      {tours.map((tour) => (
+                        <SelectItem key={tour.slug} value={tour.slug}>
+                          {tour.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
                   <Input
                     type="number"
@@ -358,6 +392,7 @@ export const AdminBookingsUI = ({
                 </div>
                 <p className="text-sm sm:text-base text-gray-600 text-center">
                   Current limit: {bookingLimit.maxBookings} places
+                  {selectedTourSlug ? ` for ${tours.find(t => t.slug === selectedTourSlug)?.name || selectedTourSlug}` : ' for all tours'}
                 </p>
               </div>
             </CardContent>
@@ -370,6 +405,7 @@ export const AdminBookingsUI = ({
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-800">
                 Bookings for {selectedDate.toLocaleDateString()}
+                {selectedTourSlug && ` - ${tours.find(t => t.slug === selectedTourSlug)?.name || selectedTourSlug}`}
               </h2>
               <div className="text-sm text-gray-500">
                 Showing {pagination.currentPage === pagination.totalPages ? 

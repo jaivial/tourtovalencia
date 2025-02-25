@@ -10,6 +10,8 @@ export interface Booking {
   paymentStatus?: 'paid' | 'pending' | 'failed';
   createdAt?: Date;
   updatedAt?: Date;
+  tourSlug?: string;
+  tourName?: string;
 }
 
 export interface BookingData {

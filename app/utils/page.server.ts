@@ -1,4 +1,4 @@
-import { getPagesCollection } from "./db.server";
+import { getPagesCollection, getToursCollection } from "./db.server";
 import type { Page } from "./db.schema.server";
 import axios from "axios";
 import sharp from "sharp";
@@ -219,7 +219,7 @@ function isImageRelatedString(str: string): boolean {
   return imageExtensions.test(str) || imageKeywords.test(str);
 }
 
-export async function createPage(name: string, content: Record<string, any>, status: "active" | "upcoming"): Promise<Page> {
+export async function createPage(name: string, content: Record<string, any>, status: "active" | "upcoming", template: string = ""): Promise<Page> {
   const collection = await getPagesCollection();
   const slug = generateSlug(name);
 
@@ -244,9 +244,10 @@ export async function createPage(name: string, content: Record<string, any>, sta
   englishContent.price = price;
 
   // Create the final page object with both language versions
-  const page: Page = {
+  const page = {
     name,
     slug,
+    template,
     content: {
       es: processedSpanishContent,
       en: englishContent,
@@ -254,10 +255,65 @@ export async function createPage(name: string, content: Record<string, any>, sta
     status,
     createdAt: new Date(),
     updatedAt: new Date(),
-  };
+  } as Page;
 
-  await collection.insertOne(page);
-  return page;
+  const result = await collection.insertOne(page);
+  
+  // If this is a tour page, also create a tour in the tours collection
+  if (template === 'tour') {
+    try {
+      await createTourFromPage({...page, _id: result.insertedId});
+    } catch (error) {
+      console.error("Error creating tour from page:", error);
+      // Continue with page creation even if tour creation fails
+    }
+  }
+  
+  return { ...page, _id: result.insertedId };
+}
+
+// Helper function to create a tour from a page
+async function createTourFromPage(page: Page): Promise<void> {
+  const toursCollection = await getToursCollection();
+  
+  // Extract tour information from the page content
+  const now = new Date();
+  
+  // Use a more flexible approach to access content properties
+  const enContent = page.content.en as any;
+  const esContent = page.content.es as any;
+  
+  const tour = {
+    slug: page.slug,
+    tourName: {
+      en: enContent.title || page.name,
+      es: esContent.title || page.name,
+    },
+    tourPrice: enContent.price || 0,
+    status: page.status,
+    description: {
+      en: enContent.description || '',
+      es: esContent.description || '',
+    },
+    duration: {
+      en: enContent.duration || '',
+      es: esContent.duration || '',
+    },
+    includes: {
+      en: enContent.includes || '',
+      es: esContent.includes || '',
+    },
+    meetingPoint: {
+      en: enContent.meetingPoint || '',
+      es: esContent.meetingPoint || '',
+    },
+    pageId: page._id?.toString() || '',
+    createdAt: now,
+    updatedAt: now,
+  };
+  
+  await toursCollection.insertOne(tour);
+  console.log(`Tour created in tours collection: ${tour.tourName.en}`);
 }
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {

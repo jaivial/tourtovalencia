@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Alert, AlertDescription } from "~/components/ui/alert";
-import { CheckCircle2, Loader2, AlertCircle, Home } from "lucide-react";
+import { CheckCircle2, Home } from "lucide-react";
 import type { Booking } from "~/types/booking";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -47,9 +47,13 @@ const iconVariants = {
 
 export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps) => {
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(200000);
+  const [countdown, setCountdown] = useState(60);
 
   useEffect(() => {
+    if (emailStatus !== 'sent' && emailStatus !== 'error') {
+      return;
+    }
+    
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -62,7 +66,7 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [navigate]);
+  }, [navigate, emailStatus]);
 
   const handleReturnHome = () => {
     navigate("/");
@@ -100,6 +104,7 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
                 {[
                   { label: "Nombre", value: booking.fullName },
                   { label: "Email", value: booking.email },
+                  { label: "Tour", value: booking.tourName || "Tour Valencia" },
                   {
                     label: "Fecha",
                     value: format(new Date(booking.date), "EEEE, d 'de' MMMM 'de' yyyy", { locale: es }),

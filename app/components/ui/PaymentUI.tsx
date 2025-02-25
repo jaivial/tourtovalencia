@@ -1,9 +1,9 @@
 import { PaymentElement, useStripe, useElements, Elements } from "@stripe/react-stripe-js";
-import { loadStripe, StripeElementsOptions, Stripe } from "@stripe/stripe-js";
+import { loadStripe, StripeElementsOptions } from "@stripe/stripe-js";
 import { Button } from "./button";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "./alert";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 declare global {
   interface Window {
@@ -17,6 +17,7 @@ interface PaymentFormProps {
   onSuccess: () => void;
   onError: (error: string) => void;
   isSubmitting: boolean;
+  tourPrice?: number;
   paymentText: {
     buttons: {
       payNow: string;
@@ -31,7 +32,7 @@ interface PaymentFormProps {
   };
 }
 
-const PaymentForm = ({ onSuccess, onError, isSubmitting, paymentText }: PaymentFormProps) => {
+const PaymentForm = ({ onSuccess, onError, isSubmitting, tourPrice = 120, paymentText }: PaymentFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -70,7 +71,20 @@ const PaymentForm = ({ onSuccess, onError, isSubmitting, paymentText }: PaymentF
 
   return (
     <form onSubmit={handleSubmit} className="w-full space-y-6">
-      <PaymentElement />
+      <PaymentElement options={{
+        fields: {
+          billingDetails: {
+            name: 'auto',
+            email: 'auto',
+          }
+        },
+        business: {
+          name: 'Viajes Olga',
+        }
+      }} />
+      <div className="text-sm text-gray-500 mb-4">
+        Tour Price: €{tourPrice} per person
+      </div>
       <Button 
         type="submit" 
         disabled={!stripe || !elements || isProcessing || isSubmitting}
@@ -94,6 +108,7 @@ interface PaymentUIProps {
   onSuccess: () => void;
   onError: (error: string) => void;
   isSubmitting: boolean;
+  tourPrice?: number;
   paymentText: {
     buttons: {
       payNow: string;
@@ -108,7 +123,7 @@ interface PaymentUIProps {
   };
 }
 
-export const PaymentUI = ({ clientSecret, onSuccess, onError, isSubmitting, paymentText }: PaymentUIProps) => {
+export const PaymentUI = ({ clientSecret, onSuccess, onError, isSubmitting, tourPrice = 120, paymentText }: PaymentUIProps) => {
   if (!window.ENV?.STRIPE_PUBLIC_KEY) {
     console.error("Stripe publishable key is not set");
     return (
@@ -146,6 +161,7 @@ export const PaymentUI = ({ clientSecret, onSuccess, onError, isSubmitting, paym
         onSuccess={onSuccess}
         onError={onError}
         isSubmitting={isSubmitting}
+        tourPrice={tourPrice}
         paymentText={paymentText}
       />
     </Elements>

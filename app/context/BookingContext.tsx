@@ -1,7 +1,6 @@
 import { createContext, useContext, useState } from "react";
-import { useBookingStates } from "~/hooks/book.hooks";
-import type { DateAvailability } from "~/models/bookingAvailability.server";
 import type { BookingFormData } from "~/hooks/book.hooks";
+import type { Tour } from "~/routes/book";
 
 export interface BookingContextState {
   currentStep: number;
@@ -27,6 +26,8 @@ export interface BookingContextState {
     gmailUser: string;
     gmailAppPassword: string;
   };
+  tours: Tour[];
+  selectedTour: Tour | null;
   setCurrentStep: (step: number) => void;
   setFormData: (data: Partial<BookingFormData>) => void;
   setErrors: (errors: Partial<Record<keyof BookingFormData, string>>) => void;
@@ -39,6 +40,13 @@ export interface BookingContextState {
         }
       | undefined
   ) => void;
+  setAvailableDates: (
+    dates: Array<{
+      date: string;
+      availablePlaces: number;
+      isAvailable: boolean;
+    }>
+  ) => void;
   setIsSubmitting: (isSubmitting: boolean) => void;
   setIsSuccess: (isSuccess: boolean) => void;
   setPaymentClientSecret: (secret: string | null) => void;
@@ -47,16 +55,27 @@ export interface BookingContextState {
   setEmailConfig: (config: {
     gmailUser: string;
     gmailAppPassword: string;
-  } | undefined) => void;
+  }) => void;
+  setSelectedTour: (tour: Tour | null) => void;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const BookingContext = createContext<BookingContextState | null>(null);
 
-interface BookingProviderProps {
+export function useBooking() {
+  const context = useContext(BookingContext);
+  if (!context) {
+    throw new Error("useBooking must be used within a BookingProvider");
+  }
+  return context;
+}
+
+export function BookingProvider({
+  children,
+  initialState,
+}: {
   children: React.ReactNode;
-  initialState: {
-    serverError?: string | null;
+  initialState?: {
     availableDates: Array<{
       date: string;
       availablePlaces: number;
@@ -67,79 +86,91 @@ interface BookingProviderProps {
       availablePlaces: number;
       isAvailable: boolean;
     };
+    serverError: string | null;
     paypalClientId?: string;
     emailConfig?: {
       gmailUser: string;
       gmailAppPassword: string;
     };
+    tours: Tour[];
   };
-}
-
-export const BookingProvider = ({ children, initialState }: BookingProviderProps) => {
+}) {
+  // Log the initial state tours
+  console.log("BookingProvider initialState tours:", initialState?.tours);
+  console.log("BookingProvider initialState tours length:", initialState?.tours?.length || 0);
+  
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<BookingFormData>({
-    date: "",
-    time: "",
-    partySize: 1,
     fullName: "",
     email: "",
     emailConfirm: "",
+    date: "",
+    time: "",
+    partySize: 1,
+    tourSlug: "",
     phoneNumber: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
-  const [selectedDateAvailability, setSelectedDateAvailability] = useState(initialState.selectedDateAvailability);
+  const [selectedDateAvailability, setSelectedDateAvailability] = useState<
+    | {
+        date: string;
+        availablePlaces: number;
+        isAvailable: boolean;
+      }
+    | undefined
+  >(initialState?.selectedDateAvailability);
+  const [availableDates, setAvailableDates] = useState<
+    Array<{
+      date: string;
+      availablePlaces: number;
+      isAvailable: boolean;
+    }>
+  >(initialState?.availableDates || []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
-  const [serverError, setServerError] = useState<string | null>(initialState.serverError || null);
-  const [emailConfig, setEmailConfig] = useState(initialState.emailConfig);
-
-  const handleSetFormData = (data: Partial<BookingFormData>) => {
-    setFormData((prev) => ({ ...prev, ...data }));
-  };
+  const [serverError, setServerError] = useState<string | null>(initialState?.serverError || null);
+  const [emailConfig, setEmailConfig] = useState(initialState?.emailConfig);
+  const tours = initialState?.tours || [];
+  const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleSetFormData({ [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  return (
-    <BookingContext.Provider
-      value={{
-        currentStep,
-        formData,
-        errors,
-        serverError,
-        availableDates: initialState.availableDates,
-        selectedDateAvailability,
-        isSubmitting,
-        isSuccess,
-        paymentClientSecret,
-        paymentIntentId,
-        paypalClientId: initialState.paypalClientId,
-        emailConfig,
-        setCurrentStep,
-        setFormData: handleSetFormData,
-        setErrors,
-        setSelectedDateAvailability,
-        setIsSubmitting,
-        setIsSuccess,
-        setPaymentClientSecret,
-        setPaymentIntentId,
-        setServerError,
-        setEmailConfig,
-        handleInputChange,
-      }}
-    >
-      {children}
-    </BookingContext.Provider>
-  );
-};
+  const value: BookingContextState = {
+    currentStep,
+    formData,
+    errors,
+    serverError,
+    availableDates,
+    selectedDateAvailability,
+    isSubmitting,
+    paypalClientId: initialState?.paypalClientId,
+    isSuccess,
+    paymentClientSecret,
+    paymentIntentId,
+    emailConfig,
+    tours,
+    selectedTour,
+    setCurrentStep,
+    setFormData: (data) => {
+      setFormData((prev) => ({ ...prev, ...data }));
+    },
+    setErrors,
+    setSelectedDateAvailability,
+    setAvailableDates,
+    setIsSubmitting,
+    setIsSuccess,
+    setPaymentClientSecret,
+    setPaymentIntentId,
+    setServerError,
+    setEmailConfig,
+    setSelectedTour,
+    handleInputChange,
+  };
 
-export const useBooking = () => {
-  const context = useContext(BookingContext);
-  if (!context) {
-    throw new Error("useBooking must be used within a BookingProvider");
-  }
-  return context;
-};
+  return <BookingContext.Provider value={value}>{children}</BookingContext.Provider>;
+}

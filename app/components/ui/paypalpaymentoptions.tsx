@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "@remix-run/react";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import type { CreateOrderActions, OnApproveData, OnApproveActions, OrderResponseBody } from "@paypal/paypal-js";
@@ -10,6 +9,13 @@ const PaymentOptions = () => {
   const states = useBooking();
   const { state } = useLanguageContext();
   const paypalText = state.booking.paypalPayment;
+  
+  // Calculate price based on selected tour price or use a default price
+  const tourPrice = states.selectedTour?.content?.en?.price || states.selectedTour?.tourPrice || 120;
+  const totalPrice = states.formData.partySize * tourPrice;
+  
+  // Format the total price to 2 decimal places for PayPal
+  const formattedTotalPrice = totalPrice.toFixed(2);
 
   const handlePaymentSuccess = async (details: OrderResponseBody) => {
     try {
@@ -35,6 +41,10 @@ const PaymentOptions = () => {
         amount: Number(amount), // Required by Booking interface
         paymentId, // Required by Booking interface
         paid: true,
+        tourName: states.selectedTour?.content?.en?.title || 
+                 states.selectedTour?.tourName?.en || 
+                 states.selectedTour?.name || 
+                 states.formData.tourSlug || ""
       };
 
       console.log("PayPal payment success, navigating with booking data:", bookingData);
@@ -66,7 +76,7 @@ const PaymentOptions = () => {
                 {
                   amount: {
                     currency_code: "EUR",
-                    value: "0.01",
+                    value: formattedTotalPrice,
                   },
                 },
               ],

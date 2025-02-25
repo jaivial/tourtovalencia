@@ -19,6 +19,25 @@ export async function action({ request }: ActionFunctionArgs) {
     const bookingsCollection = await getCollection("bookings");
     const now = new Date();
 
+    // Ensure we have the tour name
+    let tourName = bookingData.tourName || "";
+    
+    // If we have a tourSlug but no tourName, try to get it from the tours collection
+    if (bookingData.tourSlug && !tourName) {
+      try {
+        const toursCollection = await getCollection("tours");
+        const tour = await toursCollection.findOne({ slug: bookingData.tourSlug });
+        if (tour) {
+          // Fix the type conversion by first casting to unknown
+          const typedTour = tour as unknown as { tourName: { en: string; es: string } };
+          tourName = typedTour.tourName.en;
+        }
+      } catch (error) {
+        console.error("Error fetching tour name:", error);
+        // Continue with empty tour name if there's an error
+      }
+    }
+
     const bookingRecord = {
       fullName: bookingData.fullName,
       email: bookingData.email,
@@ -31,25 +50,44 @@ export async function action({ request }: ActionFunctionArgs) {
       paymentStatus: "paid",
       totalAmount: bookingData.amount / 100, // Convert from cents to euros
       phoneNumber: bookingData.phoneNumber,
+      tourSlug: bookingData.tourSlug || "",
+      tourName: tourName,
+      tourType: tourName, // Add tourType field for admin dashboard display
     };
 
     await bookingsCollection.insertOne(bookingRecord);
 
     // Send confirmation email to customer
-    await sendEmail({
-      to: bookingData.email,
-      subject: "Confirmación de Reserva - Tour Tour Valencia",
-      component: BookingConfirmationEmail({ booking: bookingData }),
-    });
+    try {
+      await sendEmail({
+        to: bookingData.email,
+        subject: "Confirmación de Reserva - Excursiones Mediterráneo",
+        component: BookingConfirmationEmail({ booking: bookingData }),
+      });
+      console.log(`✅ Customer confirmation email sent to ${bookingData.email}`);
+    } catch (emailError) {
+      console.error("Error sending customer confirmation email:", emailError);
+      // Continue execution even if customer email fails
+    }
 
-    // Send admin notification
-    await sendEmail({
-      to: "jaimebillanueba99@gmail.com",
-      subject: "Nueva Reserva Recibida",
-      component: BookingAdminEmail({ booking: bookingData }),
-    });
+    // Send admin notification with better error handling
+    try {
+      // Get admin email with fallback and logging
+      const adminEmail = process.env.ADMIN_EMAIL || "jaimebillanueba99@gmail.com";
+      console.log(`Attempting to send admin notification to: ${adminEmail}`);
+      
+      await sendEmail({
+        to: adminEmail,
+        subject: `Nueva Reserva: ${bookingData.fullName} - ${tourName || 'Excursiones Mediterráneo'}`,
+        component: BookingAdminEmail({ booking: bookingData }),
+      });
+      console.log(`✅ Admin notification email sent to ${adminEmail}`);
+    } catch (adminEmailError) {
+      console.error("Error sending admin notification email:", adminEmailError);
+      // Continue execution even if admin email fails
+    }
 
-    return json({ success: true });
+    return json({ success: true, booking: bookingData });
   } catch (error) {
     console.error("Error processing booking:", error);
     return json({ success: false, error: "Failed to process booking" });
