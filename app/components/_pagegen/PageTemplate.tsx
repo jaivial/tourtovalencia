@@ -31,7 +31,7 @@ export type PageTemplateProps = {
   section4Data?: sanJuansection4Type;
   onSection4Update: (field: keyof sanJuansection4Type, value: string) => void;
   section5Data?: sanJuanSection5Type;
-  onSection5Update: (field: keyof SanJuanSection5Type, value: string) => void;
+  onSection5Update: (field: keyof sanJuanSection5Type, value: string) => void;
   section6Data?: SanJuanSection6Type;
   onSection6Update: (field: keyof SanJuanSection6Type, value: string) => void;
   pageName: string;
@@ -39,11 +39,10 @@ export type PageTemplateProps = {
 
 const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, indexSection5Data, onIndexSection5Update, section1Data, onSection1Update, section2Data, onSection2Update, section3Data, onSection3ImageUpdate, onSection3ImageRemove, section4Data, onSection4Update, section5Data, onSection5Update, section6Data, onSection6Update, pageName }) => {
   const size = useWindowSize();
-  const { isModalOpen, openModal, closeModal } = usePublishModal();
+  const { isModalOpen, closeModal } = usePublishModal();
   const { handleCreatePage, isCreating, error } = usePageCreation();
   const width = size.width ?? 0;
   const { state } = useLanguageContext();
-  const indexSection5Text = state.index.indexSection5;
   const [loadingMessage, setLoadingMessage] = useState("Creando página...");
 
   useEffect(() => {
@@ -80,9 +79,9 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
 
   return (
     <div className="space-y-6">
-      <div className="w-full min-h-screen bg-gray-100">
-        <div className="w-full max-w-7xl mx-auto p-4">
-          <div className="flex flex-col items-center justify-center gap-6 mb-8 p-8 bg-white rounded-lg shadow-sm">
+      <div className="w-full min-h-screen bg-gray-900 overflow-x-hidden">
+        <div className="w-full mx-auto p-4 mb-8">
+          <div className="flex flex-col items-center justify-center gap-6 p-8 bg-white rounded-lg shadow-sm">
             <h2 className="text-3xl font-bold text-gray-900">{pageName}</h2>
 
             <div className="max-w-2xl text-center space-y-2 text-gray-600">
@@ -97,24 +96,25 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
               <Switch id="status" checked={status === "active"} onCheckedChange={onStatusChange} />
             </div>
           </div>
+        </div>
 
-          <div className="w-full flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
-            {indexSection5Data && onIndexSection5Update && <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />}
+        <div className="w-full flex flex-col items-start z-0 bg-blue-500 overflow-x-hidden animate-fadeIn gap-12">
+          {indexSection5Data && onIndexSection5Update && <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />}
 
-            {section1Data && <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={onSection1Update} />}
+          {section1Data && <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={onSection1Update} />}
 
-            {section2Data && <EditableSanJuanSection2 width={width} height={0} data={section2Data} onUpdate={onSection2Update} />}
+          {section2Data && <EditableSanJuanSection2 width={width} height={0} data={section2Data} onUpdate={onSection2Update} />}
 
-            {section3Data && <EditableSanJuanSection3 width={width} data={section3Data} onUpdate={onSection3ImageUpdate} onRemove={onSection3ImageRemove} />}
+          {section3Data && <EditableSanJuanSection3 width={width} data={section3Data} onUpdate={onSection3ImageUpdate} onRemove={onSection3ImageRemove} />}
 
-            {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
+          {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
 
-            {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} />}
+          {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} />}
 
-            {section6Data && <EditableSanJuanSection6 width={width} data={section6Data} onUpdate={onSection6Update} />}
-          </div>
+          {section6Data && <EditableSanJuanSection6 width={width} data={section6Data} onUpdate={onSection6Update} />}
         </div>
       </div>
+      
       {isCreating && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg shadow-lg flex items-center gap-3">
@@ -126,7 +126,8 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
           </div>
         </div>
       )}
-      <div className="flex flex-col gap-4 mt-8">
+      
+      <div className="flex flex-col gap-4 mt-8 w-full px-4">
         {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>}
         <div className="flex justify-end">
           <button onClick={handleCreatePageClick} disabled={isCreating} className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">

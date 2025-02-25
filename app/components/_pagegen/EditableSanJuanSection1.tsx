@@ -36,7 +36,7 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
         className="w-full flex flex-col items-center justify-center max-w-[1180px] gap-0 bg-white rounded-3xl p-0 shadow-lg"
       >
         {/* Background image with overlay */}
-        <div className="w-full h-[600px] relative bg-white rounded-2xl overflow-hidden mb-0 px-12">
+        <div className="w-full h-[600px] relative bg-white rounded-2xl overflow-hidden mb-0 px-0">
           <ImageUpload
             imageUrl={data.backgroundImage?.preview || ""}
             onImageChange={handleImageChange}

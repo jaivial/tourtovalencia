@@ -80,7 +80,7 @@ export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayout
       </MobileNav>
 
       {/* Main Content */}
-      <main className="min-[700px]:pl-64 p-4">
+      <main className="min-[700px]:pl-64 p-0">
         <Outlet />
       </main>
     </div>

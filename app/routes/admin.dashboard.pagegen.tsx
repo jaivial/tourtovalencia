@@ -42,7 +42,7 @@ export default function PageGeneratorRoute() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-100 p-8">
+    <div className="w-full min-h-screen bg-gray-100 p-0">
       {step === "name" ? (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Page</h2>
@@ -69,26 +69,28 @@ export default function PageGeneratorRoute() {
             <div className="w-[100px]" /> {/* Spacer for alignment */}
           </div>
 
-          <PageTemplate
-            status={status}
-            onStatusChange={handleStatusChange}
-            pageName={pageName}
-            indexSection5Data={indexSection5Data}
-            onIndexSection5Update={handleIndexSection5Update}
-            section1Data={section1Data}
-            onSection1Update={handleSection1Update}
-            section2Data={section2Data}
-            onSection2Update={handleSection2Update}
-            section3Data={section3Data}
-            onSection3ImageUpdate={handleSection3ImageUpdate}
-            onSection3ImageRemove={handleSection3ImageRemove}
-            section4Data={section4Data}
-            onSection4Update={handleSection4Update}
-            section5Data={section5Data}
-            onSection5Update={handleSection5Update}
-            section6Data={section6Data}
-            onSection6Update={handleSection6Update}
-          />
+          <div className="w-full">
+            <PageTemplate
+              status={status}
+              onStatusChange={handleStatusChange}
+              pageName={pageName}
+              indexSection5Data={indexSection5Data}
+              onIndexSection5Update={handleIndexSection5Update}
+              section1Data={section1Data}
+              onSection1Update={handleSection1Update}
+              section2Data={section2Data}
+              onSection2Update={handleSection2Update}
+              section3Data={section3Data}
+              onSection3ImageUpdate={handleSection3ImageUpdate}
+              onSection3ImageRemove={handleSection3ImageRemove}
+              section4Data={section4Data}
+              onSection4Update={handleSection4Update}
+              section5Data={section5Data}
+              onSection5Update={handleSection5Update}
+              section6Data={section6Data}
+              onSection6Update={handleSection6Update}
+            />
+          </div>
         </motion.div>
       )}
     </div>
