@@ -1,9 +1,10 @@
-// app/components/IndexSection1.tsx
+// app/components/_sanjuan/SanJuanSection2.tsx
 //UI Component: just responsible for displaying pure html with props passed from feature component
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { sanJuansection2Type } from "~/data/data";
+import { useSanJuanSection2 } from "./SanJuanSection2.hooks";
 
 // Child Props type
 type ChildProps = {
@@ -15,6 +16,7 @@ type ChildProps = {
 const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2Text }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
+  const { imageStyle } = useSanJuanSection2(SanJuanSection2Text);
 
   const commonH3Styles = `
     transition-all duration-500 ease-in-out 
@@ -128,7 +130,7 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
           <motion.img 
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.3 }}
-            src="/hero1.webp" 
+            src={imageStyle.src}
             alt="Cuevas de San Juan, visita guiada y viaje en barca." 
             className="
               w-full h-auto rounded-2xl mt-28

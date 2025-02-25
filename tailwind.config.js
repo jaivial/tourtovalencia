@@ -5,7 +5,7 @@ module.exports = {
   content: [
     "./app/**/*.{js,jsx,ts,tsx}",
     "./node_modules/shadcn/ui/dist/index.html",
-    "./node_modules/@heroui/theme/dist/components/(calendar|button|ripple|spinner).js"
+    "./node_modules/@heroui/theme/dist/components/(calendar|input|toggle|button|ripple|spinner|form).js"
   ],
   theme: {
     container: {

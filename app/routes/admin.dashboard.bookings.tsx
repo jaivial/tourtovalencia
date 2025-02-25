@@ -1,15 +1,22 @@
-import { json, type LoaderFunction, type ActionFunction } from "@remix-run/node";
+import { json, type LoaderFunctionArgs, type ActionFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useSubmit } from "@remix-run/react";
 import { AdminBookingsFeature } from "~/components/features/AdminBookingsFeature";
 import { getDb } from "~/utils/db.server";
 import { getLocalMidnight, getLocalEndOfDay, formatLocalDate, parseLocalDate } from "~/utils/date";
-import type { LoaderData, BookingData } from "~/types/booking";
+import type { LoaderData, BookingData, PaginationInfo } from "~/types/booking";
 import { updateBookingLimit } from "~/models/bookingLimit.server";
 
-export const loader: LoaderFunction = async ({ request }) => {
+// Number of bookings per page
+const ITEMS_PER_PAGE = 10;
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
     const url = new URL(request.url);
     const dateParam = url.searchParams.get("date");
+    const pageParam = url.searchParams.get("page");
+    
+    // Parse page number, default to 1 if invalid
+    const currentPage = pageParam ? Math.max(1, parseInt(pageParam)) : 1;
 
     // Create a date object that represents midnight in the local timezone
     let selectedDate: Date;
@@ -31,7 +38,22 @@ export const loader: LoaderFunction = async ({ request }) => {
     const startDate = selectedDate; // Already at midnight
     const endDate = getLocalEndOfDay(selectedDate);
 
-    // Get bookings for selected date
+    // Get total count of bookings for the selected date
+    const totalBookings = await db
+      .collection("bookings")
+      .countDocuments({
+        date: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      });
+
+    // Calculate pagination info
+    const totalPages = Math.max(1, Math.ceil(totalBookings / ITEMS_PER_PAGE));
+    const validatedPage = Math.min(currentPage, totalPages);
+    const skip = (validatedPage - 1) * ITEMS_PER_PAGE;
+
+    // Get paginated bookings for selected date
     const bookings = await db
       .collection("bookings")
       .find({
@@ -40,6 +62,8 @@ export const loader: LoaderFunction = async ({ request }) => {
           $lte: endDate,
         },
       })
+      .skip(skip)
+      .limit(ITEMS_PER_PAGE)
       .toArray();
 
     // Get booking limit
@@ -66,13 +90,22 @@ export const loader: LoaderFunction = async ({ request }) => {
     // Format the date as YYYY-MM-DD to avoid timezone issues
     const formattedDate = formatLocalDate(selectedDate);
 
+    // Create pagination info
+    const paginationInfo: PaginationInfo = {
+      currentPage: validatedPage,
+      totalPages,
+      totalItems: totalBookings,
+      itemsPerPage: ITEMS_PER_PAGE
+    };
+
     return json<LoaderData>({
       bookings: processedBookings,
       limit: {
         maxBookings: limitDoc?.maxBookings ?? 10, // Use nullish coalescing to only default when undefined/null
-        currentBookings: bookings.length,
+        currentBookings: totalBookings, // Use total bookings count
       },
       selectedDate: formattedDate,
+      pagination: paginationInfo,
     });
   } catch (error) {
     console.error("Error loading bookings:", error);
@@ -85,12 +118,18 @@ export const loader: LoaderFunction = async ({ request }) => {
         currentBookings: 0,
       },
       selectedDate: formattedDate,
+      pagination: {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        itemsPerPage: ITEMS_PER_PAGE
+      },
       error: "Failed to load bookings",
     });
   }
 };
 
-export const action: ActionFunction = async ({ request }) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
@@ -134,6 +173,8 @@ export default function AdminDashboardBookings() {
     // Create a FormData object
     const formData = new FormData();
     formData.append("date", formattedDate);
+    // Reset to page 1 when changing date
+    formData.append("page", "1");
 
     // Submit the form with the new date
     submit(formData, {

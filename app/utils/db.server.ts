@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 import { ensureDbIndexes } from "./db.schema.server";
-import type { Translation } from "./db.schema.server";
+import type { Translation, Page } from "./db.schema.server";
 
 let db: MongoClient | null = null;
 
@@ -42,6 +42,10 @@ export async function getCollection<T>(collectionName: string) {
 // Type-safe collection getters
 export async function getTranslationsCollection() {
   return getCollection<Translation>("translations");
+}
+
+export async function getPagesCollection() {
+  return getCollection<Page>("pages");
 }
 
 export { db };

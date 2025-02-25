@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { useState, useEffect } from "react";
+import type { PaginationInfo } from "~/types/booking";
 
 export type Booking = {
   _id: string;
@@ -34,24 +35,26 @@ type AdminBookingsUIProps = {
   selectedDate: Date;
   bookings: Booking[];
   bookingLimit: BookingLimit;
+  pagination: PaginationInfo;
   isLoading: boolean;
   error: string | null;
   onDateChange: (date: Date) => void;
   onUpdateMaxBookings: (newMax: number) => void;
   onCancelBooking?: (bookingId: string) => void;
-  strings: any;
+  onPageChange: (page: number) => void;
+  strings: Record<string, unknown>;
 };
 
 export const AdminBookingsUI = ({
   selectedDate,
   bookings,
   bookingLimit,
+  pagination,
   isLoading,
-  error,
   onDateChange,
   onUpdateMaxBookings,
   onCancelBooking,
-  strings,
+  onPageChange,
 }: AdminBookingsUIProps) => {
   const [maxBookings, setMaxBookings] = useState(bookingLimit.maxBookings.toString());
 
@@ -86,6 +89,127 @@ export const AdminBookingsUI = ({
     if (!isNaN(newMax) && newMax >= 0) {
       onUpdateMaxBookings(newMax);
     }
+  };
+
+  // Generate pagination buttons
+  const renderPaginationButtons = () => {
+    const { currentPage, totalPages } = pagination;
+    
+    // If there's only one page, don't show pagination
+    if (totalPages <= 1) return null;
+    
+    const buttons = [];
+    
+    // Previous button
+    buttons.push(
+      <Button
+        key="prev"
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+        disabled={currentPage === 1 || isLoading}
+        className="mx-1"
+        aria-label="Previous page"
+      >
+        &lt;
+      </Button>
+    );
+    
+    // Page number buttons
+    const maxVisibleButtons = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
+    const endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
+    
+    // Adjust start page if we're near the end
+    if (endPage - startPage + 1 < maxVisibleButtons) {
+      startPage = Math.max(1, endPage - maxVisibleButtons + 1);
+    }
+    
+    // First page button (if not visible in the range)
+    if (startPage > 1) {
+      buttons.push(
+        <Button
+          key="first"
+          variant={1 === currentPage ? "default" : "outline"}
+          size="sm"
+          onClick={() => onPageChange(1)}
+          disabled={isLoading}
+          className="mx-1"
+          aria-label="Go to first page"
+        >
+          1
+        </Button>
+      );
+      
+      // Ellipsis if there's a gap
+      if (startPage > 2) {
+        buttons.push(
+          <span key="ellipsis1" className="mx-1">...</span>
+        );
+      }
+    }
+    
+    // Page buttons
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <Button
+          key={i}
+          variant={i === currentPage ? "default" : "outline"}
+          size="sm"
+          onClick={() => onPageChange(i)}
+          disabled={isLoading}
+          className="mx-1"
+          aria-label={`Go to page ${i}`}
+        >
+          {i}
+        </Button>
+      );
+    }
+    
+    // Last page button (if not visible in the range)
+    if (endPage < totalPages) {
+      // Ellipsis if there's a gap
+      if (endPage < totalPages - 1) {
+        buttons.push(
+          <span key="ellipsis2" className="mx-1">...</span>
+        );
+      }
+      
+      buttons.push(
+        <Button
+          key="last"
+          variant={totalPages === currentPage ? "default" : "outline"}
+          size="sm"
+          onClick={() => onPageChange(totalPages)}
+          disabled={isLoading}
+          className="mx-1"
+          aria-label="Go to last page"
+        >
+          {totalPages}
+        </Button>
+      );
+    }
+    
+    // Next button
+    buttons.push(
+      <Button
+        key="next"
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+        disabled={currentPage === totalPages || isLoading}
+        className="mx-1"
+        aria-label="Next page"
+      >
+        &gt;
+      </Button>
+    );
+    
+    return (
+      <div className="flex items-center justify-center mt-4 mb-2">
+        {buttons}
+      </div>
+    );
   };
 
   return (
@@ -242,12 +366,27 @@ export const AdminBookingsUI = ({
 
         {/* Bookings Table */}
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Bookings for {selectedDate.toLocaleDateString()}
+              </h2>
+              <div className="text-sm text-gray-500">
+                Showing {pagination.currentPage === pagination.totalPages ? 
+                  (pagination.totalItems === 0 ? 0 : ((pagination.currentPage - 1) * pagination.itemsPerPage + 1) + '-' + pagination.totalItems) : 
+                  ((pagination.currentPage - 1) * pagination.itemsPerPage + 1) + '-' + (pagination.currentPage * pagination.itemsPerPage)
+                } of {pagination.totalItems} bookings
+              </div>
+            </div>
+          </div>
+          
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
+                <TableHead>Tour Type</TableHead>
                 <TableHead>People</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Payment</TableHead>
@@ -255,44 +394,67 @@ export const AdminBookingsUI = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {bookings.map((booking) => (
-                <TableRow key={booking._id}>
-                  <TableCell>{booking.name}</TableCell>
-                  <TableCell>{booking.email}</TableCell>
-                  <TableCell>{booking.phoneNumber}</TableCell>
-                  <TableCell>{booking.numberOfPeople}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      booking.status === 'confirmed' 
-                        ? 'bg-green-100 text-green-800' 
-                        : booking.status === 'pending' 
-                        ? 'bg-yellow-100 text-yellow-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {booking.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      booking.paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {booking.paid ? 'Paid' : 'Unpaid'}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => onCancelBooking?.(booking._id)}
-                      disabled={booking.status === 'cancelled'}
-                    >
-                      Cancel
-                    </Button>
+              {bookings.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                    No bookings found for this date
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                bookings.map((booking) => (
+                  <TableRow key={booking._id}>
+                    <TableCell className="font-medium">{booking.name}</TableCell>
+                    <TableCell>{booking.email}</TableCell>
+                    <TableCell>{booking.phoneNumber}</TableCell>
+                    <TableCell>{booking.tourType}</TableCell>
+                    <TableCell>{booking.numberOfPeople}</TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        booking.status === 'confirmed' 
+                          ? 'bg-green-100 text-green-800' 
+                          : booking.status === 'cancelled' 
+                          ? 'bg-red-100 text-red-800' 
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {booking.status}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        booking.paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {booking.paid ? 'Paid' : 'Pending'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          View
+                        </Button>
+                        {onCancelBooking && booking.status !== 'cancelled' && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => onCancelBooking(booking._id)}
+                          >
+                            Cancel
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
+          
+          {/* Pagination */}
+          {renderPaginationButtons()}
         </div>
       </div>
     </div>
