@@ -344,7 +344,7 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
         )}
       </motion.div>
       
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0, height: 0 }}
         animate={{ 
           opacity: isDateSelected && selectedDateAvailability?.isAvailable && !fetchError && availabilityFetcher.state === "idle" ? 1 : 0,
@@ -395,7 +395,7 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
             )}
           </>
         )}
-      </motion.div>
+      </motion.div> */}
       
       {/* Loading indicators */}
       {isLoading && (
