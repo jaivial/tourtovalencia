@@ -37,7 +37,10 @@ async function main() {
                     includes: 'Guía profesional, entradas',
                     meetingPoint: 'Plaza de la Virgen'
                 }
-            }
+            },
+            status: 'active',
+            createdAt: new Date(),
+            updatedAt: new Date()
         },
         {
             _id: new ObjectId(),
@@ -61,7 +64,10 @@ async function main() {
                     includes: 'Transporte, paseo en barca, guía profesional',
                     meetingPoint: 'Estación de Autobuses de Valencia'
                 }
-            }
+            },
+            status: 'active',
+            createdAt: new Date(),
+            updatedAt: new Date()
         },
         {
             _id: new ObjectId(),
@@ -85,24 +91,76 @@ async function main() {
                     includes: 'Transporte, cata de vinos, aperitivos, guía profesional',
                     meetingPoint: 'Estación del Norte de Valencia'
                 }
-            }
+            },
+            status: 'active',
+            createdAt: new Date(),
+            updatedAt: new Date()
         }
     ];
 
     try {
-        // Check if tours already exist
+        // Check if tours already exist in pages collection
         const existingTours = await db.collection('pages').find({ template: 'tour' }).toArray();
 
         if (existingTours.length > 0) {
-            console.log(`Found ${existingTours.length} existing tours. Skipping insertion.`);
+            console.log(`Found ${existingTours.length} existing tours in pages collection. Skipping insertion.`);
             console.log('Existing tours:');
             existingTours.forEach(tour => {
                 console.log(`- ${tour.name} (${tour.slug})`);
             });
         } else {
-            // Insert sample tours
+            // Insert sample tours to pages collection
             const result = await db.collection('pages').insertMany(sampleTours);
-            console.log(`${result.insertedCount} sample tours added successfully!`);
+            console.log(`${result.insertedCount} sample tours added to pages collection successfully!`);
+        }
+
+        // Now add the tours to the tours collection
+        // First check if tours already exist in tours collection
+        const existingToursInToursCollection = await db.collection('tours').find({}).toArray();
+
+        if (existingToursInToursCollection.length > 0) {
+            console.log(`Found ${existingToursInToursCollection.length} existing tours in tours collection. Skipping insertion.`);
+            console.log('Existing tours in tours collection:');
+            existingToursInToursCollection.forEach(tour => {
+                console.log(`- ${tour.tourName?.en || tour.slug}`);
+            });
+        } else {
+            // Create tours for the tours collection
+            const toursCollectionData = sampleTours.map(page => {
+                const now = new Date();
+                return {
+                    slug: page.slug,
+                    tourName: {
+                        en: page.content.en.title,
+                        es: page.content.es.title
+                    },
+                    tourPrice: page.content.en.price,
+                    status: page.status,
+                    description: {
+                        en: page.content.en.description,
+                        es: page.content.es.description
+                    },
+                    duration: {
+                        en: page.content.en.duration,
+                        es: page.content.es.duration
+                    },
+                    includes: {
+                        en: page.content.en.includes,
+                        es: page.content.es.includes
+                    },
+                    meetingPoint: {
+                        en: page.content.en.meetingPoint,
+                        es: page.content.es.meetingPoint
+                    },
+                    pageId: page._id.toString(),
+                    createdAt: now,
+                    updatedAt: now
+                };
+            });
+
+            // Insert to tours collection
+            const toursResult = await db.collection('tours').insertMany(toursCollectionData);
+            console.log(`${toursResult.insertedCount} sample tours added to tours collection successfully!`);
         }
     } catch (error) {
         console.error('Error adding sample tours:', error);

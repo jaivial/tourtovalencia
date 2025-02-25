@@ -2,15 +2,14 @@ import { json, type LoaderFunction, type ActionFunctionArgs } from "@remix-run/n
 import { useLoaderData } from "@remix-run/react";
 import { BookingProvider } from "~/context/BookingContext";
 import { BookingFeature } from "~/components/_book/BookingFeature";
-import { PaymentModalFeature } from "~/components/features/PaymentModalFeature";
 import { getAvailableDatesInRange, getDateAvailability } from "~/models/bookingAvailability.server";
 import { createCheckoutSession } from "~/services/stripe.server";
 import { addMonths } from "date-fns";
 import type { Booking } from "~/types/booking";
 import { useEffect } from "react";
-import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import type { Tour } from "./book";
-import { getDb } from "~/utils/db.server";
+import { getToursCollection } from "~/utils/db.server";
 
 export type LoaderData = {
   availableDates: Array<{
@@ -66,9 +65,9 @@ export const loader: LoaderFunction = async ({ request }) => {
 
     const paypalClientId = process.env.PAYPAL_CLIENT_ID;
 
-    // Get tours from the database
-    const db = await getDb();
-    const tours = await db.collection("pages").find({ template: "tour" }).toArray();
+    // Get tours from the tours collection instead of pages collection
+    const toursCollection = await getToursCollection();
+    const tours = await toursCollection.find({ status: 'active' }).toArray();
     
     // Debug: Log the tours from the database
     console.log("Tours from database:", tours);
@@ -79,42 +78,34 @@ export const loader: LoaderFunction = async ({ request }) => {
       throw new Error("Tours is not an array");
     }
     
-    // Format the tours with proper validation
+    // Format the tours to match the Tour type
     const formattedTours = tours
-      .filter(tour => tour && tour._id && tour.slug && tour.content)
+      .filter(tour => tour && tour._id && tour.slug)
       .map(tour => {
-        // Ensure the tour has the required fields
-        if (!tour.content || !tour.content.en || !tour.content.es) {
-          console.error("Tour is missing content:", tour);
-          return null;
-        }
-        
-        // Ensure the tour content has the required fields
-        if (!tour.content.en.title || !tour.content.en.price || 
-            !tour.content.es.title || !tour.content.es.price) {
-          console.error("Tour content is missing required fields:", tour.content);
-          return null;
-        }
-        
         return {
           _id: tour._id.toString(),
           slug: tour.slug,
-          name: tour.name || tour.slug,
+          name: tour.tourName.en,
           content: {
             en: {
-              title: tour.content.en.title,
-              price: tour.content.en.price,
-              ...tour.content.en
+              title: tour.tourName.en,
+              price: tour.tourPrice,
+              description: tour.description.en,
+              duration: tour.duration.en,
+              includes: tour.includes.en,
+              meetingPoint: tour.meetingPoint.en
             },
             es: {
-              title: tour.content.es.title,
-              price: tour.content.es.price,
-              ...tour.content.es
+              title: tour.tourName.es,
+              price: tour.tourPrice,
+              description: tour.description.es,
+              duration: tour.duration.es,
+              includes: tour.includes.es,
+              meetingPoint: tour.meetingPoint.es
             }
           }
         };
-      })
-      .filter(Boolean) as Tour[]; // Filter out null values
+      }) as Tour[]; // Cast to Tour type
     
     // Debug: Log the formatted tours
     console.log("Formatted tours:", formattedTours);

@@ -19,6 +19,25 @@ export async function action({ request }: ActionFunctionArgs) {
     const bookingsCollection = await getCollection("bookings");
     const now = new Date();
 
+    // Ensure we have the tour name
+    let tourName = bookingData.tourName || "";
+    
+    // If we have a tourSlug but no tourName, try to get it from the tours collection
+    if (bookingData.tourSlug && !tourName) {
+      try {
+        const toursCollection = await getCollection("tours");
+        const tour = await toursCollection.findOne({ slug: bookingData.tourSlug });
+        if (tour) {
+          // Use type assertion to access tourName property
+          const typedTour = tour as { tourName: { en: string; es: string } };
+          tourName = typedTour.tourName.en;
+        }
+      } catch (error) {
+        console.error("Error fetching tour name:", error);
+        // Continue with empty tour name if there's an error
+      }
+    }
+
     const bookingRecord = {
       fullName: bookingData.fullName,
       email: bookingData.email,
@@ -32,7 +51,8 @@ export async function action({ request }: ActionFunctionArgs) {
       totalAmount: bookingData.amount / 100, // Convert from cents to euros
       phoneNumber: bookingData.phoneNumber,
       tourSlug: bookingData.tourSlug || "",
-      tourName: bookingData.tourName || "",
+      tourName: tourName,
+      tourType: tourName, // Add tourType field for admin dashboard display
     };
 
     await bookingsCollection.insertOne(bookingRecord);

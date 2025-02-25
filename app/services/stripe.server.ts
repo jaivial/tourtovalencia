@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { BookingFormData } from "~/hooks/book.hooks";
+import { getToursCollection } from "~/utils/db.server";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY must be defined");
@@ -71,18 +72,18 @@ export async function createCheckoutSession(booking: BookingFormData, baseUrl: s
     throw new Error(`Invalid base URL provided: ${baseUrl}`);
   }
 
-  // Get tour information from the database if tourSlug is provided
+  // Get tour information from the tours collection if tourSlug is provided
   let tourName = "Excursión a Cuevas de San Jose";
   let tourPrice = 0.5; // Default price in EUR
   
   if (booking.tourSlug) {
     try {
-      const db = await import("~/utils/db.server").then(module => module.getDb());
-      const tour = await db.collection("pages").findOne({ slug: booking.tourSlug, template: "tour" });
+      const toursCollection = await getToursCollection();
+      const tour = await toursCollection.findOne({ slug: booking.tourSlug });
       
       if (tour) {
-        tourName = tour.content.en.title;
-        tourPrice = tour.content.en.price || tourPrice;
+        tourName = tour.tourName.en;
+        tourPrice = tour.tourPrice || tourPrice;
       }
     } catch (error) {
       console.error("Error fetching tour information:", error);
