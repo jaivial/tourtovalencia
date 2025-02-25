@@ -28,6 +28,9 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     setSelectedTour
   } = useBooking();
 
+  // Debug: Log the tours array
+  console.log("Tours in BookingDateStep:", tours);
+
   const fetcher = useFetcher<LoaderData>();
 
   // Filter out any invalid dates and convert strings to Date objects

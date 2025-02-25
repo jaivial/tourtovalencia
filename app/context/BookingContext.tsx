@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { BookingFormData } from "~/hooks/book.hooks";
 import type { Tour } from "~/routes/book";
 
@@ -79,6 +79,12 @@ interface BookingProviderProps {
 }
 
 export const BookingProvider = ({ children, initialState }: BookingProviderProps) => {
+  // Ensure tours is always an array, even if undefined
+  const tours = initialState.tours || [];
+  
+  // Debug: Log the initial state tours
+  console.log("Initial state tours in BookingProvider:", tours);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<BookingFormData>({
     date: "",
@@ -99,6 +105,11 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
   const [serverError, setServerError] = useState<string | null>(initialState.serverError || null);
   const [emailConfig, setEmailConfig] = useState(initialState.emailConfig);
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
+
+  // Debug: Log when tours change
+  useEffect(() => {
+    console.log("Tours in BookingContext:", tours);
+  }, [tours]);
 
   const handleSetFormData = (data: Partial<BookingFormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -123,7 +134,7 @@ export const BookingProvider = ({ children, initialState }: BookingProviderProps
         paymentIntentId,
         paypalClientId: initialState.paypalClientId,
         emailConfig,
-        tours: initialState.tours,
+        tours,
         selectedTour,
         setCurrentStep,
         setFormData: handleSetFormData,

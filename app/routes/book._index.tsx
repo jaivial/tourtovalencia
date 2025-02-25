@@ -70,12 +70,59 @@ export const loader: LoaderFunction = async ({ request }) => {
     const db = await getDb();
     const tours = await db.collection("pages").find({ template: "tour" }).toArray();
     
-    const formattedTours = tours.map(tour => ({
-      _id: tour._id.toString(),
-      slug: tour.slug,
-      name: tour.name,
-      content: tour.content
-    }));
+    // Debug: Log the tours from the database
+    console.log("Tours from database:", tours);
+    
+    // Ensure tours is an array and has the required fields
+    if (!Array.isArray(tours)) {
+      console.error("Tours is not an array:", tours);
+      throw new Error("Tours is not an array");
+    }
+    
+    // Format the tours with proper validation
+    const formattedTours = tours
+      .filter(tour => tour && tour._id && tour.slug && tour.content)
+      .map(tour => {
+        // Ensure the tour has the required fields
+        if (!tour.content || !tour.content.en || !tour.content.es) {
+          console.error("Tour is missing content:", tour);
+          return null;
+        }
+        
+        // Ensure the tour content has the required fields
+        if (!tour.content.en.title || !tour.content.en.price || 
+            !tour.content.es.title || !tour.content.es.price) {
+          console.error("Tour content is missing required fields:", tour.content);
+          return null;
+        }
+        
+        return {
+          _id: tour._id.toString(),
+          slug: tour.slug,
+          name: tour.name || tour.slug,
+          content: {
+            en: {
+              title: tour.content.en.title,
+              price: tour.content.en.price,
+              ...tour.content.en
+            },
+            es: {
+              title: tour.content.es.title,
+              price: tour.content.es.price,
+              ...tour.content.es
+            }
+          }
+        };
+      })
+      .filter(Boolean) as Tour[]; // Filter out null values
+    
+    // Debug: Log the formatted tours
+    console.log("Formatted tours:", formattedTours);
+    
+    // Ensure we have at least one tour
+    if (formattedTours.length === 0) {
+      console.error("No valid tours found");
+    }
 
     return json<LoaderData>({
       availableDates,
@@ -137,6 +184,11 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function BookIndex() {
   const { availableDates, selectedDateAvailability, paypalClientId, emailConfig, tours } = useLoaderData<typeof loader>();
+  
+  // Debug: Log the tours from the loader data
+  useEffect(() => {
+    console.log("Tours in BookIndex component:", tours);
+  }, [tours]);
 
   return (
     <BookingProvider
