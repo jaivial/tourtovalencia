@@ -18,7 +18,7 @@ export default function PageGeneratorRoute() {
     section5Data,
     section6Data,
     indexSection5Data,
-    handleIndexSection5Update,
+    timelineData,
     setPageName,
     handleNext,
     handleBack,
@@ -34,6 +34,8 @@ export default function PageGeneratorRoute() {
     handleSection4Update,
     handleSection5Update,
     handleSection6Update,
+    handleIndexSection5Update,
+    handleTimelineUpdate,
   } = usePageGenerator();
 
   const containerVariants = {
@@ -90,6 +92,8 @@ export default function PageGeneratorRoute() {
               onSection5Update={handleSection5Update}
               section6Data={section6Data}
               onSection6Update={handleSection6Update}
+              timelineData={timelineData}
+              onTimelineUpdate={handleTimelineUpdate}
             />
           </div>
         </motion.div>

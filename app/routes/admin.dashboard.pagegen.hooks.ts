@@ -8,6 +8,7 @@ import {
   sanJuanSection5Type, 
   SanJuanSection6Type 
 } from "~/data/data";
+import { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 
 // Default data
 const DEFAULT_SECTION1_DATA: sanJuanSection1Type = {
@@ -71,6 +72,21 @@ const DEFAULT_INDEX_SECTION5_DATA: IndexSection5Type = {
   secondH3: ""
 };
 
+const DEFAULT_TIMELINE_DATA: TimelineDataType = {
+  title: "Cronología del Viaje",
+  subtitle: "Descubre el itinerario paso a paso",
+  steps: [
+    {
+      title: "Salida",
+      description: "Punto de encuentro y salida desde Valencia"
+    },
+    {
+      title: "Llegada",
+      description: "Llegada al destino y bienvenida"
+    }
+  ]
+};
+
 export const usePageGenerator = () => {
   const [step, setStep] = useState<'name' | 'template'>('name');
   const [pageName, setPageName] = useState('');
@@ -84,6 +100,7 @@ export const usePageGenerator = () => {
   const [section5Data, setSection5Data] = useState<sanJuanSection5Type>(DEFAULT_SECTION5_DATA);
   const [section6Data, setSection6Data] = useState<SanJuanSection6Type>(DEFAULT_SECTION6_DATA);
   const [indexSection5Data, setIndexSection5Data] = useState<IndexSection5Type>(DEFAULT_INDEX_SECTION5_DATA);
+  const [timelineData, setTimelineData] = useState<TimelineDataType>(DEFAULT_TIMELINE_DATA);
 
   // Section 1 handlers
   const handleSection1Update = (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
@@ -195,6 +212,14 @@ export const usePageGenerator = () => {
     }));
   };
 
+  // Timeline handler
+  const handleTimelineUpdate = (field: keyof TimelineDataType, value: string | Array<{title: string, description: string}>) => {
+    setTimelineData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   // Status handler
   const handleStatusChange = (checked: boolean) => {
     setStatus(checked ? 'active' : 'upcoming');
@@ -228,6 +253,7 @@ export const usePageGenerator = () => {
     section5Data,
     section6Data,
     indexSection5Data,
+    timelineData,
 
     // Setters
     setPageName,
@@ -247,6 +273,7 @@ export const usePageGenerator = () => {
     handleSection5Update,
     handleSection6Update,
     handleIndexSection5Update,
+    handleTimelineUpdate,
     handleStatusChange,
   };
 };

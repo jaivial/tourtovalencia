@@ -10,6 +10,7 @@ import EditableSanJuanSection3 from "./EditableSanJuanSection3";
 import EditableSanJuanSection4 from "./EditableSanJuanSection4";
 import EditableSanJuanSection5 from "./EditableSanJuanSection5";
 import EditableSanJuanSection6 from "./EditableSanJuanSection6";
+import { EditableTimelineFeature, TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 import { PublishModal } from "./PublishModal";
@@ -34,10 +35,12 @@ export type PageTemplateProps = {
   onSection5Update: (field: keyof sanJuanSection5Type, value: string) => void;
   section6Data?: SanJuanSection6Type;
   onSection6Update: (field: keyof SanJuanSection6Type, value: string) => void;
+  timelineData?: TimelineDataType;
+  onTimelineUpdate?: (field: keyof TimelineDataType, value: string | Array<{title: string, description: string}>) => void;
   pageName: string;
 };
 
-const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, indexSection5Data, onIndexSection5Update, section1Data, onSection1Update, section2Data, onSection2Update, section3Data, onSection3ImageUpdate, onSection3ImageRemove, section4Data, onSection4Update, section5Data, onSection5Update, section6Data, onSection6Update, pageName }) => {
+const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, indexSection5Data, onIndexSection5Update, section1Data, onSection1Update, section2Data, onSection2Update, section3Data, onSection3ImageUpdate, onSection3ImageRemove, section4Data, onSection4Update, section5Data, onSection5Update, section6Data, onSection6Update, timelineData, onTimelineUpdate, pageName }) => {
   const size = useWindowSize();
   const { isModalOpen, closeModal } = usePublishModal();
   const { handleCreatePage, isCreating, error } = usePageCreation();
@@ -60,7 +63,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
   }, [isCreating]);
 
   const handleCreatePageClick = () => {
-    const pageContent = {
+    const content = {
       indexSection5: indexSection5Data,
       section1: section1Data,
       section2: section2Data,
@@ -68,12 +71,13 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
       section4: section4Data,
       section5: section5Data,
       section6: section6Data,
+      timeline: timelineData
     };
 
     handleCreatePage({
       name: pageName,
-      content: pageContent,
-      status: status,
+      content,
+      status
     });
   };
 
@@ -156,6 +160,18 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
           cancelText: "Cancelar",
         }}
       />
+
+      <div className="grid grid-cols-1 gap-8 mb-8">
+        {timelineData && onTimelineUpdate && (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-2xl font-bold mb-6">Línea de Tiempo</h2>
+            <EditableTimelineFeature 
+              timelineData={timelineData}
+              onTimelineUpdate={onTimelineUpdate}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
