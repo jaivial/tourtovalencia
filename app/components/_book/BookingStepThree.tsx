@@ -22,6 +22,7 @@ interface BookingStepThreeProps {
     people: string;
     priceCalculation: string;
     paymentMessage: string;
+    selectedTour: string;
   };
 }
 
@@ -40,6 +41,7 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
                   formData.tourSlug || 
                   bookingStepThreeText.notSelected;
 
+  // Create the price calculation text with the dynamic tour price
   const priceCalculation = bookingStepThreeText.priceCalculation
     .replace('{partySize}', formData.partySize.toString())
     .replace('{price}', tourPrice.toString());
@@ -93,7 +95,7 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
             <div className="flex flex-col space-y-1 sm:space-y-0 items-center sm:items-start">
               <span className="text-muted-foreground flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                {bookingStepThreeText.labels.tour}
+                {bookingStepThreeText.selectedTour || bookingStepThreeText.labels.tour}
               </span>
               <span className="sm:hidden">{tourName}</span>
             </div>

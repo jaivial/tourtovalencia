@@ -519,6 +519,7 @@
         "bookingSummary": "Booking Summary",
         "personalDetails": "Personal Details",
         "bookingDetails": "Booking Details",
+        "selectedTour": "Selected Tour",
         "labels": {
           "name": "Name:",
           "email": "Email:",
@@ -529,7 +530,7 @@
         },
         "notSelected": "Not selected",
         "people": "people",
-        "priceCalculation": "Price calculation: {partySize} people × €120 per person",
+        "priceCalculation": "Price calculation: {partySize} people × €{price} per person",
         "paymentMessage": "Your booking will be confirmed after successful payment. Click \"Book Now\" to proceed to payment."
       },
       "payment": {
@@ -1076,6 +1077,7 @@
         "bookingSummary": "Resumen de la Reserva",
         "personalDetails": "Datos Personales",
         "bookingDetails": "Detalles de la Reserva",
+        "selectedTour": "Tour Seleccionado",
         "labels": {
           "name": "Nombre:",
           "email": "Correo:",
@@ -1086,7 +1088,7 @@
         },
         "notSelected": "No seleccionado",
         "people": "personas",
-        "priceCalculation": "Cálculo del precio: {partySize} personas × €120 por persona",
+        "priceCalculation": "Cálculo del precio: {partySize} personas × €{price} por persona",
         "paymentMessage": "Tu reserva se confirmará después del pago exitoso. Haz clic en \"Reservar Ahora\" para proceder al pago."
       },
       "payment": {
