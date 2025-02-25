@@ -30,9 +30,17 @@ export interface BookingLimit {
   currentBookings: number;
 }
 
+export interface PaginationInfo {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+}
+
 export interface LoaderData {
   bookings: BookingData[];
   limit: BookingLimit;
   selectedDate: string;
+  pagination: PaginationInfo;
   error?: string;
 }

@@ -22,6 +22,7 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange }: AdminBookings
     })),
     initialLimit: loaderData.limit,
     initialDate: parseLocalDate(loaderData.selectedDate),
+    initialPagination: loaderData.pagination,
   });
 
   // Update states when loader data changes
@@ -34,6 +35,7 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange }: AdminBookings
       specialRequests: booking.specialRequests || ''
     })));
     states.setBookingLimit(loaderData.limit);
+    states.setPagination(loaderData.pagination);
   }, [loaderData]);
 
   const handleUpdateMaxBookings = (newMax: number) => {
@@ -51,16 +53,25 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange }: AdminBookings
     submit(formData, { method: "post" });
   };
 
+  const handlePageChange = (page: number) => {
+    const formData = new FormData();
+    formData.append("date", loaderData.selectedDate);
+    formData.append("page", page.toString());
+    submit(formData, { method: "get", replace: true });
+  };
+
   return (
     <AdminBookingsUI
       selectedDate={parseLocalDate(loaderData.selectedDate)}
       bookings={states.bookings}
       bookingLimit={states.bookingLimit}
+      pagination={states.pagination}
       isLoading={states.isLoading}
       error={states.error}
       onDateChange={onDateChange}
       onUpdateMaxBookings={handleUpdateMaxBookings}
       onCancelBooking={handleCancelBooking}
+      onPageChange={handlePageChange}
       strings={state.admin.bookings}
     />
   );
