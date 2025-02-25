@@ -8,6 +8,7 @@ import {
   sanJuanSection5Type, 
   SanJuanSection6Type 
 } from "~/data/data";
+import { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 
 // Default data
 const DEFAULT_SECTION1_DATA: sanJuanSection1Type = {
@@ -34,9 +35,7 @@ const DEFAULT_SECTION2_DATA: sanJuansection2Type = {
 };
 
 const DEFAULT_SECTION3_DATA: sanJuanSection3Type = {
-  images: Array(8).fill({ source: "", alt: "Gallery image" }),
-  source: "",
-  alt: ""
+  images: Array(8).fill({ source: "", alt: "Gallery image" })
 };
 
 const DEFAULT_SECTION4_DATA: sanJuansection4Type = {
@@ -73,6 +72,21 @@ const DEFAULT_INDEX_SECTION5_DATA: IndexSection5Type = {
   secondH3: ""
 };
 
+const DEFAULT_TIMELINE_DATA: TimelineDataType = {
+  title: "Cronología del Viaje",
+  subtitle: "Descubre el itinerario paso a paso",
+  steps: [
+    {
+      title: "Salida",
+      description: "Punto de encuentro y salida desde Valencia"
+    },
+    {
+      title: "Llegada",
+      description: "Llegada al destino y bienvenida"
+    }
+  ]
+};
+
 export const usePageGenerator = () => {
   const [step, setStep] = useState<'name' | 'template'>('name');
   const [pageName, setPageName] = useState('');
@@ -86,9 +100,11 @@ export const usePageGenerator = () => {
   const [section5Data, setSection5Data] = useState<sanJuanSection5Type>(DEFAULT_SECTION5_DATA);
   const [section6Data, setSection6Data] = useState<SanJuanSection6Type>(DEFAULT_SECTION6_DATA);
   const [indexSection5Data, setIndexSection5Data] = useState<IndexSection5Type>(DEFAULT_INDEX_SECTION5_DATA);
+  const [timelineData, setTimelineData] = useState<TimelineDataType>(DEFAULT_TIMELINE_DATA);
+  const [price, setPrice] = useState<number>(0);
 
   // Section 1 handlers
-  const handleSection1Update = (field: keyof sanJuanSection1Type, value: string) => {
+  const handleSection1Update = (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
     setSection1Data(prev => ({
       ...prev,
       [field]: value
@@ -111,7 +127,7 @@ export const usePageGenerator = () => {
   };
 
   // Section 2 handlers
-  const handleSection2Update = (field: keyof sanJuansection2Type, value: string) => {
+  const handleSection2Update = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
     setSection2Data(prev => ({
       ...prev,
       [field]: value
@@ -134,13 +150,18 @@ export const usePageGenerator = () => {
   };
 
   // Section 3 handlers
-  const handleSection3ImageUpdate = (index: number, base64String: string) => {
-    setSection3Data(prev => ({
-      ...prev,
-      images: prev.images.map((img, i) => 
-        i === index ? { source: base64String, alt: "Gallery image" } : img
-      )
-    }));
+  const handleSection3ImageUpdate = (index: number, file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64String = e.target?.result as string;
+      setSection3Data(prev => ({
+        ...prev,
+        images: prev.images.map((img, i) => 
+          i === index ? { source: base64String, alt: "Gallery image" } : img
+        )
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSection3ImageRemove = (index: number) => {
@@ -192,6 +213,25 @@ export const usePageGenerator = () => {
     }));
   };
 
+  // Timeline handler
+  const handleTimelineUpdate = (field: keyof TimelineDataType, value: string | Array<{title: string, description: string}>) => {
+    setTimelineData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Price handler
+  const handlePriceChange = (value: number) => {
+    setPrice(value);
+    
+    // Update the price display in section6
+    setSection6Data(prev => ({
+      ...prev,
+      secondH4span: `${value}€ por persona`
+    }));
+  };
+
   // Status handler
   const handleStatusChange = (checked: boolean) => {
     setStatus(checked ? 'active' : 'upcoming');
@@ -225,6 +265,8 @@ export const usePageGenerator = () => {
     section5Data,
     section6Data,
     indexSection5Data,
+    timelineData,
+    price,
 
     // Setters
     setPageName,
@@ -244,6 +286,8 @@ export const usePageGenerator = () => {
     handleSection5Update,
     handleSection6Update,
     handleIndexSection5Update,
+    handleTimelineUpdate,
     handleStatusChange,
+    handlePriceChange,
   };
 };

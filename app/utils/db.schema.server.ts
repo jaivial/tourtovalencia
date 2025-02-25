@@ -6,8 +6,9 @@ import {
   sanJuansection2Type, 
   sanJuansection4Type, 
   sanJuanSection5Type, 
-  SanJuanSection6Type 
+  SanJuanSection6Type
 } from "~/data/data";
+import { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 
 // Translation interface for MongoDB
 export interface Translation {
@@ -33,6 +34,8 @@ export interface Page {
       section4?: sanJuansection4Type;
       section5?: sanJuanSection5Type;
       section6?: SanJuanSection6Type;
+      timeline?: TimelineDataType;
+      price?: number;
     };
     en: {
       indexSection5?: IndexSection5Type;
@@ -42,6 +45,8 @@ export interface Page {
       section4?: sanJuansection4Type;
       section5?: sanJuanSection5Type;
       section6?: SanJuanSection6Type;
+      timeline?: TimelineDataType;
+      price?: number;
     };
   };
   status: 'active' | 'upcoming';
