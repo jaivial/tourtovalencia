@@ -224,6 +224,12 @@ export const usePageGenerator = () => {
   // Price handler
   const handlePriceChange = (value: number) => {
     setPrice(value);
+    
+    // Update the price display in section6
+    setSection6Data(prev => ({
+      ...prev,
+      secondH4span: `${value}€ por persona`
+    }));
   };
 
   // Status handler

@@ -223,6 +223,9 @@ export async function createPage(name: string, content: Record<string, any>, sta
   const collection = await getPagesCollection();
   const slug = generateSlug(name);
 
+  // Extract price from content if it exists
+  const price = typeof content.price === 'number' ? content.price : 0;
+
   // Process the Spanish content (only optimize images, no translation)
   console.log("Processing Spanish content...");
   const processedSpanishContent = await processContent(content, false);
@@ -235,6 +238,10 @@ export async function createPage(name: string, content: Record<string, any>, sta
   console.log("Verifying translations...");
   console.log("Spanish content sample:", JSON.stringify(processedSpanishContent).slice(0, 100));
   console.log("English content sample:", JSON.stringify(englishContent).slice(0, 100));
+
+  // Ensure price is set in both language versions
+  processedSpanishContent.price = price;
+  englishContent.price = price;
 
   // Create the final page object with both language versions
   const page: Page = {
