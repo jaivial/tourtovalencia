@@ -13,7 +13,7 @@ const OLLAMA_API_URL = process.env.OLLAMA_API_URL || "http://localhost:11434/api
 // - gemma:2b - Google's lightweight model (~2B parameters)
 // - mistral:7b-instruct-v0.2-q4_0 - Quantized version of Mistral, good performance with lower memory
 // - llama2:7b-chat-q4_0 - Quantized version of Llama 2, good for translation
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "qwen2.5:0.5b";
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "tinyllama:latest";
 
 // Flag to track if Ollama is available
 let isOllamaAvailable = true;
