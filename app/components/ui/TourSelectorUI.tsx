@@ -19,18 +19,9 @@ export function TourSelectorUI({
   placeholder,
   error
 }: TourSelectorUIProps) {
-  // Debug: Log the tours array and selected tour slug
-  console.log("Tours in TourSelectorUI:", tours);
-  console.log("Selected tour slug:", selectedTourSlug);
-
   return (
     <div className="space-y-2">
       <Label htmlFor="tour-selector">{label}</Label>
-      
-      {/* Debug info */}
-      <div className="text-xs text-gray-500 mb-2">
-        Tours available: {tours ? tours.length : 0}
-      </div>
       
       <Select
         value={selectedTourSlug}
@@ -57,20 +48,6 @@ export function TourSelectorUI({
           )}
         </SelectContent>
       </Select>
-      
-      {/* Debug display of tours */}
-      {tours && tours.length > 0 && (
-        <div className="mt-2 p-2 bg-gray-100 rounded text-xs">
-          <div className="font-bold">Available Tours:</div>
-          <ul className="list-disc pl-4">
-            {tours.map(tour => (
-              <li key={tour._id}>
-                {tour.name || tour.slug} - {tour.content.en.title} (€{tour.content.en.price})
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
       
       {error && (
         <p className="text-sm text-destructive">{error}</p>

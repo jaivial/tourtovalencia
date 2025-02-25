@@ -3,11 +3,12 @@ import { Label } from "../ui/label";
 import { cn } from "~/lib/utils";
 import { format, isValid } from "date-fns";
 import { useFetcher } from "@remix-run/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Calendar } from "../ui/calendar";
 import { TourSelectorUI } from "../ui/TourSelectorUI";
 import type { LoaderData } from "~/routes/book._index";
 import type { DateAvailability } from "~/routes/book";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Define the API response type
 interface AvailabilityApiResponse {
@@ -34,15 +35,8 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     setAvailableDates
   } = useBooking();
 
-  // Debug: Log the tours array
-  console.log("Tours in BookingDateStep:", tours);
-  console.log("Tours length:", tours?.length || 0);
-  
-  if (tours?.length > 0) {
-    console.log("First tour:", tours[0]);
-  } else {
-    console.log("No tours available. Check the database connection and query.");
-  }
+  // State to track if a tour has been selected
+  const [isTourSelected, setIsTourSelected] = useState(false);
 
   const fetcher = useFetcher<LoaderData>();
   const availabilityFetcher = useFetcher<AvailabilityApiResponse>();
@@ -114,6 +108,8 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     const selectedTour = tours.find(tour => tour.slug === tourSlug);
     if (selectedTour) {
       setSelectedTour(selectedTour);
+      // Set tour as selected to show the calendar
+      setIsTourSelected(true);
     }
     
     // Fetch available dates for the selected tour from our API endpoint
@@ -142,6 +138,33 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     return undefined;
   };
 
+  // Animation variants for the calendar
+  const calendarVariants = {
+    hidden: { 
+      opacity: 0,
+      y: 20,
+      scale: 0.95
+    },
+    visible: { 
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 25
+      }
+    },
+    exit: {
+      opacity: 0,
+      y: -20,
+      scale: 0.95,
+      transition: {
+        duration: 0.2
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -155,22 +178,41 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="date">Date</Label>
-        <div className={cn("border rounded-md p-4", errors.date ? "border-red-500" : "border-gray-200")}>
-          <Calendar
-            mode="single"
-            selected={getSelectedDate()}
-            onSelect={handleDateSelect}
-            disabled={isDateDisabled}
-            className="mx-auto"
-            fromDate={new Date()} // Disable dates before today
-          />
-        </div>
-        {errors.date && (
-          <p className="text-sm text-red-500">{errors.date}</p>
+      <AnimatePresence>
+        {isTourSelected && (
+          <motion.div 
+            className="space-y-2"
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={calendarVariants}
+          >
+            <Label htmlFor="date">Date</Label>
+            <div className={cn(
+              "border rounded-md p-4 flex justify-center", 
+              errors.date ? "border-red-500" : "border-gray-200"
+            )}>
+              <Calendar
+                mode="single"
+                selected={getSelectedDate()}
+                onSelect={handleDateSelect}
+                disabled={isDateDisabled}
+                className="mx-auto"
+                classNames={{
+                  table: "w-full border-collapse space-y-1 text-center",
+                  head_row: "flex justify-center",
+                  row: "flex w-full mt-2 justify-center",
+                  cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                }}
+                fromDate={new Date()} // Disable dates before today
+              />
+            </div>
+            {errors.date && (
+              <p className="text-sm text-red-500">{errors.date}</p>
+            )}
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
       
       {/* Loading indicators */}
       {(fetcher.state === "loading" || availabilityFetcher.state === "loading") && (
