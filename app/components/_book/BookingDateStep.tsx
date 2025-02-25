@@ -4,11 +4,16 @@ import { cn } from "~/lib/utils";
 import { format, isValid } from "date-fns";
 import { useFetcher } from "@remix-run/react";
 import { useEffect } from "react";
-import { Calendar } from "@heroui/react";
+import { Calendar } from "../ui/calendar";
 import { TourSelectorUI } from "../ui/TourSelectorUI";
-import type { DateValue } from "@internationalized/date";
-import { parseDate } from "@internationalized/date";
 import type { LoaderData } from "~/routes/book._index";
+import type { DateAvailability } from "~/routes/book";
+
+// Define the API response type
+interface AvailabilityApiResponse {
+  availableDates: DateAvailability[];
+  error?: string;
+}
 
 interface BookingDateStepProps {
   tourSelectorText: {
@@ -25,13 +30,22 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     availableDates,
     setSelectedDateAvailability,
     tours,
-    setSelectedTour
+    setSelectedTour,
+    setAvailableDates
   } = useBooking();
 
   // Debug: Log the tours array
   console.log("Tours in BookingDateStep:", tours);
+  console.log("Tours length:", tours?.length || 0);
+  
+  if (tours?.length > 0) {
+    console.log("First tour:", tours[0]);
+  } else {
+    console.log("No tours available. Check the database connection and query.");
+  }
 
   const fetcher = useFetcher<LoaderData>();
+  const availabilityFetcher = useFetcher<AvailabilityApiResponse>();
 
   // Filter out any invalid dates and convert strings to Date objects
   const disabledDates = availableDates
@@ -47,125 +61,121 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     })
     .filter(Boolean) as Date[];
 
-  const handleDateSelect = (date: DateValue | null) => {
-    if (date) {
-      // Convert DateValue to Date for ISO string
-      const jsDate = new Date(date.toString());
-      // Fetch availability for the selected date
-      fetcher.load(`/book?date=${jsDate.toISOString()}`);
-      
-      setFormData({
-        date: jsDate.toISOString(),
-        // Reset party size when date changes
-        partySize: 1
-      });
-    } else {
-      setFormData({
-        date: "",
-        partySize: 1
-      });
+  const handleDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+    
+    // Format the date for display and storage
+    const formattedDate = format(date, "yyyy-MM-dd");
+    
+    // Update form data with the selected date
+    setFormData({ date: formattedDate });
+    
+    // Fetch availability for the selected date and tour
+    const tourSlug = formData.tourSlug || "";
+    const searchParams = new URLSearchParams();
+    searchParams.set("date", formattedDate);
+    if (tourSlug) {
+      searchParams.set("tourSlug", tourSlug);
     }
+    
+    fetcher.load(`/book?${searchParams.toString()}`);
   };
 
-  // Update selectedDateAvailability when we get new data
+  // When fetcher data changes, update the selected date availability
   useEffect(() => {
-    if (fetcher.data && fetcher.data.selectedDateAvailability) {
+    if (fetcher.data?.selectedDateAvailability) {
       setSelectedDateAvailability(fetcher.data.selectedDateAvailability);
     }
   }, [fetcher.data, setSelectedDateAvailability]);
 
-  const isDateUnavailable = (date: DateValue) => {
-    // Convert DateValue to Date for comparison
-    const jsDate = new Date(date.toString());
-    
-    // Disable dates in the past
-    if (jsDate < new Date()) return true;
-    
-    // Validate the date before using it
-    if (!isValid(jsDate)) return true;
-    
-    // Disable dates with no availability
-    return disabledDates.some(disabledDate => {
-      // Ensure disabledDate is valid before formatting
-      if (!disabledDate || !isValid(disabledDate)) return false;
-      
-      return format(disabledDate, 'yyyy-MM-dd') === format(jsDate, 'yyyy-MM-dd');
-    });
+  // When availability fetcher data changes, update the available dates
+  useEffect(() => {
+    if (availabilityFetcher.data?.availableDates) {
+      setAvailableDates(availabilityFetcher.data.availableDates);
+    }
+  }, [availabilityFetcher.data, setAvailableDates]);
+
+  // Check if a date is disabled
+  const isDateDisabled = (date: Date) => {
+    // Check if the date is in the disabledDates array
+    return disabledDates.some(disabledDate => 
+      disabledDate.getFullYear() === date.getFullYear() &&
+      disabledDate.getMonth() === date.getMonth() &&
+      disabledDate.getDate() === date.getDate()
+    );
   };
 
+  // Handle tour selection
   const handleTourChange = (tourSlug: string) => {
-    const tour = tours.find(t => t.slug === tourSlug);
-    if (tour) {
-      setSelectedTour(tour);
-      setFormData({ tourSlug });
+    // Update form data with the selected tour
+    setFormData({ tourSlug });
+    
+    // Find the selected tour object
+    const selectedTour = tours.find(tour => tour.slug === tourSlug);
+    if (selectedTour) {
+      setSelectedTour(selectedTour);
+    }
+    
+    // Fetch available dates for the selected tour from our API endpoint
+    availabilityFetcher.load(`/api/booking-availability?tourSlug=${tourSlug}`);
+    
+    // If a date is already selected, fetch availability for that date and the new tour
+    if (formData.date) {
+      const searchParams = new URLSearchParams();
+      searchParams.set("date", formData.date);
+      searchParams.set("tourSlug", tourSlug);
+      fetcher.load(`/book?${searchParams.toString()}`);
     }
   };
 
-  // Convert JS Date to DateValue for the Calendar component
-  const getDateValue = () => {
-    if (!formData.date) return undefined;
-    
-    try {
-      const jsDate = new Date(formData.date);
-      if (!isValid(jsDate)) return undefined;
-      
-      // Format as YYYY-MM-DD for parseDate
-      const dateStr = format(jsDate, 'yyyy-MM-dd');
-      return parseDate(dateStr);
-    } catch (e) {
-      console.error("Error parsing date:", e);
-      return undefined;
+  // Get the selected date for the calendar
+  const getSelectedDate = () => {
+    if (formData.date) {
+      try {
+        const dateObj = new Date(formData.date);
+        return isValid(dateObj) ? dateObj : undefined;
+      } catch (e) {
+        console.error("Error parsing date:", e);
+        return undefined;
+      }
     }
+    return undefined;
   };
 
   return (
-    <div className="flex flex-col items-center w-full space-y-6">
-      <div className="w-full max-w-md space-y-4">
-        {/* Tour Selector */}
+    <div className="space-y-6">
+      <div className="space-y-2">
         <TourSelectorUI
           tours={tours}
-          selectedTourSlug={formData.tourSlug}
+          selectedTourSlug={formData.tourSlug || ""}
           onTourChange={handleTourChange}
           label={tourSelectorText.label}
           placeholder={tourSelectorText.placeholder}
           error={errors.tourSlug}
         />
+      </div>
 
-        {/* Date Selector */}
-        <Label className="text-center block text-lg font-medium">Selecciona una fecha</Label>
-        <div className={cn(
-          "border rounded-lg p-2 sm:p-4 md:p-6 bg-white",
-          errors.date ? "border-red-500" : "border-gray-200"
-        )}>
+      <div className="space-y-2">
+        <Label htmlFor="date">Date</Label>
+        <div className={cn("border rounded-md p-4", errors.date ? "border-red-500" : "border-gray-200")}>
           <Calendar
-            value={getDateValue()}
-            onChange={handleDateSelect}
-            isDateUnavailable={isDateUnavailable}
-            weekdayStyle="short"
-            showMonthAndYearPickers
-            color="primary"
-            calendarWidth="100%"
-            showShadow
-            classNames={{
-              base: "w-full",
-              cell: "text-center",
-              cellButton: cn(
-                "w-10 h-10 rounded-full",
-                "hover:bg-primary-100 focus:bg-primary-200",
-                "disabled:opacity-50 disabled:cursor-not-allowed",
-                "aria-selected:bg-primary-500 aria-selected:text-white"
-              )
-            }}
+            mode="single"
+            selected={getSelectedDate()}
+            onSelect={handleDateSelect}
+            disabled={isDateDisabled}
+            className="mx-auto"
+            fromDate={new Date()} // Disable dates before today
           />
         </div>
         {errors.date && (
-          <p className="text-sm text-red-500 text-center mt-2">{errors.date}</p>
+          <p className="text-sm text-red-500">{errors.date}</p>
         )}
       </div>
-
-      {fetcher.state === "loading" && (
-        <div className="text-sm text-muted-foreground text-center">
-          Comprobando disponibilidad...
+      
+      {/* Loading indicators */}
+      {(fetcher.state === "loading" || availabilityFetcher.state === "loading") && (
+        <div className="text-sm text-center text-gray-500">
+          Loading availability...
         </div>
       )}
     </div>

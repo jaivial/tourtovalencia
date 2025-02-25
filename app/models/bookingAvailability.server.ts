@@ -35,15 +35,19 @@ export async function getDateAvailability(date: Date, tourSlug?: string): Promis
     status: "confirmed"
   };
   
+  // If a tour is specified, check for bookings with either tourSlug or tourType matching
   if (effectiveTourSlug) {
-    bookingsQuery.tourSlug = effectiveTourSlug;
+    bookingsQuery.$or = [
+      { tourSlug: effectiveTourSlug },
+      { tourType: effectiveTourSlug }
+    ];
   }
 
   const dateBookings = await bookings.find(bookingsQuery).toArray();
 
   // Calculate total booked places
   const bookedPlaces = dateBookings.reduce((sum, booking) => 
-    sum + (booking.partySize || 0), 0);
+    sum + (booking.partySize || booking.numberOfPeople || 0), 0);
 
   // If maxBookings is 0 or bookedPlaces >= maxBookings, the date is not available
   const availablePlaces = maxBookings === 0 || bookedPlaces >= maxBookings ? 0 : maxBookings - bookedPlaces;
@@ -92,8 +96,12 @@ export async function getAvailableDatesInRange(startDate: Date, endDate: Date, t
     status: "confirmed",
   };
   
+  // If a tour is specified, check for bookings with either tourSlug or tourType matching
   if (effectiveTourSlug) {
-    bookingsQuery.tourSlug = effectiveTourSlug;
+    bookingsQuery.$or = [
+      { tourSlug: effectiveTourSlug },
+      { tourType: effectiveTourSlug }
+    ];
   }
 
   const bookingsInRange = await bookings
@@ -105,10 +113,12 @@ export async function getAvailableDatesInRange(startDate: Date, endDate: Date, t
   const bookingCounts = new Map<string, number>();
   bookingsInRange.forEach((booking) => {
     const dateStr = booking.date.toISOString().split("T")[0];
-    const key = effectiveTourSlug ? `${dateStr}-${booking.tourSlug || 'default'}` : dateStr;
+    // Use either tourSlug or tourType, whichever is available
+    const bookingTourId = booking.tourSlug || booking.tourType || 'default';
+    const key = effectiveTourSlug ? `${dateStr}-${bookingTourId}` : dateStr;
     bookingCounts.set(
       key,
-      (bookingCounts.get(key) || 0) + (booking.partySize || 0)
+      (bookingCounts.get(key) || 0) + (booking.partySize || booking.numberOfPeople || 0)
     );
   });
 

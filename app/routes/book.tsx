@@ -2,13 +2,7 @@ import { json } from "@remix-run/node";
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { useNavigation, Outlet } from "@remix-run/react";
 import { BookingLoading } from "~/components/_book/BookingLoading";
-import { retrieveCheckoutSession } from "~/services/stripe.server";
-import { createBooking } from "~/services/booking.server";
-import { sendEmail } from "~/utils/email.server";
-import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
-import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
 import type { Booking } from "~/types/booking";
-import { getDb } from "~/utils/db.server";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Book Your Experience" }, { name: "description", content: "Book your unique dining experience with us" }];
@@ -24,6 +18,11 @@ export type Tour = {
   _id: string;
   slug: string;
   name?: string;
+  tourName?: {
+    en: string;
+    es: string;
+  };
+  tourPrice?: number;
   content: {
     en: {
       title: string;
@@ -38,17 +37,58 @@ export type Tour = {
   };
 };
 
+export type DateAvailability = {
+  date: string;
+  availablePlaces: number;
+  isAvailable: boolean;
+  tourSlug?: string;
+};
+
+// Define types for booking limit and booking documents
+export interface BookingLimit {
+  _id?: string;
+  date: Date;
+  tourSlug: string;
+  maxBookings: number;
+  currentBookings?: number;
+}
+
+export interface BookingDocument {
+  _id?: string;
+  date: Date;
+  status: string;
+  tourSlug?: string;
+  tourType?: string;
+  partySize?: number;
+  numberOfPeople?: number;
+}
+
 export async function loader() {
+  // Import server-only modules inside the loader function
+  const { getToursCollection } = await import("~/utils/db.server");
+  
   try {
-    const db = await getDb();
-    const tours = await db.collection("pages").find({ template: "tour" }).toArray();
+    // Get tours from the tours collection instead of pages
+    const toursCollection = await getToursCollection();
+    const tours = await toursCollection.find({}).toArray();
     
     return json({ 
       tours: tours.map(tour => ({
         _id: tour._id.toString(),
-        slug: tour.slug,
-        name: tour.name,
-        content: tour.content
+        slug: tour.slug || "",
+        name: tour.tourName?.en || tour.slug || "",
+        tourName: tour.tourName || { en: "", es: "" },
+        tourPrice: tour.tourPrice || 0,
+        content: {
+          en: {
+            title: tour.tourName?.en || tour.slug || "",
+            price: tour.tourPrice || 0
+          },
+          es: {
+            title: tour.tourName?.es || tour.slug || "",
+            price: tour.tourPrice || 0
+          }
+        }
       }))
     });
   } catch (error) {
@@ -58,6 +98,13 @@ export async function loader() {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  // Import server-only modules inside the action function
+  const { retrieveCheckoutSession } = await import("~/services/stripe.server");
+  const { createBooking } = await import("~/services/booking.server");
+  const { sendEmail } = await import("~/utils/email.server");
+  const { BookingConfirmationEmail } = await import("~/components/emails/BookingConfirmationEmail");
+  const { BookingAdminEmail } = await import("~/components/emails/BookingAdminEmail");
+  
   const formData = await request.formData();
   const intent = formData.get("intent");
 

@@ -1,15 +1,37 @@
-import { json, type LoaderFunction, type ActionFunctionArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { BookingProvider } from "~/context/BookingContext";
 import { BookingFeature } from "~/components/_book/BookingFeature";
 import { getAvailableDatesInRange, getDateAvailability } from "~/models/bookingAvailability.server";
-import { createCheckoutSession } from "~/services/stripe.server";
 import { addMonths } from "date-fns";
 import type { Booking } from "~/types/booking";
 import { useEffect } from "react";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import type { Tour } from "./book";
-import { getToursCollection } from "~/utils/db.server";
+import { ObjectId } from "mongodb";
+
+// Define a type for the MongoDB tour document
+interface TourDocument {
+  _id: ObjectId;
+  slug?: string;
+  name?: string;
+  content?: {
+    en?: {
+      title?: string;
+      price?: number;
+    };
+    es?: {
+      title?: string;
+      price?: number;
+    };
+  };
+  template?: string;
+  tourName?: {
+    en?: string;
+    es?: string;
+  };
+  tourPrice?: number;
+}
 
 export type LoaderData = {
   availableDates: Array<{
@@ -39,104 +61,122 @@ export type ActionData = {
   sessionId?: string;
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
+export async function loader({ request }: { request: Request }) {
   try {
+    // Import server-only modules inside the loader function
+    const { getToursCollection } = await import("~/utils/db.server");
+    const { getAvailableDatesForTour } = await import("~/services/bookingAvailability.server");
+    
     const url = new URL(request.url);
     const selectedDate = url.searchParams.get("date");
+    const tourSlug = url.searchParams.get("tourSlug");
 
     // Get dates for the next 3 months
     const startDate = new Date();
     const endDate = addMonths(startDate, 3);
 
-    const availableDates = await getAvailableDatesInRange(startDate, endDate);
+    // Get available dates
+    let availableDates;
+    
+    // If a tour is selected, get available dates for that specific tour
+    if (tourSlug) {
+      availableDates = await getAvailableDatesForTour(tourSlug);
+    } else {
+      // Otherwise, get general availability
+      availableDates = await getAvailableDatesInRange(startDate, endDate);
+    }
 
+    // Get availability for the selected date if provided
     let selectedDateAvailability;
     if (selectedDate) {
-      selectedDateAvailability = await getDateAvailability(new Date(selectedDate));
+      const date = new Date(selectedDate);
+      if (!isNaN(date.getTime())) {
+        selectedDateAvailability = await getDateAvailability(date, tourSlug || undefined);
+      }
     }
 
-    // Get email configuration
-    const gmailUser = process.env.GMAIL_USER;
-    const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
-
-    if (!gmailUser || !gmailAppPassword) {
-      throw new Error("Missing email configuration");
-    }
-
-    const paypalClientId = process.env.PAYPAL_CLIENT_ID;
-
-    // Get tours from the tours collection instead of pages collection
+    // Get tours
     const toursCollection = await getToursCollection();
-    const tours = await toursCollection.find({ status: 'active' }).toArray();
+    console.log("Querying tours collection...");
+    const tours = await toursCollection.find({}).toArray() as unknown as TourDocument[];
+    console.log(`Found ${tours.length} tours in the database`);
     
-    // Debug: Log the tours from the database
-    console.log("Tours from database:", tours);
-    
-    // Ensure tours is an array and has the required fields
-    if (!Array.isArray(tours)) {
-      console.error("Tours is not an array:", tours);
-      throw new Error("Tours is not an array");
+    if (tours.length > 0) {
+      console.log("First tour:", JSON.stringify(tours[0]));
     }
     
-    // Format the tours to match the Tour type
-    const formattedTours = tours
-      .filter(tour => tour && tour._id && tour.slug)
-      .map(tour => {
-        return {
-          _id: tour._id.toString(),
-          slug: tour.slug,
-          name: tour.tourName.en,
-          content: {
-            en: {
-              title: tour.tourName.en,
-              price: tour.tourPrice,
-              description: tour.description.en,
-              duration: tour.duration.en,
-              includes: tour.includes.en,
-              meetingPoint: tour.meetingPoint.en
-            },
-            es: {
-              title: tour.tourName.es,
-              price: tour.tourPrice,
-              description: tour.description.es,
-              duration: tour.duration.es,
-              includes: tour.includes.es,
-              meetingPoint: tour.meetingPoint.es
-            }
+    // Convert MongoDB documents to Tour type
+    const formattedTours = tours.map(tour => {
+      // Safely access properties with optional chaining
+      const tourData = {
+        _id: tour._id.toString(),
+        slug: tour.slug || "",
+        name: tour.name || tour.slug || "",
+        tourName: tour.tourName,
+        tourPrice: tour.tourPrice,
+        content: {
+          en: {
+            title: "",
+            price: 0
+          },
+          es: {
+            title: "",
+            price: 0
           }
-        };
-      }) as Tour[]; // Cast to Tour type
-    
-    // Debug: Log the formatted tours
-    console.log("Formatted tours:", formattedTours);
-    
-    // Ensure we have at least one tour
-    if (formattedTours.length === 0) {
-      console.error("No valid tours found");
-    }
+        }
+      };
+      
+      // Add content if available from pages collection format
+      if (tour.content) {
+        if (tour.content.en) {
+          tourData.content.en.title = tour.content.en.title || "";
+          tourData.content.en.price = tour.content.en.price || 0;
+        }
+        if (tour.content.es) {
+          tourData.content.es.title = tour.content.es.title || "";
+          tourData.content.es.price = tour.content.es.price || 0;
+        }
+      } 
+      // Use tourName and tourPrice if available from tours collection format
+      else if (tour.tourName) {
+        tourData.content.en.title = tour.tourName.en || "";
+        tourData.content.es.title = tour.tourName.es || "";
+        tourData.content.en.price = tour.tourPrice || 0;
+        tourData.content.es.price = tour.tourPrice || 0;
+      }
+      
+      return tourData as Tour;
+    });
 
-    return json<LoaderData>({
+    return json({
       availableDates,
       selectedDateAvailability,
-      paypalClientId,
+      paypalClientId: process.env.PAYPAL_CLIENT_ID,
       emailConfig: {
-        gmailUser,
-        gmailAppPassword,
+        gmailUser: process.env.GMAIL_USER || "",
+        gmailAppPassword: process.env.GMAIL_APP_PASSWORD || "",
       },
       tours: formattedTours,
     });
   } catch (error) {
-    console.error("Error loading booking data:", error);
-    return json<LoaderData>({ availableDates: [], tours: [], error: "Failed to load available dates" });
+    console.error("Error in loader:", error);
+    return json({
+      availableDates: [],
+      error: "Failed to load available dates",
+      tours: [],
+    });
   }
-};
+}
 
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const intent = formData.get("intent");
+export async function action({ request }: { request: Request }) {
+  try {
+    // Import server-only modules inside the action function
+    const { createCheckoutSession } = await import("~/services/stripe.server");
+    
+    const formData = await request.formData();
+    const intent = formData.get("intent");
 
-  if (intent === "create-checkout-session") {
-    try {
+    if (intent === "create-checkout-session") {
       const bookingData = JSON.parse(formData.get("booking") as string);
 
       // Get the host and construct the base URL
@@ -164,13 +204,16 @@ export async function action({ request }: ActionFunctionArgs) {
       }
 
       return json<ActionData>({ success: true, redirectUrl: url, sessionId });
-    } catch (error) {
-      console.error("Error creating checkout session:", error);
-      return json<ActionData>({ success: false, error: error instanceof Error ? error.message : "Failed to create checkout session" }, { status: 400 });
     }
-  }
 
-  return json<ActionData>({ success: false, error: "Invalid intent" }, { status: 400 });
+    return json<ActionData>({ success: false, error: "Invalid intent" }, { status: 400 });
+  } catch (error) {
+    console.error("Error in action:", error);
+    return json<ActionData>({ 
+      success: false, 
+      error: error instanceof Error ? error.message : "Failed to create checkout session" 
+    }, { status: 400 });
+  }
 }
 
 export default function BookIndex() {
