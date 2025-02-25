@@ -2,9 +2,7 @@ import { useBooking } from "~/context/BookingContext";
 import { format } from "date-fns";
 import { Card } from "~/components/ui/card";
 import { PaymentFeature } from "../features/PaymentFeature";
-import { BookingPaymentModalFeature } from "../features/BookingPaymentModalFeature";
-import { User, Mail, Phone, Users, Calendar, Receipt, AlertCircle } from "lucide-react";
-import { useNavigate } from "@remix-run/react";
+import { User, Mail, Phone, Users, Calendar, Receipt, AlertCircle, MapPin } from "lucide-react";
 
 interface BookingStepThreeProps {
   bookingStepThreeText: {
@@ -18,6 +16,7 @@ interface BookingStepThreeProps {
       partySize: string;
       date: string;
       totalPrice: string;
+      tour: string;
     };
     notSelected: string;
     people: string;
@@ -28,10 +27,22 @@ interface BookingStepThreeProps {
 
 export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps) => {
   const states = useBooking();
-  const totalPrice = states.formData.partySize * 120;
-  const navigate = useNavigate();
+  const { selectedTour, formData } = states;
+  
+  // Calculate price based on selected tour price or use a default price
+  const tourPrice = selectedTour?.content?.en?.price || selectedTour?.tourPrice || 120;
+  const totalPrice = formData.partySize * tourPrice;
 
-  const priceCalculation = bookingStepThreeText.priceCalculation.replace('{partySize}', states.formData.partySize.toString());
+  // Get tour name from selected tour or use the slug
+  const tourName = selectedTour?.content?.en?.title || 
+                  selectedTour?.tourName?.en || 
+                  selectedTour?.name || 
+                  formData.tourSlug || 
+                  bookingStepThreeText.notSelected;
+
+  const priceCalculation = bookingStepThreeText.priceCalculation
+    .replace('{partySize}', formData.partySize.toString())
+    .replace('{price}', tourPrice.toString());
 
   return (
     <div className="space-y-6 flex flex-col items-center">
@@ -81,6 +92,15 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <div className="flex flex-col space-y-1 sm:space-y-0 items-center sm:items-start">
               <span className="text-muted-foreground flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                {bookingStepThreeText.labels.tour}
+              </span>
+              <span className="sm:hidden">{tourName}</span>
+            </div>
+            <span className="hidden sm:block">{tourName}</span>
+            
+            <div className="flex flex-col space-y-1 sm:space-y-0 items-center sm:items-start">
+              <span className="text-muted-foreground flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 {bookingStepThreeText.labels.partySize}
               </span>
@@ -113,11 +133,10 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
 
       {states.paymentClientSecret ? (
         <div className="w-full max-w-2xl">
-          <PaymentFeature />
+          <PaymentFeature tourPrice={tourPrice} />
         </div>
       ) : (
         <div className="space-y-4 w-full max-w-2xl">
-          {/* <BookingPaymentModalFeature /> */}
           <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
             <p className="text-yellow-800 text-sm flex items-center gap-2">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
