@@ -41,6 +41,10 @@ const PaymentOptions = () => {
         amount: Number(amount), // Required by Booking interface
         paymentId, // Required by Booking interface
         paid: true,
+        tourName: states.selectedTour?.content?.en?.title || 
+                 states.selectedTour?.tourName?.en || 
+                 states.selectedTour?.name || 
+                 states.formData.tourSlug || ""
       };
 
       console.log("PayPal payment success, navigating with booking data:", bookingData);

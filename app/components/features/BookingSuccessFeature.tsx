@@ -11,7 +11,7 @@ export const BookingSuccessFeature = () => {
     if (emailStatus === 'idle') {
       handleSendEmails();
     }
-  }, []); // Run only once on mount
+  }, [emailStatus, handleSendEmails]); // Add dependencies
 
   return (
     <BookingSuccessUI 
