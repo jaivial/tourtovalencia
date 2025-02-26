@@ -5,13 +5,13 @@ import { cn } from "~/lib/utils";
 import { format, isValid } from "date-fns";
 import { useFetcher } from "@remix-run/react";
 import { useEffect, useState, useRef } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { motion } from "framer-motion";
 import type { LoaderData } from "~/routes/book._index";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
 import { TourSelectorUI } from "../ui/TourSelectorUI";
 import type { DateAvailability } from "~/routes/book";
+import { useLanguageContext } from "~/providers/LanguageContext";
 
 // Define the API response type
 interface AvailabilityApiResponse {
@@ -46,6 +46,10 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     setAvailableDates,
     selectedDateAvailability
   } = useBooking();
+  
+  // Get the current language from context
+  const { state } = useLanguageContext();
+  const currentLanguage = state.currentLanguage === "English" ? "en" : "es";
 
   // State to track if a tour has been selected
   const [isTourSelected, setIsTourSelected] = useState(!!formData.tourSlug);
@@ -68,7 +72,8 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     console.log("Fetcher data:", fetcher.data);
     console.log("Selected date availability:", selectedDateAvailability);
     console.log("Is date selected:", isDateSelected);
-  }, [fetcher.state, fetcher.data, selectedDateAvailability, isDateSelected]);
+    console.log("Current language:", currentLanguage);
+  }, [fetcher.state, fetcher.data, selectedDateAvailability, isDateSelected, currentLanguage]);
 
   // Clear timeout when component unmounts
   useEffect(() => {
@@ -248,11 +253,6 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     availabilityFetcher.load(`/api/booking-availability?tourSlug=${tourSlug}`);
   };
 
-  // Handle party size selection
-  const handlePartySizeChange = (value: string) => {
-    setFormData({ partySize: parseInt(value, 10) });
-  };
-
   // Get the selected date for the calendar
   const getSelectedDate = () => {
     if (formData.date) {
@@ -265,25 +265,6 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       }
     }
     return undefined;
-  };
-
-  // Generate party size options based on available places
-  const generatePartySizeOptions = () => {
-    if (!selectedDateAvailability) return [];
-    
-    const { availablePlaces } = selectedDateAvailability;
-    const options = [];
-    
-    // Generate options from 1 to availablePlaces (max 10)
-    const maxOptions = Math.min(availablePlaces, 10);
-    for (let i = 1; i <= maxOptions; i++) {
-      options.push({
-        value: i.toString(),
-        label: `${i} ${i === 1 ? "person" : "people"}`
-      });
-    }
-    
-    return options;
   };
 
   // Check if we're in a loading state
@@ -343,59 +324,6 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
           </>
         )}
       </motion.div>
-      
-      {/* <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ 
-          opacity: isDateSelected && selectedDateAvailability?.isAvailable && !fetchError && availabilityFetcher.state === "idle" ? 1 : 0,
-          height: isDateSelected && selectedDateAvailability?.isAvailable && !fetchError && availabilityFetcher.state === "idle" ? "auto" : 0
-        }}
-        transition={{ duration: 0.3 }}
-        className="space-y-2 overflow-hidden"
-      >
-        {isDateSelected && selectedDateAvailability?.isAvailable && !fetchError && availabilityFetcher.state === "idle" && (
-          <>
-            <Label htmlFor="party-size">Number of People</Label>
-            <div className="flex items-center space-x-2">
-              <div className="flex-1">
-                <Select
-                  value={formData.partySize?.toString() || "1"}
-                  onValueChange={handlePartySizeChange}
-                >
-                  <SelectTrigger 
-                    id="party-size" 
-                    className={errors.partySize ? "border-red-500" : ""}
-                  >
-                    <SelectValue placeholder="Select number of people" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generatePartySizeOptions().map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                    {selectedDateAvailability.availablePlaces === 0 && (
-                      <SelectItem value="0" disabled>
-                        No places available
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="text-sm text-gray-500">
-                {selectedDateAvailability.availablePlaces > 0 ? (
-                  <span>{selectedDateAvailability.availablePlaces} places available</span>
-                ) : (
-                  <span className="text-red-500">No places available</span>
-                )}
-              </div>
-            </div>
-            {errors.partySize && (
-              <p className="text-sm text-red-500">{errors.partySize}</p>
-            )}
-          </>
-        )}
-      </motion.div> */}
       
       {/* Loading indicators */}
       {isLoading && (

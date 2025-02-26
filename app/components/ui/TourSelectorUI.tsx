@@ -1,6 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 import { Label } from "./label";
 import type { Tour } from "~/routes/book";
+import { useLanguageContext } from "~/providers/LanguageContext";
 
 interface TourSelectorUIProps {
   tours: Tour[];
@@ -19,6 +20,34 @@ export function TourSelectorUI({
   placeholder,
   error
 }: TourSelectorUIProps) {
+  // Get the current language from context
+  const { state } = useLanguageContext();
+  const currentLanguage = state.currentLanguage === "English" ? "en" : "es";
+  
+  // Helper function to get the tour name in the current language
+  const getTourName = (tour: Tour) => {
+    // If tourName object exists with language keys, use that
+    if (tour.tourName && tour.tourName[currentLanguage as keyof typeof tour.tourName]) {
+      return tour.tourName[currentLanguage as keyof typeof tour.tourName];
+    }
+    
+    // Fallback to content title if tourName is not available
+    if (tour.content && tour.content[currentLanguage as keyof typeof tour.content]) {
+      const content = tour.content[currentLanguage as keyof typeof tour.content];
+      if (typeof content === 'object' && content !== null && 'title' in content) {
+        return (content as { title: string }).title;
+      }
+    }
+    
+    // Final fallback to name or English content title
+    return tour.name || (tour.content.en.title || "Unknown Tour");
+  };
+  
+  // Helper function to get the tour price
+  const getTourPrice = (tour: Tour) => {
+    return tour.tourPrice || (tour.content && tour.content.en && tour.content.en.price) || 0;
+  };
+
   return (
     <div className="space-y-2">
       <Label htmlFor="tour-selector">{label}</Label>
@@ -38,7 +67,7 @@ export function TourSelectorUI({
           {tours && tours.length > 0 ? (
             tours.map((tour) => (
               <SelectItem key={tour.slug} value={tour.slug}>
-                {tour.content.en.title} - €{tour.content.en.price}
+                {getTourName(tour)} - €{getTourPrice(tour)}
               </SelectItem>
             ))
           ) : (

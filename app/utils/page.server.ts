@@ -50,8 +50,8 @@ async function optimizeImage(base64Data: string): Promise<string> {
     if (optimizedBuffer.length > MAX_IMAGE_SIZE) {
       const metadata = await sharp(buffer).metadata();
       const aspectRatio = metadata.width! / metadata.height!;
-      let width = Math.sqrt(MAX_IMAGE_SIZE * aspectRatio);
-      let height = width / aspectRatio;
+      const width = Math.sqrt(MAX_IMAGE_SIZE * aspectRatio);
+      const height = width / aspectRatio;
 
       optimizedBuffer = await sharp(buffer).resize(Math.floor(width), Math.floor(height)).webp({ quality: 70 }).toBuffer();
     }
@@ -63,17 +63,18 @@ async function optimizeImage(base64Data: string): Promise<string> {
   }
 }
 
-async function processContent(content: any, translate: boolean = true): Promise<any> {
+// Export the processContent function so it can be used in other files
+export async function processContent(content: Record<string, unknown>, translate: boolean = true): Promise<Record<string, unknown>> {
   if (!content) return content;
 
   // If it's an array, process each item
   if (Array.isArray(content)) {
-    return Promise.all(content.map((item) => processContent(item, translate)));
+    return Promise.all(content.map((item) => processContent(item as Record<string, unknown>, translate)));
   }
 
   // If it's an object, process each property
   if (typeof content === "object") {
-    const processed: any = {};
+    const processed: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(content)) {
       // Skip null or undefined values
@@ -82,12 +83,12 @@ async function processContent(content: any, translate: boolean = true): Promise<
       // Handle base64 images
       if (typeof value === "string" && value.startsWith("data:image")) {
         const size = Buffer.from(value.split(",")[1], "base64").length;
-        processed[key] = size > MAX_IMAGE_SIZE || true ? await optimizeImage(value) : value;
+        processed[key] = size > MAX_IMAGE_SIZE ? await optimizeImage(value) : value;
       } else if (typeof value === "string" && value.trim() !== "") {
         // For text content, only translate if translate flag is true
         processed[key] = translate ? await translateText(value) : value;
       } else if (typeof value === "object") {
-        processed[key] = await processContent(value, translate);
+        processed[key] = await processContent(value as Record<string, unknown>, translate);
       } else {
         processed[key] = value;
       }
@@ -100,11 +101,12 @@ async function processContent(content: any, translate: boolean = true): Promise<
     return translate ? await translateText(content) : content;
   }
 
-  return content;
+  // Otherwise, return as is
+  return content as Record<string, unknown>;
 }
 
 // Helper function to translate text using OpenRouter API with a free model
-async function translateText(text: string, retryCount = 0): Promise<string> {
+export async function translateText(text: string, retryCount = 0): Promise<string> {
   // Skip translation for empty strings or image paths
   if (!text.trim() || text.startsWith("/")) return text;
 
@@ -120,11 +122,11 @@ async function translateText(text: string, retryCount = 0): Promise<string> {
         messages: [
           {
             role: "system",
-            content: "You are a translator. Translate the following Spanish text to English. Respond only with the English translation, no additional text.",
+            content: "You are a translator. Translate the following Spanish text to English. Respond only with the English translation, no additional text, no quotation marks.",
           },
           {
             role: "user",
-            content: `Translate to English: "${text}"`,
+            content: `Translate to English: ${text}`,
           },
         ],
         temperature: 0.1,
@@ -146,21 +148,24 @@ async function translateText(text: string, retryCount = 0): Promise<string> {
     // Safely access the response data
     if (response.data?.choices?.[0]?.message?.content) {
       const translation = response.data.choices[0].message.content.trim();
-      console.log("Translated text:", translation);
-      return translation;
+      // Clean up any quotation marks that might have been added
+      const cleanedTranslation = translation.replace(/^["']|["']$/g, '').replace(/\\"/g, '');
+      console.log("Translated text:", cleanedTranslation);
+      return cleanedTranslation;
     } else {
       console.error("Unexpected API response format:", response.data);
       return text;
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as Error & { response?: { status?: number; data?: unknown } };
     console.error("Translation error details:", {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-      stack: error.stack,
+      status: err.response?.status,
+      data: err.response?.data,
+      message: err.message,
+      stack: err.stack,
     });
 
-    if (error.response?.status === 429 && retryCount < 3) {
+    if (err.response?.status === 429 && retryCount < 3) {
       console.log(`Rate limit hit, retrying in ${retryCount + 1} seconds...`);
       await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1)));
       return translateText(text, retryCount + 1);
@@ -172,8 +177,8 @@ async function translateText(text: string, retryCount = 0): Promise<string> {
 }
 
 // Helper function to recursively translate content
-async function translateContent(content: Record<string, any>): Promise<Record<string, any>> {
-  const translated: Record<string, any> = {};
+export async function translateContent(content: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const translated: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(content)) {
     if (value == null) {
@@ -186,7 +191,7 @@ async function translateContent(content: Record<string, any>): Promise<Record<st
         translated[key] = await Promise.all(
           value.map(async (item) => {
             if (typeof item === "object" && item !== null) {
-              return await translateContent(item);
+              return await translateContent(item as Record<string, unknown>);
             } else if (typeof item === "string") {
               return isImageRelatedString(item) ? item : await translateText(item);
             }
@@ -194,7 +199,7 @@ async function translateContent(content: Record<string, any>): Promise<Record<st
           })
         );
       } else if (typeof value === "object") {
-        translated[key] = await translateContent(value);
+        translated[key] = await translateContent(value as Record<string, unknown>);
       } else if (typeof value === "string") {
         translated[key] = isImageRelatedString(value) || value.startsWith("data:image") ? value : await translateText(value);
       } else {
@@ -219,7 +224,7 @@ function isImageRelatedString(str: string): boolean {
   return imageExtensions.test(str) || imageKeywords.test(str);
 }
 
-export async function createPage(name: string, content: Record<string, any>, status: "active" | "upcoming", template: string = ""): Promise<Page> {
+export async function createPage(name: string, content: Record<string, unknown>, status: "active" | "upcoming", template: string = ""): Promise<Page> {
   const collection = await getPagesCollection();
   const slug = generateSlug(name);
 
@@ -240,8 +245,8 @@ export async function createPage(name: string, content: Record<string, any>, sta
   console.log("English content sample:", JSON.stringify(englishContent).slice(0, 100));
 
   // Ensure price is set in both language versions
-  processedSpanishContent.price = price;
-  englishContent.price = price;
+  (processedSpanishContent as Record<string, unknown>).price = price;
+  (englishContent as Record<string, unknown>).price = price;
 
   // Create the final page object with both language versions
   const page = {
@@ -280,32 +285,101 @@ async function createTourFromPage(page: Page): Promise<void> {
   const now = new Date();
   
   // Use a more flexible approach to access content properties
-  const enContent = page.content.en as any;
-  const esContent = page.content.es as any;
+  const enContent = page.content.en as Record<string, any>;
+  const esContent = page.content.es as Record<string, any>;
+  
+  // Log the page name for debugging
+  console.log(`Creating tour from page: "${page.name}" with ID: ${page._id}`);
+  
+  // Get Spanish title directly from page name
+  const esTitle = page.name;
+  
+  // For English title, directly translate the Spanish title
+  let enTitle = "";
+  
+  try {
+    // Special handling for tour names
+    // Extract the main subject of the tour if it follows the pattern "Tour de X"
+    if (esTitle.toLowerCase().startsWith("tour de ")) {
+      const subject = esTitle.substring(8); // Get everything after "Tour de "
+      console.log(`Detected 'Tour de X' pattern. Subject to translate: "${subject}"`);
+      
+      // Translate just the subject
+      const translatedSubject = await translateText(subject);
+      console.log(`Translated subject: "${translatedSubject}"`);
+      
+      // Format as "X Tour" in English
+      enTitle = `${translatedSubject} Tour`;
+      console.log(`Formatted as English tour name: "${enTitle}"`);
+    } else {
+      // For other tour names, translate the whole thing
+      enTitle = await translateText(esTitle);
+      console.log(`Translated tour name: "${enTitle}"`);
+    }
+  } catch (error) {
+    console.error('Error translating tour name:', error);
+    enTitle = esTitle; // Fallback to Spanish title if translation fails
+  }
+  
+  // Clean up the translated name - remove any quotation marks that might have been added
+  enTitle = enTitle.replace(/^["']|["']$/g, '').replace(/\\"/g, '');
+  
+  console.log(`Final tour titles - ES: "${esTitle}", EN: "${enTitle}"`);
+  
+  // Extract description from different possible locations
+  const getDescription = (content: Record<string, any>): string => {
+    if (content.description) return content.description;
+    if (content.section1?.firstSquareP) return content.section1.firstSquareP;
+    if (content.section2?.firstH3) return content.section2.firstH3;
+    return '';
+  };
+  
+  // Extract duration from different possible locations
+  const getDuration = (content: Record<string, any>): string => {
+    if (content.duration) return content.duration;
+    if (content.section4?.secondH3) return content.section4.secondH3;
+    return '';
+  };
+  
+  // Extract includes from different possible locations
+  const getIncludes = (content: Record<string, any>): string => {
+    if (content.includes) return content.includes;
+    if (content.section6?.list && Array.isArray(content.section6.list)) {
+      return content.section6.list.map((item: { li: string }) => item.li).join(', ');
+    }
+    return '';
+  };
+  
+  // Extract meeting point from different possible locations
+  const getMeetingPoint = (content: Record<string, any>): string => {
+    if (content.meetingPoint) return content.meetingPoint;
+    if (content.section4?.thirdH3) return content.section4.thirdH3;
+    return '';
+  };
   
   const tour = {
     slug: page.slug,
     tourName: {
-      en: enContent.title || page.name,
-      es: esContent.title || page.name,
+      en: enTitle,
+      es: esTitle,
     },
     tourPrice: enContent.price || 0,
     status: page.status,
     description: {
-      en: enContent.description || '',
-      es: esContent.description || '',
+      en: getDescription(enContent),
+      es: getDescription(esContent),
     },
     duration: {
-      en: enContent.duration || '',
-      es: esContent.duration || '',
+      en: getDuration(enContent),
+      es: getDuration(esContent),
     },
     includes: {
-      en: enContent.includes || '',
-      es: esContent.includes || '',
+      en: getIncludes(enContent),
+      es: getIncludes(esContent),
     },
     meetingPoint: {
-      en: enContent.meetingPoint || '',
-      es: esContent.meetingPoint || '',
+      en: getMeetingPoint(enContent),
+      es: getMeetingPoint(esContent),
     },
     pageId: page._id?.toString() || '',
     createdAt: now,
@@ -316,9 +390,9 @@ async function createTourFromPage(page: Page): Promise<void> {
   console.log(`Tour created in tours collection: ${tour.tourName.en}`);
 }
 
-export async function getPageBySlug(slug: string): Promise<Page | null> {
-  const pagesCollection = await getPagesCollection();
-  return pagesCollection.findOne({ slug });
+export async function getPageBySlug(slug: string) {
+  const collection = await getPagesCollection();
+  return collection.findOne({ slug });
 }
 
 export async function getAllPages(): Promise<Page[]> {
