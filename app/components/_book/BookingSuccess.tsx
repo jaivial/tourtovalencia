@@ -61,7 +61,7 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
               </div>
               <div className="flex justify-between py-1 border-b border-gray-100">
                 <dt className="font-medium text-gray-600">Total Paid:</dt>
-                <dd className="text-gray-900">€{booking.amount.toFixed(2)}</dd>
+                <dd className="text-gray-900">{booking.amount.toFixed(2)}€</dd>
               </div>
               {booking.paymentMethod && (
                 <div className="flex justify-between py-1 border-b border-gray-100">

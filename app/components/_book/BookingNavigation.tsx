@@ -60,7 +60,7 @@ export const BookingNavigation = ({ currentStep, onNext, onPrevious, isSubmittin
           <div className="text-center">
             <h2 className="text-2xl font-semibold">{bookingNavigationText.completeBooking}</h2>
             <p className="text-muted-foreground mt-2">
-              {bookingNavigationText.totalAmount} €{totalPrice}
+              {bookingNavigationText.totalAmount} {totalPrice}€
             </p>
           </div>
           <PaymentOptions />

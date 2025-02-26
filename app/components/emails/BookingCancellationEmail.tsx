@@ -167,7 +167,7 @@ export const BookingCancellationEmail = ({
                 {amount && (
                   <Text style={styles.detailRow}>
                     <Text style={styles.detailLabel}>{texts.labels.amount}</Text>
-                    <Text style={styles.detailValue}>€{amount}</Text>
+                    <Text style={styles.detailValue}>{amount}€</Text>
                   </Text>
                 )}
                 

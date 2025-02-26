@@ -143,7 +143,7 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
                 
                 <Text style={detailItem}>
                   <Text style={detailLabel}>Total Pagado:</Text>
-                  <Text style={detailValueHighlight}>€{totalPrice}</Text>
+                  <Text style={detailValueHighlight}>{totalPrice}€</Text>
                 </Text>
                 
                 <Text style={detailItem}>

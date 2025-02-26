@@ -67,7 +67,7 @@ export function TourSelectorUI({
           {tours && tours.length > 0 ? (
             tours.map((tour) => (
               <SelectItem key={tour.slug} value={tour.slug}>
-                {getTourName(tour)} - €{getTourPrice(tour)}
+                {getTourName(tour)} - {getTourPrice(tour)}€
               </SelectItem>
             ))
           ) : (

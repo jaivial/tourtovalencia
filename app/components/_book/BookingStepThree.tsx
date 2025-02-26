@@ -147,7 +147,7 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
               <Receipt className="h-5 w-5" />
               {bookingStepThreeText.labels.totalPrice}
             </span>
-            <span className="text-2xl font-bold text-center sm:text-left">€{totalPrice}</span>
+            <span className="text-2xl font-bold text-center sm:text-left">{totalPrice}€</span>
           </div>
           <p className="mt-2 text-sm text-muted-foreground text-center sm:text-left">{priceCalculation}</p>
         </div>

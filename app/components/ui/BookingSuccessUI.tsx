@@ -117,7 +117,7 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
                   { label: "Personas", value: booking.partySize },
                   {
                     label: "Total",
-                    value: `€${booking.amount.toFixed(2)}`,
+                    value: `${booking.amount.toFixed(2)}€`,
                     highlight: true,
                   },
                   {

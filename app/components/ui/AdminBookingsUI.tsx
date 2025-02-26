@@ -476,7 +476,7 @@ export const AdminBookingsUI = ({
                         {selectedStatus === "confirmed" ? (
                           <>
                             <TableCell className="text-center">
-                              {booking.amount ? `€${booking.amount.toFixed(2)}` : '-'}
+                              {booking.amount ? `${booking.amount.toFixed(2)}€` : '-'}
                             </TableCell>
                             <TableCell className="text-center">
                               {booking.paid ? (
@@ -522,7 +522,7 @@ export const AdminBookingsUI = ({
                         ) : (
                           <>
                             <TableCell className="text-center">
-                              {booking.amount ? `€${booking.amount.toFixed(2)}` : '-'}
+                              {booking.amount ? `${booking.amount.toFixed(2)}€` : '-'}
                             </TableCell>
                             <TableCell className="text-center">
                               {booking.refundIssued ? (

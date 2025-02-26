@@ -83,7 +83,7 @@ const PaymentForm = ({ onSuccess, onError, isSubmitting, tourPrice = 120, paymen
         }
       }} />
       <div className="text-sm text-gray-500 mb-4">
-        Tour Price: €{tourPrice} per person
+        Tour Price: {tourPrice}€ per person
       </div>
       <Button 
         type="submit" 

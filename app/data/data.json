@@ -530,7 +530,7 @@
         },
         "notSelected": "Not selected",
         "people": "people",
-        "priceCalculation": "Price calculation: {partySize} people × €{price} per person",
+        "priceCalculation": "Price calculation: {partySize} people × {price}€ per person",
         "paymentMessage": "Your booking will be confirmed after successful payment. Click \"Book Now\" to proceed to payment."
       },
       "payment": {
@@ -1088,7 +1088,7 @@
         },
         "notSelected": "No seleccionado",
         "people": "personas",
-        "priceCalculation": "Cálculo del precio: {partySize} personas × €{price} por persona",
+        "priceCalculation": "Cálculo del precio: {partySize} personas × {price}€ por persona",
         "paymentMessage": "Tu reserva se confirmará después del pago exitoso. Haz clic en \"Reservar Ahora\" para proceder al pago."
       },
       "payment": {

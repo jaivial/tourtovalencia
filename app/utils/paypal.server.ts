@@ -158,7 +158,7 @@ export async function refundPayPalPayment(
       };
     }
 
-    console.log(`Attempting to refund PayPal transaction ${transactionId} for €${amount.toFixed(2)}`);
+    console.log(`Attempting to refund PayPal transaction ${transactionId} for ${amount.toFixed(2)}€`);
     
     // In development mode, if credentials are missing or invalid, use mock response
     if (process.env.NODE_ENV !== 'production') {

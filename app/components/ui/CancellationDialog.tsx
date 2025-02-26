@@ -67,7 +67,7 @@ export const CancellationDialog: React.FC<CancellationDialogProps> = ({
                   className="data-[state=checked]:bg-amber-500"
                 />
                 <Label htmlFor="refund" className="font-medium text-amber-800">
-                  {strings.issueRefundOf} €{amount.toFixed(2)} {strings.via} {paymentMethod}
+                  {strings.issueRefundOf} {amount.toFixed(2)}€ {strings.via} {paymentMethod}
                 </Label>
               </div>
             ) : null}

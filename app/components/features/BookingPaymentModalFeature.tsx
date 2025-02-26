@@ -29,7 +29,7 @@ export const BookingPaymentModalFeature = () => {
         <div className="space-y-6">
           <div className="text-center">
             <h2 className="text-2xl font-semibold">Complete Your Booking</h2>
-            <p className="text-muted-foreground mt-2">Your total amount: €{formData.partySize * 120}</p>
+            <p className="text-muted-foreground mt-2">Your total amount: {formData.partySize * 120}€</p>
           </div>
           <PaymentOptions />
         </div>

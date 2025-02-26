@@ -203,7 +203,7 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
                 
                 <Text style={detailItem}>
                   <Text style={detailLabel}>{texts.labels.totalPrice}</Text>
-                  <Text style={detailValuePrice}>€{totalPrice}</Text>
+                  <Text style={detailValuePrice}>{totalPrice}€</Text>
                 </Text>
                 
                 <Text style={detailItem}>

@@ -84,7 +84,7 @@ export async function createCheckoutSession(booking: BookingFormData, baseUrl: s
       if (tour) {
         tourName = tour.tourName.en;
         tourPrice = tour.tourPrice || tourPrice;
-        console.log(`Found tour: ${tourName} with price: €${tourPrice}`);
+        console.log(`Found tour: ${tourName} with price: ${tourPrice}€`);
       }
     } catch (error) {
       console.error("Error fetching tour information:", error);
@@ -94,7 +94,7 @@ export async function createCheckoutSession(booking: BookingFormData, baseUrl: s
 
   // Calculate total amount in cents for Stripe
   const totalAmount = booking.partySize * tourPrice * 100; // Convert to cents
-  console.log(`Calculating price: ${booking.partySize} people × €${tourPrice} = €${booking.partySize * tourPrice} (${totalAmount} cents)`);
+  console.log(`Calculating price: ${booking.partySize} people × ${tourPrice}€ = ${booking.partySize * tourPrice}€ (${totalAmount} cents)`);
 
   try {
     // Ensure the date is a string when sending to Stripe
