@@ -21,6 +21,7 @@ type ToursSectionProps = {
 const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [], pages = [] }) => {
   const { state } = useLanguageContext();
   const language = state.currentLanguage === "English" ? "en" : "es";
+  const perPersonText = language === "en" ? "per person" : "por persona";
 
   // Mock data for tours if none provided
   const mockTours: Tour[] = [
@@ -163,8 +164,44 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
     return null;
   };
 
+  // Function to get additional description text from the page
+  const getAdditionalDescription = (tour: Tour) => {
+    if (!pages || pages.length === 0) return { section2FirstH3: null, indexSection5SecondH3: null };
+    
+    // Find the page that corresponds to this tour
+    const page = pages.find(p => p._id === tour.pageId || p.slug === tour.slug);
+    
+    const result = {
+      section2FirstH3: null as string | null,
+      indexSection5SecondH3: null as string | null
+    };
+    
+    if (page && page.content) {
+      // Get section2.firstH3
+      if (page.content[language]?.section2?.firstH3) {
+        result.section2FirstH3 = page.content[language].section2.firstH3;
+      } else if (page.content.es?.section2?.firstH3) {
+        result.section2FirstH3 = page.content.es.section2.firstH3;
+      }
+      
+      // Get indexSection5.secondH3
+      if (page.content[language]?.indexSection5?.secondH3) {
+        result.indexSection5SecondH3 = page.content[language].indexSection5.secondH3;
+      } else if (page.content.es?.indexSection5?.secondH3) {
+        result.indexSection5SecondH3 = page.content.es.indexSection5.secondH3;
+      }
+    }
+    
+    return result;
+  };
+
+  // Define button styles to prevent underlines
+  const linkButtonStyle = {
+    textDecoration: 'none'
+  };
+
   return (
-    <div className="w-full py-16 bg-gradient-to-b from-blue-50 to-white">
+    <div className="w-full py-16 bg-blue-50">
       <div className="w-[95%] max-w-[1280px] mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -187,9 +224,10 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {displayTours.map((tour, index) => {
             const tourImage = getTourImage(tour);
+            const additionalDesc = getAdditionalDescription(tour);
             
             return (
               <motion.div
@@ -199,12 +237,13 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 className={`
-                  relative rounded-xl overflow-hidden shadow-lg bg-white
+                  relative rounded-xl overflow-hidden shadow-lg bg-white h-[550px] flex flex-col
+                  transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2
                   ${tour.status === "upcoming" ? "overflow-hidden" : ""}
                 `}
               >
                 {/* Tour Image */}
-                <div className="h-48 overflow-hidden">
+                <div className="h-56 overflow-hidden">
                   {tourImage ? (
                     <img 
                       src={tourImage} 
@@ -224,34 +263,68 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
                 </div>
 
                 {/* Tour Content */}
-                <div className="p-5">
-                  <h3 className="text-xl font-bold text-blue-900 mb-2">{tour.tourName[language]}</h3>
-                  <p className="text-blue-700 text-sm mb-4">{tour.duration[language]}</p>
+                <div className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-2xl font-bold text-blue-900 mb-3">{tour.tourName[language]}</h3>
+                  
+                  <div className="flex items-center mb-4 text-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-sm">{tour.duration[language]}</p>
+                  </div>
+                  
+                  {additionalDesc?.section2FirstH3 && (
+                    <p className="text-gray-700 text-sm mb-3 italic">&ldquo;{additionalDesc.section2FirstH3}&rdquo;</p>
+                  )}
+                  
                   <p className="text-gray-600 text-sm mb-4 line-clamp-3">{tour.description[language]}</p>
                   
-                  <div className="flex justify-between items-center mt-4">
-                    <span className="text-xl font-bold text-blue-800">{tour.tourPrice.toFixed(2)}€</span>
-                    
-                    {tour.status === "active" ? (
-                      <Link 
-                        to={`/book?tour=${tour.slug}`}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        {toursText.bookNow}
-                      </Link>
-                    ) : (
-                      <span className="px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed">
-                        {toursText.comingSoon}
-                      </span>
-                    )}
+                  {additionalDesc?.indexSection5SecondH3 && (
+                    <p className="text-gray-700 text-sm mb-3 font-medium">{additionalDesc.indexSection5SecondH3}</p>
+                  )}
+                  
+                  <div className="mt-auto">
+                    <div className="flex flex-col space-y-4">
+                      <div className="flex items-center justify-center bg-blue-50 py-3 px-4 rounded-lg">
+                        <span className="text-2xl font-bold text-blue-800">{tour.tourPrice.toFixed(2)}€</span>
+                        <span className="text-sm text-blue-600 ml-1">{perPersonText}</span>
+                      </div>
+                      
+                      {/* View More Button */}
+                      <div className="w-full">
+                        <Link 
+                          to={`/pages/${tour.slug}`}
+                          className="block w-full py-3 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-center font-medium"
+                          style={linkButtonStyle}
+                        >
+                          <span className="pointer-events-none">{toursText.viewDetails}</span>
+                        </Link>
+                      </div>
+                      
+                      {tour.status === "active" ? (
+                        <div className="w-full">
+                          <Link 
+                            to={`/book?tour=${tour.slug}`}
+                            className="block w-full py-3 bg-blue-600 text-white hover:text-white rounded-lg hover:bg-blue-700 transition-colors text-center font-medium"
+                            style={linkButtonStyle}
+                          >
+                            <span className="pointer-events-none text-white hover:text-white">{toursText.bookNow}</span>
+                          </Link>
+                        </div>
+                      ) : (
+                        <span className="w-full py-3 bg-gray-400 text-white rounded-lg cursor-not-allowed text-center font-medium">
+                          {toursText.comingSoon}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 {/* Overlay for upcoming tours */}
                 {tour.status === "upcoming" && (
                   <div className="absolute inset-0 bg-gray-800/50 backdrop-blur-sm flex items-center justify-center">
-                    <div className="bg-white/90 px-6 py-4 rounded-lg text-center">
-                      <p className="text-xl font-bold text-blue-900">{toursText.comingSoon}</p>
+                    <div className="bg-white/90 px-8 py-6 rounded-lg text-center transform rotate-12 shadow-xl">
+                      <p className="text-2xl font-bold text-blue-900">{toursText.comingSoon}</p>
                     </div>
                   </div>
                 )}
