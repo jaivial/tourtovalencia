@@ -420,8 +420,6 @@ export async function getPayPalTransactionDetails(transactionId: string) {
     
     // Try different PayPal API endpoints for transaction details
     const detailEndpoints = [
-      `${PAYPAL_API_BASE}/v2/payments/captures/${transactionId}`,
-      `${PAYPAL_API_BASE}/v2/payments/authorizations/${transactionId}`,
       `${PAYPAL_API_BASE}/v2/checkout/orders/${transactionId}`
     ];
     
