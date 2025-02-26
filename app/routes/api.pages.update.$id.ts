@@ -2,7 +2,7 @@ import { json } from "@remix-run/server-runtime";
 import type { ActionFunctionArgs } from "@remix-run/server-runtime";
 import { getPagesCollection, getToursCollection } from "~/utils/db.server";
 import { ObjectId } from "mongodb";
-import { processContent, translateContent } from "~/utils/page.server";
+import { processContent, translateContent, translateText } from "~/utils/page.server";
 import type { Page, Tour } from "~/utils/db.schema.server";
 import type { Filter } from "mongodb";
 
@@ -68,6 +68,35 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       template = "tour";
       console.log(`Updating page "${name}" as a tour with price ${content.price}€`);
       
+      // Translate the tour name
+      let translatedTourName = name;
+      try {
+        // Special handling for tour names
+        if (name.toLowerCase().startsWith("tour de ")) {
+          const subject = name.substring(8); // Get everything after "Tour de "
+          console.log(`Detected 'Tour de X' pattern. Subject to translate: "${subject}"`);
+          
+          // Translate just the subject
+          const translatedSubject = await translateText(subject);
+          console.log(`Translated subject: "${translatedSubject}"`);
+          
+          // Format as "X Tour" in English
+          translatedTourName = `${translatedSubject} Tour`;
+          console.log(`Formatted as English tour name: "${translatedTourName}"`);
+        } else {
+          // For other tour names, translate the whole thing
+          translatedTourName = await translateText(name);
+          console.log(`Translated tour name: "${translatedTourName}"`);
+        }
+        
+        // Clean up the translated name - remove any quotation marks that might have been added
+        translatedTourName = translatedTourName.replace(/^["']|["']$/g, '').replace(/\\"/g, '');
+        console.log(`Final translated tour name: "${translatedTourName}"`);
+      } catch (error) {
+        console.error('Error translating tour name:', error);
+        translatedTourName = name; // Fallback to Spanish name if translation fails
+      }
+      
       // Update the corresponding tour in the tours collection
       const pageIdString = objectId.toString();
       const tourFilter: Filter<Tour> = { pageId: pageIdString };
@@ -83,7 +112,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
             $set: {
               tourName: {
                 es: name,
-                en: name // This will be translated properly in a background job
+                en: translatedTourName
               },
               tourPrice: content.price,
               status: status as 'active' | 'upcoming',
@@ -94,31 +123,32 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
         
         tourUpdated = tourUpdateResult.modifiedCount > 0;
         console.log(`Updated tour for page "${name}" with price ${content.price}€`);
+        console.log(`Tour name updated - ES: "${name}", EN: "${translatedTourName}"`);
       } else {
         // Create a new tour if it doesn't exist
         const newTour = {
           slug: existingPage.slug,
           tourName: {
             es: name,
-            en: name // This will be translated properly in a background job
+            en: translatedTourName
           },
           tourPrice: content.price,
           status: status as 'active' | 'upcoming',
           description: {
-            es: processedSpanishContent.section1?.title || "",
-            en: englishContent.section1?.title || ""
+            es: (processedSpanishContent.section1 as any)?.title || "",
+            en: (englishContent.section1 as any)?.title || ""
           },
           duration: {
-            es: processedSpanishContent.section4?.duration || "",
-            en: englishContent.section4?.duration || ""
+            es: (processedSpanishContent.section4 as any)?.duration || "",
+            en: (englishContent.section4 as any)?.duration || ""
           },
           includes: {
-            es: processedSpanishContent.section4?.includes || "",
-            en: englishContent.section4?.includes || ""
+            es: (processedSpanishContent.section4 as any)?.includes || "",
+            en: (englishContent.section4 as any)?.includes || ""
           },
           meetingPoint: {
-            es: processedSpanishContent.section4?.meetingPoint || "",
-            en: englishContent.section4?.meetingPoint || ""
+            es: (processedSpanishContent.section4 as any)?.meetingPoint || "",
+            en: (englishContent.section4 as any)?.meetingPoint || ""
           },
           pageId: pageIdString,
           createdAt: new Date(),
@@ -128,6 +158,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
         await toursCollection.insertOne(newTour);
         tourUpdated = true;
         console.log(`Created new tour for page "${name}" with price ${content.price}€`);
+        console.log(`Tour name set - ES: "${name}", EN: "${translatedTourName}"`);
       }
     }
     

@@ -123,8 +123,8 @@ export async function loader({ request }: { request: Request }) {
     // Get tours
     const toursCollection = await getToursCollection();
     console.log("Querying tours collection...");
-    const tours = await toursCollection.find({}).toArray() as unknown as TourDocument[];
-    console.log(`Found ${tours.length} tours in the database`);
+    const tours = await toursCollection.find({ status: "active" }).toArray() as unknown as TourDocument[];
+    console.log(`Found ${tours.length} active tours in the database`);
     
     if (tours.length > 0) {
       console.log("First tour:", JSON.stringify(tours[0]));

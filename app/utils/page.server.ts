@@ -106,7 +106,7 @@ export async function processContent(content: Record<string, unknown>, translate
 }
 
 // Helper function to translate text using OpenRouter API with a free model
-async function translateText(text: string, retryCount = 0): Promise<string> {
+export async function translateText(text: string, retryCount = 0): Promise<string> {
   // Skip translation for empty strings or image paths
   if (!text.trim() || text.startsWith("/")) return text;
 
