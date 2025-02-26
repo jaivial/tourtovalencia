@@ -1,8 +1,10 @@
 import { useBooking } from "~/context/BookingContext";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { Card } from "~/components/ui/card";
 import { PaymentFeature } from "../features/PaymentFeature";
 import { User, Mail, Phone, Users, Calendar, Receipt, AlertCircle, MapPin } from "lucide-react";
+import { useLanguageContext } from "~/providers/LanguageContext";
 
 interface BookingStepThreeProps {
   bookingStepThreeText: {
@@ -30,21 +32,39 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
   const states = useBooking();
   const { selectedTour, formData } = states;
   
-  // Calculate price based on selected tour price or use a default price
+  const { state } = useLanguageContext();
+  const currentLanguage = state.currentLanguage === "English" ? "en" : "es";
+  
+  const locale = currentLanguage === "es" ? es : undefined;
+  
   const tourPrice = selectedTour?.content?.en?.price || selectedTour?.tourPrice || 120;
   const totalPrice = formData.partySize * tourPrice;
 
-  // Get tour name from selected tour or use the slug
-  const tourName = selectedTour?.content?.en?.title || 
-                  selectedTour?.tourName?.en || 
-                  selectedTour?.name || 
-                  formData.tourSlug || 
-                  bookingStepThreeText.notSelected;
+  const tourName = currentLanguage === "en" 
+    ? (selectedTour?.content?.en?.title || 
+       selectedTour?.tourName?.en || 
+       selectedTour?.name || 
+       formData.tourSlug || 
+       bookingStepThreeText.notSelected)
+    : (selectedTour?.content?.es?.title || 
+       selectedTour?.tourName?.es || 
+       selectedTour?.name || 
+       formData.tourSlug || 
+       bookingStepThreeText.notSelected);
 
-  // Create the price calculation text with the dynamic tour price
   const priceCalculation = bookingStepThreeText.priceCalculation
     .replace('{partySize}', formData.partySize.toString())
     .replace('{price}', tourPrice.toString());
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return format(date, "PPP", { locale });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return bookingStepThreeText.notSelected;
+    }
+  };
 
   return (
     <div className="space-y-6 flex flex-col items-center">
@@ -115,9 +135,9 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
                 <Calendar className="h-4 w-4" />
                 {bookingStepThreeText.labels.date}
               </span>
-              <span className="sm:hidden">{states.formData.date ? format(new Date(states.formData.date), "PPP") : bookingStepThreeText.notSelected}</span>
+              <span className="sm:hidden">{states.formData.date ? formatDate(states.formData.date) : bookingStepThreeText.notSelected}</span>
             </div>
-            <span className="hidden sm:block">{states.formData.date ? format(new Date(states.formData.date), "PPP") : bookingStepThreeText.notSelected}</span>
+            <span className="hidden sm:block">{states.formData.date ? formatDate(states.formData.date) : bookingStepThreeText.notSelected}</span>
           </div>
         </div>
 
