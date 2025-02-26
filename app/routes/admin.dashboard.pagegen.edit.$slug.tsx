@@ -210,6 +210,7 @@ export default function EditPageRoute() {
             onSection6Update={adaptSection6Update}
             timelineData={timelineData}
             onTimelineUpdate={adaptTimelineUpdate}
+            isEditMode={true}
           />
         </div>
       </div>
