@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Menu, ArrowRightToLine, ChevronDown, Settings } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { useFetcher, Link, useLocation, useLoaderData } from "@remix-run/react";
+import { useFetcher, Link, useLocation } from "@remix-run/react";
 import { DynamicNavLinks } from "./DynamicNavLinks";
 import type { Page } from "~/utils/db.schema.server";
 
@@ -23,6 +23,12 @@ const Nav: React.FC<NavProps> = ({ pages }) => {
   const [mobileNavOpen, setMobileNavOpen] = useState<boolean>(false);
   const [isToursOpen, setIsToursOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+
+  // Calculate the number of tour pages to determine dropdown height
+  const tourPages = pages.filter(page => page.template === 'tour' && page.status === 'active');
+  const dropdownItemHeight = 40; // Height of each dropdown item in pixels
+  const baseDropdownPadding = 16; // Padding for the dropdown
+  const dynamicDropdownHeight = tourPages.length * dropdownItemHeight + baseDropdownPadding;
 
   useEffect(() => {
     setIsMounted(true);
@@ -87,27 +93,31 @@ const Nav: React.FC<NavProps> = ({ pages }) => {
                 </SelectContent>
               </Select>
 
-              {/* Tours Dropdown */}
-              <div className="w-full">
-                <button onClick={() => setIsToursOpen(!isToursOpen)} className="w-full flex items-center justify-between text-blue-50 font-sans font-semibold text-xl group">
-                  Tours
-                  <ChevronDown className={`transition-transform duration-300 ${isToursOpen ? "rotate-180" : ""}`} size={20} />
-                </button>
-                <div className={`overflow-hidden transition-all duration-300 ${isToursOpen ? "max-h-[200px] mt-4" : "max-h-0"}`}>
-                  <Link to="/sanjuan" onClick={handleLinkClick} className="pl-4 text-blue-50 hover:text-blue-200 transition-colors font-sans text-lg block py-2">
-                    {state.common.toursMenu.caves}
-                  </Link>
-                  <DynamicNavLinks pages={pages} onLinkClick={handleLinkClick} />
-                </div>
-              </div>
-
               {/* Regular Nav Links */}
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-6 w-full">
                 {navLinks.map((link, index) => (
                   <Link key={index} to={link.path} onClick={handleLinkClick} className="text-white text-2xl hover:text-blue-200 transition-colors">
                     {link.linkText}
                   </Link>
                 ))}
+                
+                {/* Tours Dropdown - Moved below regular links */}
+                <div className="w-full">
+                  <button onClick={() => setIsToursOpen(!isToursOpen)} className="w-full flex items-center justify-between text-blue-50 font-sans font-semibold text-xl group">
+                    Tours
+                    <ChevronDown className={`transition-transform duration-300 ${isToursOpen ? "rotate-180" : ""}`} size={20} />
+                  </button>
+                  <div 
+                    className={`overflow-hidden transition-all duration-300 ${isToursOpen ? "mt-4" : ""}`}
+                    style={{ maxHeight: isToursOpen ? `${dynamicDropdownHeight}px` : '0' }}
+                  >
+                    {/* Only use DynamicNavLinks for tour pages */}
+                    <DynamicNavLinks 
+                      pages={tourPages} 
+                      onLinkClick={handleLinkClick} 
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             <div className="w-full flex justify-between items-center">
