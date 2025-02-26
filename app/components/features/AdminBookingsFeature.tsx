@@ -12,6 +12,8 @@ interface AdminBookingsFeatureProps {
   onTourChange: (tourSlug: string) => void;
   onStatusChange: (status: string) => void;
   onAllDatesChange: (allDates: boolean) => void;
+  onSearchChange: (searchTerm: string) => void;
+  isSearching: boolean;
   onCancelBooking: (bookingId: string, shouldRefund: boolean, reason: string) => Promise<{
     success: boolean;
     message: string;
@@ -30,6 +32,8 @@ export const AdminBookingsFeature = ({
   onTourChange, 
   onStatusChange, 
   onAllDatesChange,
+  onSearchChange,
+  isSearching,
   onCancelBooking 
 }: AdminBookingsFeatureProps) => {
   const { state } = useLanguageContext();
@@ -47,6 +51,7 @@ export const AdminBookingsFeature = ({
     initialSelectedTourSlug: loaderData.selectedTourSlug || '',
     initialSelectedStatus: loaderData.selectedStatus || 'confirmed',
     initialAllDates: loaderData.allDates || false,
+    initialSearchTerm: loaderData.searchTerm || '',
   });
 
   // Update states when loader data changes
@@ -64,7 +69,14 @@ export const AdminBookingsFeature = ({
     states.setSelectedTourSlug(loaderData.selectedTourSlug || '');
     states.setSelectedStatus(loaderData.selectedStatus || 'confirmed');
     states.setAllDates(loaderData.allDates || false);
+    states.setSearchTerm(loaderData.searchTerm || '');
+    states.setIsLoading(false); // Reset loading state when data changes
   }, [loaderData]);
+
+  // Update loading state when isSearching changes
+  useEffect(() => {
+    states.setIsLoading(isSearching);
+  }, [isSearching]);
 
   const handleUpdateMaxBookings = (newMax: number) => {
     const formData = new FormData();
@@ -128,6 +140,15 @@ export const AdminBookingsFeature = ({
     onAllDatesChange(allDates);
   };
 
+  const handleSearchChange = (searchTerm: string) => {
+    // Set the search term in the state
+    states.setSearchTerm(searchTerm);
+    // Set loading state to true before search
+    states.setIsLoading(true);
+    // Pass the search term to the parent component
+    onSearchChange(searchTerm);
+  };
+
   return (
     <AdminBookingsUI
       selectedDate={parseLocalDate(loaderData.selectedDate)}
@@ -140,6 +161,7 @@ export const AdminBookingsFeature = ({
       selectedTourSlug={states.selectedTourSlug}
       selectedStatus={states.selectedStatus}
       allDates={states.allDates}
+      searchTerm={states.searchTerm}
       onDateChange={onDateChange}
       onUpdateMaxBookings={handleUpdateMaxBookings}
       onCancelBooking={handleCancelBooking}
@@ -147,6 +169,7 @@ export const AdminBookingsFeature = ({
       onTourChange={handleTourChange}
       onStatusChange={handleStatusChange}
       onAllDatesChange={handleAllDatesChange}
+      onSearchChange={handleSearchChange}
       strings={state.admin.bookings}
     />
   );

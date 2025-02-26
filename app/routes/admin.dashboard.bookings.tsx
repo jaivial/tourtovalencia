@@ -10,6 +10,7 @@ import type { LoaderData, BookingData, PaginationInfo } from "~/types/booking";
 import { updateBookingLimit } from "~/models/bookingLimit.server";
 import { cancelBooking } from "~/services/bookingCancellation.server";
 // import type { Tour } from "~/routes/book";
+import { useState, useEffect } from "react";
 
 // Number of bookings per page
 const ITEMS_PER_PAGE = 10;
@@ -23,6 +24,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     const tourSlugParam = url.searchParams.get("tourSlug");
     const statusParam = url.searchParams.get("status") || "confirmed";
     const allDatesParam = url.searchParams.get("allDates") === "true";
+    const searchTermParam = url.searchParams.get("searchTerm") || "";
     
     // Parse page number, default to 1 if invalid
     const currentPage = pageParam ? Math.max(1, parseInt(pageParam)) : 1;
@@ -66,14 +68,24 @@ export const loader = async ({ request }: LoaderArgs) => {
         $gte: Date;
         $lte: Date;
       };
+      $or?: Array<{
+        fullName?: {
+          $regex: string;
+          $options: string;
+        };
+        name?: {
+          $regex: string;
+          $options: string;
+        };
+      }>;
     }
 
     const bookingsQuery: BookingQuery = {
       status: statusParam
     };
 
-    // Only filter by date if not viewing all cancelled bookings
-    if (!(statusParam === "cancelled" && allDatesParam)) {
+    // Only filter by date if not viewing all cancelled bookings or all confirmed bookings
+    if (!((statusParam === "cancelled" || statusParam === "confirmed") && allDatesParam)) {
       bookingsQuery.date = {
         $gte: startDate,
         $lte: endDate,
@@ -83,6 +95,14 @@ export const loader = async ({ request }: LoaderArgs) => {
     // If a tour is selected, filter bookings by tour
     if (tourSlugParam) {
       bookingsQuery.tourSlug = tourSlugParam;
+    }
+
+    // If search term is provided, add it to the query
+    if (searchTermParam) {
+      bookingsQuery.$or = [
+        { fullName: { $regex: searchTermParam, $options: 'i' } },
+        { name: { $regex: searchTermParam, $options: 'i' } }
+      ];
     }
 
     // Get total count of bookings for the selected date and tour (if specified)
@@ -177,6 +197,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       selectedTourSlug: tourSlugParam || "",
       selectedStatus: statusParam,
       allDates: allDatesParam,
+      searchTerm: searchTermParam,
     });
   } catch (error) {
     console.error("Error loading bookings:", error);
@@ -209,6 +230,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       selectedTourSlug: "",
       selectedStatus: "confirmed",
       allDates: false,
+      searchTerm: "",
       error: "Failed to load bookings",
     });
   }
@@ -287,6 +309,7 @@ export const action = async ({ request }: ActionArgs) => {
 export default function AdminDashboardBookings() {
   const data = useLoaderData<typeof loader>();
   const submit = useSubmit();
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleDateChange = (date: Date) => {
     // Format the date as YYYY-MM-DD in local timezone
@@ -534,6 +557,47 @@ export default function AdminDashboardBookings() {
     });
   };
 
+  const handleSearchChange = (searchTerm: string) => {
+    // Only trigger search if the term has changed
+    if (searchTerm === data.searchTerm) {
+      return;
+    }
+    
+    // Set searching state
+    setIsSearching(true);
+    
+    // Create a FormData object
+    const formData = new FormData();
+    formData.append("date", data.selectedDate);
+    // Keep the selected tour if any
+    if (data.selectedTourSlug) {
+      formData.append("tourSlug", data.selectedTourSlug);
+    }
+    // Keep the selected status
+    formData.append("status", data.selectedStatus);
+    // Keep the allDates setting if it's set
+    if (data.allDates) {
+      formData.append("allDates", "true");
+    }
+    // Add the search term
+    if (searchTerm) {
+      formData.append("searchTerm", searchTerm);
+    }
+    // Reset to page 1 when changing search term
+    formData.append("page", "1");
+
+    // Submit the form with the new search term
+    submit(formData, {
+      method: "get",
+      replace: true,
+    });
+  };
+
+  // Reset searching state when data changes (search complete)
+  useEffect(() => {
+    setIsSearching(false);
+  }, [data]);
+
   return (
     <AdminBookingsFeature 
       loaderData={data} 
@@ -542,6 +606,8 @@ export default function AdminDashboardBookings() {
       onStatusChange={handleStatusChange}
       onAllDatesChange={handleAllDatesChange}
       onCancelBooking={handleCancelBooking}
+      onSearchChange={handleSearchChange}
+      isSearching={isSearching}
     />
   );
 }

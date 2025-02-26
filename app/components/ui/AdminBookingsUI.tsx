@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { BookingData, PaginationInfo } from "~/types/booking";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Label } from "~/components/ui/label";
@@ -19,7 +19,7 @@ import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { CancellationDialog } from "~/components/ui/CancellationDialog";
 import { CancellationResultDialog } from "~/components/ui/CancellationResultDialog";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Search, Loader2 } from "lucide-react";
 
 export type BookingLimit = {
   maxBookings: number;
@@ -48,6 +48,7 @@ type AdminBookingsUIProps = {
   selectedTourSlug: string;
   selectedStatus: string;
   allDates: boolean;
+  searchTerm: string;
   onDateChange: (date: Date) => void;
   onUpdateMaxBookings: (newMax: number) => void;
   onCancelBooking?: (bookingId: string, shouldRefund: boolean, reason: string) => Promise<CancellationResultType>;
@@ -55,6 +56,7 @@ type AdminBookingsUIProps = {
   onTourChange: (tourSlug: string) => void;
   onStatusChange: (status: string) => void;
   onAllDatesChange: (allDates: boolean) => void;
+  onSearchChange: (searchTerm: string) => void;
   strings: Record<string, unknown>;
 };
 
@@ -68,6 +70,7 @@ export const AdminBookingsUI = ({
   selectedTourSlug,
   selectedStatus,
   allDates,
+  searchTerm,
   onDateChange,
   onUpdateMaxBookings,
   onCancelBooking,
@@ -75,17 +78,56 @@ export const AdminBookingsUI = ({
   onTourChange,
   onStatusChange,
   onAllDatesChange,
+  onSearchChange,
 }: AdminBookingsUIProps) => {
   const [maxBookings, setMaxBookings] = useState(bookingLimit.maxBookings.toString());
   const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
   const [showCancellationDialog, setShowCancellationDialog] = useState(false);
   const [cancellationResult, setCancellationResult] = useState<CancellationResultType | null>(null);
   const [showResultDialog, setShowResultDialog] = useState(false);
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Update maxBookings input when bookingLimit changes (e.g., when date changes)
   useEffect(() => {
     setMaxBookings(bookingLimit.maxBookings.toString());
   }, [bookingLimit.maxBookings]);
+
+  // Update localSearchTerm when searchTerm prop changes
+  useEffect(() => {
+    setLocalSearchTerm(searchTerm);
+  }, [searchTerm]);
+
+  // Debounced search function
+  const debouncedSearch = useCallback((term: string) => {
+    // Clear any existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    
+    // Set a new timeout
+    const timeout = setTimeout(() => {
+      onSearchChange(term);
+    }, 300); // 300ms delay
+    
+    setSearchTimeout(timeout);
+    
+    // Cleanup function to clear the timeout if the component unmounts
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [onSearchChange, searchTimeout]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
 
   // Calculate total people from all bookings
   const totalPeople = bookings.reduce((sum, booking) => {
@@ -188,6 +230,23 @@ export const AdminBookingsUI = ({
     onAllDatesChange(checked);
   };
 
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSearchTerm = e.target.value;
+    setLocalSearchTerm(newSearchTerm);
+    // Use the debounced search function
+    debouncedSearch(newSearchTerm);
+  };
+
+  const handleClearSearch = () => {
+    setLocalSearchTerm('');
+    onSearchChange('');
+    // Clear any pending search timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+      setSearchTimeout(null);
+    }
+  };
+
   // Format date for display
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -240,23 +299,21 @@ export const AdminBookingsUI = ({
                   </Select>
                 </div>
 
-                {/* All Dates Button (only for cancelled bookings) */}
-                {selectedStatus === "cancelled" && (
-                  <div>
-                    <Label className="block text-sm font-medium mb-3">Date Filter</Label>
-                    <Button
-                      variant={allDates ? "default" : "outline"}
-                      onClick={() => handleAllDatesChange(!allDates)}
-                      className="w-full"
-                    >
-                      {allDates ? "✓ Show all dates" : "Show all dates"}
-                    </Button>
-                  </div>
-                )}
+                {/* All Dates Button (for both cancelled and confirmed bookings) */}
+                <div>
+                  <Label className="block text-sm font-medium mb-3">Date Filter</Label>
+                  <Button
+                    variant={allDates ? "default" : "outline"}
+                    onClick={() => handleAllDatesChange(!allDates)}
+                    className="w-full"
+                  >
+                    {allDates ? "✓ Show all dates" : "Show all dates"}
+                  </Button>
+                </div>
 
                 {/* Booking Limit (only for confirmed bookings) */}
                 {selectedStatus === "confirmed" && (
-                  <div className="space-y-4">
+                  <div className="space-y-4 mt-6">
                     <div>
                       <Label htmlFor="max-bookings" className="block text-sm font-medium mb-3">Max Bookings</Label>
                       <div className="flex items-center space-x-2">
@@ -317,8 +374,54 @@ export const AdminBookingsUI = ({
               </Tabs>
             </div>
 
+            {/* Search Bar */}
+            <div className="p-4 border-b border-gray-200">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 text-gray-400 animate-spin" />
+                  ) : (
+                    <Search className="h-4 w-4 text-gray-400" />
+                  )}
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Search by name..."
+                  value={localSearchTerm}
+                  onChange={handleSearchInputChange}
+                  className="pl-10 w-full"
+                  disabled={isLoading}
+                />
+                {localSearchTerm && !isLoading && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3"
+                  >
+                    <XCircle className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Table */}
             <div className="overflow-x-auto">
+              {searchTerm && (
+                <div className="p-2 bg-blue-50 text-blue-700 text-sm flex items-center justify-between">
+                  <span>
+                    <Search className="h-3 w-3 inline mr-1" />
+                    Showing results for: <strong>{searchTerm}</strong>
+                  </span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleClearSearch}
+                    className="h-6 text-xs"
+                  >
+                    Clear search
+                  </Button>
+                </div>
+              )}
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -345,10 +448,23 @@ export const AdminBookingsUI = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {bookings.length === 0 ? (
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={selectedStatus === "confirmed" ? 9 : 9} className="text-center py-8">
+                        <div className="flex flex-col items-center justify-center">
+                          <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
+                          <span className="text-sm text-muted-foreground">Searching bookings...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : bookings.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={selectedStatus === "confirmed" ? 9 : 9} className="text-center py-4">
-                        No bookings found for this {selectedStatus === "cancelled" && allDates ? "tour" : "date"}.
+                        {searchTerm ? (
+                          <span>No bookings found matching &ldquo;{searchTerm}&rdquo;</span>
+                        ) : (
+                          <span>No bookings found for this {selectedStatus === "cancelled" && allDates ? "tour" : "date"}.</span>
+                        )}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -438,7 +554,7 @@ export const AdminBookingsUI = ({
             </div>
             
             {/* Pagination */}
-            {pagination && pagination.totalPages > 1 && (
+            {pagination && pagination.totalPages > 1 && bookings.length > 0 && (
               <div className="flex justify-center p-4">
                 <div className="flex space-x-1">
                   <Button

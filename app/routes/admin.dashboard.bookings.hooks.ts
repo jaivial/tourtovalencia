@@ -22,6 +22,7 @@ type StatesProps = {
   initialSelectedTourSlug?: string;
   initialSelectedStatus?: string;
   initialAllDates?: boolean;
+  initialSearchTerm?: string;
 };
 
 export const useStates = ({ 
@@ -32,7 +33,8 @@ export const useStates = ({
   initialTours = [],
   initialSelectedTourSlug = '',
   initialSelectedStatus = 'confirmed',
-  initialAllDates = false
+  initialAllDates = false,
+  initialSearchTerm = ''
 }: StatesProps) => {
   const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
@@ -42,6 +44,7 @@ export const useStates = ({
   const [selectedTourSlug, setSelectedTourSlug] = useState<string>(initialSelectedTourSlug);
   const [selectedStatus, setSelectedStatus] = useState<string>(initialSelectedStatus);
   const [allDates, setAllDates] = useState<boolean>(initialAllDates);
+  const [searchTerm, setSearchTerm] = useState<string>(initialSearchTerm);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,6 +72,8 @@ export const useStates = ({
     setSelectedStatus,
     allDates,
     setAllDates,
+    searchTerm,
+    setSearchTerm,
     isLoading,
     setIsLoading,
     error,

@@ -57,5 +57,6 @@ export interface LoaderData {
   selectedTourSlug?: string;
   selectedStatus?: string;
   allDates?: boolean;
+  searchTerm?: string;
   error?: string;
 }
