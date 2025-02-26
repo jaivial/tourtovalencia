@@ -63,7 +63,8 @@ async function optimizeImage(base64Data: string): Promise<string> {
   }
 }
 
-async function processContent(content: any, translate: boolean = true): Promise<any> {
+// Export the processContent function so it can be used in other files
+export async function processContent(content: any, translate: boolean = true): Promise<any> {
   if (!content) return content;
 
   // If it's an array, process each item
@@ -100,6 +101,7 @@ async function processContent(content: any, translate: boolean = true): Promise<
     return translate ? await translateText(content) : content;
   }
 
+  // Otherwise, return as is
   return content;
 }
 
@@ -172,7 +174,7 @@ async function translateText(text: string, retryCount = 0): Promise<string> {
 }
 
 // Helper function to recursively translate content
-async function translateContent(content: Record<string, any>): Promise<Record<string, any>> {
+export async function translateContent(content: Record<string, any>): Promise<Record<string, any>> {
   const translated: Record<string, any> = {};
 
   for (const [key, value] of Object.entries(content)) {

@@ -2,7 +2,9 @@ import { json } from "@remix-run/server-runtime";
 import type { ActionFunctionArgs } from "@remix-run/server-runtime";
 import { getPagesCollection } from "~/utils/db.server";
 import { ObjectId } from "mongodb";
-import { processContent } from "~/utils/page.server";
+import { processContent, translateContent } from "~/utils/page.server";
+import type { Page } from "~/utils/db.schema.server";
+import type { Filter } from "mongodb";
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   if (request.method !== "PUT") {
@@ -39,11 +41,19 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     console.log("Processing Spanish content for update...");
     const processedSpanishContent = await processContent(content, false);
 
+    // Create English content by translating the processed Spanish content
+    console.log("Translating content to English...");
+    const englishContent = await translateContent({ ...processedSpanishContent });
+
     // Get the pages collection
     const collection = await getPagesCollection();
     
+    // Create a properly typed filter
+    const objectId = new ObjectId(id);
+    const filter: Filter<Page> = { _id: objectId as unknown as string };
+    
     // Find the existing page to get the English content
-    const existingPage = await collection.findOne({ _id: new ObjectId(id) });
+    const existingPage = await collection.findOne(filter);
     
     if (!existingPage) {
       return json({ error: "Page not found" }, { status: 404 });
@@ -56,15 +66,16 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       console.log(`Updating page "${name}" as a tour with price ${content.price}€`);
     }
     
-    // Update the page with new Spanish content but keep existing English content
+    // Update the page with new Spanish content and translated English content
     const result = await collection.updateOne(
-      { _id: new ObjectId(id) },
+      filter,
       {
         $set: {
           name,
           status,
           template,
           "content.es": processedSpanishContent,
+          "content.en": englishContent,
           updatedAt: new Date()
         }
       }
@@ -76,7 +87,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
     return json({ 
       success: true, 
-      message: "Page updated successfully" 
+      message: "Page updated successfully with translations" 
     });
   } catch (error) {
     console.error("Error updating page:", error);

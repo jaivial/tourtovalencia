@@ -10,6 +10,8 @@ import { useEditPage } from "./admin.dashboard.pagegen.edit.$slug.hooks";
 import { getPageBySlug } from "~/utils/page.server";
 import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
 import { motion } from "framer-motion";
+import type { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
+import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { slug } = params;
@@ -64,6 +66,57 @@ export default function EditPageRoute() {
     handleSavePage,
     handleCancel
   } = useEditPage(page);
+
+  // Adapter functions to match PageTemplate prop types
+  const adaptStatusChange = (checked: boolean) => {
+    handleStatusChange(checked ? 'active' : 'upcoming');
+  };
+
+  const adaptSection1Update = (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
+    const updatedData = { ...section1Data, [field]: value };
+    handleSection1Update(updatedData);
+  };
+
+  const adaptSection2Update = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
+    const updatedData = { ...section2Data, [field]: value };
+    handleSection2Update(updatedData);
+  };
+
+  const adaptSection3ImageUpdate = (index: number, file: File) => {
+    // Convert File to data URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        handleSection3ImageUpdate(index, e.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const adaptSection4Update = (field: keyof sanJuansection4Type, value: string) => {
+    const updatedData = { ...section4Data, [field]: value };
+    handleSection4Update(updatedData);
+  };
+
+  const adaptSection5Update = (field: keyof sanJuanSection5Type, value: string) => {
+    const updatedData = { ...section5Data, [field]: value };
+    handleSection5Update(updatedData);
+  };
+
+  const adaptSection6Update = (field: keyof SanJuanSection6Type, value: string) => {
+    const updatedData = { ...section6Data, [field]: value };
+    handleSection6Update(updatedData);
+  };
+
+  const adaptIndexSection5Update = (field: keyof IndexSection5Type, value: string) => {
+    const updatedData = { ...indexSection5Data, [field]: value };
+    handleIndexSection5Update(updatedData);
+  };
+
+  const adaptTimelineUpdate = (field: keyof TimelineDataType, value: string | Array<{title: string, description: string}>) => {
+    const updatedData = { ...timelineData, [field]: value };
+    handleTimelineUpdate(updatedData);
+  };
 
   return (
     <div className="w-full min-h-screen bg-gray-100 p-0">
@@ -136,27 +189,27 @@ export default function EditPageRoute() {
         <div className="w-full">
           <PageTemplate
             status={status}
-            onStatusChange={handleStatusChange}
+            onStatusChange={adaptStatusChange}
             pageName={pageName}
             price={price}
             onPriceChange={handlePriceChange}
             indexSection5Data={indexSection5Data}
-            onIndexSection5Update={handleIndexSection5Update}
+            onIndexSection5Update={adaptIndexSection5Update}
             section1Data={section1Data}
-            onSection1Update={handleSection1Update}
+            onSection1Update={adaptSection1Update}
             section2Data={section2Data}
-            onSection2Update={handleSection2Update}
+            onSection2Update={adaptSection2Update}
             section3Data={section3Data}
-            onSection3ImageUpdate={handleSection3ImageUpdate}
+            onSection3ImageUpdate={adaptSection3ImageUpdate}
             onSection3ImageRemove={handleSection3ImageRemove}
             section4Data={section4Data}
-            onSection4Update={handleSection4Update}
+            onSection4Update={adaptSection4Update}
             section5Data={section5Data}
-            onSection5Update={handleSection5Update}
+            onSection5Update={adaptSection5Update}
             section6Data={section6Data}
-            onSection6Update={handleSection6Update}
+            onSection6Update={adaptSection6Update}
             timelineData={timelineData}
-            onTimelineUpdate={handleTimelineUpdate}
+            onTimelineUpdate={adaptTimelineUpdate}
           />
         </div>
       </div>

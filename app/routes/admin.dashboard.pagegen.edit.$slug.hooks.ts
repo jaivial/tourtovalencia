@@ -12,38 +12,111 @@ import type {
 } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 
-export const useEditPage = (initialPage: Page) => {
+// Helper function to deserialize JSON content
+const deserializeContent = (page: any): Page => {
+  // Create a deep copy of the page
+  const deserializedPage = { ...page };
+  
+  // Ensure status is valid
+  if (deserializedPage.status !== 'active' && deserializedPage.status !== 'upcoming') {
+    deserializedPage.status = 'upcoming'; // Default to upcoming if invalid
+  }
+  
+  // Handle File objects and other complex types that might be serialized
+  if (deserializedPage.content?.es) {
+    // Process each section that might contain File objects
+    if (deserializedPage.content.es.section1?.backgroundImage) {
+      deserializedPage.content.es.section1.backgroundImage = {
+        preview: deserializedPage.content.es.section1.backgroundImage.preview || '',
+        file: undefined // File objects can't be serialized, so we set to undefined
+      };
+    }
+    
+    if (deserializedPage.content.es.section2?.sectionImage) {
+      deserializedPage.content.es.section2.sectionImage = {
+        preview: deserializedPage.content.es.section2.sectionImage.preview || '',
+        file: undefined
+      };
+    }
+    
+    // Handle section3 images array
+    if (deserializedPage.content.es.section3?.images) {
+      deserializedPage.content.es.section3.images = 
+        deserializedPage.content.es.section3.images.map((img: any) => ({
+          source: img.source || '',
+          alt: img.alt || 'Gallery image'
+        }));
+    }
+  }
+  
+  return deserializedPage as Page;
+};
+
+export const useEditPage = (initialPage: any) => {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   
+  // Deserialize the page content
+  const deserializedPage = deserializeContent(initialPage);
+  
   // Page data states
-  const [pageName, setPageName] = useState(initialPage.name);
-  const [status, setStatus] = useState<'active' | 'upcoming'>(initialPage.status);
-  const [price, setPrice] = useState(initialPage.content.es.price || 0);
+  const [pageName, setPageName] = useState(deserializedPage.name);
+  const [status, setStatus] = useState<'active' | 'upcoming'>(deserializedPage.status);
+  const [price, setPrice] = useState(deserializedPage.content.es.price || 0);
   
   // Section data states
   const [section1Data, setSection1Data] = useState<sanJuanSection1Type>(
-    initialPage.content.es.section1 || {} as sanJuanSection1Type
+    deserializedPage.content.es.section1 || {} as sanJuanSection1Type
   );
   const [section2Data, setSection2Data] = useState<sanJuansection2Type>(
-    initialPage.content.es.section2 || {} as sanJuansection2Type
+    deserializedPage.content.es.section2 || {} as sanJuansection2Type
   );
+  
+  // Initialize section3Data with default empty images array if it doesn't exist
+  const defaultSection3Data: sanJuanSection3Type = {
+    images: []
+  };
+  
   const [section3Data, setSection3Data] = useState<sanJuanSection3Type>(
-    initialPage.content.es.section3 || {} as sanJuanSection3Type
+    deserializedPage.content.es.section3 
+      ? {
+          ...deserializedPage.content.es.section3,
+          images: deserializedPage.content.es.section3.images || []
+        }
+      : defaultSection3Data
   );
+  
   const [section4Data, setSection4Data] = useState<sanJuansection4Type>(
-    initialPage.content.es.section4 || {} as sanJuansection4Type
+    deserializedPage.content.es.section4 || {} as sanJuansection4Type
   );
   const [section5Data, setSection5Data] = useState<sanJuanSection5Type>(
-    initialPage.content.es.section5 || {} as sanJuanSection5Type
+    deserializedPage.content.es.section5 || {} as sanJuanSection5Type
   );
+  
+  // Initialize section6Data with default empty list array if it doesn't exist
+  const defaultSection6Data: SanJuanSection6Type = {
+    cardTitle: "",
+    cardDescription: "",
+    firstH4: "",
+    list: [],
+    secondH4: "",
+    secondH4span: "",
+    button: ""
+  };
+  
   const [section6Data, setSection6Data] = useState<SanJuanSection6Type>(
-    initialPage.content.es.section6 || {} as SanJuanSection6Type
+    deserializedPage.content.es.section6 
+      ? {
+          ...deserializedPage.content.es.section6,
+          list: deserializedPage.content.es.section6.list || []
+        }
+      : defaultSection6Data
   );
+  
   const [indexSection5Data, setIndexSection5Data] = useState<IndexSection5Type>(
-    initialPage.content.es.indexSection5 || {} as IndexSection5Type
+    deserializedPage.content.es.indexSection5 || {} as IndexSection5Type
   );
   
   // Initialize with default empty timeline if none exists
@@ -54,7 +127,7 @@ export const useEditPage = (initialPage: Page) => {
   };
   
   const [timelineData, setTimelineData] = useState<TimelineDataType>(
-    initialPage.content.es.timeline || defaultTimeline
+    deserializedPage.content.es.timeline || defaultTimeline
   );
 
   // Status change handler
@@ -115,10 +188,15 @@ export const useEditPage = (initialPage: Page) => {
     setTimelineData(data);
   };
 
-  // Save page handler
   const handleSavePage = async () => {
     if (!pageName.trim()) {
       setSaveError("El nombre del tour es obligatorio");
+      return;
+    }
+
+    // Validate status
+    if (status !== 'active' && status !== 'upcoming') {
+      setSaveError("El estado debe ser 'active' o 'upcoming'");
       return;
     }
 
@@ -145,10 +223,10 @@ export const useEditPage = (initialPage: Page) => {
       formData.append("name", pageName);
       formData.append("content", JSON.stringify(content));
       formData.append("status", status);
-      formData.append("id", initialPage._id || "");
+      formData.append("id", deserializedPage._id || "");
 
       // Send update request
-      const response = await fetch(`/api/pages/update/${initialPage._id}`, {
+      const response = await fetch(`/api/pages/update/${deserializedPage._id}`, {
         method: "PUT",
         body: formData,
       });
@@ -178,7 +256,6 @@ export const useEditPage = (initialPage: Page) => {
   };
 
   return {
-    // States
     pageName,
     status,
     price,
@@ -193,11 +270,7 @@ export const useEditPage = (initialPage: Page) => {
     isSaving,
     saveError,
     saveSuccess,
-
-    // Setters
     setPageName,
-
-    // Handlers
     handleStatusChange,
     handlePriceChange,
     handleSection1Update,
