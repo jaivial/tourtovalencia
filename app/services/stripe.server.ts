@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { BookingFormData } from "~/hooks/book.hooks";
+import { getToursCollection } from "~/utils/db.server";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY must be defined");
@@ -71,7 +72,29 @@ export async function createCheckoutSession(booking: BookingFormData, baseUrl: s
     throw new Error(`Invalid base URL provided: ${baseUrl}`);
   }
 
-  const totalAmount = booking.partySize * 0.5 * 100; // 0.5 EUR converted to cents
+  // Get tour information from the tours collection if tourSlug is provided
+  let tourName = "Excursión a Cuevas de San Jose";
+  let tourPrice = 0.5; // Default price in EUR
+  
+  if (booking.tourSlug) {
+    try {
+      const toursCollection = await getToursCollection();
+      const tour = await toursCollection.findOne({ slug: booking.tourSlug });
+      
+      if (tour) {
+        tourName = tour.tourName.en;
+        tourPrice = tour.tourPrice || tourPrice;
+        console.log(`Found tour: ${tourName} with price: €${tourPrice}`);
+      }
+    } catch (error) {
+      console.error("Error fetching tour information:", error);
+      // Continue with default values if there's an error
+    }
+  }
+
+  // Calculate total amount in cents for Stripe
+  const totalAmount = booking.partySize * tourPrice * 100; // Convert to cents
+  console.log(`Calculating price: ${booking.partySize} people × €${tourPrice} = €${booking.partySize * tourPrice} (${totalAmount} cents)`);
 
   try {
     // Ensure the date is a string when sending to Stripe
@@ -88,12 +111,12 @@ export async function createCheckoutSession(booking: BookingFormData, baseUrl: s
           price_data: {
             currency: "eur",
             product_data: {
-              name: "Excursión a Cuevas de San Jose",
+              name: tourName,
               description: `Reserva para ${booking.partySize} ${booking.partySize === 1 ? "persona" : "personas"} el ${new Date(date).toLocaleDateString("es-ES")}`,
             },
-            unit_amount: totalAmount,
+            unit_amount: Math.round(tourPrice * 100), // Price per person in cents
           },
-          quantity: 1,
+          quantity: booking.partySize, // Number of people as quantity
         },
       ],
       mode: "payment",
@@ -106,6 +129,8 @@ export async function createCheckoutSession(booking: BookingFormData, baseUrl: s
         customerEmail: booking.email,
         phoneNumber: booking.phoneNumber || "",
         partySize: booking.partySize.toString(),
+        tourSlug: booking.tourSlug || "",
+        tourName: tourName,
       },
       customer_email: booking.email,
     });
@@ -123,7 +148,25 @@ export async function createCheckoutSession(booking: BookingFormData, baseUrl: s
 export async function retrieveCheckoutSession(sessionId: string) {
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-    return session;
+    console.log("Retrieved Stripe session:", {
+      id: session.id,
+      amount_total: session.amount_total,
+      currency: session.currency,
+      customer_email: session.customer_email,
+      payment_status: session.payment_status,
+      metadata: session.metadata,
+    });
+    
+    // Add payment method to metadata
+    const enhancedMetadata = {
+      ...session.metadata,
+      paymentMethod: 'stripe'
+    };
+    
+    return {
+      ...session,
+      metadata: enhancedMetadata
+    };
   } catch (error) {
     console.error("Error retrieving checkout session:", error);
     if (error instanceof Stripe.errors.StripeError) {

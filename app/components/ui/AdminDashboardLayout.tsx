@@ -1,6 +1,6 @@
 import { Link, useLocation, Outlet } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
-import { BookOpenCheck, LogOut, Home, Calendar, FileText } from "lucide-react";
+import { LogOut, Home, Calendar, FileText } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { MobileNav } from "./MobileNav";
 
@@ -11,13 +11,14 @@ export type AdminDashboardLayoutProps = {
     bookings: string;
     logout: string;
     pageGenerator: string;
+    home: string;
   };
 };
 
 export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayoutProps) {
   const location = useLocation();
-  const isBookingsActive = location.pathname.includes("/admin/dashboard/bookings");
-  const isPageGenActive = location.pathname.includes("/admin/dashboard/pagegen");
+  const isBookingsActive = location.pathname === "/admin/dashboard/bookings";
+  const isPageGenActive = location.pathname === "/admin/dashboard/pagegen";
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -30,13 +31,27 @@ export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayout
           <nav className="flex-1 p-4 space-y-2">
             <Link to="/admin/dashboard" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", location.pathname === "/admin/dashboard" ? "bg-primary text-white hover:bg-primary/90" : "")}>
               <Home className="h-5 w-5" />
-              <span>Home</span>
+              <span>{strings.home}</span>
             </Link>
-            <Link to="/admin/dashboard/bookings" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isBookingsActive ? "bg-primary text-white hover:bg-primary/90" : "")}>
+            <Link 
+              to="/admin/dashboard/bookings" 
+              className={cn(
+                "flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", 
+                isBookingsActive ? "bg-primary text-white hover:bg-primary/90" : ""
+              )}
+              prefetch="intent"
+            >
               <Calendar className="h-5 w-5" />
               <span>{strings.bookings}</span>
             </Link>
-            <Link to="/admin/dashboard/pagegen" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isPageGenActive ? "bg-primary text-white hover:bg-primary/90" : "")}>
+            <Link 
+              to="/admin/dashboard/pagegen" 
+              className={cn(
+                "flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", 
+                isPageGenActive ? "bg-primary text-white hover:bg-primary/90" : ""
+              )}
+              prefetch="intent"
+            >
               <FileText className="h-5 w-5" />
               <span>{strings.pageGenerator}</span>
             </Link>
@@ -59,13 +74,27 @@ export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayout
           <nav className="flex-1 p-4 space-y-2">
             <Link to="/admin/dashboard" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", location.pathname === "/admin/dashboard" ? "bg-primary text-white hover:bg-primary/90" : "")}>
               <Home className="h-5 w-5" />
-              <span>Home</span>
+              <span>{strings.home}</span>
             </Link>
-            <Link to="/admin/dashboard/bookings" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isBookingsActive ? "bg-primary text-white hover:bg-primary/90" : "")}>
+            <Link 
+              to="/admin/dashboard/bookings" 
+              className={cn(
+                "flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", 
+                isBookingsActive ? "bg-primary text-white hover:bg-primary/90" : ""
+              )}
+              prefetch="intent"
+            >
               <Calendar className="h-5 w-5" />
               <span>{strings.bookings}</span>
             </Link>
-            <Link to="/admin/dashboard/pagegen" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isPageGenActive ? "bg-primary text-white hover:bg-primary/90" : "")}>
+            <Link 
+              to="/admin/dashboard/pagegen" 
+              className={cn(
+                "flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", 
+                isPageGenActive ? "bg-primary text-white hover:bg-primary/90" : ""
+              )}
+              prefetch="intent"
+            >
               <FileText className="h-5 w-5" />
               <span>{strings.pageGenerator}</span>
             </Link>

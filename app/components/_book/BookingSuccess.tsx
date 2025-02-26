@@ -1,9 +1,14 @@
 import { Button } from "~/components/ui/button";
 import { Link, useNavigate } from "@remix-run/react";
-import { CheckCircle, Home, ArrowLeft } from "lucide-react";
+import { CheckCircle, Home } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { Booking } from "~/types/booking";
 
-export const BookingSuccess = () => {
+interface BookingSuccessProps {
+  booking?: Booking;
+}
+
+export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
   const [countdown, setCountdown] = useState(20);
   const navigate = useNavigate();
 
@@ -35,6 +40,38 @@ export const BookingSuccess = () => {
             We&apos;ve received your request and sent a confirmation email to your inbox.
           </p>
         </div>
+
+        {booking && (
+          <div className="bg-white border border-gray-200 rounded-lg p-6 text-left shadow-sm">
+            <h2 className="font-medium text-gray-800 mb-4 text-lg">Booking Details:</h2>
+            <dl className="grid grid-cols-1 gap-3 text-sm">
+              {booking.tourName && (
+                <div className="flex justify-between py-1 border-b border-gray-100">
+                  <dt className="font-medium text-gray-600">Tour:</dt>
+                  <dd className="text-gray-900">{booking.tourName}</dd>
+                </div>
+              )}
+              <div className="flex justify-between py-1 border-b border-gray-100">
+                <dt className="font-medium text-gray-600">Date:</dt>
+                <dd className="text-gray-900">{new Date(booking.date).toLocaleDateString()}</dd>
+              </div>
+              <div className="flex justify-between py-1 border-b border-gray-100">
+                <dt className="font-medium text-gray-600">Party Size:</dt>
+                <dd className="text-gray-900">{booking.partySize} people</dd>
+              </div>
+              <div className="flex justify-between py-1 border-b border-gray-100">
+                <dt className="font-medium text-gray-600">Total Paid:</dt>
+                <dd className="text-gray-900">€{booking.amount.toFixed(2)}</dd>
+              </div>
+              {booking.paymentMethod && (
+                <div className="flex justify-between py-1 border-b border-gray-100">
+                  <dt className="font-medium text-gray-600">Payment Method:</dt>
+                  <dd className="text-gray-900 capitalize">{booking.paymentMethod}</dd>
+                </div>
+              )}
+            </dl>
+          </div>
+        )}
 
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-left">
           <h2 className="font-medium text-yellow-800 mb-3">Next Steps:</h2>

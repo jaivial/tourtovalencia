@@ -506,17 +506,20 @@
         "email": "Email",
         "emailConfirm": "Confirm Email",
         "phoneNumber": "Phone Number",
+        "tourSelector": "Select Tour",
         "placeholders": {
           "fullName": "Enter your full name",
           "email": "Enter your email",
           "emailConfirm": "Confirm your email",
-          "phoneNumber": "Enter your phone number"
+          "phoneNumber": "Enter your phone number",
+          "tourSelector": "Choose a tour experience"
         }
       },
       "bookingStepThree": {
         "bookingSummary": "Booking Summary",
         "personalDetails": "Personal Details",
         "bookingDetails": "Booking Details",
+        "selectedTour": "Selected Tour",
         "labels": {
           "name": "Name:",
           "email": "Email:",
@@ -527,7 +530,7 @@
         },
         "notSelected": "Not selected",
         "people": "people",
-        "priceCalculation": "Price calculation: {partySize} people × €120 per person",
+        "priceCalculation": "Price calculation: {partySize} people × €{price} per person",
         "paymentMessage": "Your booking will be confirmed after successful payment. Click \"Book Now\" to proceed to payment."
       },
       "payment": {
@@ -1059,19 +1062,22 @@
       "bookingStepOne": {
         "fullName": "Nombre Completo",
         "email": "Correo Electrónico",
-        "emailConfirm": "Confirmar Correo",
+        "emailConfirm": "Confirmar Correo Electrónico",
         "phoneNumber": "Número de Teléfono",
+        "tourSelector": "Seleccionar Tour",
         "placeholders": {
-          "fullName": "Introduce tu nombre completo",
-          "email": "Introduce tu correo electrónico",
-          "emailConfirm": "Confirma tu correo electrónico",
-          "phoneNumber": "Introduce tu número de teléfono"
+          "fullName": "Ingrese su nombre completo",
+          "email": "Ingrese su correo electrónico",
+          "emailConfirm": "Confirme su correo electrónico",
+          "phoneNumber": "Ingrese su número de teléfono",
+          "tourSelector": "Elija una experiencia de tour"
         }
       },
       "bookingStepThree": {
         "bookingSummary": "Resumen de la Reserva",
         "personalDetails": "Datos Personales",
         "bookingDetails": "Detalles de la Reserva",
+        "selectedTour": "Tour Seleccionado",
         "labels": {
           "name": "Nombre:",
           "email": "Correo:",
@@ -1082,7 +1088,7 @@
         },
         "notSelected": "No seleccionado",
         "people": "personas",
-        "priceCalculation": "Cálculo del precio: {partySize} personas × €120 por persona",
+        "priceCalculation": "Cálculo del precio: {partySize} personas × €{price} por persona",
         "paymentMessage": "Tu reserva se confirmará después del pago exitoso. Haz clic en \"Reservar Ahora\" para proceder al pago."
       },
       "payment": {

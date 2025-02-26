@@ -83,10 +83,16 @@ export const usePageCreation = () => {
       // Process images before sending to server
       const processedContent = await processImages(pageData.content);
       
+      // Ensure price is included at the top level of the content object
+      const contentWithPrice = {
+        ...processedContent,
+        price: processedContent.price || 0
+      };
+      
       fetcher.submit(
         { 
           name: pageData.name,
-          content: JSON.stringify(processedContent),
+          content: JSON.stringify(contentWithPrice),
           status: pageData.status
         },
         { 

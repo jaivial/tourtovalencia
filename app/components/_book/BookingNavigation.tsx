@@ -1,6 +1,5 @@
 import { Button } from "~/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { PaymentModalFeature } from "~/components/features/PaymentModalFeature";
 import { useEffect, useState } from "react";
 import { PaymentModal } from "~/components/ui/PaymentModal";
 import PaymentOptions from "~/components/ui/paypalpaymentoptions";
@@ -10,7 +9,6 @@ interface BookingNavigationProps {
   currentStep: number;
   onNext: () => void;
   onPrevious: () => void;
-  onSubmit: () => void;
   isSubmitting: boolean;
   paypalClientId: string | undefined;
   bookingNavigationText: {
@@ -22,10 +20,14 @@ interface BookingNavigationProps {
   };
 }
 
-export const BookingNavigation = ({ currentStep, onNext, onPrevious, onSubmit, isSubmitting, paypalClientId, bookingNavigationText }: BookingNavigationProps) => {
+export const BookingNavigation = ({ currentStep, onNext, onPrevious, isSubmitting, paypalClientId, bookingNavigationText }: BookingNavigationProps) => {
   const isLastStep = currentStep === 4;
   const [isOpen, setIsOpen] = useState(false);
-  const { formData } = useBooking();
+  const { formData, selectedTour } = useBooking();
+
+  // Calculate price based on selected tour price or use a default price
+  const tourPrice = selectedTour?.content?.en?.price || selectedTour?.tourPrice || 120;
+  const totalPrice = formData.partySize * tourPrice;
 
   useEffect(() => {
     console.log("bookingNavigationText", bookingNavigationText.bookNow);
@@ -58,7 +60,7 @@ export const BookingNavigation = ({ currentStep, onNext, onPrevious, onSubmit, i
           <div className="text-center">
             <h2 className="text-2xl font-semibold">{bookingNavigationText.completeBooking}</h2>
             <p className="text-muted-foreground mt-2">
-              {bookingNavigationText.totalAmount} €{formData.partySize * 120}
+              {bookingNavigationText.totalAmount} €{totalPrice}
             </p>
           </div>
           <PaymentOptions />

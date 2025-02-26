@@ -1,12 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Alert, AlertDescription } from "~/components/ui/alert";
-import { CheckCircle2, Loader2, AlertCircle, Home } from "lucide-react";
+import { CheckCircle2, Home } from "lucide-react";
 import type { Booking } from "~/types/booking";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { Button } from "~/components/ui/button";
-import { useNavigate } from "@remix-run/react";
 import { useEffect, useState } from "react";
 
 interface BookingSuccessUIProps {
@@ -46,15 +45,23 @@ const iconVariants = {
 };
 
 export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps) => {
-  const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(200000);
+  const [countdown, setCountdown] = useState(60);
 
   useEffect(() => {
+    if (emailStatus !== 'sent' && emailStatus !== 'error') {
+      return;
+    }
+    
+    // Only run in browser environment
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          navigate("/");
+          window.location.href = "/";
           return 0;
         }
         return prev - 1;
@@ -62,10 +69,12 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [navigate]);
+  }, [emailStatus]);
 
   const handleReturnHome = () => {
-    navigate("/");
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
   };
 
   return (
@@ -100,6 +109,7 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
                 {[
                   { label: "Nombre", value: booking.fullName },
                   { label: "Email", value: booking.email },
+                  { label: "Tour", value: booking.tourName || "Tour Valencia" },
                   {
                     label: "Fecha",
                     value: format(new Date(booking.date), "EEEE, d 'de' MMMM 'de' yyyy", { locale: es }),
@@ -109,6 +119,10 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
                     label: "Total",
                     value: `€${booking.amount.toFixed(2)}`,
                     highlight: true,
+                  },
+                  {
+                    label: "Método de Pago",
+                    value: booking.paymentMethod ? booking.paymentMethod.charAt(0).toUpperCase() + booking.paymentMethod.slice(1) : "Desconocido",
                   },
                 ].map((item, index) => (
                   <motion.div 

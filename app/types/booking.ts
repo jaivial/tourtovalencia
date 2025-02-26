@@ -1,15 +1,24 @@
 export interface Booking {
+  _id: string;
   fullName: string;
   email: string;
   date: string | Date;
   partySize: number;
   amount: number;
+  totalAmount?: number;
   paymentIntentId: string;
   phoneNumber: string;
   status?: 'confirmed' | 'pending' | 'cancelled';
   paymentStatus?: 'paid' | 'pending' | 'failed';
   createdAt?: Date;
   updatedAt?: Date;
+  tourSlug?: string;
+  tourName?: string;
+  paymentMethod?: 'stripe' | 'paypal';
+  transactionId?: string;
+  refundIssued?: boolean;
+  cancellationReason?: string;
+  language?: string;
 }
 
 export interface BookingData {
@@ -23,6 +32,11 @@ export interface BookingData {
   phoneNumber: string;
   specialRequests?: string;
   paid: boolean;
+  amount: number;
+  paymentMethod?: string;
+  refundIssued?: boolean;
+  cancellationReason?: string;
+  language?: string;
 }
 
 export interface BookingLimit {
@@ -42,5 +56,10 @@ export interface LoaderData {
   limit: BookingLimit;
   selectedDate: string;
   pagination: PaginationInfo;
+  tours?: Array<{ _id: string; slug: string; name: string }>;
+  selectedTourSlug?: string;
+  selectedStatus?: string;
+  allDates?: boolean;
+  searchTerm?: string;
   error?: string;
 }

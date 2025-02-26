@@ -1,13 +1,18 @@
-import { useBooking } from "~/context/BookingContext";
-import { BookingDateUI } from "../ui/BookingDateUI";
-import { useBookingDateActions } from "~/hooks/bookingDate.hooks";
+import { BookingDateStep } from "~/components/_book/BookingDateStep";
 import { useLanguageContext } from "~/providers/LanguageContext";
 
 export const BookingDateFeature = () => {
-  const states = useBooking();
-  const actions = useBookingDateActions(states);
   const { state } = useLanguageContext();
-  const bookingDateText = state.booking.date.selectLabel;
+  
+  // Get the tour selector text from the language context
+  const tourSelectorText = {
+    label: state.booking.bookingStepOne.tourSelector,
+    placeholder: state.booking.bookingStepOne.placeholders.tourSelector
+  };
 
-  return <BookingDateUI formData={states.formData} errors={states.errors} availableDates={states.availableDates} isLoading={actions.isLoading} onDateSelect={actions.handleDateSelect} bookingDateText={bookingDateText} />;
+  return (
+    <BookingDateStep 
+      tourSelectorText={tourSelectorText}
+    />
+  );
 };

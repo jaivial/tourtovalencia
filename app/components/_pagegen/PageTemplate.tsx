@@ -10,11 +10,13 @@ import EditableSanJuanSection3 from "./EditableSanJuanSection3";
 import EditableSanJuanSection4 from "./EditableSanJuanSection4";
 import EditableSanJuanSection5 from "./EditableSanJuanSection5";
 import EditableSanJuanSection6 from "./EditableSanJuanSection6";
+import { EditableTimelineFeature, TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 import { PublishModal } from "./PublishModal";
 import { usePublishModal, usePageCreation } from "./PageTemplate.hooks";
 import { useEffect, useState } from "react";
+import { Button } from "~/components/ui/button";
 
 export type PageTemplateProps = {
   status: "active" | "upcoming";
@@ -34,10 +36,14 @@ export type PageTemplateProps = {
   onSection5Update: (field: keyof sanJuanSection5Type, value: string) => void;
   section6Data?: SanJuanSection6Type;
   onSection6Update: (field: keyof SanJuanSection6Type, value: string) => void;
+  timelineData?: TimelineDataType;
+  onTimelineUpdate?: (field: keyof TimelineDataType, value: string | Array<{title: string, description: string}>) => void;
   pageName: string;
+  price: number;
+  onPriceChange: (value: number) => void;
 };
 
-const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, indexSection5Data, onIndexSection5Update, section1Data, onSection1Update, section2Data, onSection2Update, section3Data, onSection3ImageUpdate, onSection3ImageRemove, section4Data, onSection4Update, section5Data, onSection5Update, section6Data, onSection6Update, pageName }) => {
+const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, indexSection5Data, onIndexSection5Update, section1Data, onSection1Update, section2Data, onSection2Update, section3Data, onSection3ImageUpdate, onSection3ImageRemove, section4Data, onSection4Update, section5Data, onSection5Update, section6Data, onSection6Update, timelineData, onTimelineUpdate, pageName, price, onPriceChange }) => {
   const size = useWindowSize();
   const { isModalOpen, closeModal } = usePublishModal();
   const { handleCreatePage, isCreating, error } = usePageCreation();
@@ -60,7 +66,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
   }, [isCreating]);
 
   const handleCreatePageClick = () => {
-    const pageContent = {
+    const content = {
       indexSection5: indexSection5Data,
       section1: section1Data,
       section2: section2Data,
@@ -68,18 +74,20 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
       section4: section4Data,
       section5: section5Data,
       section6: section6Data,
+      timeline: timelineData,
+      price: price
     };
 
     handleCreatePage({
       name: pageName,
-      content: pageContent,
-      status: status,
+      content,
+      status
     });
   };
 
   return (
     <div className="space-y-6">
-      <div className="w-full min-h-screen bg-gray-900 overflow-x-hidden">
+      <div className="w-full min-h-screen bg-gray-100 overflow-x-hidden">
         <div className="w-full mx-auto p-4 mb-8">
           <div className="flex flex-col items-center justify-center gap-6 p-8 bg-white rounded-lg shadow-sm">
             <h2 className="text-3xl font-bold text-gray-900">{pageName}</h2>
@@ -89,16 +97,37 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
               <p className="text-sm">Para cambiar las imágenes, pasa el cursor sobre ellas y haz clic en el icono de la cámara.</p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Label htmlFor="status" className="text-sm font-medium text-gray-700">
-                {status === "active" ? "Activo" : "Proximamente"}
-              </Label>
-              <Switch id="status" checked={status === "active"} onCheckedChange={onStatusChange} />
+            <div className="flex flex-col items-center gap-6 w-full max-w-md">
+              <div className="flex flex-col items-center gap-3">
+                <Label htmlFor="status" className="text-sm font-medium text-gray-700">
+                  {status === "active" ? "Activo" : "Proximamente"}
+                </Label>
+                <Switch id="status" checked={status === "active"} onCheckedChange={onStatusChange} />
+              </div>
+              
+              <div className="flex flex-col w-full sm:w-auto items-center">
+                <Label htmlFor="price" className="text-sm font-medium text-gray-700 mb-1 text-center">
+                  Precio (€)
+                </Label>
+                <div className="relative flex justify-center">
+                  <Input
+                    id="price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={price.toString()}
+                    onChange={(e) => onPriceChange(parseFloat(e.target.value))}
+                    className="w-full sm:w-32 pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+                    placeholder="0.00"
+                  />
+                  <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500">€</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="w-full flex flex-col items-start z-0 bg-blue-500 overflow-x-hidden animate-fadeIn gap-12">
+        <div className="w-full flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
           {indexSection5Data && onIndexSection5Update && <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />}
 
           {section1Data && <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={onSection1Update} />}
@@ -110,6 +139,13 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
           {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
 
           {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} />}
+
+          {timelineData && onTimelineUpdate && (
+            <EditableTimelineFeature 
+              timelineData={timelineData}
+              onTimelineUpdate={onTimelineUpdate}
+            />
+          )}
 
           {section6Data && <EditableSanJuanSection6 width={width} data={section6Data} onUpdate={onSection6Update} />}
         </div>
@@ -129,16 +165,14 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
       
       <div className="flex flex-col gap-4 mt-8 w-full px-4">
         {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>}
-        <div className="flex justify-end">
-          <button onClick={handleCreatePageClick} disabled={isCreating} className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-            {isCreating && (
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            )}
-            {isCreating ? "Creando Página..." : "Crear Página"}
-          </button>
+        <div className="flex justify-center pb-24">
+          <Button 
+            onClick={handleCreatePageClick} 
+            disabled={isCreating || !pageName.trim()}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            {isCreating ? 'Creando...' : 'Crear Página'}
+          </Button>
         </div>
       </div>
 
@@ -156,6 +190,8 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
           cancelText: "Cancelar",
         }}
       />
+
+     
     </div>
   );
 };

@@ -5,22 +5,27 @@ import { localDateToUTCMidnight, utcDateToLocalMidnight } from "~/utils/date";
 export interface BookingLimit {
   _id?: ObjectId;
   date: Date;
+  tourSlug: string;
   maxBookings: number;
   currentBookings: number;
 }
 
-export async function updateBookingLimit(localDate: Date, maxBookings: number) {
+export async function updateBookingLimit(localDate: Date, maxBookings: number, tourSlug: string) {
   try {
-    const bookingLimits = await getCollection("bookingLimits");
+    // If tourSlug is "all", use "default" as the tourSlug
+    const effectiveTourSlug = tourSlug === "all" ? "default" : tourSlug;
+    
+    const bookingLimits = await getCollection<BookingLimit>("bookingLimits");
     
     // Convert local date to UTC midnight for storage
     const utcDate = localDateToUTCMidnight(localDate);
 
     const result = await bookingLimits.updateOne(
-      { date: utcDate },
+      { date: utcDate, tourSlug: effectiveTourSlug },
       {
         $set: { 
           date: utcDate,
+          tourSlug: effectiveTourSlug,
           maxBookings: parseInt(String(maxBookings))
         },
         $setOnInsert: { currentBookings: 0 }
@@ -30,7 +35,7 @@ export async function updateBookingLimit(localDate: Date, maxBookings: number) {
 
     if (result.acknowledged) {
       // Get the updated document to return
-      const updatedLimit = await bookingLimits.findOne({ date: utcDate });
+      const updatedLimit = await bookingLimits.findOne({ date: utcDate, tourSlug: effectiveTourSlug });
       return { 
         success: true, 
         data: {
@@ -50,14 +55,17 @@ export async function updateBookingLimit(localDate: Date, maxBookings: number) {
   }
 }
 
-export async function getBookingLimit(localDate: Date): Promise<BookingLimit | null> {
+export async function getBookingLimit(localDate: Date, tourSlug: string): Promise<BookingLimit | null> {
   try {
-    const bookingLimits = await getCollection("bookingLimits");
+    // If tourSlug is "all", use "default" as the tourSlug
+    const effectiveTourSlug = tourSlug === "all" ? "default" : tourSlug;
+    
+    const bookingLimits = await getCollection<BookingLimit>("bookingLimits");
     
     // Convert local date to UTC midnight for querying
     const utcDate = localDateToUTCMidnight(localDate);
     
-    const limit = await bookingLimits.findOne({ date: utcDate });
+    const limit = await bookingLimits.findOne({ date: utcDate, tourSlug: effectiveTourSlug });
     
     if (!limit) return null;
 
@@ -65,6 +73,7 @@ export async function getBookingLimit(localDate: Date): Promise<BookingLimit | n
     const bookingLimit: BookingLimit = {
       _id: limit._id,
       date: utcDateToLocalMidnight(limit.date),
+      tourSlug: limit.tourSlug,
       maxBookings: limit.maxBookings || 0,
       currentBookings: limit.currentBookings || 0
     };
@@ -73,5 +82,28 @@ export async function getBookingLimit(localDate: Date): Promise<BookingLimit | n
   } catch (error) {
     console.error("Error in getBookingLimit:", error);
     throw new Error("Failed to get booking limit");
+  }
+}
+
+// Get all booking limits for a specific date (for all tours)
+export async function getBookingLimitsForDate(localDate: Date): Promise<BookingLimit[]> {
+  try {
+    const bookingLimits = await getCollection<BookingLimit>("bookingLimits");
+    
+    // Convert local date to UTC midnight for querying
+    const utcDate = localDateToUTCMidnight(localDate);
+    
+    const limits = await bookingLimits.find({ date: utcDate }).toArray();
+    
+    return limits.map(limit => ({
+      _id: limit._id,
+      date: utcDateToLocalMidnight(limit.date),
+      tourSlug: limit.tourSlug,
+      maxBookings: limit.maxBookings || 0,
+      currentBookings: limit.currentBookings || 0
+    }));
+  } catch (error) {
+    console.error("Error in getBookingLimitsForDate:", error);
+    throw new Error("Failed to get booking limits for date");
   }
 }

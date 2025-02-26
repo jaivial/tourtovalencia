@@ -34,7 +34,7 @@ const EditableIndexSection5: React.FC<EditableIndexSection5Props> = ({
             viewport={{ once: true }}
           >
             <EditableText
-              text={data.firstH3}
+              value={data.firstH3}
               onUpdate={handleTextUpdate('firstH3')}
               placeholder="Título principal"
               className={`
@@ -50,7 +50,7 @@ const EditableIndexSection5: React.FC<EditableIndexSection5Props> = ({
             viewport={{ once: true }}
           >
             <EditableText
-              text={data.secondH3}
+              value={data.secondH3}
               onUpdate={handleTextUpdate('secondH3')}
               placeholder="Subtítulo"
               className={`

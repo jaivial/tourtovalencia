@@ -1,8 +1,8 @@
-import { json } from "@remix-run/node";
-import type { ActionFunction } from "@remix-run/node";
+import { json } from "@remix-run/server-runtime";
+import type { ActionFunctionArgs } from "@remix-run/server-runtime";
 import { createPage } from "~/utils/page.server";
 
-export const action: ActionFunction = async ({ request }) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   if (request.method !== "POST") {
     return json({ error: "Method not allowed" }, { status: 405 });
   }
@@ -27,8 +27,15 @@ export const action: ActionFunction = async ({ request }) => {
 
     const content = JSON.parse(contentStr);
     
+    // Determine if this is a tour page based on price
+    let template = "";
+    if (content.price && typeof content.price === "number" && content.price > 0) {
+      template = "tour";
+      console.log(`Creating page "${name}" as a tour with price ${content.price}€`);
+    }
+    
     // Create page with the content (images are already base64)
-    const page = await createPage(name, content, status);
+    const page = await createPage(name, content, status as "active" | "upcoming", template);
 
     return json({ success: true, page });
   } catch (error) {
