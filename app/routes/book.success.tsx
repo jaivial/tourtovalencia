@@ -79,6 +79,7 @@ export async function action({ request }: { request: Request }) {
       tourName: tourName,
       tourType: tourName, // Add tourType field for admin dashboard display
       paymentMethod: bookingData.paymentMethod || "unknown", // Store the payment method
+      transactionId: bookingData.transactionId || bookingData.paymentIntentId, // Store transaction ID for refunds
     };
 
     await bookingsCollection.insertOne(bookingRecord);

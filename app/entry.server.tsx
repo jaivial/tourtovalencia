@@ -4,6 +4,10 @@
  * For more information, see https://remix.run/file-conventions/entry.server
  */
 
+// Load environment variables at server startup
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { PassThrough } from "stream";
 import type { EntryContext } from "@remix-run/node";
 import { createReadableStreamFromReadable } from "@remix-run/node";

@@ -14,6 +14,7 @@ export interface Booking {
   tourSlug?: string;
   tourName?: string;
   paymentMethod?: 'stripe' | 'paypal';
+  transactionId?: string;
 }
 
 export interface BookingData {

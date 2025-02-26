@@ -31,6 +31,10 @@ const PaymentOptions = () => {
         throw new Error(paypalText.errors.noPaymentId);
       }
 
+      // Get the transaction/capture ID which is needed for refunds
+      const transactionId = details.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+      console.log("PayPal transaction ID:", transactionId);
+
       // Calculate the expected amount based on the form data
       const expectedAmount = states.formData.partySize * (states.selectedTour?.content?.en?.price || states.selectedTour?.tourPrice || 120);
       console.log("Expected amount:", expectedAmount);
@@ -49,6 +53,7 @@ const PaymentOptions = () => {
         paymentId, // Required by Booking interface
         paid: true,
         paymentMethod: 'paypal', // Set payment method
+        transactionId: transactionId, // Store the transaction ID for refunds
         tourName: states.selectedTour?.content?.en?.title || 
                  states.selectedTour?.tourName?.en || 
                  states.selectedTour?.name || 

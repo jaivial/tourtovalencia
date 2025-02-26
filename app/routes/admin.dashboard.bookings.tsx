@@ -8,7 +8,7 @@ import { getDb, getToursCollection } from "~/utils/db.server";
 import { getLocalMidnight, getLocalEndOfDay, formatLocalDate, parseLocalDate } from "~/utils/date";
 import type { LoaderData, BookingData, PaginationInfo } from "~/types/booking";
 import { updateBookingLimit } from "~/models/bookingLimit.server";
-import { ObjectId } from "mongodb";
+import { cancelBooking } from "~/services/bookingCancellation.server";
 // import type { Tour } from "~/routes/book";
 
 // Number of bookings per page
@@ -250,63 +250,21 @@ export const action = async ({ request }: ActionArgs) => {
     }
     
     try {
-      const db = await getDb();
-      
-      // Get the booking to cancel
-      const booking = await db.collection("bookings").findOne({ 
-        _id: new ObjectId(bookingId.toString()) 
-      });
-      
-      if (!booking) {
-        return json({ error: "Booking not found" }, { status: 404 });
-      }
-      
-      // Update booking status to cancelled
-      const updateResult = await db.collection("bookings").updateOne(
-        { _id: new ObjectId(bookingId.toString()) },
-        { 
-          $set: { 
-            status: "cancelled",
-            updatedAt: new Date(),
-            cancellationReason,
-            refundIssued: shouldRefund,
-            cancelledAt: new Date()
-          } 
-        }
+      // Use the new cancelBooking service
+      const result = await cancelBooking(
+        bookingId.toString(),
+        shouldRefund,
+        cancellationReason
       );
       
-      if (updateResult.modifiedCount === 0) {
-        return json({ error: "Failed to cancel booking" }, { status: 500 });
-      }
-      
-      // Process refund if requested
-      if (shouldRefund) {
-        // Log the refund request for now
-        console.log(`Refund requested for booking ${bookingId}`);
-        
-        // TODO: Implement actual refund logic with Stripe/PayPal
-        // This would involve calling the appropriate payment provider's API
-        // based on the booking's paymentMethod
-        
-        // For now, just mark as refunded in the database
-        await db.collection("bookings").updateOne(
-          { _id: new ObjectId(bookingId.toString()) },
-          { $set: { refundStatus: "pending" } }
-        );
-      }
-      
-      // Send cancellation email to customer
-      try {
-        // TODO: Implement email notification for cancellation
-        console.log(`Cancellation notification would be sent to ${booking.email}`);
-      } catch (emailError) {
-        console.error("Error sending cancellation email:", emailError);
-        // Continue execution even if email fails
+      if (!result.success) {
+        return json({ error: result.message }, { status: 500 });
       }
       
       return json({
         success: true,
-        message: `Booking cancelled successfully${shouldRefund ? " with refund" : ""}`,
+        message: result.message,
+        refundResult: result.refundResult
       });
     } catch (error) {
       console.error("Error cancelling booking:", error);

@@ -50,7 +50,7 @@ type AdminBookingsUIProps = {
   selectedStatus: string;
   onDateChange: (date: Date) => void;
   onUpdateMaxBookings: (newMax: number) => void;
-  onCancelBooking?: (bookingId: string) => void;
+  onCancelBooking?: (bookingId: string, shouldRefund: boolean, reason: string) => void;
   onPageChange: (page: number) => void;
   onTourChange: (tourSlug: string) => void;
   onStatusChange: (status: string) => void;
