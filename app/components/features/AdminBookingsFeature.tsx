@@ -11,9 +11,10 @@ interface AdminBookingsFeatureProps {
   onDateChange: (date: Date) => void;
   onTourChange: (tourSlug: string) => void;
   onStatusChange: (status: string) => void;
+  onCancelBooking: (bookingId: string, shouldRefund: boolean, reason: string) => void;
 }
 
-export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange, onStatusChange }: AdminBookingsFeatureProps) => {
+export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange, onStatusChange, onCancelBooking }: AdminBookingsFeatureProps) => {
   const { state } = useLanguageContext();
   const submit = useSubmit();
   const states = useStates({
@@ -60,11 +61,9 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange, o
     submit(formData, { method: "post" });
   };
 
-  const handleCancelBooking = (bookingId: string) => {
-    const formData = new FormData();
-    formData.append("intent", "cancelBooking");
-    formData.append("bookingId", bookingId);
-    submit(formData, { method: "post" });
+  const handleCancelBooking = (bookingId: string, shouldRefund: boolean = false, reason: string = "Cancelled by admin") => {
+    // Call the parent component's onCancelBooking function
+    onCancelBooking(bookingId, shouldRefund, reason);
   };
 
   const handlePageChange = (page: number) => {

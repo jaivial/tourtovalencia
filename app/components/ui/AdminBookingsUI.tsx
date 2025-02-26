@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 import { Label } from "~/components/ui/label";
 import type { TourOption } from "~/routes/admin.dashboard.bookings.hooks";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { CancellationDialog } from "~/components/ui/CancellationDialog";
 
 export type Booking = {
   _id: string;
@@ -73,6 +74,8 @@ export const AdminBookingsUI = ({
   onStatusChange,
 }: AdminBookingsUIProps) => {
   const [maxBookings, setMaxBookings] = useState(bookingLimit.maxBookings.toString());
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [showCancellationDialog, setShowCancellationDialog] = useState(false);
 
   // Update maxBookings input when bookingLimit changes (e.g., when date changes)
   useEffect(() => {
@@ -109,6 +112,18 @@ export const AdminBookingsUI = ({
 
   const handleTourChange = (value: string) => {
     onTourChange(value);
+  };
+
+  const handleCancelClick = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setShowCancellationDialog(true);
+  };
+
+  const handleConfirmCancellation = (refund: boolean, reason: string) => {
+    if (selectedBooking && onCancelBooking) {
+      onCancelBooking(selectedBooking._id, refund, reason);
+    }
+    setSelectedBooking(null);
   };
 
   return (
@@ -260,7 +275,7 @@ export const AdminBookingsUI = ({
                 <TableBody>
                   {bookings.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-4">
+                      <TableCell colSpan={9} className="text-center py-4">
                         No bookings found for this date.
                       </TableCell>
                     </TableRow>
@@ -272,7 +287,7 @@ export const AdminBookingsUI = ({
                         <TableCell>{booking.phoneNumber}</TableCell>
                         <TableCell>{booking.tourType}</TableCell>
                         <TableCell className="text-center">{booking.numberOfPeople}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-center">
                           {booking.amount ? `€${booking.amount.toFixed(2)}` : '-'}
                         </TableCell>
                         <TableCell className="text-center">
@@ -308,7 +323,7 @@ export const AdminBookingsUI = ({
                             <Button
                               variant="destructive"
                               size="sm"
-                              onClick={() => onCancelBooking(booking._id)}
+                              onClick={() => handleCancelClick(booking)}
                               className="h-8"
                             >
                               Cancel
@@ -361,6 +376,19 @@ export const AdminBookingsUI = ({
           </CardContent>
         </Card>
       </div>
+
+      {/* Cancellation Dialog */}
+      {selectedBooking && (
+        <CancellationDialog
+          open={showCancellationDialog}
+          onOpenChange={setShowCancellationDialog}
+          onConfirm={handleConfirmCancellation}
+          bookingId={selectedBooking._id}
+          bookingReference={selectedBooking.name}
+          amount={selectedBooking.amount}
+          paymentMethod={selectedBooking.paymentMethod}
+        />
+      )}
     </div>
   );
 };

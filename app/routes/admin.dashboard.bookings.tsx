@@ -8,6 +8,7 @@ import { getDb, getToursCollection } from "~/utils/db.server";
 import { getLocalMidnight, getLocalEndOfDay, formatLocalDate, parseLocalDate } from "~/utils/date";
 import type { LoaderData, BookingData, PaginationInfo } from "~/types/booking";
 import { updateBookingLimit } from "~/models/bookingLimit.server";
+import { ObjectId } from "mongodb";
 // import type { Tour } from "~/routes/book";
 
 // Number of bookings per page
@@ -238,6 +239,80 @@ export const action = async ({ request }: ActionArgs) => {
       return json({ error: "Failed to update booking limit" }, { status: 500 });
     }
   }
+  
+  if (intent === "cancelBooking") {
+    const bookingId = formData.get("bookingId");
+    const shouldRefund = formData.get("shouldRefund") === "true";
+    const cancellationReason = formData.get("reason")?.toString() || "Cancelled by admin";
+    
+    if (!bookingId) {
+      return json({ error: "Missing booking ID" }, { status: 400 });
+    }
+    
+    try {
+      const db = await getDb();
+      
+      // Get the booking to cancel
+      const booking = await db.collection("bookings").findOne({ 
+        _id: new ObjectId(bookingId.toString()) 
+      });
+      
+      if (!booking) {
+        return json({ error: "Booking not found" }, { status: 404 });
+      }
+      
+      // Update booking status to cancelled
+      const updateResult = await db.collection("bookings").updateOne(
+        { _id: new ObjectId(bookingId.toString()) },
+        { 
+          $set: { 
+            status: "cancelled",
+            updatedAt: new Date(),
+            cancellationReason,
+            refundIssued: shouldRefund,
+            cancelledAt: new Date()
+          } 
+        }
+      );
+      
+      if (updateResult.modifiedCount === 0) {
+        return json({ error: "Failed to cancel booking" }, { status: 500 });
+      }
+      
+      // Process refund if requested
+      if (shouldRefund) {
+        // Log the refund request for now
+        console.log(`Refund requested for booking ${bookingId}`);
+        
+        // TODO: Implement actual refund logic with Stripe/PayPal
+        // This would involve calling the appropriate payment provider's API
+        // based on the booking's paymentMethod
+        
+        // For now, just mark as refunded in the database
+        await db.collection("bookings").updateOne(
+          { _id: new ObjectId(bookingId.toString()) },
+          { $set: { refundStatus: "pending" } }
+        );
+      }
+      
+      // Send cancellation email to customer
+      try {
+        // TODO: Implement email notification for cancellation
+        console.log(`Cancellation notification would be sent to ${booking.email}`);
+      } catch (emailError) {
+        console.error("Error sending cancellation email:", emailError);
+        // Continue execution even if email fails
+      }
+      
+      return json({
+        success: true,
+        message: `Booking cancelled successfully${shouldRefund ? " with refund" : ""}`,
+      });
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      return json({ error: "Failed to cancel booking" }, { status: 500 });
+    }
+  }
 
   return json({ error: "Invalid intent" }, { status: 400 });
 };
@@ -306,6 +381,18 @@ export default function AdminDashboardBookings() {
       replace: true,
     });
   };
+  
+  const handleCancelBooking = (bookingId: string, shouldRefund: boolean, reason: string) => {
+    const formData = new FormData();
+    formData.append("intent", "cancelBooking");
+    formData.append("bookingId", bookingId);
+    formData.append("shouldRefund", shouldRefund.toString());
+    formData.append("reason", reason);
+    
+    submit(formData, {
+      method: "post",
+    });
+  };
 
   return (
     <AdminBookingsFeature 
@@ -313,6 +400,7 @@ export default function AdminDashboardBookings() {
       onDateChange={handleDateChange} 
       onTourChange={handleTourChange}
       onStatusChange={handleStatusChange}
+      onCancelBooking={handleCancelBooking}
     />
   );
 }
