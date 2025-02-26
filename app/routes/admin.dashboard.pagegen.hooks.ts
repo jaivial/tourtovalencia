@@ -88,7 +88,7 @@ const DEFAULT_TIMELINE_DATA: TimelineDataType = {
 };
 
 export const usePageGenerator = () => {
-  const [step, setStep] = useState<'name' | 'template'>('name');
+  const [step, setStep] = useState<'name' | 'create' | 'template'>('name');
   const [pageName, setPageName] = useState('');
   const [status, setStatus] = useState<'active' | 'upcoming'>('active');
   
@@ -240,15 +240,16 @@ export const usePageGenerator = () => {
   // Navigation handlers
   const handleNext = () => {
     if (step === 'name') {
-      if (!pageName.trim()) {
-        return;
-      }
+      setStep('create');
+    } else if (step === 'create') {
       setStep('template');
     }
   };
 
   const handleBack = () => {
     if (step === 'template') {
+      setStep('create');
+    } else if (step === 'create') {
       setStep('name');
     }
   };
@@ -270,6 +271,7 @@ export const usePageGenerator = () => {
 
     // Setters
     setPageName,
+    setStep,
 
     // Handlers
     handleNext,

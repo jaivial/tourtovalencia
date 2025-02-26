@@ -316,9 +316,9 @@ async function createTourFromPage(page: Page): Promise<void> {
   console.log(`Tour created in tours collection: ${tour.tourName.en}`);
 }
 
-export async function getPageBySlug(slug: string): Promise<Page | null> {
-  const pagesCollection = await getPagesCollection();
-  return pagesCollection.findOne({ slug });
+export async function getPageBySlug(slug: string) {
+  const collection = await getPagesCollection();
+  return collection.findOne({ slug });
 }
 
 export async function getAllPages(): Promise<Page[]> {
