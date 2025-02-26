@@ -122,11 +122,11 @@ async function translateText(text: string, retryCount = 0): Promise<string> {
         messages: [
           {
             role: "system",
-            content: "You are a translator. Translate the following Spanish text to English. Respond only with the English translation, no additional text.",
+            content: "You are a translator. Translate the following Spanish text to English. Respond only with the English translation, no additional text, no quotation marks.",
           },
           {
             role: "user",
-            content: `Translate to English: "${text}"`,
+            content: `Translate to English: ${text}`,
           },
         ],
         temperature: 0.1,
@@ -148,8 +148,10 @@ async function translateText(text: string, retryCount = 0): Promise<string> {
     // Safely access the response data
     if (response.data?.choices?.[0]?.message?.content) {
       const translation = response.data.choices[0].message.content.trim();
-      console.log("Translated text:", translation);
-      return translation;
+      // Clean up any quotation marks that might have been added
+      const cleanedTranslation = translation.replace(/^["']|["']$/g, '').replace(/\\"/g, '');
+      console.log("Translated text:", cleanedTranslation);
+      return cleanedTranslation;
     } else {
       console.error("Unexpected API response format:", response.data);
       return text;
@@ -286,23 +288,43 @@ async function createTourFromPage(page: Page): Promise<void> {
   const enContent = page.content.en as Record<string, any>;
   const esContent = page.content.es as Record<string, any>;
   
-  // Extract title from different possible locations in the content
-  const getTitle = (content: Record<string, any>): string => {
-    // First, use the page name as the most reliable source
-    if (page.name && page.name.trim() !== '') {
-      return page.name;
+  // Log the page name for debugging
+  console.log(`Creating tour from page: "${page.name}" with ID: ${page._id}`);
+  
+  // Get Spanish title directly from page name
+  const esTitle = page.name;
+  
+  // For English title, directly translate the Spanish title
+  let enTitle = "";
+  
+  try {
+    // Special handling for tour names
+    // Extract the main subject of the tour if it follows the pattern "Tour de X"
+    if (esTitle.toLowerCase().startsWith("tour de ")) {
+      const subject = esTitle.substring(8); // Get everything after "Tour de "
+      console.log(`Detected 'Tour de X' pattern. Subject to translate: "${subject}"`);
+      
+      // Translate just the subject
+      const translatedSubject = await translateText(subject);
+      console.log(`Translated subject: "${translatedSubject}"`);
+      
+      // Format as "X Tour" in English
+      enTitle = `${translatedSubject} Tour`;
+      console.log(`Formatted as English tour name: "${enTitle}"`);
+    } else {
+      // For other tour names, translate the whole thing
+      enTitle = await translateText(esTitle);
+      console.log(`Translated tour name: "${enTitle}"`);
     }
-    
-    // Then try to find title in different possible locations in the content
-    if (content.title) return content.title;
-    if (content.section1?.firstH3) return content.section1.firstH3;
-    if (content.section4?.firstH3) return content.section4.firstH3;
-    
-    // If we still don't have a title, log this for debugging
-    console.log('Warning: Could not find a suitable title for tour', JSON.stringify(content).substring(0, 200));
-    
-    return 'Tour';
-  };
+  } catch (error) {
+    console.error('Error translating tour name:', error);
+    enTitle = esTitle; // Fallback to Spanish title if translation fails
+  }
+  
+  // Clean up the translated name - remove any quotation marks that might have been added
+  enTitle = enTitle.replace(/^["']|["']$/g, '').replace(/\\"/g, '');
+  
+  console.log(`Final tour titles - ES: "${esTitle}", EN: "${enTitle}"`);
   
   // Extract description from different possible locations
   const getDescription = (content: Record<string, any>): string => {
@@ -334,15 +356,6 @@ async function createTourFromPage(page: Page): Promise<void> {
     if (content.section4?.thirdH3) return content.section4.thirdH3;
     return '';
   };
-  
-  // Log the page name and content structure for debugging
-  console.log(`Creating tour from page: "${page.name}" with ID: ${page._id}`);
-  console.log('Content structure:', Object.keys(enContent).join(', '));
-  
-  const enTitle = getTitle(enContent);
-  const esTitle = getTitle(esContent);
-  
-  console.log(`Tour titles - EN: "${enTitle}", ES: "${esTitle}"`);
   
   const tour = {
     slug: page.slug,
