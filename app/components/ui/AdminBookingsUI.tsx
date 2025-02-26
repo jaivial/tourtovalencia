@@ -105,19 +105,12 @@ export const AdminBookingsUI = ({
       clearTimeout(searchTimeout);
     }
     
-    // Set a new timeout
+    // Set a new timeout with a longer delay
     const timeout = setTimeout(() => {
       onSearchChange(term);
-    }, 300); // 300ms delay
+    }, 500); // Increased from 300ms to 500ms for more fluid typing
     
     setSearchTimeout(timeout);
-    
-    // Cleanup function to clear the timeout if the component unmounts
-    return () => {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-    };
   }, [onSearchChange, searchTimeout]);
 
   // Cleanup on unmount
@@ -233,8 +226,11 @@ export const AdminBookingsUI = ({
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchTerm = e.target.value;
     setLocalSearchTerm(newSearchTerm);
-    // Use the debounced search function
-    debouncedSearch(newSearchTerm);
+    
+    // Only trigger search if term is at least 2 characters or empty (clearing search)
+    if (newSearchTerm.length >= 2 || newSearchTerm === '') {
+      debouncedSearch(newSearchTerm);
+    }
   };
 
   const handleClearSearch = () => {

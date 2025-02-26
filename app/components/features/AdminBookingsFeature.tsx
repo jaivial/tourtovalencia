@@ -141,10 +141,14 @@ export const AdminBookingsFeature = ({
   };
 
   const handleSearchChange = (searchTerm: string) => {
+    // Only update loading state for non-empty searches
+    if (searchTerm.length > 0) {
+      states.setIsLoading(true);
+    }
+    
     // Set the search term in the state
     states.setSearchTerm(searchTerm);
-    // Set loading state to true before search
-    states.setIsLoading(true);
+    
     // Pass the search term to the parent component
     onSearchChange(searchTerm);
   };

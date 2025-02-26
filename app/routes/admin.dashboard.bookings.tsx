@@ -558,7 +558,7 @@ export default function AdminDashboardBookings() {
   };
 
   const handleSearchChange = (searchTerm: string) => {
-    // Only trigger search if the term has changed
+    // Only trigger search if the term has changed and is different from current
     if (searchTerm === data.searchTerm) {
       return;
     }
