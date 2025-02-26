@@ -13,6 +13,7 @@ export interface BookingFormData {
   emailConfirm: string;
   phoneNumber: string;
   tourSlug: string;
+  language?: string;
 }
 
 export type BookingStates = Omit<BookingContextState, "setCurrentStep" | "setFormData" | "setErrors" | "setSelectedDateAvailability" | "setIsSubmitting" | "setIsSuccess" | "setPaymentClientSecret" | "setPaymentIntentId" | "setServerError">;

@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { Loader2, CalendarRange, Users2, Sparkles } from "lucide-react";
 import { HeroUIProvider } from "@heroui/react";
 import { useLanguageContext } from "~/providers/LanguageContext";
+import { useEffect } from "react";
 
 export const BookingFeature = () => {
   const { state } = useLanguageContext();
@@ -22,6 +23,21 @@ export const BookingFeature = () => {
 
   const context = useBooking();
   const actions = useBookingActions(context);
+  
+  // Set the current language in the form data
+  useEffect(() => {
+    // Map display language to language code
+    const languageMap: Record<string, string> = {
+      Español: "es",
+      English: "en",
+    };
+    
+    // Get the language code from the current display language
+    const languageCode = languageMap[state.currentLanguage] || "es";
+    
+    // Update the form data with the current language
+    context.setFormData({ ...context.formData, language: languageCode });
+  }, [state.currentLanguage, context.setFormData, context.formData]);
 
   if (context.isSuccess) {
     return <BookingSuccess />;

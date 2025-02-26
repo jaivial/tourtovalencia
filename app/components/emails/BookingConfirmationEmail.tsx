@@ -13,14 +13,96 @@ import {
 } from "@react-email/components";
 import { Booking } from "~/types/booking";
 
+// Extend the Booking type for email purposes
+interface EmailBooking extends Booking {
+  time?: string;
+}
+
 interface BookingConfirmationEmailProps {
-  booking: Booking;
+  booking: EmailBooking;
 }
 
 export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailProps) => {
-  const previewText = `Confirmación de reserva para ${booking.tourName || 'Excursiones Mediterráneo'}`;
+  // Determine language - default to Spanish if not specified
+  const language = booking.language || "es";
+  const isEnglish = language === "en";
+  
+  // Text content based on language
+  const texts = {
+    previewText: isEnglish 
+      ? `Booking confirmation for ${booking.tourName || 'Excursiones Mediterráneo'}`
+      : `Confirmación de reserva para ${booking.tourName || 'Excursiones Mediterráneo'}`,
+    
+    heroHeading: isEnglish 
+      ? "Booking Confirmed!"
+      : "¡Reserva Confirmada!",
+    
+    greeting: isEnglish 
+      ? `Dear ${booking.fullName},`
+      : `Estimado/a ${booking.fullName},`,
+    
+    thankYouMessage: isEnglish
+      ? `Thank you for booking with <strong>Excursiones Mediterráneo</strong>! We have received your booking and are pleased to confirm the following details:`
+      : `¡Gracias por reservar con <strong>Excursiones Mediterráneo</strong>! Hemos recibido tu reserva y estamos encantados de confirmar los siguientes detalles:`,
+    
+    detailsHeading: isEnglish
+      ? "Your Booking Details"
+      : "Detalles de tu Reserva",
+    
+    labels: {
+      bookingId: isEnglish ? "Booking ID:" : "ID de Reserva:",
+      bookingDate: isEnglish ? "Booking Date:" : "Fecha de Reserva:",
+      name: isEnglish ? "Name:" : "Nombre:",
+      email: isEnglish ? "Email:" : "Email:",
+      phone: isEnglish ? "Phone:" : "Teléfono:",
+      tour: isEnglish ? "Tour:" : "Tour:",
+      tourDate: isEnglish ? "Tour Date:" : "Fecha del Tour:",
+      tourTime: isEnglish ? "Tour Time:" : "Hora del Tour:",
+      people: isEnglish ? "Number of People:" : "Número de Personas:",
+      totalPrice: isEnglish ? "Total Price:" : "Precio Total:",
+      paymentMethod: isEnglish ? "Payment Method:" : "Método de Pago:",
+    },
+    
+    importantInfo: isEnglish
+      ? "Important Information"
+      : "Información Importante",
+    
+    meetingPoint: isEnglish
+      ? "Meeting Point"
+      : "Punto de Encuentro",
+    
+    meetingPointDetails: isEnglish
+      ? "Please arrive 15 minutes before the scheduled departure time. Our guide will be waiting for you at the designated meeting point."
+      : "Por favor, llegue 15 minutos antes de la hora de salida programada. Nuestro guía le estará esperando en el punto de encuentro designado.",
+    
+    whatToBring: isEnglish
+      ? "What to Bring"
+      : "Qué Llevar",
+    
+    whatToBringDetails: isEnglish
+      ? "Comfortable shoes, water, sunscreen, and a camera to capture the memories."
+      : "Zapatos cómodos, agua, protector solar y una cámara para capturar los recuerdos.",
+    
+    contactUs: isEnglish
+      ? "Contact Us"
+      : "Contáctenos",
+    
+    contactUsDetails: isEnglish
+      ? "If you have any questions or need to make changes to your booking, please contact us at:"
+      : "Si tiene alguna pregunta o necesita hacer cambios en su reserva, contáctenos en:",
+    
+    footer: isEnglish
+      ? "We look forward to providing you with an unforgettable experience!"
+      : "¡Esperamos proporcionarle una experiencia inolvidable!",
+    
+    footerSignature: isEnglish
+      ? "The Excursiones Mediterráneo Team"
+      : "El Equipo de Excursiones Mediterráneo",
+  };
+  
   const bookingDate = new Date(booking.date);
-  const formattedDate = bookingDate.toLocaleDateString('es-ES', {
+  // Format date based on language
+  const formattedDate = bookingDate.toLocaleDateString(isEnglish ? 'en-US' : 'es-ES', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -29,11 +111,18 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
   
   // Calculate the total price
   const totalPrice = (booking.amount).toFixed(2);
+  
+  // Format payment method
+  const paymentMethod = booking.paymentMethod 
+    ? booking.paymentMethod === "paypal" 
+      ? isEnglish ? "PayPal" : "PayPal" 
+      : booking.paymentMethod.charAt(0).toUpperCase() + booking.paymentMethod.slice(1)
+    : isEnglish ? "Online Payment" : "Pago en línea";
 
   return (
     <Html>
       <Head />
-      <Preview>{previewText}</Preview>
+      <Preview>{texts.previewText}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
@@ -47,116 +136,115 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
           </Section>
           
           <Section style={heroSection}>
-            <Heading style={heroHeading}>¡Reserva Confirmada!</Heading>
+            <Heading style={heroHeading}>{texts.heroHeading}</Heading>
           </Section>
           
           <Section style={section}>
             <Text style={greeting}>
-              Estimado/a <strong>{booking.fullName}</strong>,
+              {texts.greeting}
             </Text>
             
-            <Text style={text}>
-              ¡Gracias por reservar con <strong>Excursiones Mediterráneo</strong>! Hemos recibido tu reserva y estamos encantados de confirmar los siguientes detalles:
-            </Text>
+            <Text style={text} dangerouslySetInnerHTML={{ __html: texts.thankYouMessage }} />
 
             <Section style={detailsSection}>
-              <Heading as="h2" style={detailsHeading}>Detalles de tu Reserva</Heading>
+              <Heading as="h2" style={detailsHeading}>{texts.detailsHeading}</Heading>
               
               <Section style={detailsContainer}>
                 <Text style={detailItem}>
-                  <Text style={detailLabel}>ID de Reserva:</Text>
+                  <Text style={detailLabel}>{texts.labels.bookingId}</Text>
                   <Text style={detailValue}>{booking.paymentIntentId || 'N/A'}</Text>
                 </Text>
                 
                 <Text style={detailItem}>
-                  <Text style={detailLabel}>Fecha de Reserva:</Text>
-                  <Text style={detailValue}>{new Date().toLocaleDateString("es-ES")}</Text>
+                  <Text style={detailLabel}>{texts.labels.bookingDate}</Text>
+                  <Text style={detailValue}>{new Date().toLocaleDateString(isEnglish ? "en-US" : "es-ES")}</Text>
                 </Text>
                 
                 <Hr style={dividerSmall} />
                 
                 <Text style={detailItem}>
-                  <Text style={detailLabel}>Nombre:</Text>
+                  <Text style={detailLabel}>{texts.labels.name}</Text>
                   <Text style={detailValue}>{booking.fullName}</Text>
                 </Text>
                 
                 <Text style={detailItem}>
-                  <Text style={detailLabel}>Email:</Text>
+                  <Text style={detailLabel}>{texts.labels.email}</Text>
                   <Text style={detailValue}>{booking.email}</Text>
                 </Text>
                 
                 <Text style={detailItem}>
-                  <Text style={detailLabel}>Teléfono:</Text>
+                  <Text style={detailLabel}>{texts.labels.phone}</Text>
                   <Text style={detailValue}>{booking.phoneNumber}</Text>
                 </Text>
                 
                 <Hr style={dividerSmall} />
                 
                 <Text style={detailItem}>
-                  <Text style={detailLabel}>Tour:</Text>
-                  <Text style={detailValue}>{booking.tourName || 'Excursiones Mediterráneo'}</Text>
+                  <Text style={detailLabel}>{texts.labels.tour}</Text>
+                  <Text style={detailValue}>{booking.tourName || 'Standard Tour'}</Text>
                 </Text>
                 
                 <Text style={detailItem}>
-                  <Text style={detailLabel}>Fecha del Tour:</Text>
+                  <Text style={detailLabel}>{texts.labels.tourDate}</Text>
                   <Text style={detailValue}>{formattedDate}</Text>
                 </Text>
                 
+                {booking.time && (
+                  <Text style={detailItem}>
+                    <Text style={detailLabel}>{texts.labels.tourTime}</Text>
+                    <Text style={detailValue}>{booking.time}</Text>
+                  </Text>
+                )}
+                
                 <Text style={detailItem}>
-                  <Text style={detailLabel}>Personas:</Text>
+                  <Text style={detailLabel}>{texts.labels.people}</Text>
                   <Text style={detailValue}>{booking.partySize}</Text>
                 </Text>
                 
-                <Hr style={dividerSmall} />
-                
                 <Text style={detailItem}>
-                  <Text style={detailLabel}>Total Pagado:</Text>
-                  <Text style={detailValueHighlight}>€{totalPrice}</Text>
+                  <Text style={detailLabel}>{texts.labels.totalPrice}</Text>
+                  <Text style={detailValuePrice}>€{totalPrice}</Text>
                 </Text>
                 
                 <Text style={detailItem}>
-                  <Text style={detailLabel}>Estado de Pago:</Text>
-                  <Text style={detailValueHighlight}>✓ Confirmado</Text>
+                  <Text style={detailLabel}>{texts.labels.paymentMethod}</Text>
+                  <Text style={detailValue}>{paymentMethod}</Text>
                 </Text>
               </Section>
             </Section>
-
+            
             <Section style={infoSection}>
-              <Heading as="h3" style={infoHeading}>Información Importante</Heading>
+              <Heading as="h2" style={infoHeading}>{texts.importantInfo}</Heading>
               
-              <Text style={text}>
-                • Por favor, preséntate en el punto de encuentro <strong>10 minutos antes</strong> de la hora de inicio del tour.
-              </Text>
-              
-              <Text style={text}>
-                • Recuerda llevar ropa y calzado cómodos, así como protección solar si es necesario.
-              </Text>
-              
-              <Text style={text}>
-                • Si necesitas hacer algún cambio en tu reserva, contáctanos lo antes posible.
-              </Text>
+              <Section style={infoContainer}>
+                <Text style={infoTitle}>{texts.meetingPoint}</Text>
+                <Text style={infoContent}>{texts.meetingPointDetails}</Text>
+                
+                <Text style={infoTitle}>{texts.whatToBring}</Text>
+                <Text style={infoContent}>{texts.whatToBringDetails}</Text>
+                
+                <Text style={infoTitle}>{texts.contactUs}</Text>
+                <Text style={infoContent}>
+                  {texts.contactUsDetails}
+                  <br />
+                  <Link href="mailto:info@excursionesmediterraneo.com" style={link}>
+                    info@excursionesmediterraneo.com
+                  </Link>
+                  <br />
+                  <Link href="tel:+34612345678" style={link}>
+                    +34 612 345 678
+                  </Link>
+                </Text>
+              </Section>
             </Section>
-
+            
             <Hr style={divider} />
-
-            <Text style={text}>
-              Si tienes alguna pregunta o necesitas asistencia, no dudes en contactarnos:
-            </Text>
             
-            <Text style={contactInfo}>
-              📧 Email: <Link href="mailto:info@excursionesmediterraneo.com" style={link}>info@excursionesmediterraneo.com</Link>
-            </Text>
-            
-            <Text style={contactInfo}>
-              📱 Teléfono: <Link href="tel:+34600000000" style={link}>+34 600 000 000</Link>
-            </Text>
-
-            <Text style={thankYou}>
-              ¡Esperamos verte pronto y que disfrutes de tu experiencia con nosotros!
-            </Text>
-            
-            <Text style={signature}>
-              El equipo de Excursiones Mediterráneo
+            <Text style={footer}>
+              {texts.footer}
+              <br />
+              <br />
+              {texts.footerSignature}
             </Text>
           </Section>
           
@@ -277,7 +365,7 @@ const detailValue = {
   textAlign: "center" as const,
 };
 
-const detailValueHighlight = {
+const detailValuePrice = {
   fontSize: "18px",
   fontWeight: "bold",
   color: "#0056b3",
@@ -303,39 +391,38 @@ const infoHeading = {
   textAlign: "center" as const,
 };
 
+const infoContainer = {
+  backgroundColor: "#f9f9f9",
+  borderRadius: "8px",
+  padding: "20px",
+  margin: "16px 0",
+  border: "1px solid #eaeaea",
+};
+
+const infoTitle = {
+  fontSize: "16px",
+  fontWeight: "bold",
+  color: "#333",
+  margin: "16px 0 8px 0",
+  textAlign: "center" as const,
+};
+
+const infoContent = {
+  fontSize: "15px",
+  lineHeight: "22px",
+  color: "#4a4a4a",
+  margin: "0 0 16px 0",
+  textAlign: "center" as const,
+};
+
 const divider = {
   borderTop: "1px solid #eaeaea",
   margin: "32px 0",
 };
 
-const contactInfo = {
-  fontSize: "15px",
-  lineHeight: "24px",
-  color: "#4a4a4a",
-  margin: "8px 0",
-  textAlign: "center" as const,
-};
-
 const link = {
   color: "#0056b3",
   textDecoration: "none",
-};
-
-const thankYou = {
-  fontSize: "16px",
-  lineHeight: "24px",
-  color: "#333",
-  margin: "32px 0 16px 0",
-  fontWeight: "bold",
-  textAlign: "center" as const,
-};
-
-const signature = {
-  fontSize: "16px",
-  color: "#666",
-  fontStyle: "italic",
-  margin: "16px 0 0 0",
-  textAlign: "center" as const,
 };
 
 const footer = {

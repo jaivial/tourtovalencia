@@ -14,10 +14,11 @@ export async function action({ request }: { request: Request }) {
 
   try {
     // Log the amount for debugging
-    console.log("Original amount from Stripe/PayPal:", bookingData.amount);
+    console.log("Original amount from PayPal:", bookingData.amount);
     console.log("Party size:", bookingData.partySize);
     console.log("Tour slug:", bookingData.tourSlug);
-    console.log("Payment method:", bookingData.paymentMethod || "Unknown");
+    console.log("Payment method:", bookingData.paymentMethod || "PayPal");
+    console.log("Language:", bookingData.language || "es");
     
     // Save to MongoDB
     const bookingsCollection = await getCollection("bookings");
@@ -35,7 +36,13 @@ export async function action({ request }: { request: Request }) {
         if (tour) {
           // Fix the type conversion by first casting to unknown
           const typedTour = tour as unknown as { tourName: { en: string; es: string }, tourPrice: number };
-          tourName = typedTour.tourName.en;
+          
+          // Use the appropriate language version of the tour name if available
+          const language = bookingData.language || "es";
+          tourName = language === "en" && typedTour.tourName.en ? 
+                    typedTour.tourName.en : 
+                    typedTour.tourName.es || typedTour.tourName.en || "";
+                    
           tourPrice = typedTour.tourPrice || 0;
           console.log("Tour price from database:", tourPrice);
         }
@@ -45,51 +52,58 @@ export async function action({ request }: { request: Request }) {
       }
     }
 
-    // Calculate the expected amount based on tour price and party size
-    const expectedAmount = bookingData.partySize * (tourPrice || 25); // Default to €25 if no price found
-    console.log("Expected amount (euros):", expectedAmount);
+    // Calculate the final amount based on party size and tour price
+    const finalAmount = tourPrice > 0 ? 
+      bookingData.partySize * tourPrice : 
+      bookingData.amount;
     
-    // Store the amount as-is - PayPal already provides the amount in euros
-    let finalAmount = bookingData.amount;
+    console.log("Final calculated amount:", finalAmount);
     
-    // If payment method is Stripe, convert from cents to euros
-    if (bookingData.paymentMethod === 'stripe') {
-      finalAmount = bookingData.amount / 100;
-      console.log("Amount converted from cents to euros (Stripe):", finalAmount);
-    } else {
-      console.log("Amount already in euros (PayPal):", finalAmount);
-    }
-    
-    console.log("Final amount to store:", finalAmount);
-
+    // Create the booking record
     const bookingRecord = {
       fullName: bookingData.fullName,
       email: bookingData.email,
       date: new Date(bookingData.date),
       partySize: bookingData.partySize,
-      status: "confirmed",
+      status: "confirmed" as const,
       createdAt: now,
       updatedAt: now,
       paymentIntentId: bookingData.paymentIntentId,
-      paymentStatus: "paid",
-      totalAmount: finalAmount, // Use the amount as-is
-      amount: finalAmount, // Also store as amount for consistency
+      paymentStatus: "paid" as const,
+      totalAmount: finalAmount,
+      amount: finalAmount,
       phoneNumber: bookingData.phoneNumber,
-      tourSlug: bookingData.tourSlug || "",
+      tourSlug: bookingData.tourSlug,
       tourName: tourName,
-      tourType: tourName, // Add tourType field for admin dashboard display
-      paymentMethod: bookingData.paymentMethod || "unknown", // Store the payment method
-      transactionId: bookingData.transactionId || bookingData.paymentIntentId, // Store transaction ID for refunds
+      paymentMethod: "paypal" as const,
+      language: bookingData.language || "es",
     };
 
     await bookingsCollection.insertOne(bookingRecord);
 
+    // After insertion, create a complete booking object for the email
+    const completeBooking: Booking = {
+      _id: bookingData.paymentIntentId,
+      ...bookingRecord
+    };
+
     // Send confirmation email to customer
     try {
+      // Set the email subject based on the language
+      const emailSubject = bookingData.language === "en" 
+        ? "Booking Confirmation - Excursiones Mediterráneo" 
+        : "Confirmación de Reserva - Excursiones Mediterráneo";
+        
       await sendEmail({
         to: bookingData.email,
-        subject: "Confirmación de Reserva - Excursiones Mediterráneo",
-        component: BookingConfirmationEmail({ booking: bookingData }),
+        subject: emailSubject,
+        component: BookingConfirmationEmail({ 
+          booking: {
+            ...bookingData,
+            paymentMethod: "paypal", // Ensure PayPal is set as payment method
+            language: bookingData.language || "es" // Ensure language is passed to the email component
+          } 
+        }),
       });
       console.log(`✅ Customer confirmation email sent to ${bookingData.email}`);
     } catch (emailError) {
@@ -103,10 +117,12 @@ export async function action({ request }: { request: Request }) {
       const adminEmail = process.env.ADMIN_EMAIL || "jaimebillanueba99@gmail.com";
       console.log(`Attempting to send admin notification to: ${adminEmail}`);
       
+      const adminEmailComponent = <BookingAdminEmail booking={completeBooking} />;
+      
       await sendEmail({
         to: adminEmail,
         subject: `Nueva Reserva: ${bookingData.fullName} - ${tourName || 'Excursiones Mediterráneo'}`,
-        component: BookingAdminEmail({ booking: bookingData }),
+        component: adminEmailComponent,
       });
       console.log(`✅ Admin notification email sent to ${adminEmail}`);
     } catch (adminEmailError) {

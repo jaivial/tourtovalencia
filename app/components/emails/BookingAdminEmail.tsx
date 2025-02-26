@@ -11,14 +11,32 @@ import {
   Link,
   Img,
 } from "@react-email/components";
-import { Booking } from "~/types/booking";
+
+// Define a more flexible booking type for the email component
+interface EmailBooking {
+  _id?: string | { toString(): string };
+  fullName: string;
+  email: string;
+  date: string | Date;
+  partySize: number;
+  amount: number;
+  paymentIntentId: string;
+  phoneNumber: string;
+  tourName?: string;
+  language?: string;
+  paymentMethod?: string;
+}
 
 interface BookingAdminEmailProps {
-  booking: Booking;
+  booking: EmailBooking;
 }
 
 export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
-  const previewText = `Nueva reserva recibida de ${booking.fullName}`;
+  // Get the customer's language for display purposes only
+  const customerLanguage = booking.language || "es";
+  const customerLanguageDisplay = customerLanguage === "en" ? "Inglés" : "Español";
+  
+  // Format the booking date in Spanish
   const bookingDate = new Date(booking.date);
   const formattedDate = bookingDate.toLocaleDateString("es-ES", {
     weekday: "long",
@@ -29,6 +47,15 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
   
   // Calculate the total price
   const totalPrice = (booking.amount).toFixed(2);
+  
+  // Format payment method
+  const paymentMethod = booking.paymentMethod === "paypal" 
+    ? "PayPal" 
+    : booking.paymentMethod 
+      ? booking.paymentMethod.charAt(0).toUpperCase() + booking.paymentMethod.slice(1) 
+      : "Pago en línea";
+
+  const previewText = `Nueva reserva recibida de ${booking.fullName}`;
 
   return (
     <Html>
@@ -107,6 +134,11 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
                   <Text style={detailValue}>{booking.partySize}</Text>
                 </Text>
                 
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Idioma del Cliente:</Text>
+                  <Text style={detailValue}>{customerLanguageDisplay}</Text>
+                </Text>
+                
                 <Hr style={dividerSmall} />
                 
                 <Text style={detailItem}>
@@ -117,6 +149,11 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
                 <Text style={detailItem}>
                   <Text style={detailLabel}>Estado de Pago:</Text>
                   <Text style={detailValueSuccess}>✓ Pagado</Text>
+                </Text>
+                
+                <Text style={detailItem}>
+                  <Text style={detailLabel}>Método de Pago:</Text>
+                  <Text style={detailValue}>{paymentMethod}</Text>
                 </Text>
                 
                 <Text style={detailItem}>
