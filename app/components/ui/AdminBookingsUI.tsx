@@ -28,6 +28,8 @@ export type Booking = {
   phoneNumber: string;
   specialRequests?: string;
   paid: boolean;
+  amount?: number;
+  paymentMethod?: string;
 };
 
 export type BookingLimit = {
@@ -249,14 +251,16 @@ export const AdminBookingsUI = ({
                     <TableHead>Phone</TableHead>
                     <TableHead>Tour</TableHead>
                     <TableHead className="text-center">People</TableHead>
+                    <TableHead className="text-center">Price</TableHead>
                     <TableHead className="text-center">Paid</TableHead>
+                    <TableHead className="text-center">Method</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {bookings.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-4">
+                      <TableCell colSpan={8} className="text-center py-4">
                         No bookings found for this date.
                       </TableCell>
                     </TableRow>
@@ -268,6 +272,9 @@ export const AdminBookingsUI = ({
                         <TableCell>{booking.phoneNumber}</TableCell>
                         <TableCell>{booking.tourType}</TableCell>
                         <TableCell className="text-center">{booking.numberOfPeople}</TableCell>
+                        <TableCell className="text-right">
+                          {booking.amount ? `€${booking.amount.toFixed(2)}` : '-'}
+                        </TableCell>
                         <TableCell className="text-center">
                           {booking.paid ? (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -276,6 +283,23 @@ export const AdminBookingsUI = ({
                           ) : (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                               Pending
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {booking.paymentMethod ? (
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              booking.paymentMethod === 'stripe' 
+                                ? 'bg-blue-100 text-blue-800' 
+                                : booking.paymentMethod === 'paypal'
+                                  ? 'bg-indigo-100 text-indigo-800'
+                                  : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {booking.paymentMethod.charAt(0).toUpperCase() + booking.paymentMethod.slice(1)}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              Unknown
                             </span>
                           )}
                         </TableCell>

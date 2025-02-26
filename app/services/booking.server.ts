@@ -7,7 +7,7 @@ import { Booking } from "~/types/booking";
 export interface BookingDocument extends Omit<BookingFormData, "emailConfirm" | "date"> {
   _id?: ObjectId;
   date: Date;
-  time: string;
+  time?: string;
   status: "pending" | "confirmed" | "cancelled";
   createdAt: Date;
   updatedAt: Date;
@@ -15,24 +15,36 @@ export interface BookingDocument extends Omit<BookingFormData, "emailConfirm" | 
   paymentStatus: "pending" | "paid" | "failed";
   totalAmount: number;
   phoneNumber: string;
+  tourSlug: string;
+  tourName?: string;
+  tourType?: string;
 }
 
 export async function createBooking(bookingData: Omit<Booking, "_id">, paymentId: string): Promise<Booking> {
   const db = await getDb();
+
+  // Convert amount from cents to euros if needed
+  let totalAmount = bookingData.amount;
+  if (totalAmount > 100) {
+    totalAmount = totalAmount / 100;
+  }
 
   const bookingDocument: Omit<BookingDocument, "_id"> = {
     fullName: bookingData.fullName,
     email: bookingData.email,
     phoneNumber: bookingData.phoneNumber || "",
     date: new Date(bookingData.date),
-    time: bookingData.time,
+    time: bookingData.time || "",
     partySize: bookingData.partySize,
     status: "confirmed",
     createdAt: new Date(),
     updatedAt: new Date(),
     paymentIntentId: paymentId,
     paymentStatus: "paid",
-    totalAmount: bookingData.amount,
+    totalAmount: totalAmount,
+    tourSlug: bookingData.tourSlug || "",
+    tourName: bookingData.tourName,
+    tourType: bookingData.tourName,
   };
 
   const result = await db.collection("bookings").insertOne(bookingDocument);

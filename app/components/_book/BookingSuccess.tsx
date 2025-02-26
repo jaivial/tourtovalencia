@@ -1,6 +1,6 @@
 import { Button } from "~/components/ui/button";
 import { Link, useNavigate } from "@remix-run/react";
-import { CheckCircle, Home, ArrowLeft } from "lucide-react";
+import { CheckCircle, Home } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Booking } from "~/types/booking";
 
@@ -61,8 +61,14 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
               </div>
               <div className="flex justify-between py-1 border-b border-gray-100">
                 <dt className="font-medium text-gray-600">Total Paid:</dt>
-                <dd className="text-gray-900">€{(booking.amount / 100).toFixed(2)}</dd>
+                <dd className="text-gray-900">€{booking.amount.toFixed(2)}</dd>
               </div>
+              {booking.paymentMethod && (
+                <div className="flex justify-between py-1 border-b border-gray-100">
+                  <dt className="font-medium text-gray-600">Payment Method:</dt>
+                  <dd className="text-gray-900 capitalize">{booking.paymentMethod}</dd>
+                </div>
+              )}
             </dl>
           </div>
         )}

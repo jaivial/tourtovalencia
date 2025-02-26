@@ -17,6 +17,9 @@ export const useBookingSuccessStates = (initialBooking: Booking) => {
     // Prevent multiple submissions
     if (emailStatus !== 'idle') return;
 
+    console.log("Sending booking data to server:", booking);
+    console.log("Amount:", booking.amount);
+    
     setEmailStatus('sending');
     const formData = new FormData();
     formData.set("booking", JSON.stringify(booking));

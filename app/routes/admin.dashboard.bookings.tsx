@@ -1,17 +1,20 @@
-import { json, type LoaderFunctionArgs, type ActionFunctionArgs } from "@remix-run/node";
+// @ts-expect-error - Remix types compatibility
+import { json } from "@remix-run/node";
+// @ts-expect-error - Remix types compatibility
+import type { LoaderArgs, ActionArgs } from "@remix-run/node";
 import { useLoaderData, useSubmit } from "@remix-run/react";
 import { AdminBookingsFeature } from "~/components/features/AdminBookingsFeature";
 import { getDb, getToursCollection } from "~/utils/db.server";
 import { getLocalMidnight, getLocalEndOfDay, formatLocalDate, parseLocalDate } from "~/utils/date";
 import type { LoaderData, BookingData, PaginationInfo } from "~/types/booking";
 import { updateBookingLimit } from "~/models/bookingLimit.server";
-import type { Tour } from "~/routes/book";
+// import type { Tour } from "~/routes/book";
 
 // Number of bookings per page
 const ITEMS_PER_PAGE = 10;
 const DEFAULT_BOOKING_LIMIT = 10;
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request }: LoaderArgs) => {
   try {
     const url = new URL(request.url);
     const dateParam = url.searchParams.get("date");
@@ -54,7 +57,16 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     const endDate = getLocalEndOfDay(selectedDate);
 
     // Build query for bookings
-    const bookingsQuery: any = {
+    interface BookingQuery {
+      date: {
+        $gte: Date;
+        $lte: Date;
+      };
+      status: string;
+      tourSlug?: string;
+    }
+
+    const bookingsQuery: BookingQuery = {
       date: {
         $gte: startDate,
         $lte: endDate,
@@ -86,7 +98,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       .toArray();
 
     // Get booking limit for the selected date and tour (if specified)
-    const limitQuery: any = {
+    interface LimitQuery {
+      date: { 
+        $gte: Date; 
+        $lte: Date;
+      };
+      tourSlug?: string;
+    }
+
+    const limitQuery: LimitQuery = {
       date: { $gte: startDate, $lte: endDate }
     };
 
@@ -100,6 +120,16 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       // Get phone number from either field
       const phoneNumber = booking.phoneNumber || booking.phone || "";
       
+      // Get amount from either totalAmount or amount field and convert from cents to dollars if needed
+      let amount = 0;
+      if (booking.totalAmount !== undefined) {
+        // If totalAmount exists, use it (it should already be in euros)
+        amount = booking.totalAmount;
+      } else if (booking.amount !== undefined) {
+        // If amount exists, use it (it might be in cents or euros)
+        amount = booking.amount > 100 ? booking.amount / 100 : booking.amount;
+      }
+      
       return {
         _id: booking._id.toString(),
         name: booking.fullName || booking.name || "",
@@ -111,6 +141,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         phoneNumber: phoneNumber,  // Use the extracted phone number
         specialRequests: booking.specialRequests,
         paid: booking.paymentStatus === "paid" || Boolean(booking.paid),
+        amount: amount,
+        paymentMethod: booking.paymentMethod || undefined,
       };
     });
 
@@ -172,7 +204,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   const intent = formData.get("intent");
 

@@ -20,6 +20,8 @@ const PaymentOptions = () => {
   const handlePaymentSuccess = async (details: OrderResponseBody) => {
     try {
       const amount = details.purchase_units?.[0]?.amount?.value;
+      console.log("PayPal payment amount:", amount);
+      
       if (!amount) {
         throw new Error(paypalText.errors.invalidAmount);
       }
@@ -28,6 +30,11 @@ const PaymentOptions = () => {
       if (!paymentId) {
         throw new Error(paypalText.errors.noPaymentId);
       }
+
+      // Calculate the expected amount based on the form data
+      const expectedAmount = states.formData.partySize * (states.selectedTour?.content?.en?.price || states.selectedTour?.tourPrice || 120);
+      console.log("Expected amount:", expectedAmount);
+      console.log("PayPal amount:", Number(amount));
 
       // Create booking data
       const bookingData = {
@@ -41,6 +48,7 @@ const PaymentOptions = () => {
         amount: Number(amount), // Required by Booking interface
         paymentId, // Required by Booking interface
         paid: true,
+        paymentMethod: 'paypal', // Set payment method
         tourName: states.selectedTour?.content?.en?.title || 
                  states.selectedTour?.tourName?.en || 
                  states.selectedTour?.name || 

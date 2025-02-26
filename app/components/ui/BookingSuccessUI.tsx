@@ -115,6 +115,10 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
                     value: `€${booking.amount.toFixed(2)}`,
                     highlight: true,
                   },
+                  {
+                    label: "Método de Pago",
+                    value: booking.paymentMethod ? booking.paymentMethod.charAt(0).toUpperCase() + booking.paymentMethod.slice(1) : "Desconocido",
+                  },
                 ].map((item, index) => (
                   <motion.div 
                     key={item.label} 

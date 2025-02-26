@@ -4,6 +4,7 @@ export interface Booking {
   date: string | Date;
   partySize: number;
   amount: number;
+  totalAmount?: number;
   paymentIntentId: string;
   phoneNumber: string;
   status?: 'confirmed' | 'pending' | 'cancelled';
@@ -12,6 +13,7 @@ export interface Booking {
   updatedAt?: Date;
   tourSlug?: string;
   tourName?: string;
+  paymentMethod?: 'stripe' | 'paypal';
 }
 
 export interface BookingData {
@@ -25,6 +27,8 @@ export interface BookingData {
   phoneNumber: string;
   specialRequests?: string;
   paid: boolean;
+  amount: number;
+  paymentMethod?: string;
 }
 
 export interface BookingLimit {
