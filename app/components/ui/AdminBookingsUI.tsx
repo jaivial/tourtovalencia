@@ -200,98 +200,103 @@ export const AdminBookingsUI = ({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Date Selector Card */}
         <Card className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
           <CardHeader className="bg-primary/5 border-b border-primary/10">
             <CardTitle className="text-lg sm:text-xl text-primary">Date & Tour Selection</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="space-y-6">
+            <div className="flex flex-col items-center md:items-stretch md:flex-row md:justify-center md:space-x-8 lg:space-x-12">
               {/* Date Picker */}
-              <div>
-                <Label htmlFor="date-picker" className="block text-sm font-medium mb-2">Select Date</Label>
+              <div className="w-full max-w-xs flex flex-col items-center mb-8 md:mb-0">
+                <Label htmlFor="date-picker" className="self-start text-sm font-medium mb-3">Select Date</Label>
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={(date) => date && onDateChange(date)}
-                  className="rounded-md border"
+                  className="rounded-md border shadow-sm"
                   disabled={selectedStatus === "cancelled" && allDates}
                 />
               </div>
 
-              {/* Tour Selector */}
-              <div>
-                <Label htmlFor="tour-selector" className="block text-sm font-medium mb-2">Select Tour</Label>
-                <Select value={selectedTourSlug || "all"} onValueChange={handleTourChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a tour" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Tours</SelectItem>
-                    {tours.map((tour) => (
-                      <SelectItem key={tour._id} value={tour.slug}>
-                        {tour.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* All Dates Checkbox (only for cancelled bookings) */}
-              {selectedStatus === "cancelled" && (
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant={allDates ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleAllDatesChange(!allDates)}
-                    className="h-8"
-                  >
-                    {allDates ? "✓ Show all dates" : "Show all dates"}
-                  </Button>
+              {/* Tour Selector and All Dates/Booking Limit */}
+              <div className="w-full max-w-xs flex flex-col">
+                {/* Tour Selector */}
+                <div className="mb-6">
+                  <Label htmlFor="tour-selector" className="block text-sm font-medium mb-3">Select Tour</Label>
+                  <Select value={selectedTourSlug || "all"} onValueChange={handleTourChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a tour" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Tours</SelectItem>
+                      {tours.map((tour) => (
+                        <SelectItem key={tour._id} value={tour.slug}>
+                          {tour.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
 
-              {/* Booking Limit (only for confirmed bookings) */}
-              {selectedStatus === "confirmed" && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="max-bookings" className="text-sm font-medium">Max Bookings:</Label>
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        id="max-bookings"
-                        type="number"
-                        min="0"
-                        value={maxBookings}
-                        onChange={handleMaxBookingsChange}
-                        className="w-20 h-8 text-right"
-                      />
-                      <Button 
-                        onClick={handleUpdateMaxBookings} 
-                        size="sm"
-                        className="h-8"
-                      >
-                        Update
-                      </Button>
+                {/* All Dates Button (only for cancelled bookings) */}
+                {selectedStatus === "cancelled" && (
+                  <div>
+                    <Label className="block text-sm font-medium mb-3">Date Filter</Label>
+                    <Button
+                      variant={allDates ? "default" : "outline"}
+                      onClick={() => handleAllDatesChange(!allDates)}
+                      className="w-full"
+                    >
+                      {allDates ? "✓ Show all dates" : "Show all dates"}
+                    </Button>
+                  </div>
+                )}
+
+                {/* Booking Limit (only for confirmed bookings) */}
+                {selectedStatus === "confirmed" && (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="max-bookings" className="block text-sm font-medium mb-3">Max Bookings</Label>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          id="max-bookings"
+                          type="number"
+                          min="0"
+                          value={maxBookings}
+                          onChange={handleMaxBookingsChange}
+                          className="flex-1"
+                        />
+                        <Button 
+                          onClick={handleUpdateMaxBookings} 
+                          className="whitespace-nowrap"
+                        >
+                          Update
+                        </Button>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+                        <span>Current: {totalPeople} people</span>
+                        <span>{completionPercentage}% Full</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className={`h-2.5 rounded-full ${
+                            completionPercentage < 70 
+                              ? 'bg-green-600' 
+                              : completionPercentage < 90 
+                                ? 'bg-yellow-400' 
+                                : 'bg-red-600'
+                          }`}
+                          style={{ width: `${completionPercentage}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className={`h-2.5 rounded-full ${
-                        completionPercentage < 70 
-                          ? 'bg-green-600' 
-                          : completionPercentage < 90 
-                            ? 'bg-yellow-400' 
-                            : 'bg-red-600'
-                      }`}
-                      style={{ width: `${completionPercentage}%` }}
-                    ></div>
-                  </div>
-                  <div className="text-xs text-right">
-                    {completionPercentage}% Full
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
