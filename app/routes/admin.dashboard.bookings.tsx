@@ -551,6 +551,10 @@ export default function AdminDashboardBookings() {
               if (containsSuccessIndicators) {
                 // Si el HTML contiene indicadores de éxito, asumir que la operación fue exitosa
                 console.log('La respuesta HTML contiene indicadores de éxito, tratándola como cancelación exitosa');
+                
+                // Refrescar los datos después de una cancelación exitosa
+                refreshCurrentData();
+                
                 return resolve({
                   success: true,
                   message: "Reserva cancelada correctamente",
@@ -596,6 +600,11 @@ export default function AdminDashboardBookings() {
               });
             }
             
+            // Refrescar los datos después de una cancelación exitosa
+            if (data.success) {
+              refreshCurrentData();
+            }
+            
             return resolve({
               success: true,
               message: data.message || "Reserva cancelada correctamente",
@@ -618,6 +627,35 @@ export default function AdminDashboardBookings() {
             message: error instanceof Error ? error.message : "Ocurrió un error inesperado"
           });
         });
+    });
+  };
+
+  // Función para refrescar los datos actuales sin cambiar la URL
+  const refreshCurrentData = () => {
+    // Crear un objeto FormData con los parámetros actuales
+    const formData = new FormData();
+    formData.append("date", data.selectedDate);
+    // Mantener el tour seleccionado si hay alguno
+    if (data.selectedTourSlug) {
+      formData.append("tourSlug", data.selectedTourSlug);
+    }
+    // Mantener el estado seleccionado
+    formData.append("status", data.selectedStatus);
+    // Mantener la configuración allDates si está establecida
+    if (data.allDates) {
+      formData.append("allDates", "true");
+    }
+    // Mantener el término de búsqueda si hay alguno
+    if (data.searchTerm) {
+      formData.append("searchTerm", data.searchTerm);
+    }
+    // Mantener la página actual
+    formData.append("page", data.pagination.currentPage.toString());
+
+    // Enviar el formulario para refrescar los datos
+    submit(formData, {
+      method: "get",
+      replace: true,
     });
   };
 
