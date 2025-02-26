@@ -1,5 +1,5 @@
 import { useNavigate, useLocation, json } from "@remix-run/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BookingSuccessProvider } from "~/context/BookingSuccessContext";
 import { BookingSuccessFeature } from "~/components/features/BookingSuccessFeature";
 import type { Booking } from "~/types/booking";
@@ -7,6 +7,13 @@ import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
 import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
 import { getCollection } from "~/utils/db.server";
+
+// Add a loader function to handle direct navigation to the success page
+export async function loader() {
+  // This loader allows the page to be loaded directly
+  // The client-side code will handle redirecting if no booking data is found
+  return json({ ok: true });
+}
 
 export async function action({ request }: { request: Request }) {
   const formData = await request.formData();
@@ -140,19 +147,75 @@ export async function action({ request }: { request: Request }) {
 export default function BookingSuccess() {
   const location = useLocation();
   const navigate = useNavigate();
-
+  
+  // Use useState to handle client-side data retrieval
+  const [bookingData, setBookingData] = useState(location.state?.booking || null);
+  const [isLoading, setIsLoading] = useState(true);
+  
   useEffect(() => {
-    if (!location.state?.booking) {
-      navigate("/book", { replace: true });
+    // Only run in browser environment
+    if (typeof window !== 'undefined') {
+      console.log("Running useEffect in browser environment");
+      
+      // Add a small delay to ensure sessionStorage is populated
+      const timer = setTimeout(() => {
+        // Try to get data from sessionStorage
+        const storedData = sessionStorage.getItem('bookingData');
+        console.log("Checking sessionStorage:", storedData ? "Data found" : "No data found");
+        
+        if (storedData) {
+          try {
+            const parsedData = JSON.parse(storedData);
+            if (parsedData.booking) {
+              console.log("Retrieved booking data from sessionStorage in useEffect");
+              setBookingData(parsedData.booking);
+              // Clear the sessionStorage after retrieving the data
+              sessionStorage.removeItem('bookingData');
+              setIsLoading(false);
+              return;
+            }
+          } catch (error) {
+            console.error("Error parsing stored booking data:", error);
+          }
+        }
+        
+        // Check if we have data from location state
+        if (location.state?.booking) {
+          console.log("Using booking data from location state");
+          setBookingData(location.state.booking);
+          setIsLoading(false);
+          return;
+        }
+        
+        // If we don't have data from either source, redirect
+        if (!bookingData) {
+          console.log("No booking data found, redirecting to booking page");
+          navigate("/book", { replace: true });
+        } else {
+          setIsLoading(false);
+        }
+      }, 300); // Small delay to ensure sessionStorage is populated
+      
+      return () => clearTimeout(timer);
     }
-  }, [location.state?.booking, navigate]);
+  }, [location.state, navigate]);
 
-  if (!location.state?.booking) {
+  // Show loading state during initial render
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+      </div>
+    );
+  }
+
+  if (!bookingData) {
+    // Return a loading state or null for server-side rendering
     return null;
   }
 
   return (
-    <BookingSuccessProvider booking={location.state.booking}>
+    <BookingSuccessProvider booking={bookingData}>
       <BookingSuccessFeature />
     </BookingSuccessProvider>
   );

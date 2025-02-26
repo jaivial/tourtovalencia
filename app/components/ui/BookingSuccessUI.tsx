@@ -6,7 +6,6 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { Button } from "~/components/ui/button";
-import { useNavigate } from "@remix-run/react";
 import { useEffect, useState } from "react";
 
 interface BookingSuccessUIProps {
@@ -46,7 +45,6 @@ const iconVariants = {
 };
 
 export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps) => {
-  const navigate = useNavigate();
   const [countdown, setCountdown] = useState(60);
 
   useEffect(() => {
@@ -54,11 +52,16 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
       return;
     }
     
+    // Only run in browser environment
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          navigate("/");
+          window.location.href = "/";
           return 0;
         }
         return prev - 1;
@@ -66,10 +69,12 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [navigate, emailStatus]);
+  }, [emailStatus]);
 
   const handleReturnHome = () => {
-    navigate("/");
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
   };
 
   return (
