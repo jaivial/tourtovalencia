@@ -11,7 +11,16 @@ interface AdminBookingsFeatureProps {
   onDateChange: (date: Date) => void;
   onTourChange: (tourSlug: string) => void;
   onStatusChange: (status: string) => void;
-  onCancelBooking: (bookingId: string, shouldRefund: boolean, reason: string) => void;
+  onCancelBooking: (bookingId: string, shouldRefund: boolean, reason: string) => Promise<{
+    success: boolean;
+    message: string;
+    refundResult?: {
+      success: boolean;
+      refundId?: string;
+      error?: string;
+      mockResponse?: boolean;
+    };
+  }>;
 }
 
 export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange, onStatusChange, onCancelBooking }: AdminBookingsFeatureProps) => {
@@ -62,8 +71,8 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange, o
   };
 
   const handleCancelBooking = (bookingId: string, shouldRefund: boolean = false, reason: string = "Cancelled by admin") => {
-    // Call the parent component's onCancelBooking function
-    onCancelBooking(bookingId, shouldRefund, reason);
+    // Call the parent component's onCancelBooking function and return its promise
+    return onCancelBooking(bookingId, shouldRefund, reason);
   };
 
   const handlePageChange = (page: number) => {

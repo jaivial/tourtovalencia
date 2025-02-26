@@ -1,6 +1,9 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "../utils/db.server";
 import { refundPayPalPayment } from "../utils/paypal.server";
+import { sendEmail } from "../utils/email.server";
+import { BookingCancellationEmail } from "../components/emails/BookingCancellationEmail";
+import type { Booking } from "~/types/booking";
 
 interface CancellationResult {
   success: boolean;
@@ -67,7 +70,10 @@ export async function cancelBooking(
       );
       
       // Process refund based on payment method
-      if (booking.paymentMethod === "paypal" && booking.transactionId) {
+      if (booking.paymentMethod === "paypal" && (booking.transactionId || booking.paymentIntentId || booking.captureId)) {
+        // Get the transaction ID from any of the possible fields
+        const transactionId = booking.transactionId || booking.paymentIntentId || booking.captureId;
+        
         // Get amount in the correct format (ensure it's a number)
         const amount = typeof booking.amount === 'number' 
           ? booking.amount 
@@ -75,11 +81,11 @@ export async function cancelBooking(
             ? booking.totalAmount
             : 0;
             
-        console.log(`Processing PayPal refund for booking ${bookingId} with transaction ID ${booking.transactionId} for amount ${amount}`);
+        console.log(`Processing PayPal refund for booking ${bookingId} with transaction ID ${transactionId} for amount ${amount}`);
             
         // Process PayPal refund
         refundResult = await refundPayPalPayment(
-          booking.transactionId,
+          transactionId,
           amount,
           cancellationReason
         );
@@ -102,7 +108,7 @@ export async function cancelBooking(
             } 
           }
         );
-      } else if (booking.paymentMethod === "stripe" && booking.transactionId) {
+      } else if (booking.paymentMethod === "stripe" && (booking.transactionId || booking.paymentIntentId)) {
         // TODO: Implement Stripe refund logic
         refundResult = {
           success: false,
@@ -137,8 +143,35 @@ export async function cancelBooking(
     
     // Send cancellation email to customer
     try {
-      // TODO: Implement email notification for cancellation
-      console.log(`Cancellation notification would be sent to ${booking.email}`);
+      if (booking.email) {
+        // Get the updated booking with all cancellation details
+        const updatedBooking = await db.collection("bookings").findOne({ 
+          _id: new ObjectId(bookingId) 
+        });
+        
+        if (updatedBooking) {
+          await sendEmail({
+            to: updatedBooking.email,
+            subject: "Your Booking Has Been Cancelled - Viajes Olga",
+            component: BookingCancellationEmail({
+              booking: updatedBooking as unknown as Booking,
+              reason: cancellationReason,
+              refundIssued: shouldRefund && (refundResult?.success || false),
+              refundId: refundResult?.refundId
+            }),
+          });
+          
+          // Log email sent
+          await db.collection("bookings").updateOne(
+            { _id: new ObjectId(bookingId) },
+            { $set: { cancellationEmailSent: new Date() } }
+          );
+          
+          console.log(`✅ Cancellation email sent to ${updatedBooking.email}`);
+        }
+      } else {
+        console.warn(`Cannot send cancellation email: No email address for booking ${bookingId}`);
+      }
     } catch (emailError) {
       console.error("Error sending cancellation email:", emailError);
       // Continue execution even if email fails

@@ -11,6 +11,7 @@ import { Button } from "../ui/button"
 import { Label } from "../ui/label"
 import { Switch } from "../ui/switch"
 import { Textarea } from "../ui/textarea"
+import { AlertCircle, CheckCircle2, Ban } from "lucide-react"
 
 interface CancellationDialogProps {
   open: boolean
@@ -40,43 +41,73 @@ export const CancellationDialog: React.FC<CancellationDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Cancel Booking</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to cancel booking {bookingReference}?
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          {(amount && amount > 0 && paymentMethod) ? (
-            <div className="flex items-center space-x-2">
-              <Switch 
-                id="refund" 
-                checked={refund} 
-                onCheckedChange={setRefund} 
-              />
-              <Label htmlFor="refund">
-                Issue refund of ${amount.toFixed(2)} via {paymentMethod}
-              </Label>
+      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
+        <div className="bg-red-50 p-4 border-b border-red-100">
+          <DialogHeader>
+            <div className="flex items-center gap-2 text-red-700">
+              <AlertCircle className="h-5 w-5" />
+              <DialogTitle className="text-xl">Cancel Booking</DialogTitle>
             </div>
-          ) : null}
-          <div className="grid gap-2">
-            <Label htmlFor="reason">Cancellation reason</Label>
-            <Textarea
-              id="reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Enter reason for cancellation"
-            />
+            <DialogDescription className="text-red-600 mt-2">
+              Are you sure you want to cancel booking <span className="font-medium">{bookingReference}</span>?
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+        
+        <div className="p-6">
+          <div className="grid gap-5">
+            {(amount && amount > 0 && paymentMethod) ? (
+              <div className="flex items-center space-x-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <Switch 
+                  id="refund" 
+                  checked={refund} 
+                  onCheckedChange={setRefund}
+                  className="data-[state=checked]:bg-amber-500"
+                />
+                <Label htmlFor="refund" className="font-medium text-amber-800">
+                  Issue refund of €{amount.toFixed(2)} via {paymentMethod}
+                </Label>
+              </div>
+            ) : null}
+            
+            <div className="grid gap-3">
+              <Label htmlFor="reason" className="text-gray-700">
+                Cancellation reason <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                id="reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Enter reason for cancellation"
+                className="min-h-[100px] resize-none"
+                required
+              />
+              <p className="text-xs text-gray-500">
+                This reason will be included in the cancellation email sent to the customer.
+              </p>
+            </div>
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm}>
-            Confirm Cancellation
-          </Button>
+        
+        <DialogFooter className="bg-gray-50 px-6 py-4 border-t">
+          <div className="flex gap-3 w-full justify-end">
+            <Button 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              className="gap-2"
+            >
+              <Ban className="h-4 w-4" />
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConfirm}
+              className="bg-red-600 hover:bg-red-700 gap-2"
+              disabled={!reason.trim()}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Confirm Cancellation
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

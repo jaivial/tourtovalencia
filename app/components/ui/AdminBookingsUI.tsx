@@ -11,36 +11,35 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { useState, useEffect } from "react";
-import type { PaginationInfo } from "~/types/booking";
+import type { BookingData, PaginationInfo } from "~/types/booking";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Label } from "~/components/ui/label";
 import type { TourOption } from "~/routes/admin.dashboard.bookings.hooks";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { CancellationDialog } from "~/components/ui/CancellationDialog";
-
-export type Booking = {
-  _id: string;
-  name: string;
-  email: string;
-  date: string;
-  tourType: string;
-  numberOfPeople: number;
-  status: string;
-  phoneNumber: string;
-  specialRequests?: string;
-  paid: boolean;
-  amount?: number;
-  paymentMethod?: string;
-};
+import { CancellationResultDialog } from "~/components/ui/CancellationResultDialog";
+import { toast } from "sonner";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 export type BookingLimit = {
   maxBookings: number;
   currentBookings: number;
 };
 
+type CancellationResultType = {
+  success: boolean;
+  message: string;
+  refundResult?: {
+    success: boolean;
+    refundId?: string;
+    error?: string;
+    mockResponse?: boolean;
+  };
+};
+
 type AdminBookingsUIProps = {
   selectedDate: Date;
-  bookings: Booking[];
+  bookings: BookingData[];
   bookingLimit: BookingLimit;
   pagination: PaginationInfo;
   isLoading: boolean;
@@ -50,7 +49,7 @@ type AdminBookingsUIProps = {
   selectedStatus: string;
   onDateChange: (date: Date) => void;
   onUpdateMaxBookings: (newMax: number) => void;
-  onCancelBooking?: (bookingId: string, shouldRefund: boolean, reason: string) => void;
+  onCancelBooking?: (bookingId: string, shouldRefund: boolean, reason: string) => Promise<CancellationResultType>;
   onPageChange: (page: number) => void;
   onTourChange: (tourSlug: string) => void;
   onStatusChange: (status: string) => void;
@@ -74,8 +73,10 @@ export const AdminBookingsUI = ({
   onStatusChange,
 }: AdminBookingsUIProps) => {
   const [maxBookings, setMaxBookings] = useState(bookingLimit.maxBookings.toString());
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
   const [showCancellationDialog, setShowCancellationDialog] = useState(false);
+  const [cancellationResult, setCancellationResult] = useState<CancellationResultType | null>(null);
+  const [showResultDialog, setShowResultDialog] = useState(false);
 
   // Update maxBookings input when bookingLimit changes (e.g., when date changes)
   useEffect(() => {
@@ -103,8 +104,8 @@ export const AdminBookingsUI = ({
     }
   };
 
-  const handleUpdateClick = () => {
-    const newMax = parseInt(maxBookings);
+  const handleUpdateMaxBookings = () => {
+    const newMax = parseInt(maxBookings, 10);
     if (!isNaN(newMax) && newMax >= 0) {
       onUpdateMaxBookings(newMax);
     }
@@ -114,16 +115,64 @@ export const AdminBookingsUI = ({
     onTourChange(value);
   };
 
-  const handleCancelClick = (booking: Booking) => {
+  const handleCancelClick = (booking: BookingData) => {
     setSelectedBooking(booking);
     setShowCancellationDialog(true);
   };
 
-  const handleConfirmCancellation = (refund: boolean, reason: string) => {
+  const handleConfirmCancellation = async (refund: boolean, reason: string) => {
     if (selectedBooking && onCancelBooking) {
-      onCancelBooking(selectedBooking._id, refund, reason);
+      // Show loading toast
+      const toastId = toast.loading("Processing cancellation...");
+      
+      try {
+        // Call the cancellation function
+        const result = await onCancelBooking(selectedBooking._id, refund, reason);
+        
+        // Ensure we have a valid result object before proceeding
+        if (!result || typeof result !== 'object') {
+          throw new Error("Invalid response from server");
+        }
+        
+        // Update the result state and show dialog
+        setCancellationResult({
+          success: result.success || false,
+          message: result.message || "Unknown response from server",
+          refundResult: result.refundResult
+        });
+        setShowResultDialog(true);
+        
+        // Show success or error toast
+        if (result.success) {
+          toast.success("Booking cancelled successfully", {
+            id: toastId,
+            icon: <CheckCircle2 className="h-4 w-4" />,
+          });
+        } else {
+          toast.error(result.message || "Failed to cancel booking", {
+            id: toastId,
+            icon: <XCircle className="h-4 w-4" />,
+          });
+        }
+      } catch (error) {
+        console.error("Error during cancellation:", error);
+        
+        // Show error toast
+        const errorMessage = error instanceof Error ? error.message : "An error occurred";
+        toast.error(errorMessage, {
+          id: toastId,
+          icon: <XCircle className="h-4 w-4" />,
+        });
+        
+        // Create a fallback error result to display in the dialog
+        setCancellationResult({
+          success: false,
+          message: errorMessage,
+        });
+        setShowResultDialog(true);
+      }
     }
-    setSelectedBooking(null);
+    setShowCancellationDialog(false);
   };
 
   return (
@@ -211,7 +260,7 @@ export const AdminBookingsUI = ({
                         className="w-20 h-8 text-right"
                       />
                       <Button 
-                        onClick={handleUpdateClick} 
+                        onClick={handleUpdateMaxBookings} 
                         size="sm"
                         className="h-8"
                       >
@@ -389,6 +438,13 @@ export const AdminBookingsUI = ({
           paymentMethod={selectedBooking.paymentMethod}
         />
       )}
+
+      {/* Cancellation Result Dialog */}
+      <CancellationResultDialog
+        open={showResultDialog}
+        onOpenChange={setShowResultDialog}
+        result={cancellationResult}
+      />
     </div>
   );
 };

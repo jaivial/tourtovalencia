@@ -179,6 +179,30 @@ export async function refundPayPalPayment(
     // Get access token
     const accessToken = await getAccessToken();
 
+    // First, try to get transaction details to verify it's refundable
+    try {
+      const transactionDetails = await getPayPalTransactionDetails(transactionId);
+      console.log('Transaction details before refund:', {
+        id: transactionDetails.id,
+        status: transactionDetails.status,
+        amount: transactionDetails.amount,
+        create_time: transactionDetails.create_time,
+        update_time: transactionDetails.update_time,
+        links: transactionDetails.links
+      });
+      
+      // Check if transaction is in a refundable state
+      if (transactionDetails.status !== 'COMPLETED') {
+        return {
+          success: false,
+          error: `Transaction is not in a refundable state. Current status: ${transactionDetails.status}`
+        };
+      }
+    } catch (error) {
+      console.warn('Could not verify transaction details before refund:', error instanceof Error ? error.message : String(error));
+      // Continue with refund attempt even if we can't verify details
+    }
+
     // Call PayPal refund API
     const response = await fetch(`${PAYPAL_API_BASE}/v2/payments/captures/${transactionId}/refund`, {
       method: 'POST',
@@ -191,7 +215,7 @@ export async function refundPayPalPayment(
           value: amount.toFixed(2),
           currency_code: 'EUR'
         },
-        note_to_payer: reason
+        note_to_payer: reason.substring(0, 255) // Ensure note is not too long
       })
     });
 
@@ -214,6 +238,36 @@ export async function refundPayPalPayment(
         data: responseData
       });
       
+      // Handle specific error cases
+      if (response.status === 422) {
+        // Extract detailed error information for 422 errors
+        const details = responseData.details?.[0] || {};
+        const issueOrDescription = details.issue || details.description || '';
+        
+        if (issueOrDescription.includes('TRANSACTION_ALREADY_REFUNDED')) {
+          return {
+            success: false,
+            error: 'This transaction has already been refunded'
+          };
+        } else if (issueOrDescription.includes('MAX_NUMBER_OF_REFUNDS_EXCEEDED')) {
+          return {
+            success: false,
+            error: 'Maximum number of refunds for this transaction has been exceeded'
+          };
+        } else if (issueOrDescription.includes('REFUND_AMOUNT_EXCEEDED')) {
+          return {
+            success: false,
+            error: 'Refund amount exceeds the available amount'
+          };
+        } else if (issueOrDescription.includes('TRANSACTION_CANNOT_BE_REFUNDED')) {
+          return {
+            success: false,
+            error: 'This transaction cannot be refunded in its current state'
+          };
+        }
+      }
+      
+      // General error message if no specific case matched
       return {
         success: false,
         error: `PayPal refund failed: ${responseData.message || responseData.error?.message || JSON.stringify(responseData)}`

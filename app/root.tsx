@@ -10,6 +10,7 @@ import ArrowToTop from "./components/_index/ArrowToTop";
 import { LanguageContextProvider } from "~/providers/LanguageContext";
 import { MotionProvider } from "~/providers/MotionProvider";
 import { getAllPages } from "~/utils/page.server";
+import { ToastProvider } from "~/components/ui/toast-provider";
 
 export interface RootLoaderData {
   initialLanguage: typeof languageData.en;
@@ -83,6 +84,7 @@ export default function App() {
             <Nav pages={pages} />
             <Outlet />
             {!isAdminDashboard && <Footer />}
+            <ToastProvider />
           </LanguageContextProvider>
         </MotionProvider>
         <ScrollRestoration />

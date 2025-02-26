@@ -347,8 +347,93 @@ export default function AdminDashboardBookings() {
     formData.append("shouldRefund", shouldRefund.toString());
     formData.append("reason", reason);
     
-    submit(formData, {
-      method: "post",
+    // Submit the form and return a promise that will be resolved with the fetch response
+    return new Promise<{
+      success: boolean;
+      message: string;
+      refundResult?: {
+        success: boolean;
+        refundId?: string;
+        error?: string;
+        mockResponse?: boolean;
+      };
+    }>(resolve => {
+      // Use fetch directly instead of submit to get the response
+      fetch("/admin/dashboard/bookings", {
+        method: "POST",
+        body: formData,
+      })
+        .then(async response => {
+          // First check if the response is ok
+          if (!response.ok) {
+            // Try to get a meaningful error message
+            try {
+              const text = await response.text();
+              
+              // Try to parse as JSON
+              try {
+                const errorData = JSON.parse(text);
+                return resolve({
+                  success: false,
+                  message: errorData.error || `Server error: ${response.status}`
+                });
+              } catch (e) {
+                // If not JSON, extract a meaningful error from the HTML or use status
+                let errorMessage = `Server error: ${response.status}`;
+                if (text.includes('<title>')) {
+                  try {
+                    errorMessage = text.split('<title>')[1].split('</title>')[0];
+                  } catch (htmlError) {
+                    console.error("Error extracting title from HTML:", htmlError);
+                  }
+                }
+                return resolve({
+                  success: false,
+                  message: errorMessage
+                });
+              }
+            } catch (textError) {
+              // If we can't even get the response text
+              return resolve({
+                success: false,
+                message: `Server error: ${response.status}`
+              });
+            }
+          }
+          
+          // If response is ok, try to parse as JSON
+          try {
+            const data = await response.json();
+            
+            if (data.error) {
+              return resolve({
+                success: false,
+                message: data.error
+              });
+            }
+            
+            return resolve({
+              success: true,
+              message: data.message || "Booking cancelled successfully",
+              refundResult: data.refundResult
+            });
+          } catch (jsonError) {
+            // If we can't parse the JSON
+            console.error("Error parsing JSON response:", jsonError);
+            return resolve({
+              success: false,
+              message: "Failed to parse server response"
+            });
+          }
+        })
+        .catch(error => {
+          // Handle any network errors
+          console.error("Network error during cancellation:", error);
+          resolve({
+            success: false,
+            message: error instanceof Error ? error.message : "An unexpected error occurred"
+          });
+        });
     });
   };
 
