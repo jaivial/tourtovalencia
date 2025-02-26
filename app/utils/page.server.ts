@@ -50,8 +50,8 @@ async function optimizeImage(base64Data: string): Promise<string> {
     if (optimizedBuffer.length > MAX_IMAGE_SIZE) {
       const metadata = await sharp(buffer).metadata();
       const aspectRatio = metadata.width! / metadata.height!;
-      let width = Math.sqrt(MAX_IMAGE_SIZE * aspectRatio);
-      let height = width / aspectRatio;
+      const width = Math.sqrt(MAX_IMAGE_SIZE * aspectRatio);
+      const height = width / aspectRatio;
 
       optimizedBuffer = await sharp(buffer).resize(Math.floor(width), Math.floor(height)).webp({ quality: 70 }).toBuffer();
     }
@@ -64,17 +64,17 @@ async function optimizeImage(base64Data: string): Promise<string> {
 }
 
 // Export the processContent function so it can be used in other files
-export async function processContent(content: any, translate: boolean = true): Promise<any> {
+export async function processContent(content: Record<string, unknown>, translate: boolean = true): Promise<Record<string, unknown>> {
   if (!content) return content;
 
   // If it's an array, process each item
   if (Array.isArray(content)) {
-    return Promise.all(content.map((item) => processContent(item, translate)));
+    return Promise.all(content.map((item) => processContent(item as Record<string, unknown>, translate)));
   }
 
   // If it's an object, process each property
   if (typeof content === "object") {
-    const processed: any = {};
+    const processed: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(content)) {
       // Skip null or undefined values
@@ -83,12 +83,12 @@ export async function processContent(content: any, translate: boolean = true): P
       // Handle base64 images
       if (typeof value === "string" && value.startsWith("data:image")) {
         const size = Buffer.from(value.split(",")[1], "base64").length;
-        processed[key] = size > MAX_IMAGE_SIZE || true ? await optimizeImage(value) : value;
+        processed[key] = size > MAX_IMAGE_SIZE ? await optimizeImage(value) : value;
       } else if (typeof value === "string" && value.trim() !== "") {
         // For text content, only translate if translate flag is true
         processed[key] = translate ? await translateText(value) : value;
       } else if (typeof value === "object") {
-        processed[key] = await processContent(value, translate);
+        processed[key] = await processContent(value as Record<string, unknown>, translate);
       } else {
         processed[key] = value;
       }
@@ -102,7 +102,7 @@ export async function processContent(content: any, translate: boolean = true): P
   }
 
   // Otherwise, return as is
-  return content;
+  return content as Record<string, unknown>;
 }
 
 // Helper function to translate text using OpenRouter API with a free model
@@ -154,15 +154,16 @@ async function translateText(text: string, retryCount = 0): Promise<string> {
       console.error("Unexpected API response format:", response.data);
       return text;
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as Error & { response?: { status?: number; data?: unknown } };
     console.error("Translation error details:", {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-      stack: error.stack,
+      status: err.response?.status,
+      data: err.response?.data,
+      message: err.message,
+      stack: err.stack,
     });
 
-    if (error.response?.status === 429 && retryCount < 3) {
+    if (err.response?.status === 429 && retryCount < 3) {
       console.log(`Rate limit hit, retrying in ${retryCount + 1} seconds...`);
       await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1)));
       return translateText(text, retryCount + 1);
@@ -174,8 +175,8 @@ async function translateText(text: string, retryCount = 0): Promise<string> {
 }
 
 // Helper function to recursively translate content
-export async function translateContent(content: Record<string, any>): Promise<Record<string, any>> {
-  const translated: Record<string, any> = {};
+export async function translateContent(content: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const translated: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(content)) {
     if (value == null) {
@@ -188,7 +189,7 @@ export async function translateContent(content: Record<string, any>): Promise<Re
         translated[key] = await Promise.all(
           value.map(async (item) => {
             if (typeof item === "object" && item !== null) {
-              return await translateContent(item);
+              return await translateContent(item as Record<string, unknown>);
             } else if (typeof item === "string") {
               return isImageRelatedString(item) ? item : await translateText(item);
             }
@@ -196,7 +197,7 @@ export async function translateContent(content: Record<string, any>): Promise<Re
           })
         );
       } else if (typeof value === "object") {
-        translated[key] = await translateContent(value);
+        translated[key] = await translateContent(value as Record<string, unknown>);
       } else if (typeof value === "string") {
         translated[key] = isImageRelatedString(value) || value.startsWith("data:image") ? value : await translateText(value);
       } else {
@@ -221,7 +222,7 @@ function isImageRelatedString(str: string): boolean {
   return imageExtensions.test(str) || imageKeywords.test(str);
 }
 
-export async function createPage(name: string, content: Record<string, any>, status: "active" | "upcoming", template: string = ""): Promise<Page> {
+export async function createPage(name: string, content: Record<string, unknown>, status: "active" | "upcoming", template: string = ""): Promise<Page> {
   const collection = await getPagesCollection();
   const slug = generateSlug(name);
 
@@ -242,8 +243,8 @@ export async function createPage(name: string, content: Record<string, any>, sta
   console.log("English content sample:", JSON.stringify(englishContent).slice(0, 100));
 
   // Ensure price is set in both language versions
-  processedSpanishContent.price = price;
-  englishContent.price = price;
+  (processedSpanishContent as Record<string, unknown>).price = price;
+  (englishContent as Record<string, unknown>).price = price;
 
   // Create the final page object with both language versions
   const page = {
@@ -282,32 +283,90 @@ async function createTourFromPage(page: Page): Promise<void> {
   const now = new Date();
   
   // Use a more flexible approach to access content properties
-  const enContent = page.content.en as any;
-  const esContent = page.content.es as any;
+  const enContent = page.content.en as Record<string, any>;
+  const esContent = page.content.es as Record<string, any>;
+  
+  // Extract title from different possible locations in the content
+  const getTitle = (content: Record<string, any>): string => {
+    // First, use the page name as the most reliable source
+    if (page.name && page.name.trim() !== '') {
+      return page.name;
+    }
+    
+    // Then try to find title in different possible locations in the content
+    if (content.title) return content.title;
+    if (content.section1?.firstH3) return content.section1.firstH3;
+    if (content.section4?.firstH3) return content.section4.firstH3;
+    
+    // If we still don't have a title, log this for debugging
+    console.log('Warning: Could not find a suitable title for tour', JSON.stringify(content).substring(0, 200));
+    
+    return 'Tour';
+  };
+  
+  // Extract description from different possible locations
+  const getDescription = (content: Record<string, any>): string => {
+    if (content.description) return content.description;
+    if (content.section1?.firstSquareP) return content.section1.firstSquareP;
+    if (content.section2?.firstH3) return content.section2.firstH3;
+    return '';
+  };
+  
+  // Extract duration from different possible locations
+  const getDuration = (content: Record<string, any>): string => {
+    if (content.duration) return content.duration;
+    if (content.section4?.secondH3) return content.section4.secondH3;
+    return '';
+  };
+  
+  // Extract includes from different possible locations
+  const getIncludes = (content: Record<string, any>): string => {
+    if (content.includes) return content.includes;
+    if (content.section6?.list && Array.isArray(content.section6.list)) {
+      return content.section6.list.map((item: { li: string }) => item.li).join(', ');
+    }
+    return '';
+  };
+  
+  // Extract meeting point from different possible locations
+  const getMeetingPoint = (content: Record<string, any>): string => {
+    if (content.meetingPoint) return content.meetingPoint;
+    if (content.section4?.thirdH3) return content.section4.thirdH3;
+    return '';
+  };
+  
+  // Log the page name and content structure for debugging
+  console.log(`Creating tour from page: "${page.name}" with ID: ${page._id}`);
+  console.log('Content structure:', Object.keys(enContent).join(', '));
+  
+  const enTitle = getTitle(enContent);
+  const esTitle = getTitle(esContent);
+  
+  console.log(`Tour titles - EN: "${enTitle}", ES: "${esTitle}"`);
   
   const tour = {
     slug: page.slug,
     tourName: {
-      en: enContent.title || page.name,
-      es: esContent.title || page.name,
+      en: enTitle,
+      es: esTitle,
     },
     tourPrice: enContent.price || 0,
     status: page.status,
     description: {
-      en: enContent.description || '',
-      es: esContent.description || '',
+      en: getDescription(enContent),
+      es: getDescription(esContent),
     },
     duration: {
-      en: enContent.duration || '',
-      es: esContent.duration || '',
+      en: getDuration(enContent),
+      es: getDuration(esContent),
     },
     includes: {
-      en: enContent.includes || '',
-      es: esContent.includes || '',
+      en: getIncludes(enContent),
+      es: getIncludes(esContent),
     },
     meetingPoint: {
-      en: enContent.meetingPoint || '',
-      es: esContent.meetingPoint || '',
+      en: getMeetingPoint(enContent),
+      es: getMeetingPoint(esContent),
     },
     pageId: page._id?.toString() || '',
     createdAt: now,
