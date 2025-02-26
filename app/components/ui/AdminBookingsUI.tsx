@@ -15,6 +15,7 @@ import type { PaginationInfo } from "~/types/booking";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Label } from "~/components/ui/label";
 import type { TourOption } from "~/routes/admin.dashboard.bookings.hooks";
+import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 export type Booking = {
   _id: string;
@@ -43,11 +44,13 @@ type AdminBookingsUIProps = {
   error: string | null;
   tours: TourOption[];
   selectedTourSlug: string;
+  selectedStatus: string;
   onDateChange: (date: Date) => void;
   onUpdateMaxBookings: (newMax: number) => void;
   onCancelBooking?: (bookingId: string) => void;
   onPageChange: (page: number) => void;
   onTourChange: (tourSlug: string) => void;
+  onStatusChange: (status: string) => void;
   strings: Record<string, unknown>;
 };
 
@@ -59,11 +62,13 @@ export const AdminBookingsUI = ({
   isLoading,
   tours,
   selectedTourSlug,
+  selectedStatus,
   onDateChange,
   onUpdateMaxBookings,
   onCancelBooking,
   onPageChange,
   onTourChange,
+  onStatusChange,
 }: AdminBookingsUIProps) => {
   const [maxBookings, setMaxBookings] = useState(bookingLimit.maxBookings.toString());
 
@@ -104,127 +109,6 @@ export const AdminBookingsUI = ({
     onTourChange(value);
   };
 
-  // Generate pagination buttons
-  const renderPaginationButtons = () => {
-    const { currentPage, totalPages } = pagination;
-    
-    // If there's only one page, don't show pagination
-    if (totalPages <= 1) return null;
-    
-    const buttons = [];
-    
-    // Previous button
-    buttons.push(
-      <Button
-        key="prev"
-        variant="outline"
-        size="sm"
-        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-        disabled={currentPage === 1 || isLoading}
-        className="mx-1"
-        aria-label="Previous page"
-      >
-        &lt;
-      </Button>
-    );
-    
-    // Page number buttons
-    const maxVisibleButtons = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
-    const endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
-    
-    // Adjust start page if we're near the end
-    if (endPage - startPage + 1 < maxVisibleButtons) {
-      startPage = Math.max(1, endPage - maxVisibleButtons + 1);
-    }
-    
-    // First page button (if not visible in the range)
-    if (startPage > 1) {
-      buttons.push(
-        <Button
-          key="first"
-          variant={1 === currentPage ? "default" : "outline"}
-          size="sm"
-          onClick={() => onPageChange(1)}
-          disabled={isLoading}
-          className="mx-1"
-          aria-label="Go to first page"
-        >
-          1
-        </Button>
-      );
-      
-      // Ellipsis if there's a gap
-      if (startPage > 2) {
-        buttons.push(
-          <span key="ellipsis1" className="mx-1">...</span>
-        );
-      }
-    }
-    
-    // Page buttons
-    for (let i = startPage; i <= endPage; i++) {
-      buttons.push(
-        <Button
-          key={i}
-          variant={i === currentPage ? "default" : "outline"}
-          size="sm"
-          onClick={() => onPageChange(i)}
-          disabled={isLoading}
-          className="mx-1"
-          aria-label={`Go to page ${i}`}
-        >
-          {i}
-        </Button>
-      );
-    }
-    
-    // Last page button (if not visible in the range)
-    if (endPage < totalPages) {
-      // Ellipsis if there's a gap
-      if (endPage < totalPages - 1) {
-        buttons.push(
-          <span key="ellipsis2" className="mx-1">...</span>
-        );
-      }
-      
-      buttons.push(
-        <Button
-          key="last"
-          variant={totalPages === currentPage ? "default" : "outline"}
-          size="sm"
-          onClick={() => onPageChange(totalPages)}
-          disabled={isLoading}
-          className="mx-1"
-          aria-label="Go to last page"
-        >
-          {totalPages}
-        </Button>
-      );
-    }
-    
-    // Next button
-    buttons.push(
-      <Button
-        key="next"
-        variant="outline"
-        size="sm"
-        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-        disabled={currentPage === totalPages || isLoading}
-        className="mx-1"
-        aria-label="Next page"
-      >
-        &gt;
-      </Button>
-    );
-    
-    return (
-      <div className="flex items-center justify-center mt-4 mb-2">
-        {buttons}
-      </div>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="p-2 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
@@ -248,250 +132,210 @@ export const AdminBookingsUI = ({
                 selected={selectedDate}
                 onSelect={(date) => date && onDateChange(date)}
                 className="w-full"
-                classNames={{
-                  months: "w-full space-y-4",
-                  month: "w-full space-y-4",
-                  table: "w-full border-collapse space-y-1",
-                  head_row: "flex w-full",
-                  head_cell: "text-muted-foreground rounded-md w-full font-normal text-center",
-                  row: "flex w-full mt-2",
-                  cell: "text-center relative p-0 text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md h-9 w-full",
-                  day: "h-9 w-9 p-0 font-normal text-center mx-auto flex items-center justify-center aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
-                  day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-                  day_today: "bg-accent text-accent-foreground",
-                  day_outside: "text-muted-foreground opacity-50",
-                  day_disabled: "text-muted-foreground opacity-50",
-                  day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
-                  day_hidden: "invisible",
-                  nav: "space-x-1 flex items-center justify-center",
-                  nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
-                  nav_button_previous: "absolute left-1",
-                  nav_button_next: "absolute right-1",
-                  caption: "relative flex items-center justify-center py-2",
-                  caption_label: "text-sm font-medium",
-                }}
               />
             </CardContent>
           </Card>
 
-          {/* Booking Completion Card */}
+          {/* Tour Selection Card */}
           <Card className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
             <CardHeader className="bg-primary/5 border-b border-primary/10">
-              <CardTitle className="text-lg sm:text-xl text-primary">Booking Completion</CardTitle>
+              <CardTitle className="text-lg sm:text-xl text-primary">Select Tour</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center p-6">
-              <div className="flex flex-col items-center space-y-4">
-                <div className="relative w-32 h-32 sm:w-36 sm:h-36">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="16"
-                      fill="none"
-                      className="stroke-current text-gray-200"
-                      strokeWidth="3"
-                    />
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="16"
-                      fill="none"
-                      className={`stroke-current ${
-                        completionPercentage >= 100 
-                          ? 'text-red-500' 
-                          : completionPercentage >= 90 
-                          ? 'text-yellow-500' 
-                          : 'text-primary'
-                      }`}
-                      strokeWidth="3"
-                      strokeDasharray={`${completionPercentage}, 100`}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className={`text-2xl sm:text-3xl font-bold ${
-                      completionPercentage >= 100 
-                        ? 'text-red-500' 
-                        : completionPercentage >= 90 
-                        ? 'text-yellow-500' 
-                        : 'text-primary'
-                    }`}>{completionPercentage}%</span>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center text-center space-y-1">
-                  <p className="text-sm sm:text-base text-gray-600">
-                    {totalPeople} of {bookingLimit.maxBookings} places booked
-                  </p>
-                  {completionPercentage >= 100 && (
-                    <p className="text-sm text-red-500 font-medium">
-                      Overbooking!
-                    </p>
-                  )}
-                  {completionPercentage >= 90 && completionPercentage < 100 && (
-                    <p className="text-sm text-yellow-500 font-medium">
-                      Almost full!
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Daily Places Limit Card */}
-          <Card className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="bg-primary/5 border-b border-primary/10">
-              <CardTitle className="text-lg sm:text-xl text-primary">Daily Places Limit</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center p-6">
-              <div className="w-full max-w-xs mx-auto space-y-4">
-                {/* Tour Selector */}
+            <CardContent className="flex-1 p-4 flex flex-col justify-center">
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="tour-selector">Select Tour</Label>
+                  <Label htmlFor="tour-select">Tour</Label>
                   <Select
                     value={selectedTourSlug || "all"}
                     onValueChange={handleTourChange}
                   >
-                    <SelectTrigger id="tour-selector">
+                    <SelectTrigger id="tour-select" className="w-full">
                       <SelectValue placeholder="Select a tour" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Tours</SelectItem>
                       {tours.map((tour) => (
-                        <SelectItem key={tour.slug} value={tour.slug}>
+                        <SelectItem key={tour._id} value={tour.slug}>
                           {tour.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
 
-                <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                  <Input
-                    type="number"
-                    min="0"
-                    value={maxBookings}
-                    onChange={handleMaxBookingsChange}
-                    className="w-full sm:w-32 text-center"
-                    aria-label="Maximum bookings per day"
-                    disabled={isLoading}
-                  />
-                  <Button 
-                    onClick={handleUpdateClick}
-                    className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                        <span>Updating...</span>
-                      </div>
-                    ) : (
-                      'Update'
-                    )}
-                  </Button>
+          {/* Booking Limit Card */}
+          <Card className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <CardHeader className="bg-primary/5 border-b border-primary/10">
+              <CardTitle className="text-lg sm:text-xl text-primary">Booking Limit</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 p-4 flex flex-col justify-center">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Current Bookings:</span>
+                  <span className="font-bold">{bookingLimit.currentBookings}</span>
                 </div>
-                <p className="text-sm sm:text-base text-gray-600 text-center">
-                  Current limit: {bookingLimit.maxBookings} places
-                  {selectedTourSlug ? ` for ${tours.find(t => t.slug === selectedTourSlug)?.name || selectedTourSlug}` : ' for all tours'}
-                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Total People:</span>
+                  <span className="font-bold">{totalPeople}</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="max-bookings" className="text-sm font-medium">Max Bookings:</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        id="max-bookings"
+                        type="number"
+                        min="0"
+                        value={maxBookings}
+                        onChange={handleMaxBookingsChange}
+                        className="w-20 h-8 text-right"
+                      />
+                      <Button 
+                        onClick={handleUpdateClick} 
+                        size="sm"
+                        className="h-8"
+                      >
+                        Update
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div 
+                      className={`h-2.5 rounded-full ${
+                        completionPercentage < 70 
+                          ? 'bg-green-600' 
+                          : completionPercentage < 90 
+                            ? 'bg-yellow-400' 
+                            : 'bg-red-600'
+                      }`}
+                      style={{ width: `${completionPercentage}%` }}
+                    ></div>
+                  </div>
+                  <div className="text-xs text-right">
+                    {completionPercentage}% Full
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Bookings Table */}
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-800">
-                Bookings for {selectedDate.toLocaleDateString()}
-                {selectedTourSlug && ` - ${tours.find(t => t.slug === selectedTourSlug)?.name || selectedTourSlug}`}
-              </h2>
-              <div className="text-sm text-gray-500">
-                Showing {pagination.currentPage === pagination.totalPages ? 
-                  (pagination.totalItems === 0 ? 0 : ((pagination.currentPage - 1) * pagination.itemsPerPage + 1) + '-' + pagination.totalItems) : 
-                  ((pagination.currentPage - 1) * pagination.itemsPerPage + 1) + '-' + (pagination.currentPage * pagination.itemsPerPage)
-                } of {pagination.totalItems} bookings
-              </div>
+        {/* Bookings Table Card */}
+        <Card className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+          <CardHeader className="bg-primary/5 border-b border-primary/10">
+            <CardTitle className="text-lg sm:text-xl text-primary">Bookings</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {/* Status Tabs */}
+            <div className="p-4 border-b border-gray-200">
+              <Tabs value={selectedStatus} onValueChange={onStatusChange} className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2">
+                  <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
+                  <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
-          </div>
-          
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Tour Type</TableHead>
-                <TableHead>People</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Payment</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {bookings.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                    No bookings found for this date
-                  </TableCell>
-                </TableRow>
-              ) : (
-                bookings.map((booking) => (
-                  <TableRow key={booking._id}>
-                    <TableCell className="font-medium">{booking.name}</TableCell>
-                    <TableCell>{booking.email}</TableCell>
-                    <TableCell>{booking.phoneNumber}</TableCell>
-                    <TableCell>{booking.tourType}</TableCell>
-                    <TableCell>{booking.numberOfPeople}</TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        booking.status === 'confirmed' 
-                          ? 'bg-green-100 text-green-800' 
-                          : booking.status === 'cancelled' 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {booking.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        booking.paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {booking.paid ? 'Paid' : 'Pending'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          View
-                        </Button>
-                        {onCancelBooking && booking.status !== 'cancelled' && (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="text-red-600 hover:text-red-800"
-                            onClick={() => onCancelBooking(booking._id)}
-                          >
-                            Cancel
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[180px]">Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Tour</TableHead>
+                    <TableHead className="text-center">People</TableHead>
+                    <TableHead className="text-center">Paid</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-          
-          {/* Pagination */}
-          {renderPaginationButtons()}
-        </div>
+                </TableHeader>
+                <TableBody>
+                  {bookings.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-4">
+                        No bookings found for this date.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    bookings.map((booking) => (
+                      <TableRow key={booking._id}>
+                        <TableCell className="font-medium">{booking.name}</TableCell>
+                        <TableCell>{booking.email}</TableCell>
+                        <TableCell>{booking.phoneNumber}</TableCell>
+                        <TableCell>{booking.tourType}</TableCell>
+                        <TableCell className="text-center">{booking.numberOfPeople}</TableCell>
+                        <TableCell className="text-center">
+                          {booking.paid ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Paid
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                              Pending
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {onCancelBooking && booking.status !== 'cancelled' && (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => onCancelBooking(booking._id)}
+                              className="h-8"
+                            >
+                              Cancel
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex justify-center p-4">
+                <div className="flex space-x-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onPageChange(Math.max(1, pagination.currentPage - 1))}
+                    disabled={pagination.currentPage === 1 || isLoading}
+                  >
+                    Previous
+                  </Button>
+                  
+                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={page === pagination.currentPage ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => onPageChange(page)}
+                      disabled={isLoading}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onPageChange(Math.min(pagination.totalPages, pagination.currentPage + 1))}
+                    disabled={pagination.currentPage === pagination.totalPages || isLoading}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

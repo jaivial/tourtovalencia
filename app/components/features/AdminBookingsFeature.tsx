@@ -10,9 +10,10 @@ interface AdminBookingsFeatureProps {
   loaderData: LoaderData;
   onDateChange: (date: Date) => void;
   onTourChange: (tourSlug: string) => void;
+  onStatusChange: (status: string) => void;
 }
 
-export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange }: AdminBookingsFeatureProps) => {
+export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange, onStatusChange }: AdminBookingsFeatureProps) => {
   const { state } = useLanguageContext();
   const submit = useSubmit();
   const states = useStates({
@@ -26,6 +27,7 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange }:
     initialPagination: loaderData.pagination,
     initialTours: loaderData.tours || [],
     initialSelectedTourSlug: loaderData.selectedTourSlug || '',
+    initialSelectedStatus: loaderData.selectedStatus || 'confirmed',
   });
 
   // Update states when loader data changes
@@ -41,6 +43,7 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange }:
     states.setPagination(loaderData.pagination);
     states.setTours(loaderData.tours || []);
     states.setSelectedTourSlug(loaderData.selectedTourSlug || '');
+    states.setSelectedStatus(loaderData.selectedStatus || 'confirmed');
   }, [loaderData]);
 
   const handleUpdateMaxBookings = (newMax: number) => {
@@ -74,6 +77,9 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange }:
       formData.append("tourSlug", states.selectedTourSlug);
     }
     
+    // Include the selected status
+    formData.append("status", states.selectedStatus);
+    
     submit(formData, { method: "get", replace: true });
   };
 
@@ -83,6 +89,13 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange }:
     states.setSelectedTourSlug(tourSlug === "all" ? "" : tourSlug);
     // Pass the selected tour slug to the parent component
     onTourChange(tourSlug);
+  };
+
+  const handleStatusChange = (status: string) => {
+    // Set the selected status in the state
+    states.setSelectedStatus(status);
+    // Pass the selected status to the parent component
+    onStatusChange(status);
   };
 
   return (
@@ -95,11 +108,13 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange }:
       error={states.error}
       tours={states.tours}
       selectedTourSlug={states.selectedTourSlug}
+      selectedStatus={states.selectedStatus}
       onDateChange={onDateChange}
       onUpdateMaxBookings={handleUpdateMaxBookings}
       onCancelBooking={handleCancelBooking}
       onPageChange={handlePageChange}
       onTourChange={handleTourChange}
+      onStatusChange={handleStatusChange}
       strings={state.admin.bookings}
     />
   );

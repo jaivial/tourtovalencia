@@ -17,6 +17,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     const dateParam = url.searchParams.get("date");
     const pageParam = url.searchParams.get("page");
     const tourSlugParam = url.searchParams.get("tourSlug");
+    const statusParam = url.searchParams.get("status") || "confirmed";
     
     // Parse page number, default to 1 if invalid
     const currentPage = pageParam ? Math.max(1, parseInt(pageParam)) : 1;
@@ -57,7 +58,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       date: {
         $gte: startDate,
         $lte: endDate,
-      }
+      },
+      status: statusParam
     };
 
     // If a tour is selected, filter bookings by tour
@@ -133,6 +135,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       pagination: paginationInfo,
       tours: formattedTours,
       selectedTourSlug: tourSlugParam || "",
+      selectedStatus: statusParam,
     });
   } catch (error) {
     console.error("Error loading bookings:", error);
@@ -163,6 +166,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       },
       tours: formattedTours,
       selectedTourSlug: "",
+      selectedStatus: "confirmed",
       error: "Failed to load bookings",
     });
   }
@@ -221,6 +225,8 @@ export default function AdminDashboardBookings() {
     if (data.selectedTourSlug) {
       formData.append("tourSlug", data.selectedTourSlug);
     }
+    // Keep the selected status
+    formData.append("status", data.selectedStatus);
     // Reset to page 1 when changing date
     formData.append("page", "1");
 
@@ -238,10 +244,31 @@ export default function AdminDashboardBookings() {
     if (tourSlug && tourSlug !== "all") {
       formData.append("tourSlug", tourSlug);
     }
+    // Keep the selected status
+    formData.append("status", data.selectedStatus);
     // Reset to page 1 when changing tour
     formData.append("page", "1");
 
     // Submit the form with the new tour
+    submit(formData, {
+      method: "get",
+      replace: true,
+    });
+  };
+
+  const handleStatusChange = (status: string) => {
+    // Create a FormData object
+    const formData = new FormData();
+    formData.append("date", data.selectedDate);
+    // Keep the selected tour if any
+    if (data.selectedTourSlug) {
+      formData.append("tourSlug", data.selectedTourSlug);
+    }
+    formData.append("status", status);
+    // Reset to page 1 when changing status
+    formData.append("page", "1");
+
+    // Submit the form with the new status
     submit(formData, {
       method: "get",
       replace: true,
@@ -253,6 +280,7 @@ export default function AdminDashboardBookings() {
       loaderData={data} 
       onDateChange={handleDateChange} 
       onTourChange={handleTourChange}
+      onStatusChange={handleStatusChange}
     />
   );
 }

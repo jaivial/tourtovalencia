@@ -44,5 +44,8 @@ export interface LoaderData {
   limit: BookingLimit;
   selectedDate: string;
   pagination: PaginationInfo;
+  tours?: Array<{ _id: string; slug: string; name: string }>;
+  selectedTourSlug?: string;
+  selectedStatus?: string;
   error?: string;
 }

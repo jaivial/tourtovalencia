@@ -20,6 +20,7 @@ type StatesProps = {
   initialPagination: PaginationInfo;
   initialTours?: TourOption[];
   initialSelectedTourSlug?: string;
+  initialSelectedStatus?: string;
 };
 
 export const useStates = ({ 
@@ -28,7 +29,8 @@ export const useStates = ({
   initialDate, 
   initialPagination,
   initialTours = [],
-  initialSelectedTourSlug = ''
+  initialSelectedTourSlug = '',
+  initialSelectedStatus = 'confirmed'
 }: StatesProps) => {
   const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
@@ -36,6 +38,7 @@ export const useStates = ({
   const [pagination, setPagination] = useState<PaginationInfo>(initialPagination);
   const [tours, setTours] = useState<TourOption[]>(initialTours);
   const [selectedTourSlug, setSelectedTourSlug] = useState<string>(initialSelectedTourSlug);
+  const [selectedStatus, setSelectedStatus] = useState<string>(initialSelectedStatus);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,6 +62,8 @@ export const useStates = ({
     setTours,
     selectedTourSlug,
     setSelectedTourSlug,
+    selectedStatus,
+    setSelectedStatus,
     isLoading,
     setIsLoading,
     error,
