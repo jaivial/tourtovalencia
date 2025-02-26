@@ -3,16 +3,16 @@ import { useState, useEffect } from "react";
 import { Menu, ArrowRightToLine, ChevronDown, Settings } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { useFetcher, Link, useLocation } from "@remix-run/react";
-import { DynamicNavLinks } from "./DynamicNavLinks";
-import type { Page } from "~/utils/db.schema.server";
+import { useFetcher, Link, useLocation, useLoaderData } from "@remix-run/react";
+import type { RootLoaderData } from "~/root";
 
 interface NavProps {
-  pages: Page[];
+  pages: unknown; // Keep the prop for compatibility but mark it as unused
 }
 
-const Nav: React.FC<NavProps> = ({ pages }) => {
+const Nav: React.FC<NavProps> = () => {
   const { state, dispatch } = useLanguageContext();
+  const { tours } = useLoaderData<RootLoaderData>();
   const fetcher = useFetcher();
   const navLinks = state.links;
   const currentLanguage = state.currentLanguage;
@@ -24,11 +24,13 @@ const Nav: React.FC<NavProps> = ({ pages }) => {
   const [isToursOpen, setIsToursOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Calculate the number of tour pages to determine dropdown height
-  const tourPages = pages.filter(page => page.template === 'tour' && page.status === 'active');
+  // Get active tours
+  const activeTours = tours.filter(tour => tour.status === 'active');
+  
+  // Calculate dropdown height based on number of tours
   const dropdownItemHeight = 40; // Height of each dropdown item in pixels
   const baseDropdownPadding = 16; // Padding for the dropdown
-  const dynamicDropdownHeight = tourPages.length * dropdownItemHeight + baseDropdownPadding;
+  const dynamicDropdownHeight = activeTours.length * dropdownItemHeight + baseDropdownPadding;
 
   useEffect(() => {
     setIsMounted(true);
@@ -102,22 +104,30 @@ const Nav: React.FC<NavProps> = ({ pages }) => {
                 ))}
                 
                 {/* Tours Dropdown - Moved below regular links */}
-                <div className="w-full">
-                  <button onClick={() => setIsToursOpen(!isToursOpen)} className="w-full flex items-center justify-between text-blue-50 font-sans font-semibold text-xl group">
-                    Tours
-                    <ChevronDown className={`transition-transform duration-300 ${isToursOpen ? "rotate-180" : ""}`} size={20} />
-                  </button>
-                  <div 
-                    className={`overflow-hidden transition-all duration-300 ${isToursOpen ? "mt-4" : ""}`}
-                    style={{ maxHeight: isToursOpen ? `${dynamicDropdownHeight}px` : '0' }}
-                  >
-                    {/* Only use DynamicNavLinks for tour pages */}
-                    <DynamicNavLinks 
-                      pages={tourPages} 
-                      onLinkClick={handleLinkClick} 
-                    />
+                {activeTours.length > 0 && (
+                  <div className="w-full">
+                    <button onClick={() => setIsToursOpen(!isToursOpen)} className="w-full flex items-center justify-between text-blue-50 font-sans font-semibold text-xl group">
+                      Tours
+                      <ChevronDown className={`transition-transform duration-300 ${isToursOpen ? "rotate-180" : ""}`} size={20} />
+                    </button>
+                    <div 
+                      className={`overflow-hidden transition-all duration-300 ${isToursOpen ? "mt-4" : ""}`}
+                      style={{ maxHeight: isToursOpen ? `${dynamicDropdownHeight}px` : '0' }}
+                    >
+                      {/* Display tour links with localized names */}
+                      {activeTours.map((tour) => (
+                        <Link
+                          key={tour.slug}
+                          to={`/pages/${tour.slug}`}
+                          onClick={handleLinkClick}
+                          className="pl-4 text-blue-50 hover:text-blue-200 transition-colors font-sans text-lg block py-2"
+                        >
+                          {currentLanguage === "English" ? tour.tourName.en : tour.tourName.es}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
             <div className="w-full flex justify-between items-center">

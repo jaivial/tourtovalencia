@@ -11,6 +11,8 @@ import { LanguageContextProvider } from "~/providers/LanguageContext";
 import { MotionProvider } from "~/providers/MotionProvider";
 import { getAllPages } from "~/utils/page.server";
 import { ToastProvider } from "~/components/ui/toast-provider";
+import { getToursCollection } from "~/utils/db.server";
+import type { Tour } from "~/utils/db.schema.server";
 
 export interface RootLoaderData {
   initialLanguage: typeof languageData.en;
@@ -19,6 +21,7 @@ export interface RootLoaderData {
     PAYPAL_CLIENT_ID: string | undefined;
   };
   pages: Awaited<ReturnType<typeof getAllPages>>;
+  tours: Tour[];
 }
 
 export const loader = async ({ request }: LoaderArgs) => {
@@ -27,6 +30,10 @@ export const loader = async ({ request }: LoaderArgs) => {
   const language = cookieLanguage as keyof typeof languageData;
 
   const pages = await getAllPages();
+  
+  // Fetch active tours
+  const toursCollection = await getToursCollection();
+  const tours = await toursCollection.find({ status: 'active' }).toArray();
 
   return json<RootLoaderData>({
     initialLanguage: languageData[language] || languageData.en,
@@ -35,6 +42,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       PAYPAL_CLIENT_ID: process.env.PAYPAL_CLIENT_ID
     },
     pages,
+    tours,
   });
 };
 
@@ -65,7 +73,7 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
-  const { initialLanguage, ENV, pages } = useLoaderData<RootLoaderData>();
+  const { initialLanguage, ENV, pages, tours } = useLoaderData<RootLoaderData>();
   const location = useLocation();
   const isAdminDashboard = location.pathname.includes("/admin/dashboard");
 
