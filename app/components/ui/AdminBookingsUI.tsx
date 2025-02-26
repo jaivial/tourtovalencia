@@ -230,9 +230,9 @@ export const AdminBookingsUI = ({
           </CardHeader>
           <CardContent className="p-0">
             {/* Status Tabs */}
-            <div className="p-4 border-b border-gray-200">
-              <Tabs value={selectedStatus} onValueChange={onStatusChange} className="w-full">
-                <TabsList className="grid w-full max-w-md grid-cols-2">
+            <div className="p-4 border-b border-gray-200 flex justify-center">
+              <Tabs value={selectedStatus} onValueChange={onStatusChange} className="w-full max-w-md">
+                <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
                   <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
                 </TabsList>
