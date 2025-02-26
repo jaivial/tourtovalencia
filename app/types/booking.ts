@@ -15,6 +15,8 @@ export interface Booking {
   tourName?: string;
   paymentMethod?: 'stripe' | 'paypal';
   transactionId?: string;
+  refundIssued?: boolean;
+  cancellationReason?: string;
 }
 
 export interface BookingData {
@@ -30,6 +32,8 @@ export interface BookingData {
   paid: boolean;
   amount: number;
   paymentMethod?: string;
+  refundIssued?: boolean;
+  cancellationReason?: string;
 }
 
 export interface BookingLimit {
@@ -52,5 +56,6 @@ export interface LoaderData {
   tours?: Array<{ _id: string; slug: string; name: string }>;
   selectedTourSlug?: string;
   selectedStatus?: string;
+  allDates?: boolean;
   error?: string;
 }

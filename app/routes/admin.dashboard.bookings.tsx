@@ -22,6 +22,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     const pageParam = url.searchParams.get("page");
     const tourSlugParam = url.searchParams.get("tourSlug");
     const statusParam = url.searchParams.get("status") || "confirmed";
+    const allDatesParam = url.searchParams.get("allDates") === "true";
     
     // Parse page number, default to 1 if invalid
     const currentPage = pageParam ? Math.max(1, parseInt(pageParam)) : 1;
@@ -59,21 +60,25 @@ export const loader = async ({ request }: LoaderArgs) => {
 
     // Build query for bookings
     interface BookingQuery {
-      date: {
+      status: string;
+      tourSlug?: string;
+      date?: {
         $gte: Date;
         $lte: Date;
       };
-      status: string;
-      tourSlug?: string;
     }
 
     const bookingsQuery: BookingQuery = {
-      date: {
-        $gte: startDate,
-        $lte: endDate,
-      },
       status: statusParam
     };
+
+    // Only filter by date if not viewing all cancelled bookings
+    if (!(statusParam === "cancelled" && allDatesParam)) {
+      bookingsQuery.date = {
+        $gte: startDate,
+        $lte: endDate,
+      };
+    }
 
     // If a tour is selected, filter bookings by tour
     if (tourSlugParam) {
@@ -144,6 +149,8 @@ export const loader = async ({ request }: LoaderArgs) => {
         paid: booking.paymentStatus === "paid" || Boolean(booking.paid),
         amount: amount,
         paymentMethod: booking.paymentMethod || undefined,
+        refundIssued: booking.refundIssued || false,
+        cancellationReason: booking.cancellationReason || "",
       };
     });
 
@@ -169,6 +176,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       tours: formattedTours,
       selectedTourSlug: tourSlugParam || "",
       selectedStatus: statusParam,
+      allDates: allDatesParam,
     });
   } catch (error) {
     console.error("Error loading bookings:", error);
@@ -200,6 +208,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       tours: formattedTours,
       selectedTourSlug: "",
       selectedStatus: "confirmed",
+      allDates: false,
       error: "Failed to load bookings",
     });
   }
@@ -292,6 +301,10 @@ export default function AdminDashboardBookings() {
     }
     // Keep the selected status
     formData.append("status", data.selectedStatus);
+    // Keep the allDates setting if it's set
+    if (data.allDates) {
+      formData.append("allDates", "true");
+    }
     // Reset to page 1 when changing date
     formData.append("page", "1");
 
@@ -311,6 +324,10 @@ export default function AdminDashboardBookings() {
     }
     // Keep the selected status
     formData.append("status", data.selectedStatus);
+    // Keep the allDates setting if it's set
+    if (data.allDates) {
+      formData.append("allDates", "true");
+    }
     // Reset to page 1 when changing tour
     formData.append("page", "1");
 
@@ -330,10 +347,38 @@ export default function AdminDashboardBookings() {
       formData.append("tourSlug", data.selectedTourSlug);
     }
     formData.append("status", status);
+    // Reset allDates when changing status
+    if (status === "cancelled" && data.allDates) {
+      formData.append("allDates", "true");
+    }
     // Reset to page 1 when changing status
     formData.append("page", "1");
 
     // Submit the form with the new status
+    submit(formData, {
+      method: "get",
+      replace: true,
+    });
+  };
+  
+  const handleAllDatesChange = (allDates: boolean) => {
+    // Create a FormData object
+    const formData = new FormData();
+    formData.append("date", data.selectedDate);
+    // Keep the selected tour if any
+    if (data.selectedTourSlug) {
+      formData.append("tourSlug", data.selectedTourSlug);
+    }
+    // Keep the selected status
+    formData.append("status", data.selectedStatus);
+    // Set the allDates parameter
+    if (allDates) {
+      formData.append("allDates", "true");
+    }
+    // Reset to page 1 when changing allDates
+    formData.append("page", "1");
+
+    // Submit the form with the new allDates setting
     submit(formData, {
       method: "get",
       replace: true,
@@ -495,6 +540,7 @@ export default function AdminDashboardBookings() {
       onDateChange={handleDateChange} 
       onTourChange={handleTourChange}
       onStatusChange={handleStatusChange}
+      onAllDatesChange={handleAllDatesChange}
       onCancelBooking={handleCancelBooking}
     />
   );
