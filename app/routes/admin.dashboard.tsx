@@ -1,4 +1,4 @@
-import { json } from "@remix-run/node";
+import { json } from "@remix-run/server-runtime";
 import { useLoaderData } from "@remix-run/react";
 import { AuthProvider } from "~/context/auth.context";
 import { AdminDashboardLayout } from "~/components/ui/AdminDashboardLayout";
@@ -7,7 +7,7 @@ export const loader = async () => {
   return json({
     user: {
       id: "1",
-      name: "Admin",
+      name: "Administrador",
     },
   });
 };
@@ -16,14 +16,15 @@ export default function AdminDashboardRoute() {
   const data = useLoaderData<typeof loader>();
 
   const handleLogout = () => {
-    // Implement logout logic
+    // Implementar lógica de cierre de sesión
   };
 
   const strings = {
     title: "Olga Travel Admin",
-    bookings: "Bookings",
-    logout: "Logout",
+    bookings: "Reservas",
+    logout: "Cerrar Sesión",
     pageGenerator: "Generador de páginas",
+    home: "Inicio",
   };
 
   return (

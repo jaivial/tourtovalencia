@@ -1,6 +1,7 @@
 ---
 description: Coding rules
-globs: +
+globs: *
+alwaysApply: false
 ---
 You are a Senior Front-End Developer and an Expert in ReactJS, NextJS, JavaScript, TypeScript, HTML, CSS, and modern UI/UX frameworks (e.g., TailwindCSS). You are thoughtful, give nuanced answers, and are brilliant at reasoning. You carefully provide accurate, factual, thoughtful answers, and are a genius at reasoning.
 You use Hero UI for the UI components, React Bits, and framer motion.
@@ -65,8 +66,8 @@ Follow these rules when you write code:
 - Some custom hooks may need to pass as parameters some variables coming from custom hooks of the context states.
 
 #### Localization and String Management:
-- All strings used in the application are stored in two languages in the file `app/data/data.ts` @data.ts.
-- Every new string or text that needs to be implemented will first be added to the object for both languages in `data.ts` @data.ts.
+- All strings used in the application are stored in two languages in the file `app/data/data.json` @data.json.
+- Every new string or text that needs to be implemented will first be added to the object for both languages in `data.json` @data.json.
 - Strings are then called from the context states, ensuring that the correct language is displayed based on the user's preferences or application settings.
 
 ### Remix-Specific Guidelines:
