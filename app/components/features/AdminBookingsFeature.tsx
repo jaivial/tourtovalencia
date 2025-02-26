@@ -11,6 +11,7 @@ interface AdminBookingsFeatureProps {
   onDateChange: (date: Date) => void;
   onTourChange: (tourSlug: string) => void;
   onStatusChange: (status: string) => void;
+  onAllDatesChange: (allDates: boolean) => void;
   onCancelBooking: (bookingId: string, shouldRefund: boolean, reason: string) => Promise<{
     success: boolean;
     message: string;
@@ -23,7 +24,14 @@ interface AdminBookingsFeatureProps {
   }>;
 }
 
-export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange, onStatusChange, onCancelBooking }: AdminBookingsFeatureProps) => {
+export const AdminBookingsFeature = ({ 
+  loaderData, 
+  onDateChange, 
+  onTourChange, 
+  onStatusChange, 
+  onAllDatesChange,
+  onCancelBooking 
+}: AdminBookingsFeatureProps) => {
   const { state } = useLanguageContext();
   const submit = useSubmit();
   const states = useStates({
@@ -38,6 +46,7 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange, o
     initialTours: loaderData.tours || [],
     initialSelectedTourSlug: loaderData.selectedTourSlug || '',
     initialSelectedStatus: loaderData.selectedStatus || 'confirmed',
+    initialAllDates: loaderData.allDates || false,
   });
 
   // Update states when loader data changes
@@ -54,6 +63,7 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange, o
     states.setTours(loaderData.tours || []);
     states.setSelectedTourSlug(loaderData.selectedTourSlug || '');
     states.setSelectedStatus(loaderData.selectedStatus || 'confirmed');
+    states.setAllDates(loaderData.allDates || false);
   }, [loaderData]);
 
   const handleUpdateMaxBookings = (newMax: number) => {
@@ -88,6 +98,11 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange, o
     // Include the selected status
     formData.append("status", states.selectedStatus);
     
+    // Include allDates if it's set
+    if (states.allDates) {
+      formData.append("allDates", "true");
+    }
+    
     submit(formData, { method: "get", replace: true });
   };
 
@@ -106,6 +121,13 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange, o
     onStatusChange(status);
   };
 
+  const handleAllDatesChange = (allDates: boolean) => {
+    // Set the allDates in the state
+    states.setAllDates(allDates);
+    // Pass the allDates to the parent component
+    onAllDatesChange(allDates);
+  };
+
   return (
     <AdminBookingsUI
       selectedDate={parseLocalDate(loaderData.selectedDate)}
@@ -117,12 +139,14 @@ export const AdminBookingsFeature = ({ loaderData, onDateChange, onTourChange, o
       tours={states.tours}
       selectedTourSlug={states.selectedTourSlug}
       selectedStatus={states.selectedStatus}
+      allDates={states.allDates}
       onDateChange={onDateChange}
       onUpdateMaxBookings={handleUpdateMaxBookings}
       onCancelBooking={handleCancelBooking}
       onPageChange={handlePageChange}
       onTourChange={handleTourChange}
       onStatusChange={handleStatusChange}
+      onAllDatesChange={handleAllDatesChange}
       strings={state.admin.bookings}
     />
   );

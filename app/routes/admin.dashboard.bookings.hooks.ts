@@ -1,8 +1,8 @@
 import { useState } from "react";
-import type { Booking as UIBooking, BookingLimit } from "~/components/ui/AdminBookingsUI";
-import type { PaginationInfo } from "~/types/booking";
+import type { BookingLimit } from "~/components/ui/AdminBookingsUI";
+import type { PaginationInfo, BookingData } from "~/types/booking";
 
-type Booking = Omit<UIBooking, 'date'> & {
+type Booking = Omit<BookingData, 'date'> & {
   date: Date;
 };
 
@@ -21,6 +21,7 @@ type StatesProps = {
   initialTours?: TourOption[];
   initialSelectedTourSlug?: string;
   initialSelectedStatus?: string;
+  initialAllDates?: boolean;
 };
 
 export const useStates = ({ 
@@ -30,7 +31,8 @@ export const useStates = ({
   initialPagination,
   initialTours = [],
   initialSelectedTourSlug = '',
-  initialSelectedStatus = 'confirmed'
+  initialSelectedStatus = 'confirmed',
+  initialAllDates = false
 }: StatesProps) => {
   const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
@@ -39,10 +41,11 @@ export const useStates = ({
   const [tours, setTours] = useState<TourOption[]>(initialTours);
   const [selectedTourSlug, setSelectedTourSlug] = useState<string>(initialSelectedTourSlug);
   const [selectedStatus, setSelectedStatus] = useState<string>(initialSelectedStatus);
+  const [allDates, setAllDates] = useState<boolean>(initialAllDates);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getUIBookings = (): UIBooking[] => {
+  const getUIBookings = (): BookingData[] => {
     return bookings.map(booking => ({
       ...booking,
       date: booking.date.toISOString()
@@ -64,6 +67,8 @@ export const useStates = ({
     setSelectedTourSlug,
     selectedStatus,
     setSelectedStatus,
+    allDates,
+    setAllDates,
     isLoading,
     setIsLoading,
     error,

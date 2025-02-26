@@ -26,7 +26,7 @@ export type BookingLimit = {
   currentBookings: number;
 };
 
-type CancellationResultType = {
+export type CancellationResultType = {
   success: boolean;
   message: string;
   refundResult?: {
@@ -47,12 +47,14 @@ type AdminBookingsUIProps = {
   tours: TourOption[];
   selectedTourSlug: string;
   selectedStatus: string;
+  allDates: boolean;
   onDateChange: (date: Date) => void;
   onUpdateMaxBookings: (newMax: number) => void;
   onCancelBooking?: (bookingId: string, shouldRefund: boolean, reason: string) => Promise<CancellationResultType>;
   onPageChange: (page: number) => void;
   onTourChange: (tourSlug: string) => void;
   onStatusChange: (status: string) => void;
+  onAllDatesChange: (allDates: boolean) => void;
   strings: Record<string, unknown>;
 };
 
@@ -65,12 +67,14 @@ export const AdminBookingsUI = ({
   tours,
   selectedTourSlug,
   selectedStatus,
+  allDates,
   onDateChange,
   onUpdateMaxBookings,
   onCancelBooking,
   onPageChange,
   onTourChange,
   onStatusChange,
+  onAllDatesChange,
 }: AdminBookingsUIProps) => {
   const [maxBookings, setMaxBookings] = useState(bookingLimit.maxBookings.toString());
   const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
@@ -138,7 +142,10 @@ export const AdminBookingsUI = ({
         setCancellationResult({
           success: result.success || false,
           message: result.message || "Unknown response from server",
-          refundResult: result.refundResult
+          refundResult: result.refundResult ? {
+            ...result.refundResult,
+            success: result.refundResult.success === true
+          } : undefined
         });
         setShowResultDialog(true);
         
@@ -172,50 +179,54 @@ export const AdminBookingsUI = ({
         setShowResultDialog(true);
       }
     }
+    
+    // Close the cancellation dialog
     setShowCancellationDialog(false);
   };
 
-  return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="p-2 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
-        {/* Statistics Cards and Calendar Row */}
-        <div className="grid grid-cols-1 gap-4 
-          min-[200px]:grid-cols-1 min-[200px]:gap-2
-          min-[300px]:grid-cols-1 min-[300px]:gap-3
-          min-[500px]:grid-cols-2 min-[500px]:gap-3
-          min-[800px]:grid-cols-3 min-[800px]:gap-4
-          min-[1028px]:grid-cols-3 min-[1028px]:gap-6
-          min-[1280px]:max-w-7xl min-[1280px]:mx-auto">
-          
-          {/* Calendar Card */}
-          <Card className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="bg-primary/5 border-b border-primary/10">
-              <CardTitle className="text-lg sm:text-xl text-primary">Select Date</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center p-0">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => date && onDateChange(date)}
-                className="w-full"
-              />
-            </CardContent>
-          </Card>
+  const handleAllDatesChange = (checked: boolean) => {
+    onAllDatesChange(checked);
+  };
 
-          {/* Tour Selection Card */}
-          <Card className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="bg-primary/5 border-b border-primary/10">
-              <CardTitle className="text-lg sm:text-xl text-primary">Select Tour</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 p-4 flex flex-col justify-center">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="tour-select">Tour</Label>
-                  <Select
-                    value={selectedTourSlug || "all"}
-                    onValueChange={handleTourChange}
-                  >
-                    <SelectTrigger id="tour-select" className="w-full">
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6">
+        {/* Date Selector Card */}
+        <Card className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+          <CardHeader className="bg-primary/5 border-b border-primary/10">
+            <CardTitle className="text-lg sm:text-xl text-primary">Date & Tour Selection</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center md:items-stretch md:flex-row md:justify-center md:space-x-8 lg:space-x-12">
+              {/* Date Picker */}
+              <div className="w-full max-w-xs flex flex-col items-center mb-8 md:mb-0">
+                <Label htmlFor="date-picker" className="self-start text-sm font-medium mb-3">Select Date</Label>
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => date && onDateChange(date)}
+                  className="rounded-md border shadow-sm"
+                  disabled={selectedStatus === "cancelled" && allDates}
+                />
+              </div>
+
+              {/* Tour Selector and All Dates/Booking Limit */}
+              <div className="w-full max-w-xs flex flex-col">
+                {/* Tour Selector */}
+                <div className="mb-6">
+                  <Label htmlFor="tour-selector" className="block text-sm font-medium mb-3">Select Tour</Label>
+                  <Select value={selectedTourSlug || "all"} onValueChange={handleTourChange}>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a tour" />
                     </SelectTrigger>
                     <SelectContent>
@@ -228,66 +239,67 @@ export const AdminBookingsUI = ({
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Booking Limit Card */}
-          <Card className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="bg-primary/5 border-b border-primary/10">
-              <CardTitle className="text-lg sm:text-xl text-primary">Booking Limit</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 p-4 flex flex-col justify-center">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Current Bookings:</span>
-                  <span className="font-bold">{bookingLimit.currentBookings}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Total People:</span>
-                  <span className="font-bold">{totalPeople}</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="max-bookings" className="text-sm font-medium">Max Bookings:</Label>
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        id="max-bookings"
-                        type="number"
-                        min="0"
-                        value={maxBookings}
-                        onChange={handleMaxBookingsChange}
-                        className="w-20 h-8 text-right"
-                      />
-                      <Button 
-                        onClick={handleUpdateMaxBookings} 
-                        size="sm"
-                        className="h-8"
-                      >
-                        Update
-                      </Button>
+                {/* All Dates Button (only for cancelled bookings) */}
+                {selectedStatus === "cancelled" && (
+                  <div>
+                    <Label className="block text-sm font-medium mb-3">Date Filter</Label>
+                    <Button
+                      variant={allDates ? "default" : "outline"}
+                      onClick={() => handleAllDatesChange(!allDates)}
+                      className="w-full"
+                    >
+                      {allDates ? "✓ Show all dates" : "Show all dates"}
+                    </Button>
+                  </div>
+                )}
+
+                {/* Booking Limit (only for confirmed bookings) */}
+                {selectedStatus === "confirmed" && (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="max-bookings" className="block text-sm font-medium mb-3">Max Bookings</Label>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          id="max-bookings"
+                          type="number"
+                          min="0"
+                          value={maxBookings}
+                          onChange={handleMaxBookingsChange}
+                          className="flex-1"
+                        />
+                        <Button 
+                          onClick={handleUpdateMaxBookings} 
+                          className="whitespace-nowrap"
+                        >
+                          Update
+                        </Button>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+                        <span>Current: {totalPeople} people</span>
+                        <span>{completionPercentage}% Full</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className={`h-2.5 rounded-full ${
+                            completionPercentage < 70 
+                              ? 'bg-green-600' 
+                              : completionPercentage < 90 
+                                ? 'bg-yellow-400' 
+                                : 'bg-red-600'
+                          }`}
+                          style={{ width: `${completionPercentage}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className={`h-2.5 rounded-full ${
-                        completionPercentage < 70 
-                          ? 'bg-green-600' 
-                          : completionPercentage < 90 
-                            ? 'bg-yellow-400' 
-                            : 'bg-red-600'
-                      }`}
-                      style={{ width: `${completionPercentage}%` }}
-                    ></div>
-                  </div>
-                  <div className="text-xs text-right">
-                    {completionPercentage}% Full
-                  </div>
-                </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Bookings Table Card */}
         <Card className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
@@ -315,17 +327,28 @@ export const AdminBookingsUI = ({
                     <TableHead>Phone</TableHead>
                     <TableHead>Tour</TableHead>
                     <TableHead className="text-center">People</TableHead>
-                    <TableHead className="text-center">Price</TableHead>
-                    <TableHead className="text-center">Paid</TableHead>
-                    <TableHead className="text-center">Method</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    {selectedStatus === "confirmed" ? (
+                      <>
+                        <TableHead className="text-center">Price</TableHead>
+                        <TableHead className="text-center">Paid</TableHead>
+                        <TableHead className="text-center">Method</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </>
+                    ) : (
+                      <>
+                        <TableHead className="text-center">Price</TableHead>
+                        <TableHead className="text-center">Refund</TableHead>
+                        <TableHead className="text-center">Date</TableHead>
+                        <TableHead className="text-center">Reason</TableHead>
+                      </>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {bookings.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center py-4">
-                        No bookings found for this date.
+                      <TableCell colSpan={selectedStatus === "confirmed" ? 9 : 9} className="text-center py-4">
+                        No bookings found for this {selectedStatus === "cancelled" && allDates ? "tour" : "date"}.
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -336,49 +359,77 @@ export const AdminBookingsUI = ({
                         <TableCell>{booking.phoneNumber}</TableCell>
                         <TableCell>{booking.tourType}</TableCell>
                         <TableCell className="text-center">{booking.numberOfPeople}</TableCell>
-                        <TableCell className="text-center">
-                          {booking.amount ? `€${booking.amount.toFixed(2)}` : '-'}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {booking.paid ? (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Paid
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                              Pending
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {booking.paymentMethod ? (
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              booking.paymentMethod === 'stripe' 
-                                ? 'bg-blue-100 text-blue-800' 
-                                : booking.paymentMethod === 'paypal'
-                                  ? 'bg-indigo-100 text-indigo-800'
-                                  : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {booking.paymentMethod.charAt(0).toUpperCase() + booking.paymentMethod.slice(1)}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              Unknown
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {onCancelBooking && booking.status !== 'cancelled' && (
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleCancelClick(booking)}
-                              className="h-8"
-                            >
-                              Cancel
-                            </Button>
-                          )}
-                        </TableCell>
+                        
+                        {selectedStatus === "confirmed" ? (
+                          <>
+                            <TableCell className="text-center">
+                              {booking.amount ? `€${booking.amount.toFixed(2)}` : '-'}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {booking.paid ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  Paid
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                  Pending
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {booking.paymentMethod ? (
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  booking.paymentMethod === 'stripe' 
+                                    ? 'bg-blue-100 text-blue-800' 
+                                    : booking.paymentMethod === 'paypal'
+                                      ? 'bg-indigo-100 text-indigo-800'
+                                      : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {booking.paymentMethod.charAt(0).toUpperCase() + booking.paymentMethod.slice(1)}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                  Unknown
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {onCancelBooking && booking.status !== 'cancelled' && (
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleCancelClick(booking)}
+                                  className="h-8"
+                                >
+                                  Cancel
+                                </Button>
+                              )}
+                            </TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell className="text-center">
+                              {booking.amount ? `€${booking.amount.toFixed(2)}` : '-'}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {booking.refundIssued ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  Yes
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                  No
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {formatDate(booking.date)}
+                            </TableCell>
+                            <TableCell className="text-center max-w-[200px] truncate" title={booking.cancellationReason || "No reason provided"}>
+                              {booking.cancellationReason || "No reason provided"}
+                            </TableCell>
+                          </>
+                        )}
                       </TableRow>
                     ))
                   )}
@@ -440,11 +491,13 @@ export const AdminBookingsUI = ({
       )}
 
       {/* Cancellation Result Dialog */}
-      <CancellationResultDialog
-        open={showResultDialog}
-        onOpenChange={setShowResultDialog}
-        result={cancellationResult}
-      />
+      {cancellationResult && (
+        <CancellationResultDialog
+          open={showResultDialog}
+          onOpenChange={setShowResultDialog}
+          result={cancellationResult}
+        />
+      )}
     </div>
   );
 };
