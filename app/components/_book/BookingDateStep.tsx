@@ -12,6 +12,8 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { TourSelectorUI } from "../ui/TourSelectorUI";
 import type { DateAvailability } from "~/routes/book";
 import { useLanguageContext } from "~/providers/LanguageContext";
+// Import date-fns locales
+import { es } from "date-fns/locale";
 
 // Define the API response type
 interface AvailabilityApiResponse {
@@ -50,6 +52,31 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
   // Get the current language from context
   const { state } = useLanguageContext();
   const currentLanguage = state.currentLanguage === "English" ? "en" : "es";
+
+  // Localized text for error messages and labels
+  const localizedText = {
+    en: {
+      dateLabel: "Date",
+      selectDateError: "Please select a date",
+      selectTourError: "Please select a tour first",
+      loadingAvailability: "Loading availability...",
+      timeoutMessage: "It's taking longer than expected to load availability data. Please try refreshing the page or selecting a different date or tour.",
+      dateUnavailable: "Sorry, this date is no longer available for booking.",
+      unexpectedResponse: "Unexpected response from server. Please try again."
+    },
+    es: {
+      dateLabel: "Fecha",
+      selectDateError: "Por favor, selecciona una fecha",
+      selectTourError: "Por favor, selecciona un tour primero",
+      loadingAvailability: "Cargando disponibilidad...",
+      timeoutMessage: "Está tardando más de lo esperado en cargar los datos de disponibilidad. Por favor, intenta refrescar la página o seleccionar una fecha o tour diferente.",
+      dateUnavailable: "Lo sentimos, esta fecha ya no está disponible para reservar.",
+      unexpectedResponse: "Respuesta inesperada del servidor. Por favor, inténtalo de nuevo."
+    }
+  };
+
+  // Get the appropriate locale for date-fns
+  const locale = currentLanguage === "es" ? es : undefined;
 
   // State to track if a tour has been selected
   const [isTourSelected, setIsTourSelected] = useState(!!formData.tourSlug);
@@ -122,7 +149,7 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     // Check if a tour is selected
     if (!formData.tourSlug) {
       console.error("No tour selected");
-      setFetchError("Please select a tour first");
+      setFetchError(localizedText[currentLanguage].selectTourError);
       return;
     }
 
@@ -173,7 +200,7 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
         const { isAvailable, availablePlaces } = response.dateAvailability;
         
         if (!isAvailable || availablePlaces <= 0) {
-          setFetchError(`Sorry, this date is no longer available for booking.`);
+          setFetchError(localizedText[currentLanguage].dateUnavailable);
           setLoadingTimeout(false);
           return;
         }
@@ -195,11 +222,11 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       }
       else {
         console.error("Unexpected API response format:", response);
-        setFetchError("Unexpected response from server. Please try again.");
+        setFetchError(localizedText[currentLanguage].unexpectedResponse);
         setLoadingTimeout(false);
       }
     }
-  }, [availabilityFetcher.state, availabilityFetcher.data]);
+  }, [availabilityFetcher.state, availabilityFetcher.data, currentLanguage, localizedText]);
 
   // Check if a date is disabled
   const isDateDisabled = (date: Date) => {
@@ -298,7 +325,7 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       >
         {isTourSelected && (
           <>
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">{localizedText[currentLanguage].dateLabel}</Label>
             <div className={cn(
               "border rounded-md p-4 flex justify-center", 
               errors.date ? "border-red-500" : "border-gray-200"
@@ -316,10 +343,13 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
                   cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
                 }}
                 fromDate={new Date()} // Disable dates before today
+                locale={locale} // Add locale for month names
               />
             </div>
             {errors.date && (
-              <p className="text-sm text-red-500">{errors.date}</p>
+              <p className="text-sm text-red-500">
+                {currentLanguage === "en" ? errors.date : localizedText.es.selectDateError}
+              </p>
             )}
           </>
         )}
@@ -329,7 +359,7 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       {isLoading && (
         <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 py-4">
           <Loader2 className="h-4 w-4 animate-spin" />
-          <span>Loading availability...</span>
+          <span>{localizedText[currentLanguage].loadingAvailability}</span>
         </div>
       )}
       
@@ -337,7 +367,7 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       {showTimeout && (
         <Alert className="bg-yellow-50 border-yellow-200">
           <AlertDescription>
-            It&apos;s taking longer than expected to load availability data. Please try refreshing the page or selecting a different date or tour.
+            {localizedText[currentLanguage].timeoutMessage}
           </AlertDescription>
         </Alert>
       )}
