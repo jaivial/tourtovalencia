@@ -1,4 +1,5 @@
 export interface Booking {
+  _id: string;
   fullName: string;
   email: string;
   date: string | Date;
@@ -17,6 +18,7 @@ export interface Booking {
   transactionId?: string;
   refundIssued?: boolean;
   cancellationReason?: string;
+  language?: string;
 }
 
 export interface BookingData {
@@ -34,6 +36,7 @@ export interface BookingData {
   paymentMethod?: string;
   refundIssued?: boolean;
   cancellationReason?: string;
+  language?: string;
 }
 
 export interface BookingLimit {

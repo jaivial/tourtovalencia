@@ -1,6 +1,5 @@
 import { AdminBookingsUI } from "~/components/ui/AdminBookingsUI";
 import { useStates } from "~/routes/admin.dashboard.bookings.hooks";
-import { useLanguageContext } from "~/providers/LanguageContext";
 import type { LoaderData } from "~/types/booking";
 import { useEffect } from "react";
 import { parseLocalDate } from "~/utils/date";
@@ -14,6 +13,7 @@ interface AdminBookingsFeatureProps {
   onAllDatesChange: (allDates: boolean) => void;
   onSearchChange: (searchTerm: string) => void;
   isSearching: boolean;
+  strings: Record<string, string>;
   onCancelBooking: (bookingId: string, shouldRefund: boolean, reason: string) => Promise<{
     success: boolean;
     message: string;
@@ -34,9 +34,9 @@ export const AdminBookingsFeature = ({
   onAllDatesChange,
   onSearchChange,
   isSearching,
-  onCancelBooking 
+  onCancelBooking,
+  strings
 }: AdminBookingsFeatureProps) => {
-  const { state } = useLanguageContext();
   const submit = useSubmit();
   const states = useStates({
     initialBookings: loaderData.bookings.map(booking => ({
@@ -92,7 +92,7 @@ export const AdminBookingsFeature = ({
     submit(formData, { method: "post" });
   };
 
-  const handleCancelBooking = (bookingId: string, shouldRefund: boolean = false, reason: string = "Cancelled by admin") => {
+  const handleCancelBooking = (bookingId: string, shouldRefund: boolean = false, reason: string = strings.cancelledByAdmin || "Cancelado por administrador") => {
     // Call the parent component's onCancelBooking function and return its promise
     return onCancelBooking(bookingId, shouldRefund, reason);
   };
@@ -174,7 +174,7 @@ export const AdminBookingsFeature = ({
       onStatusChange={handleStatusChange}
       onAllDatesChange={handleAllDatesChange}
       onSearchChange={handleSearchChange}
-      strings={state.admin.bookings}
+      strings={strings}
     />
   );
 };

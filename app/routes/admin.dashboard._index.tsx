@@ -5,10 +5,10 @@ export default function AdminDashboardIndexRoute() {
     <div className="p-8">
       <Card>
         <CardHeader>
-          <CardTitle>Welcome to Admin Dashboard</CardTitle>
+          <CardTitle>Bienvenido al Panel de Administración</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-500">Select an option from the sidebar to manage your site.</p>
+          <p className="text-gray-500">Seleccione una opción de la barra lateral para administrar su sitio.</p>
         </CardContent>
       </Card>
     </div>

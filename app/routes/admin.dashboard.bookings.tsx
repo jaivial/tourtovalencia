@@ -12,7 +12,7 @@ import { cancelBooking } from "~/services/bookingCancellation.server";
 // import type { Tour } from "~/routes/book";
 import { useState, useEffect } from "react";
 
-// Number of bookings per page
+// Número de reservas por página
 const ITEMS_PER_PAGE = 10;
 const DEFAULT_BOOKING_LIMIT = 10;
 
@@ -26,41 +26,41 @@ export const loader = async ({ request }: LoaderArgs) => {
     const allDatesParam = url.searchParams.get("allDates") === "true";
     const searchTermParam = url.searchParams.get("searchTerm") || "";
     
-    // Parse page number, default to 1 if invalid
+    // Analizar número de página, por defecto 1 si es inválido
     const currentPage = pageParam ? Math.max(1, parseInt(pageParam)) : 1;
 
-    // Create a date object that represents midnight in the local timezone
+    // Crear un objeto de fecha que representa la medianoche en la zona horaria local
     let selectedDate: Date;
     if (dateParam) {
       selectedDate = parseLocalDate(dateParam);
     } else {
-      // For today, use current local date at midnight
+      // Para hoy, usar la fecha local actual a medianoche
       selectedDate = getLocalMidnight(new Date());
     }
 
-    // Ensure the date is valid
+    // Asegurar que la fecha es válida
     if (isNaN(selectedDate.getTime())) {
-      throw new Error("Invalid date parameter");
+      throw new Error("Parámetro de fecha inválido");
     }
 
     const db = await getDb();
 
-    // Get all tours
+    // Obtener todos los tours
     const toursCollection = await getToursCollection();
     const tours = await toursCollection.find({ status: 'active' }).toArray();
 
-    // Format tours for the UI
+    // Formatear tours para la UI
     const formattedTours = tours.map(tour => ({
       _id: tour._id.toString(),
       slug: tour.slug,
       name: tour.tourName?.en || tour.slug,
     }));
 
-    // Create date objects for the start and end of the selected date in local timezone
-    const startDate = selectedDate; // Already at midnight
+    // Crear objetos de fecha para el inicio y fin del día seleccionado en zona horaria local
+    const startDate = selectedDate; // Ya está a medianoche
     const endDate = getLocalEndOfDay(selectedDate);
 
-    // Build query for bookings
+    // Construir consulta para reservas
     interface BookingQuery {
       status: string;
       tourSlug?: string;
@@ -84,7 +84,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       status: statusParam
     };
 
-    // Only filter by date if not viewing all cancelled bookings or all confirmed bookings
+    // Solo filtrar por fecha si no se están viendo todas las reservas canceladas o confirmadas
     if (!((statusParam === "cancelled" || statusParam === "confirmed") && allDatesParam)) {
       bookingsQuery.date = {
         $gte: startDate,
@@ -92,12 +92,12 @@ export const loader = async ({ request }: LoaderArgs) => {
       };
     }
 
-    // If a tour is selected, filter bookings by tour
+    // Si se selecciona un tour, filtrar reservas por tour
     if (tourSlugParam) {
       bookingsQuery.tourSlug = tourSlugParam;
     }
 
-    // If search term is provided, add it to the query
+    // Si se proporciona un término de búsqueda, añadirlo a la consulta
     if (searchTermParam) {
       bookingsQuery.$or = [
         { fullName: { $regex: searchTermParam, $options: 'i' } },
@@ -105,17 +105,17 @@ export const loader = async ({ request }: LoaderArgs) => {
       ];
     }
 
-    // Get total count of bookings for the selected date and tour (if specified)
+    // Obtener el recuento total de reservas para la fecha seleccionada y tour (si se especifica)
     const totalBookings = await db
       .collection("bookings")
       .countDocuments(bookingsQuery);
 
-    // Calculate pagination info
+    // Calcular información de paginación
     const totalPages = Math.max(1, Math.ceil(totalBookings / ITEMS_PER_PAGE));
     const validatedPage = Math.min(currentPage, totalPages);
     const skip = (validatedPage - 1) * ITEMS_PER_PAGE;
 
-    // Get paginated bookings for selected date and tour (if specified)
+    // Obtener reservas paginadas para la fecha seleccionada y tour (si se especifica)
     const bookings = await db
       .collection("bookings")
       .find(bookingsQuery)
@@ -123,7 +123,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       .limit(ITEMS_PER_PAGE)
       .toArray();
 
-    // Get booking limit for the selected date and tour (if specified)
+    // Obtener límite de reservas para la fecha seleccionada y tour (si se especifica)
     interface LimitQuery {
       date: { 
         $gte: Date; 
@@ -143,16 +143,16 @@ export const loader = async ({ request }: LoaderArgs) => {
     const limitDoc = await db.collection("bookingLimits").findOne(limitQuery);
 
     const processedBookings: BookingData[] = bookings.map((booking) => {
-      // Get phone number from either field
+      // Obtener número de teléfono de cualquiera de los campos
       const phoneNumber = booking.phoneNumber || booking.phone || "";
       
-      // Get amount from either totalAmount or amount field and convert from cents to dollars if needed
+      // Obtener cantidad de totalAmount o amount y convertir de céntimos a euros si es necesario
       let amount = 0;
       if (booking.totalAmount !== undefined) {
-        // If totalAmount exists, use it (it should already be in euros)
+        // Si totalAmount existe, usarlo (ya debería estar en euros)
         amount = booking.totalAmount;
       } else if (booking.amount !== undefined) {
-        // If amount exists, use it (it might be in cents or euros)
+        // Si amount existe, usarlo (podría estar en céntimos o euros)
         amount = booking.amount > 100 ? booking.amount / 100 : booking.amount;
       }
       
@@ -164,7 +164,7 @@ export const loader = async ({ request }: LoaderArgs) => {
         tourType: booking.tourName || booking.tourType || "",
         numberOfPeople: Number(booking.partySize || booking.numberOfPeople) || 1,
         status: booking.status || "pending",
-        phoneNumber: phoneNumber,  // Use the extracted phone number
+        phoneNumber: phoneNumber,  // Usar el número de teléfono extraído
         specialRequests: booking.specialRequests,
         paid: booking.paymentStatus === "paid" || Boolean(booking.paid),
         amount: amount,
@@ -174,10 +174,10 @@ export const loader = async ({ request }: LoaderArgs) => {
       };
     });
 
-    // Format the date as YYYY-MM-DD to avoid timezone issues
+    // Formatear la fecha como YYYY-MM-DD para evitar problemas de zona horaria
     const formattedDate = formatLocalDate(selectedDate);
 
-    // Create pagination info
+    // Crear información de paginación
     const paginationInfo: PaginationInfo = {
       currentPage: validatedPage,
       totalPages,
@@ -200,11 +200,11 @@ export const loader = async ({ request }: LoaderArgs) => {
       searchTerm: searchTermParam,
     });
   } catch (error) {
-    console.error("Error loading bookings:", error);
+    console.error("Error al cargar reservas:", error);
     const today = getLocalMidnight(new Date());
     const formattedDate = formatLocalDate(today);
 
-    // Get all tours even in error case
+    // Obtener todos los tours incluso en caso de error
     const toursCollection = await getToursCollection();
     const tours = await toursCollection.find({ status: 'active' }).toArray();
     const formattedTours = tours.map(tour => ({
@@ -231,7 +231,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       selectedStatus: "confirmed",
       allDates: false,
       searchTerm: "",
-      error: "Failed to load bookings",
+      error: "Error al cargar reservas",
     });
   }
 };
@@ -246,7 +246,7 @@ export const action = async ({ request }: ActionArgs) => {
     const tourSlug = formData.get("tourSlug");
 
     if (!date || !maxBookings) {
-      return json({ error: "Missing required fields" }, { status: 400 });
+      return json({ error: "Faltan campos requeridos" }, { status: 400 });
     }
 
     try {
@@ -259,29 +259,29 @@ export const action = async ({ request }: ActionArgs) => {
       if (result.success) {
         return json({
           success: true,
-          message: "Booking limit updated successfully",
+          message: "Límite de reservas actualizado correctamente",
           data: result.data,
         });
       } else {
-        return json({ error: "Failed to update booking limit" }, { status: 500 });
+        return json({ error: "Error al actualizar el límite de reservas" }, { status: 500 });
       }
     } catch (error) {
-      console.error("Error updating booking limit:", error);
-      return json({ error: "Failed to update booking limit" }, { status: 500 });
+      console.error("Error al actualizar el límite de reservas:", error);
+      return json({ error: "Error al actualizar el límite de reservas" }, { status: 500 });
     }
   }
   
   if (intent === "cancelBooking") {
     const bookingId = formData.get("bookingId");
     const shouldRefund = formData.get("shouldRefund") === "true";
-    const cancellationReason = formData.get("reason")?.toString() || "Cancelled by admin";
+    const cancellationReason = formData.get("reason")?.toString() || "Cancelado por administrador";
     
     if (!bookingId) {
-      return json({ error: "Missing booking ID" }, { status: 400 });
+      return json({ error: "Falta ID de reserva" }, { status: 400 });
     }
     
     try {
-      // Use the new cancelBooking service
+      // Usar el nuevo servicio cancelBooking
       const result = await cancelBooking(
         bookingId.toString(),
         shouldRefund,
@@ -298,12 +298,12 @@ export const action = async ({ request }: ActionArgs) => {
         refundResult: result.refundResult
       });
     } catch (error) {
-      console.error("Error cancelling booking:", error);
-      return json({ error: "Failed to cancel booking" }, { status: 500 });
+      console.error("Error al cancelar reserva:", error);
+      return json({ error: "Error al cancelar reserva" }, { status: 500 });
     }
   }
 
-  return json({ error: "Invalid intent" }, { status: 400 });
+  return json({ error: "Intent inválido" }, { status: 400 });
 };
 
 export default function AdminDashboardBookings() {
@@ -311,27 +311,91 @@ export default function AdminDashboardBookings() {
   const submit = useSubmit();
   const [isSearching, setIsSearching] = useState(false);
 
+  // Strings for UI components in Spanish
+  const strings = {
+    dateAndTourSelection: "Selección de Fecha y Tour",
+    selectDate: "Seleccionar Fecha",
+    selectTour: "Seleccionar Tour",
+    allTours: "Todos los Tours",
+    dateFilter: "Filtro de Fecha",
+    showAllDates: "Mostrar todas las fechas",
+    maxBookings: "Reservas Máximas",
+    update: "Actualizar",
+    current: "Actual",
+    people: "Personas",
+    full: "Lleno",
+    bookings: "Reservas",
+    confirmed: "Confirmadas",
+    cancelled: "Canceladas",
+    searchByName: "Buscar por nombre...",
+    clearSearch: "Limpiar búsqueda",
+    showingResultsFor: "Mostrando resultados para",
+    name: "Nombre",
+    email: "Correo",
+    phone: "Teléfono",
+    tour: "Tour",
+    price: "Precio",
+    paid: "Pagado",
+    pending: "Pendiente",
+    method: "Método",
+    actions: "Acciones",
+    cancel: "Cancelar",
+    refund: "Reembolso",
+    date: "Fecha",
+    reason: "Motivo",
+    yes: "Sí",
+    no: "No",
+    noReasonProvided: "No se proporcionó motivo",
+    searchingBookings: "Buscando reservas...",
+    noBookingsFound: "No se encontraron reservas para esta",
+    noBookingsMatchingSearch: "No se encontraron reservas que coincidan con",
+    previous: "Anterior",
+    next: "Siguiente",
+    cancelBooking: "Cancelar Reserva",
+    areYouSureCancel: "¿Está seguro de que desea cancelar la reserva",
+    issueRefundOf: "Emitir reembolso de",
+    via: "vía",
+    cancellationReason: "Motivo de cancelación",
+    enterReasonForCancellation: "Ingrese el motivo de la cancelación",
+    reasonIncludedInEmail: "Este motivo se incluirá en el correo electrónico de cancelación enviado al cliente.",
+    confirmCancellation: "Confirmar Cancelación",
+    bookingCancelledSuccessfully: "Reserva Cancelada Exitosamente",
+    cancellationFailed: "Cancelación Fallida",
+    refundProcessed: "Reembolso Procesado",
+    refundFailed: "Reembolso Fallido",
+    refundProcessedSuccessfully: "El reembolso ha sido procesado correctamente.",
+    refundSimulatedSuccessfully: "El reembolso ha sido simulado correctamente.",
+    unknownErrorRefund: "Ocurrió un error desconocido al procesar el reembolso.",
+    refundId: "ID de Reembolso",
+    simulatedRefund: "Este es un reembolso simulado en modo de desarrollo.",
+    customerWillReceiveEmail: "El cliente recibirá una notificación por correo electrónico sobre esta cancelación.",
+    tryAgainOrContact: "Intente nuevamente o contacte con soporte técnico si el problema persiste.",
+    close: "Cerrar",
+    unknown: "Desconocido",
+    cancelledByAdmin: "Cancelado por administrador"
+  };
+
   const handleDateChange = (date: Date) => {
-    // Format the date as YYYY-MM-DD in local timezone
+    // Formatear la fecha como YYYY-MM-DD en zona horaria local
     const formattedDate = formatLocalDate(date);
 
-    // Create a FormData object
+    // Crear un objeto FormData
     const formData = new FormData();
     formData.append("date", formattedDate);
-    // Keep the selected tour if any
+    // Mantener el tour seleccionado si hay alguno
     if (data.selectedTourSlug) {
       formData.append("tourSlug", data.selectedTourSlug);
     }
-    // Keep the selected status
+    // Mantener el estado seleccionado
     formData.append("status", data.selectedStatus);
-    // Keep the allDates setting if it's set
+    // Mantener la configuración allDates si está establecida
     if (data.allDates) {
       formData.append("allDates", "true");
     }
-    // Reset to page 1 when changing date
+    // Resetear a página 1 al cambiar la fecha
     formData.append("page", "1");
 
-    // Submit the form with the new date
+    // Enviar el formulario con la nueva fecha
     submit(formData, {
       method: "get",
       replace: true,
@@ -339,22 +403,22 @@ export default function AdminDashboardBookings() {
   };
 
   const handleTourChange = (tourSlug: string) => {
-    // Create a FormData object
+    // Crear un objeto FormData
     const formData = new FormData();
     formData.append("date", data.selectedDate);
     if (tourSlug && tourSlug !== "all") {
       formData.append("tourSlug", tourSlug);
     }
-    // Keep the selected status
+    // Mantener el estado seleccionado
     formData.append("status", data.selectedStatus);
-    // Keep the allDates setting if it's set
+    // Mantener la configuración allDates si está establecida
     if (data.allDates) {
       formData.append("allDates", "true");
     }
-    // Reset to page 1 when changing tour
+    // Resetear a página 1 al cambiar el tour
     formData.append("page", "1");
 
-    // Submit the form with the new tour
+    // Enviar el formulario con el nuevo tour
     submit(formData, {
       method: "get",
       replace: true,
@@ -362,22 +426,22 @@ export default function AdminDashboardBookings() {
   };
 
   const handleStatusChange = (status: string) => {
-    // Create a FormData object
+    // Crear un objeto FormData
     const formData = new FormData();
     formData.append("date", data.selectedDate);
-    // Keep the selected tour if any
+    // Mantener el tour seleccionado si hay alguno
     if (data.selectedTourSlug) {
       formData.append("tourSlug", data.selectedTourSlug);
     }
     formData.append("status", status);
-    // Reset allDates when changing status
+    // Resetear allDates al cambiar el estado
     if (status === "cancelled" && data.allDates) {
       formData.append("allDates", "true");
     }
-    // Reset to page 1 when changing status
+    // Resetear a página 1 al cambiar el estado
     formData.append("page", "1");
 
-    // Submit the form with the new status
+    // Enviar el formulario con el nuevo estado
     submit(formData, {
       method: "get",
       replace: true,
@@ -385,23 +449,23 @@ export default function AdminDashboardBookings() {
   };
   
   const handleAllDatesChange = (allDates: boolean) => {
-    // Create a FormData object
+    // Crear un objeto FormData
     const formData = new FormData();
     formData.append("date", data.selectedDate);
-    // Keep the selected tour if any
+    // Mantener el tour seleccionado si hay alguno
     if (data.selectedTourSlug) {
       formData.append("tourSlug", data.selectedTourSlug);
     }
-    // Keep the selected status
+    // Mantener el estado seleccionado
     formData.append("status", data.selectedStatus);
-    // Set the allDates parameter
+    // Establecer el parámetro allDates
     if (allDates) {
       formData.append("allDates", "true");
     }
-    // Reset to page 1 when changing allDates
+    // Resetear a página 1 al cambiar allDates
     formData.append("page", "1");
 
-    // Submit the form with the new allDates setting
+    // Enviar el formulario con la nueva configuración allDates
     submit(formData, {
       method: "get",
       replace: true,
@@ -415,7 +479,7 @@ export default function AdminDashboardBookings() {
     formData.append("shouldRefund", shouldRefund.toString());
     formData.append("reason", reason);
     
-    // Submit the form and return a promise that will be resolved with the fetch response
+    // Enviar el formulario y devolver una promesa que se resolverá con la respuesta del fetch
     return new Promise<{
       success: boolean;
       message: string;
@@ -426,33 +490,33 @@ export default function AdminDashboardBookings() {
         mockResponse?: boolean;
       };
     }>(resolve => {
-      // Use fetch directly instead of submit to get the response
+      // Usar fetch directamente en lugar de submit para obtener la respuesta
       fetch("/admin/dashboard/bookings", {
         method: "POST",
         body: formData,
       })
         .then(async response => {
-          // First check if the response is ok
+          // Primero comprobar si la respuesta es correcta
           if (!response.ok) {
-            // Try to get a meaningful error message
+            // Intentar obtener un mensaje de error significativo
             try {
               const text = await response.text();
               
-              // Try to parse as JSON
+              // Intentar analizar como JSON
               try {
                 const errorData = JSON.parse(text);
                 return resolve({
                   success: false,
-                  message: errorData.error || `Server error: ${response.status}`
+                  message: errorData.error || `Error del servidor: ${response.status}`
                 });
               } catch (e) {
-                // If not JSON, extract a meaningful error from the HTML or use status
-                let errorMessage = `Server error: ${response.status}`;
+                // Si no es JSON, extraer un error significativo del HTML o usar el estado
+                let errorMessage = `Error del servidor: ${response.status}`;
                 if (text.includes('<title>')) {
                   try {
                     errorMessage = text.split('<title>')[1].split('</title>')[0];
                   } catch (htmlError) {
-                    console.error("Error extracting title from HTML:", htmlError);
+                    console.error("Error al extraer título del HTML:", htmlError);
                   }
                 }
                 return resolve({
@@ -461,35 +525,39 @@ export default function AdminDashboardBookings() {
                 });
               }
             } catch (textError) {
-              // If we can't even get the response text
+              // Si ni siquiera podemos obtener el texto de la respuesta
               return resolve({
                 success: false,
-                message: `Server error: ${response.status}`
+                message: `Error del servidor: ${response.status}`
               });
             }
           }
           
-          // If response is ok, try to parse as JSON
+          // Si la respuesta es correcta, intentar analizar como JSON
           let data;
           try {
-            // First check if the response is HTML by looking at the first few characters
+            // Primero comprobar si la respuesta es HTML mirando los primeros caracteres
             const text = await response.text();
             if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
-              // This is an HTML response, not JSON
+              // Esta es una respuesta HTML, no JSON
               
-              // Check if the HTML contains indicators of success
-              // For example, if the logs show a successful refund but we get HTML
+              // Comprobar si el HTML contiene indicadores de éxito
+              // Por ejemplo, si los logs muestran un reembolso exitoso pero obtenemos HTML
               const containsSuccessIndicators = 
                 text.includes('PayPal refund successful') || 
                 text.includes('Cancellation email sent') ||
                 text.includes('Booking cancelled successfully');
                 
               if (containsSuccessIndicators) {
-                // If the HTML contains success indicators, assume the operation was successful
-                console.log('HTML response contains success indicators, treating as successful cancellation');
+                // Si el HTML contiene indicadores de éxito, asumir que la operación fue exitosa
+                console.log('La respuesta HTML contiene indicadores de éxito, tratándola como cancelación exitosa');
+                
+                // Refrescar los datos después de una cancelación exitosa
+                refreshCurrentData();
+                
                 return resolve({
                   success: true,
-                  message: "Booking cancelled successfully",
+                  message: "Reserva cancelada correctamente",
                   refundResult: {
                     success: true,
                     mockResponse: false
@@ -497,15 +565,15 @@ export default function AdminDashboardBookings() {
                 });
               }
               
-              // Otherwise, treat as an error
-              let errorMessage = 'Server returned HTML instead of JSON';
+              // De lo contrario, tratar como un error
+              let errorMessage = 'El servidor devolvió HTML en lugar de JSON';
               try {
-                // Try to extract a meaningful error from the HTML
+                // Intentar extraer un error significativo del HTML
                 if (text.includes('<title>')) {
                   errorMessage = text.split('<title>')[1].split('</title>')[0];
                 }
               } catch (htmlError) {
-                // Ignore errors in HTML parsing
+                // Ignorar errores en el análisis HTML
               }
               
               return resolve({
@@ -514,14 +582,14 @@ export default function AdminDashboardBookings() {
               });
             }
             
-            // If it's not HTML, try to parse as JSON
+            // Si no es HTML, intentar analizar como JSON
             try {
               data = JSON.parse(text);
             } catch (parseError) {
-              // If we can't parse as JSON, return a friendly error
+              // Si no podemos analizar como JSON, devolver un error amigable
               return resolve({
                 success: false,
-                message: "Server returned an invalid response format"
+                message: "El servidor devolvió un formato de respuesta inválido"
               });
             }
             
@@ -532,68 +600,102 @@ export default function AdminDashboardBookings() {
               });
             }
             
+            // Refrescar los datos después de una cancelación exitosa
+            if (data.success) {
+              refreshCurrentData();
+            }
+            
             return resolve({
               success: true,
-              message: data.message || "Booking cancelled successfully",
+              message: data.message || "Reserva cancelada correctamente",
               refundResult: data.refundResult
             });
           } catch (responseError) {
-            // If there's any error in processing the response
-            console.error("Error processing server response:", responseError);
+            // Si hay algún error al procesar la respuesta
+            console.error("Error al procesar la respuesta del servidor:", responseError);
             return resolve({
               success: false,
-              message: "Failed to process server response"
+              message: "Error al procesar la respuesta del servidor"
             });
           }
         })
         .catch(error => {
-          // Handle any network errors
-          console.error("Network error during cancellation:", error);
+          // Manejar cualquier error de red
+          console.error("Error de red durante la cancelación:", error);
           resolve({
             success: false,
-            message: error instanceof Error ? error.message : "An unexpected error occurred"
+            message: error instanceof Error ? error.message : "Ocurrió un error inesperado"
           });
         });
     });
   };
 
-  const handleSearchChange = (searchTerm: string) => {
-    // Only trigger search if the term has changed and is different from current
-    if (searchTerm === data.searchTerm) {
-      return;
-    }
-    
-    // Set searching state
-    setIsSearching(true);
-    
-    // Create a FormData object
+  // Función para refrescar los datos actuales sin cambiar la URL
+  const refreshCurrentData = () => {
+    // Crear un objeto FormData con los parámetros actuales
     const formData = new FormData();
     formData.append("date", data.selectedDate);
-    // Keep the selected tour if any
+    // Mantener el tour seleccionado si hay alguno
     if (data.selectedTourSlug) {
       formData.append("tourSlug", data.selectedTourSlug);
     }
-    // Keep the selected status
+    // Mantener el estado seleccionado
     formData.append("status", data.selectedStatus);
-    // Keep the allDates setting if it's set
+    // Mantener la configuración allDates si está establecida
     if (data.allDates) {
       formData.append("allDates", "true");
     }
-    // Add the search term
-    if (searchTerm) {
-      formData.append("searchTerm", searchTerm);
+    // Mantener el término de búsqueda si hay alguno
+    if (data.searchTerm) {
+      formData.append("searchTerm", data.searchTerm);
     }
-    // Reset to page 1 when changing search term
-    formData.append("page", "1");
+    // Mantener la página actual
+    formData.append("page", data.pagination.currentPage.toString());
 
-    // Submit the form with the new search term
+    // Enviar el formulario para refrescar los datos
     submit(formData, {
       method: "get",
       replace: true,
     });
   };
 
-  // Reset searching state when data changes (search complete)
+  const handleSearchChange = (searchTerm: string) => {
+    // Solo activar la búsqueda si el término ha cambiado y es diferente del actual
+    if (searchTerm === data.searchTerm) {
+      return;
+    }
+    
+    // Establecer estado de búsqueda
+    setIsSearching(true);
+    
+    // Crear un objeto FormData
+    const formData = new FormData();
+    formData.append("date", data.selectedDate);
+    // Mantener el tour seleccionado si hay alguno
+    if (data.selectedTourSlug) {
+      formData.append("tourSlug", data.selectedTourSlug);
+    }
+    // Mantener el estado seleccionado
+    formData.append("status", data.selectedStatus);
+    // Mantener la configuración allDates si está establecida
+    if (data.allDates) {
+      formData.append("allDates", "true");
+    }
+    // Añadir el término de búsqueda
+    if (searchTerm) {
+      formData.append("searchTerm", searchTerm);
+    }
+    // Resetear a página 1 al cambiar el término de búsqueda
+    formData.append("page", "1");
+
+    // Enviar el formulario con el nuevo término de búsqueda
+    submit(formData, {
+      method: "get",
+      replace: true,
+    });
+  };
+
+  // Resetear estado de búsqueda cuando cambian los datos (búsqueda completada)
   useEffect(() => {
     setIsSearching(false);
   }, [data]);
@@ -608,6 +710,7 @@ export default function AdminDashboardBookings() {
       onCancelBooking={handleCancelBooking}
       onSearchChange={handleSearchChange}
       isSearching={isSearching}
+      strings={strings}
     />
   );
 }

@@ -11,6 +11,7 @@ export type AdminDashboardLayoutProps = {
     bookings: string;
     logout: string;
     pageGenerator: string;
+    home: string;
   };
 };
 
@@ -30,7 +31,7 @@ export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayout
           <nav className="flex-1 p-4 space-y-2">
             <Link to="/admin/dashboard" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", location.pathname === "/admin/dashboard" ? "bg-primary text-white hover:bg-primary/90" : "")}>
               <Home className="h-5 w-5" />
-              <span>Home</span>
+              <span>{strings.home}</span>
             </Link>
             <Link 
               to="/admin/dashboard/bookings" 
@@ -73,7 +74,7 @@ export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayout
           <nav className="flex-1 p-4 space-y-2">
             <Link to="/admin/dashboard" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", location.pathname === "/admin/dashboard" ? "bg-primary text-white hover:bg-primary/90" : "")}>
               <Home className="h-5 w-5" />
-              <span>Home</span>
+              <span>{strings.home}</span>
             </Link>
             <Link 
               to="/admin/dashboard/bookings" 

@@ -57,7 +57,7 @@ type AdminBookingsUIProps = {
   onStatusChange: (status: string) => void;
   onAllDatesChange: (allDates: boolean) => void;
   onSearchChange: (searchTerm: string) => void;
-  strings: Record<string, unknown>;
+  strings: Record<string, string>;
 };
 
 export const AdminBookingsUI = ({
@@ -79,6 +79,7 @@ export const AdminBookingsUI = ({
   onStatusChange,
   onAllDatesChange,
   onSearchChange,
+  strings
 }: AdminBookingsUIProps) => {
   const [maxBookings, setMaxBookings] = useState(bookingLimit.maxBookings.toString());
   const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
@@ -162,7 +163,7 @@ export const AdminBookingsUI = ({
   const handleConfirmCancellation = async (refund: boolean, reason: string) => {
     if (selectedBooking && onCancelBooking) {
       // Show loading toast
-      const toastId = toast.loading("Processing cancellation...");
+      const toastId = toast.loading("Procesando cancelación...");
       
       try {
         // Call the cancellation function
@@ -170,13 +171,13 @@ export const AdminBookingsUI = ({
         
         // Ensure we have a valid result object before proceeding
         if (!result || typeof result !== 'object') {
-          throw new Error("Invalid response from server");
+          throw new Error("Respuesta inválida del servidor");
         }
         
         // Update the result state and show dialog
         setCancellationResult({
           success: result.success || false,
-          message: result.message || "Unknown response from server",
+          message: result.message || "Respuesta desconocida del servidor",
           refundResult: result.refundResult ? {
             ...result.refundResult,
             success: result.refundResult.success === true
@@ -186,21 +187,21 @@ export const AdminBookingsUI = ({
         
         // Show success or error toast
         if (result.success) {
-          toast.success("Booking cancelled successfully", {
+          toast.success("Reserva cancelada exitosamente", {
             id: toastId,
             icon: <CheckCircle2 className="h-4 w-4" />,
           });
         } else {
-          toast.error(result.message || "Failed to cancel booking", {
+          toast.error(result.message || "Error al cancelar la reserva", {
             id: toastId,
             icon: <XCircle className="h-4 w-4" />,
           });
         }
       } catch (error) {
-        console.error("Error during cancellation:", error);
+        console.error("Error durante la cancelación:", error);
         
         // Show error toast
-        const errorMessage = error instanceof Error ? error.message : "An error occurred";
+        const errorMessage = error instanceof Error ? error.message : "Ocurrió un error";
         toast.error(errorMessage, {
           id: toastId,
           icon: <XCircle className="h-4 w-4" />,
@@ -259,13 +260,13 @@ export const AdminBookingsUI = ({
         {/* Date Selector Card */}
         <Card className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
           <CardHeader className="bg-primary/5 border-b border-primary/10">
-            <CardTitle className="text-lg sm:text-xl text-primary">Date & Tour Selection</CardTitle>
+            <CardTitle className="text-lg sm:text-xl text-primary">{strings.dateAndTourSelection}</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="flex flex-col items-center md:items-stretch md:flex-row md:justify-center md:space-x-8 lg:space-x-12">
               {/* Date Picker */}
               <div className="w-full max-w-xs flex flex-col items-center mb-8 md:mb-0">
-                <Label htmlFor="date-picker" className="self-start text-sm font-medium mb-3">Select Date</Label>
+                <Label htmlFor="date-picker" className="self-start text-sm font-medium mb-3">{strings.selectDate}</Label>
                 <Calendar
                   mode="single"
                   selected={selectedDate}
@@ -279,13 +280,13 @@ export const AdminBookingsUI = ({
               <div className="w-full max-w-xs flex flex-col">
                 {/* Tour Selector */}
                 <div className="mb-6">
-                  <Label htmlFor="tour-selector" className="block text-sm font-medium mb-3">Select Tour</Label>
+                  <Label htmlFor="tour-selector" className="block text-sm font-medium mb-3">{strings.selectTour}</Label>
                   <Select value={selectedTourSlug || "all"} onValueChange={handleTourChange}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a tour" />
+                      <SelectValue placeholder={strings.selectTour} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Tours</SelectItem>
+                      <SelectItem value="all">{strings.allTours}</SelectItem>
                       {tours.map((tour) => (
                         <SelectItem key={tour._id} value={tour.slug}>
                           {tour.name}
@@ -297,13 +298,13 @@ export const AdminBookingsUI = ({
 
                 {/* All Dates Button (for both cancelled and confirmed bookings) */}
                 <div>
-                  <Label className="block text-sm font-medium mb-3">Date Filter</Label>
+                  <Label className="block text-sm font-medium mb-3">{strings.dateFilter}</Label>
                   <Button
                     variant={allDates ? "default" : "outline"}
                     onClick={() => handleAllDatesChange(!allDates)}
                     className="w-full"
                   >
-                    {allDates ? "✓ Show all dates" : "Show all dates"}
+                    {allDates ? `✓ ${strings.showAllDates}` : strings.showAllDates}
                   </Button>
                 </div>
 
@@ -311,7 +312,7 @@ export const AdminBookingsUI = ({
                 {selectedStatus === "confirmed" && (
                   <div className="space-y-4 mt-6">
                     <div>
-                      <Label htmlFor="max-bookings" className="block text-sm font-medium mb-3">Max Bookings</Label>
+                      <Label htmlFor="max-bookings" className="block text-sm font-medium mb-3">{strings.maxBookings}</Label>
                       <div className="flex items-center space-x-2">
                         <Input
                           id="max-bookings"
@@ -325,14 +326,14 @@ export const AdminBookingsUI = ({
                           onClick={handleUpdateMaxBookings} 
                           className="whitespace-nowrap"
                         >
-                          Update
+                          {strings.update}
                         </Button>
                       </div>
                     </div>
                     <div>
                       <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-                        <span>Current: {totalPeople} people</span>
-                        <span>{completionPercentage}% Full</span>
+                        <span>{strings.current}: {totalPeople} {strings.people}</span>
+                        <span>{completionPercentage}% {strings.full}</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
                         <div 
@@ -357,15 +358,15 @@ export const AdminBookingsUI = ({
         {/* Bookings Table Card */}
         <Card className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
           <CardHeader className="bg-primary/5 border-b border-primary/10">
-            <CardTitle className="text-lg sm:text-xl text-primary">Bookings</CardTitle>
+            <CardTitle className="text-lg sm:text-xl text-primary">{strings.bookings}</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {/* Status Tabs */}
             <div className="p-4 border-b border-gray-200 flex justify-center">
               <Tabs value={selectedStatus} onValueChange={onStatusChange} className="w-full max-w-md">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
-                  <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+                  <TabsTrigger value="confirmed">{strings.confirmed}</TabsTrigger>
+                  <TabsTrigger value="cancelled">{strings.cancelled}</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -382,7 +383,7 @@ export const AdminBookingsUI = ({
                 </div>
                 <Input
                   type="text"
-                  placeholder="Search by name..."
+                  placeholder={strings.searchByName}
                   value={localSearchTerm}
                   onChange={handleSearchInputChange}
                   className="pl-10 w-full"
@@ -406,7 +407,7 @@ export const AdminBookingsUI = ({
                 <div className="p-2 bg-blue-50 text-blue-700 text-sm flex items-center justify-between">
                   <span>
                     <Search className="h-3 w-3 inline mr-1" />
-                    Showing results for: <strong>{searchTerm}</strong>
+                    {strings.showingResultsFor}: <strong>{searchTerm}</strong>
                   </span>
                   <Button 
                     variant="ghost" 
@@ -414,31 +415,31 @@ export const AdminBookingsUI = ({
                     onClick={handleClearSearch}
                     className="h-6 text-xs"
                   >
-                    Clear search
+                    {strings.clearSearch}
                   </Button>
                 </div>
               )}
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[180px]">Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Tour</TableHead>
-                    <TableHead className="text-center">People</TableHead>
+                    <TableHead className="w-[180px]">{strings.name}</TableHead>
+                    <TableHead>{strings.email}</TableHead>
+                    <TableHead>{strings.phone}</TableHead>
+                    <TableHead>{strings.tour}</TableHead>
+                    <TableHead className="text-center">{strings.people}</TableHead>
                     {selectedStatus === "confirmed" ? (
                       <>
-                        <TableHead className="text-center">Price</TableHead>
-                        <TableHead className="text-center">Paid</TableHead>
-                        <TableHead className="text-center">Method</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead className="text-center">{strings.price}</TableHead>
+                        <TableHead className="text-center">{strings.paid}</TableHead>
+                        <TableHead className="text-center">{strings.method}</TableHead>
+                        <TableHead className="text-right">{strings.actions}</TableHead>
                       </>
                     ) : (
                       <>
-                        <TableHead className="text-center">Price</TableHead>
-                        <TableHead className="text-center">Refund</TableHead>
-                        <TableHead className="text-center">Date</TableHead>
-                        <TableHead className="text-center">Reason</TableHead>
+                        <TableHead className="text-center">{strings.price}</TableHead>
+                        <TableHead className="text-center">{strings.refund}</TableHead>
+                        <TableHead className="text-center">{strings.date}</TableHead>
+                        <TableHead className="text-center">{strings.reason}</TableHead>
                       </>
                     )}
                   </TableRow>
@@ -449,7 +450,7 @@ export const AdminBookingsUI = ({
                       <TableCell colSpan={selectedStatus === "confirmed" ? 9 : 9} className="text-center py-8">
                         <div className="flex flex-col items-center justify-center">
                           <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
-                          <span className="text-sm text-muted-foreground">Searching bookings...</span>
+                          <span className="text-sm text-muted-foreground">{strings.searchingBookings}</span>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -457,9 +458,9 @@ export const AdminBookingsUI = ({
                     <TableRow>
                       <TableCell colSpan={selectedStatus === "confirmed" ? 9 : 9} className="text-center py-4">
                         {searchTerm ? (
-                          <span>No bookings found matching &ldquo;{searchTerm}&rdquo;</span>
+                          <span>{strings.noBookingsMatchingSearch} &ldquo;{searchTerm}&rdquo;</span>
                         ) : (
-                          <span>No bookings found for this {selectedStatus === "cancelled" && allDates ? "tour" : "date"}.</span>
+                          <span>{strings.noBookingsFound} {selectedStatus === "cancelled" && allDates ? strings.tour.toLowerCase() : strings.date.toLowerCase()}.</span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -480,11 +481,11 @@ export const AdminBookingsUI = ({
                             <TableCell className="text-center">
                               {booking.paid ? (
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  Paid
+                                  {strings.paid}
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                  Pending
+                                  {strings.pending}
                                 </span>
                               )}
                             </TableCell>
@@ -501,7 +502,7 @@ export const AdminBookingsUI = ({
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                  Unknown
+                                  {strings.unknown}
                                 </span>
                               )}
                             </TableCell>
@@ -513,7 +514,7 @@ export const AdminBookingsUI = ({
                                   onClick={() => handleCancelClick(booking)}
                                   className="h-8"
                                 >
-                                  Cancel
+                                  {strings.cancel}
                                 </Button>
                               )}
                             </TableCell>
@@ -526,19 +527,19 @@ export const AdminBookingsUI = ({
                             <TableCell className="text-center">
                               {booking.refundIssued ? (
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  Yes
+                                  {strings.yes}
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                  No
+                                  {strings.no}
                                 </span>
                               )}
                             </TableCell>
                             <TableCell className="text-center">
                               {formatDate(booking.date)}
                             </TableCell>
-                            <TableCell className="text-center max-w-[200px] truncate" title={booking.cancellationReason || "No reason provided"}>
-                              {booking.cancellationReason || "No reason provided"}
+                            <TableCell className="text-center max-w-[200px] truncate" title={booking.cancellationReason || strings.noReasonProvided}>
+                              {booking.cancellationReason || strings.noReasonProvided}
                             </TableCell>
                           </>
                         )}
@@ -559,7 +560,7 @@ export const AdminBookingsUI = ({
                     onClick={() => onPageChange(Math.max(1, pagination.currentPage - 1))}
                     disabled={pagination.currentPage === 1 || isLoading}
                   >
-                    Previous
+                    {strings.previous}
                   </Button>
                   
                   {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
@@ -580,7 +581,7 @@ export const AdminBookingsUI = ({
                     onClick={() => onPageChange(Math.min(pagination.totalPages, pagination.currentPage + 1))}
                     disabled={pagination.currentPage === pagination.totalPages || isLoading}
                   >
-                    Next
+                    {strings.next}
                   </Button>
                 </div>
               </div>
@@ -599,6 +600,7 @@ export const AdminBookingsUI = ({
           bookingReference={selectedBooking.name}
           amount={selectedBooking.amount}
           paymentMethod={selectedBooking.paymentMethod}
+          strings={strings}
         />
       )}
 
@@ -608,6 +610,7 @@ export const AdminBookingsUI = ({
           open={showResultDialog}
           onOpenChange={setShowResultDialog}
           result={cancellationResult}
+          strings={strings}
         />
       )}
     </div>

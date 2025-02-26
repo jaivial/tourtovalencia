@@ -21,6 +21,7 @@ interface CancellationDialogProps {
   bookingReference: string
   amount?: number
   paymentMethod?: string
+  strings: Record<string, string>
 }
 
 export const CancellationDialog: React.FC<CancellationDialogProps> = ({
@@ -29,7 +30,8 @@ export const CancellationDialog: React.FC<CancellationDialogProps> = ({
   onConfirm,
   bookingReference,
   amount,
-  paymentMethod
+  paymentMethod,
+  strings
 }) => {
   const [refund, setRefund] = React.useState(false)
   const [reason, setReason] = React.useState("")
@@ -46,10 +48,10 @@ export const CancellationDialog: React.FC<CancellationDialogProps> = ({
           <DialogHeader>
             <div className="flex items-center gap-2 text-red-700">
               <AlertCircle className="h-5 w-5" />
-              <DialogTitle className="text-xl">Cancel Booking</DialogTitle>
+              <DialogTitle className="text-xl">{strings.cancelBooking}</DialogTitle>
             </div>
             <DialogDescription className="text-red-600 mt-2">
-              Are you sure you want to cancel booking <span className="font-medium">{bookingReference}</span>?
+              {strings.areYouSureCancel} <span className="font-medium">{bookingReference}</span>?
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -65,25 +67,25 @@ export const CancellationDialog: React.FC<CancellationDialogProps> = ({
                   className="data-[state=checked]:bg-amber-500"
                 />
                 <Label htmlFor="refund" className="font-medium text-amber-800">
-                  Issue refund of €{amount.toFixed(2)} via {paymentMethod}
+                  {strings.issueRefundOf} €{amount.toFixed(2)} {strings.via} {paymentMethod}
                 </Label>
               </div>
             ) : null}
             
             <div className="grid gap-3">
               <Label htmlFor="reason" className="text-gray-700">
-                Cancellation reason <span className="text-red-500">*</span>
+                {strings.cancellationReason} <span className="text-red-500">*</span>
               </Label>
               <Textarea
                 id="reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Enter reason for cancellation"
+                placeholder={strings.enterReasonForCancellation}
                 className="min-h-[100px] resize-none"
                 required
               />
               <p className="text-xs text-gray-500">
-                This reason will be included in the cancellation email sent to the customer.
+                {strings.reasonIncludedInEmail}
               </p>
             </div>
           </div>
@@ -97,7 +99,7 @@ export const CancellationDialog: React.FC<CancellationDialogProps> = ({
               className="gap-2"
             >
               <Ban className="h-4 w-4" />
-              Cancel
+              {strings.cancel}
             </Button>
             <Button 
               onClick={handleConfirm}
@@ -105,7 +107,7 @@ export const CancellationDialog: React.FC<CancellationDialogProps> = ({
               disabled={!reason.trim()}
             >
               <CheckCircle2 className="h-4 w-4" />
-              Confirm Cancellation
+              {strings.confirmCancellation}
             </Button>
           </div>
         </DialogFooter>

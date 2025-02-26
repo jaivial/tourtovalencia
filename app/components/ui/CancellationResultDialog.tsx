@@ -23,12 +23,14 @@ interface CancellationResultProps {
       mockResponse?: boolean
     }
   } | null
+  strings: Record<string, string>
 }
 
 export const CancellationResultDialog: React.FC<CancellationResultProps> = ({
   open,
   onOpenChange,
-  result
+  result,
+  strings
 }) => {
   if (!result) return null
 
@@ -49,7 +51,7 @@ export const CancellationResultDialog: React.FC<CancellationResultProps> = ({
                 <XCircle className="h-6 w-6 text-red-600" />
               )}
               <DialogTitle className="text-xl">
-                {isSuccess ? 'Booking Cancelled Successfully' : 'Cancellation Failed'}
+                {isSuccess ? strings.bookingCancelledSuccessfully : strings.cancellationFailed}
               </DialogTitle>
             </div>
             <DialogDescription className={`mt-2 ${isSuccess ? 'text-green-700' : 'text-red-700'}`}>
@@ -73,24 +75,24 @@ export const CancellationResultDialog: React.FC<CancellationResultProps> = ({
                 )}
                 <div>
                   <h3 className="font-medium text-gray-800">
-                    {isRefundSuccess ? 'Refund Processed' : 'Refund Failed'}
+                    {isRefundSuccess ? strings.refundProcessed : strings.refundFailed}
                   </h3>
                   <p className="text-sm mt-1 text-gray-600">
                     {isRefundSuccess 
-                      ? `The refund has been ${isMockRefund ? 'simulated' : 'processed'} successfully.`
-                      : result.refundResult?.error || 'An unknown error occurred while processing the refund.'}
+                      ? isMockRefund ? strings.refundSimulatedSuccessfully : strings.refundProcessedSuccessfully
+                      : result.refundResult?.error || strings.unknownErrorRefund}
                   </p>
                   
                   {isRefundSuccess && result.refundResult?.refundId && (
                     <p className="text-xs mt-2 text-gray-500">
-                      Refund ID: {result.refundResult.refundId}
+                      {strings.refundId}: {result.refundResult.refundId}
                     </p>
                   )}
                   
                   {isMockRefund && (
                     <div className="flex items-center gap-2 mt-3 p-2 bg-amber-50 border border-amber-200 rounded text-amber-800 text-sm">
                       <AlertTriangle className="h-4 w-4" />
-                      <span>This is a simulated refund in development mode.</span>
+                      <span>{strings.simulatedRefund}</span>
                     </div>
                   )}
                 </div>
@@ -100,8 +102,8 @@ export const CancellationResultDialog: React.FC<CancellationResultProps> = ({
           
           <p className="text-sm text-gray-600">
             {isSuccess 
-              ? 'The customer will receive an email notification about this cancellation.'
-              : 'Please try again or contact technical support if the issue persists.'}
+              ? strings.customerWillReceiveEmail
+              : strings.tryAgainOrContact}
           </p>
         </div>
         
@@ -110,7 +112,7 @@ export const CancellationResultDialog: React.FC<CancellationResultProps> = ({
             onClick={() => onOpenChange(false)}
             className={isSuccess ? 'bg-green-600 hover:bg-green-700' : ''}
           >
-            Close
+            {strings.close}
           </Button>
         </DialogFooter>
       </DialogContent>
