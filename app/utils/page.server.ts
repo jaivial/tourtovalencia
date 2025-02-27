@@ -63,13 +63,26 @@ async function optimizeImage(base64Data: string): Promise<string> {
   }
 }
 
+// Helper function to check if a value is an image object with a blob URL preview
+function isBlobImageObject(value: unknown): boolean {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "preview" in value &&
+    typeof (value as { preview: unknown }).preview === "string" &&
+    ((value as { preview: string }).preview.startsWith("blob:") || 
+     (value as { preview: string }).preview.startsWith("data:"))
+  );
+}
+
 // Export the processContent function so it can be used in other files
 export async function processContent(content: Record<string, unknown>, translate: boolean = true): Promise<Record<string, unknown>> {
   if (!content) return content;
 
   // If it's an array, process each item
   if (Array.isArray(content)) {
-    return Promise.all(content.map((item) => processContent(item as Record<string, unknown>, translate)));
+    const processedArray = await Promise.all(content.map((item) => processContent(item as Record<string, unknown>, translate)));
+    return processedArray as unknown as Record<string, unknown>;
   }
 
   // If it's an object, process each property
@@ -84,6 +97,19 @@ export async function processContent(content: Record<string, unknown>, translate
       if (typeof value === "string" && value.startsWith("data:image")) {
         const size = Buffer.from(value.split(",")[1], "base64").length;
         processed[key] = size > MAX_IMAGE_SIZE ? await optimizeImage(value) : value;
+      } else if (typeof value === "string" && value.startsWith("blob:")) {
+        // Handle blob URLs directly
+        console.log("Found blob URL:", value);
+        processed[key] = ""; // Set to empty string as fallback
+      } else if (isBlobImageObject(value)) {
+        // Handle image objects with blob URL previews
+        const imgObj = value as { preview: string; file?: unknown };
+        processed[key] = {
+          ...imgObj,
+          preview: imgObj.preview.startsWith("data:") 
+            ? imgObj.preview 
+            : "" // Set to empty string as fallback for blob URLs
+        };
       } else if (typeof value === "string" && value.trim() !== "") {
         // For text content, only translate if translate flag is true
         processed[key] = translate ? await translateText(value) : value;
@@ -96,13 +122,17 @@ export async function processContent(content: Record<string, unknown>, translate
     return processed;
   }
 
-  // If it's a non-empty string and not an image, translate it if translate flag is true
-  if (typeof content === "string" && content.trim() !== "" && !content.startsWith("data:image")) {
-    return translate ? await translateText(content) : content;
+  // For string values, handle translation if needed
+  if (typeof content === "string") {
+    // Only translate non-empty strings that aren't image data
+    if (content.trim() !== "" && !content.startsWith("data:image")) {
+      return { value: translate ? await translateText(content) : content } as unknown as Record<string, unknown>;
+    }
+    return { value: content } as unknown as Record<string, unknown>;
   }
 
-  // Otherwise, return as is
-  return content as Record<string, unknown>;
+  // For any other type, wrap in an object to maintain the Record<string, unknown> return type
+  return { value: content } as Record<string, unknown>;
 }
 
 // Helper function to translate text using OpenRouter API with a free model
@@ -285,8 +315,8 @@ async function createTourFromPage(page: Page): Promise<void> {
   const now = new Date();
   
   // Use a more flexible approach to access content properties
-  const enContent = page.content.en as Record<string, any>;
-  const esContent = page.content.es as Record<string, any>;
+  const enContent = page.content.en as Record<string, unknown>;
+  const esContent = page.content.es as Record<string, unknown>;
   
   // Log the page name for debugging
   console.log(`Creating tour from page: "${page.name}" with ID: ${page._id}`);
@@ -327,33 +357,39 @@ async function createTourFromPage(page: Page): Promise<void> {
   console.log(`Final tour titles - ES: "${esTitle}", EN: "${enTitle}"`);
   
   // Extract description from different possible locations
-  const getDescription = (content: Record<string, any>): string => {
-    if (content.description) return content.description;
-    if (content.section1?.firstSquareP) return content.section1.firstSquareP;
-    if (content.section2?.firstH3) return content.section2.firstH3;
+  const getDescription = (content: Record<string, unknown>): string => {
+    if (content.description) return content.description as string;
+    if ((content.section1 as Record<string, unknown>)?.firstSquareP) 
+      return ((content.section1 as Record<string, unknown>).firstSquareP as string);
+    if ((content.section2 as Record<string, unknown>)?.firstH3) 
+      return ((content.section2 as Record<string, unknown>).firstH3 as string);
     return '';
   };
   
   // Extract duration from different possible locations
-  const getDuration = (content: Record<string, any>): string => {
-    if (content.duration) return content.duration;
-    if (content.section4?.secondH3) return content.section4.secondH3;
+  const getDuration = (content: Record<string, unknown>): string => {
+    if (content.duration) return content.duration as string;
+    if ((content.section4 as Record<string, unknown>)?.secondH3) 
+      return ((content.section4 as Record<string, unknown>).secondH3 as string);
     return '';
   };
   
   // Extract includes from different possible locations
-  const getIncludes = (content: Record<string, any>): string => {
-    if (content.includes) return content.includes;
-    if (content.section6?.list && Array.isArray(content.section6.list)) {
-      return content.section6.list.map((item: { li: string }) => item.li).join(', ');
+  const getIncludes = (content: Record<string, unknown>): string => {
+    if (content.includes) return content.includes as string;
+    if ((content.section6 as Record<string, unknown>)?.list && 
+        Array.isArray((content.section6 as Record<string, unknown>).list)) {
+      return ((content.section6 as Record<string, unknown>).list as Array<{ li: string }>)
+        .map((item: { li: string }) => item.li).join(', ');
     }
     return '';
   };
   
   // Extract meeting point from different possible locations
-  const getMeetingPoint = (content: Record<string, any>): string => {
-    if (content.meetingPoint) return content.meetingPoint;
-    if (content.section4?.thirdH3) return content.section4.thirdH3;
+  const getMeetingPoint = (content: Record<string, unknown>): string => {
+    if (content.meetingPoint) return content.meetingPoint as string;
+    if ((content.section4 as Record<string, unknown>)?.thirdH3) 
+      return ((content.section4 as Record<string, unknown>).thirdH3 as string);
     return '';
   };
   
@@ -363,7 +399,7 @@ async function createTourFromPage(page: Page): Promise<void> {
       en: enTitle,
       es: esTitle,
     },
-    tourPrice: enContent.price || 0,
+    tourPrice: (enContent.price as number) || 0,
     status: page.status,
     description: {
       en: getDescription(enContent),
