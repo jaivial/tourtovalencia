@@ -57,12 +57,16 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   }
 
   return [
-    { title: `${data.page.name} | Viajes Olga` },
+    { title: `${data.page.name} | Tour To Valencia` },
     { name: "description", content: description },
-    { property: "og:title", content: `${data.page.name} | Viajes Olga` },
+    { property: "og:title", content: `${data.page.name} | Tour To Valencia` },
     { property: "og:description", content: description },
-    // Add og:image if there's a background image in section1
-    ...(content.section1?.backgroundImage?.preview ? [{ property: "og:image", content: content.section1.backgroundImage.preview }] : []),
+    { property: "og:image", content: "/tourtovalencialogo.png" },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:image", content: "https://tourtovalencia.com/tourtovalenciablackbg.webp" }
   ];
 };
 

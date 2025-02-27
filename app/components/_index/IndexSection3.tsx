@@ -92,8 +92,8 @@ const IndexSection3: React.FC<ChildProps> = ({ width, indexSection3Text }) => {
                 stiffness: 300
               }}
               className="
-                w-full aspect-[4/3] bg-[url('/olgaphoto5.jpeg')] 
-                bg-cover bg-top rounded-2xl overflow-hidden 
+                w-full aspect-[3/4] bg-[url('https://images.unsplash.com/photo-1583265101492-bfe6ef35cef8?q=80&w=4000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] 
+                bg-cover bg-center rounded-2xl overflow-hidden 
                 shadow-md hover:shadow-xl transition-all duration-500
                 transform perspective-1000
               "

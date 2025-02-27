@@ -1,15 +1,15 @@
 import { useBooking } from "~/context/BookingContext";
-import { Calendar } from "../ui/calendar";
 import { Label } from "../ui/label";
 import { cn } from "~/lib/utils";
-import { format, isValid, addMonths } from "date-fns";
-import { useState, useEffect, useMemo } from "react";
+import { format } from "date-fns";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Alert, AlertDescription } from "../ui/alert";
 import { TourSelectorUI } from "../ui/TourSelectorUI";
 import { useLanguageContext } from "~/providers/LanguageContext";
-// Import date-fns locales
-import { es } from "date-fns/locale";
+// Import HeroUI Calendar and internationalized date utilities
+import { Calendar } from "@heroui/react";
+import { CalendarDate, parseDate, getLocalTimeZone, today, DateValue } from "@internationalized/date";
 
 interface BookingDateStepProps {
   tourSelectorText: {
@@ -49,9 +49,6 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     }
   };
 
-  // Get the appropriate locale for date-fns
-  const locale = currentLanguage === "es" ? es : undefined;
-
   // State to track if a tour has been selected
   const [isTourSelected, setIsTourSelected] = useState(!!formData.tourSlug);
   // State to track errors
@@ -74,85 +71,74 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     }
   }, [unavailableDates]);
   
-  // Calculate disabled dates directly as Date objects for the Calendar component
-  const disabledDates = useMemo(() => {
-    if (!formData.tourSlug) return []; // No need to calculate if no tour selected
-    
-    // Today's date for past date filtering
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // Create a set of past dates (3 months of past dates to be safe)
-    const pastDates: Date[] = [];
-    const threeMonthsAgo = new Date(today);
-    threeMonthsAgo.setMonth(today.getMonth() - 3);
-    
-    // Note: we need to use 'let' here because we're modifying loopDate in the loop
-    let loopDate = new Date(threeMonthsAgo);
-    while (loopDate < today) {
-      pastDates.push(new Date(loopDate));
-      loopDate.setDate(loopDate.getDate() + 1);
+  // Get today's date for min value
+  const todayDate = today(getLocalTimeZone());
+  
+  // Convert selected date to CalendarDate format for HeroUI Calendar
+  const getSelectedCalendarDate = () => {
+    if (formData.date) {
+      try {
+        return parseDate(formData.date);
+      } catch (e) {
+        console.error("Error parsing date:", e);
+        return null;
+      }
     }
-    
-    // Find all unavailable dates for this tour
-    const tourUnavailableDates = unavailableDates
-      .filter(d => d.tourSlug === formData.tourSlug)
-      .map(d => {
-        const dateParts = d.date.split('-').map(Number);
-        const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-        return dateObj;
-      });
-    
-    console.log(`Generated ${tourUnavailableDates.length} disabled dates for ${formData.tourSlug}`);
-    if (tourUnavailableDates.length > 0) {
-      console.log("Sample disabled dates:", tourUnavailableDates.slice(0, 3).map(d => d.toISOString().split('T')[0]));
-    }
-    
-    // Combine past dates and unavailable dates
-    return [...pastDates, ...tourUnavailableDates];
-  }, [formData.tourSlug, unavailableDates]);
+    return null;
+  };
 
-  // Check if a date is disabled - keep for validation when selecting dates
-  const isDateDisabled = (date: Date) => {
-    // Always disable dates in the past
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (date < today) return true;
+  // Function to check if a date is unavailable
+  const isDateUnavailable = (date: DateValue) => {
+    // Try to convert DateValue to JavaScript Date
+    let jsDate: Date;
+    
+    try {
+      // Assuming it's a CalendarDate
+      const calendarDate = date as CalendarDate;
+      jsDate = new Date(calendarDate.year, calendarDate.month - 1, calendarDate.day);
+    } catch (error) {
+      console.error("Error converting date:", error);
+      return false; // If we can't convert, don't disable the date
+    }
+    
+    // Get today's date with time set to midnight for comparison
+    const todayJs = new Date();
+    todayJs.setHours(0, 0, 0, 0);
+    
+    // Disable today and dates in the past
+    // For today, we compare if the dates are the same day
+    const isSameDay = jsDate.getDate() === todayJs.getDate() && 
+                      jsDate.getMonth() === todayJs.getMonth() && 
+                      jsDate.getFullYear() === todayJs.getFullYear();
+    
+    if (jsDate < todayJs || isSameDay) return true;
     
     // If no tour is selected, disable all dates
     if (!formData.tourSlug) return true;
     
-    // Format the date for comparison - make sure to use same format as in unavailableDates
-    const dateString = date.toISOString().split('T')[0];
+    // Format the date for comparison
+    const dateString = format(jsDate, "yyyy-MM-dd");
     
-    // Get all unavailable dates for the selected tour
-    const tourUnavailableDates = unavailableDates.filter(
-      unavailableDate => unavailableDate.tourSlug === formData.tourSlug
-    );
-    
-    // Check if the current date is in the unavailable dates list
-    const isUnavailable = tourUnavailableDates.some(
-      unavailableDate => unavailableDate.date === dateString
-    );
-    
-    // For debugging: log when checking specific dates
-    if (date.getDate() === 1 || date.getDate() === 15) {
-      console.log(`Validation - Checking date ${dateString} for tour ${formData.tourSlug}:`);
-      console.log(`- isUnavailable: ${isUnavailable}`);
-    }
+    // Check if the date is in the unavailable dates list for this tour
+    const isUnavailable = unavailableDates
+      .filter(d => d.tourSlug === formData.tourSlug)
+      .some(d => d.date === dateString);
     
     return isUnavailable;
   };
 
   // Handle date selection
-  const handleDateSelect = async (date: Date | undefined) => {
+  const handleDateSelect = async (date: CalendarDate | null) => {
     if (!date) return;
+    
+    // Convert CalendarDate to JavaScript Date
+    const jsDate = new Date(date.year, date.month - 1, date.day);
     
     // Reset previous errors
     setFetchError(null);
 
     // Format the date for form data
-    const formattedDate = format(date, "yyyy-MM-dd");
+    const formattedDate = format(jsDate, "yyyy-MM-dd");
 
     // Check if a tour is selected
     if (!formData.tourSlug) {
@@ -160,8 +146,8 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       return;
     }
 
-    // Double check if the date is available (extra validation)
-    if (isDateDisabled(date)) {
+    // Double check if the date is available
+    if (isDateUnavailable(date)) {
       console.log(`Prevented selection of unavailable date: ${formattedDate}`);
       setFetchError(localizedText[currentLanguage].dateUnavailable);
       return;
@@ -253,25 +239,11 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     }
   };
 
-  // Get the selected date for the calendar
-  const getSelectedDate = () => {
-    if (formData.date) {
-      try {
-        const dateObj = new Date(formData.date);
-        return isValid(dateObj) ? dateObj : undefined;
-      } catch (e) {
-        console.error("Error parsing date:", e);
-        return undefined;
-      }
-    }
-    return undefined;
-  };
-
   // Determine which messages to show
   const showError = !!fetchError;
   
   // Force re-render of calendar when tour changes
-  const calendarKey = `calendar-${formData.tourSlug || 'no-tour'}-${disabledDates.length}`;
+  const calendarKey = `calendar-${formData.tourSlug || 'no-tour'}-${unavailableDates.length}`;
 
   return (
     <div className="space-y-6">
@@ -309,21 +281,33 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
             )}>
               <Calendar
                 key={calendarKey}
-                mode="single"
-                selected={getSelectedDate()}
-                onSelect={handleDateSelect}
-                disabled={disabledDates}
-                className="mx-auto"
+                value={getSelectedCalendarDate()}
+                onChange={handleDateSelect}
+                isDateUnavailable={isDateUnavailable}
+                weekdayStyle="short"
+                showMonthAndYearPickers
+                color="primary"
+                calendarWidth="100%"
+                showShadow
+                minValue={todayDate}
                 classNames={{
-                  table: "w-full border-collapse space-y-1 text-center",
-                  head_row: "flex justify-center",
-                  row: "flex w-full mt-2 justify-center",
-                  cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                  day_disabled: "text-muted-foreground opacity-50 bg-gray-100 cursor-not-allowed",
+                  base: "w-fit",
+                  cell: "text-center",
+                  cellButton: cn(
+                    "w-10 h-10 rounded-full", 
+                    "hover:bg-primary-100 focus:bg-primary-200", 
+                    "disabled:opacity-100 disabled:cursor-not-allowed", 
+                    "aria-selected:bg-primary-500 aria-selected:text-white", 
+                    "aria-unavailable:bg-red-50 aria-unavailable:text-red-500 aria-unavailable:line-through", 
+                    "aria-unavailable:hover:bg-red-100 aria-unavailable:hover:text-red-600"
+                  ),
+                  headerWrapper: "mb-4",
+                  title: "text-lg font-semibold",
+                  prevButton: "hover:bg-gray-100 rounded-full p-1",
+                  nextButton: "hover:bg-gray-100 rounded-full p-1",
+                  gridHeader: "mb-2",
+                  gridHeaderCell: "text-gray-500 font-medium",
                 }}
-                fromDate={new Date()} // Disable dates before today
-                toDate={addMonths(new Date(), 6)} // Limit calendar view to 6 months
-                locale={locale} // Add locale for month names
               />
             </div>
             {errors.date && (

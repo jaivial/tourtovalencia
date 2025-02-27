@@ -7,10 +7,34 @@ import { useLanguageContext } from "../providers/LanguageContext";
 
 // Define metadata for SEO
 export const meta: MetaFunction = () => {
+  const title = "Valencia Tourism Guide - Things to Do & See in Valencia, Spain";
+  const description = "Discover the best things to do in Valencia, Spain. From city tours to boat trips, find all the top attractions, activities, and places to visit in Valencia.";
+  const url = "https://tourtovalencia.com/valencia-things-to-do";
+  const imageUrl = "https://tourtovalencia.com/tourtovalenciablackbg.webp";
+
   return [
-    { title: "Valencia Tourism Guide - Things to Do & See in Valencia, Spain" },
-    { name: "description", content: "Discover the best things to do in Valencia, Spain. From city tours to boat trips, find all the top attractions, activities, and places to visit in Valencia." },
+    { title },
+    { name: "description", content: description },
     { name: "keywords", content: "valencia tourism, things to do in valencia, valencia tours, valencia activities, valencia attractions, valencia travel guide, valencia spain" },
+    
+    // Open Graph / Facebook
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: url },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { property: "og:image", content: imageUrl },
+
+    // Twitter
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:url", content: url },
+    { name: "twitter:title", content: title },
+    { name: "twitter:description", content: description },
+    { name: "twitter:image", content: imageUrl },
+
+    // WhatsApp
+    { property: "og:site_name", content: "Tour To Valencia" },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" }
   ];
 };
 

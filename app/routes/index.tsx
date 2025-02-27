@@ -8,9 +8,33 @@ import { Tour } from "~/utils/db.schema.server";
 import languageData from "~/data/data.json";
 
 export const meta = () => {
+  const title = "Tour To Valencia - Explore the Best Experiences in Valencia";
+  const description = "Discover the best tours and experiences in Valencia with our expert local guides. Book your adventure today!";
+  const url = "https://tourtovalencia.com";
+  const imageUrl = "https://tourtovalencia.com/tourtovalenciablackbg.webp";
+
   return [
-    { title: "Tour To Valencia - Explore the Best Experiences in Valencia" },
-    { name: "description", content: "Discover the best tours and experiences in Valencia with our expert local guides. Book your adventure today!" },
+    { title },
+    { name: "description", content: description },
+    
+    // Open Graph / Facebook
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: url },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { property: "og:image", content: imageUrl },
+
+    // Twitter
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:url", content: url },
+    { name: "twitter:title", content: title },
+    { name: "twitter:description", content: description },
+    { name: "twitter:image", content: imageUrl },
+
+    // WhatsApp
+    { property: "og:site_name", content: "Tour To Valencia" },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" }
   ];
 };
 

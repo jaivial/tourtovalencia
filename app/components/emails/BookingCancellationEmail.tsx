@@ -88,8 +88,8 @@ export const BookingCancellationEmail = ({
       : "Esperamos darte la bienvenida en otro tour en el futuro.",
     
     footerSignature: isEnglish
-      ? "The Excursiones Mediterráneo Team"
-      : "El Equipo de Excursiones Mediterráneo",
+      ? "The Tour to Valencia Team"
+      : "El Equipo de Tour to Valencia",
   };
 
   const formattedDate = new Date(booking.date).toLocaleDateString(isEnglish ? "en-US" : "es-ES", {
@@ -123,10 +123,10 @@ export const BookingCancellationEmail = ({
         <Container style={styles.container}>
           <Section style={styles.header}>
             <Img
-              src="https://via.placeholder.com/200x80?text=Excursiones+Mediterraneo"
+              src="https://tourtovalencia.com/tourtovalencialogo.png"
               width="200"
               height="80"
-              alt="Excursiones Mediterráneo"
+              alt="Tour to Valencia"
               style={styles.logo}
             />
           </Section>
@@ -201,14 +201,14 @@ export const BookingCancellationEmail = ({
             <Text style={styles.text}>{texts.contactUs}</Text>
             
             <Text style={styles.contactInfo}>
-              <Link href="mailto:info@excursionesmediterraneo.com" style={styles.link}>
-                info@excursionesmediterraneo.com
+              <Link href="mailto:tourtovalencia@gmail.com" style={styles.link}>
+                tourtovalencia@gmail.com
               </Link>
             </Text>
             
             <Text style={styles.contactInfo}>
-              <Link href="tel:+34612345678" style={styles.link}>
-                +34 612 345 678
+              <Link href="tel:+34625291391" style={styles.link}>
+                +34 625 291 391
               </Link>
             </Text>
             
