@@ -131,6 +131,9 @@ const IndexSection6 = () => {
                 <List.Item className="!py-2 sm:!py-3 text-sm sm:text-base">
                   {state.indexSection6.accessibility.babies}
                 </List.Item>
+                <List.Item className="!py-2 sm:!py-3 text-sm sm:text-base">
+                  {state.indexSection6.accessibility.pets}
+                </List.Item>
               </List>
             </Panel>
           </motion.div>
@@ -151,17 +154,12 @@ const IndexSection6 = () => {
               className={panelClass}
             >
               <List className={listClass}>
-                {[
-                  'confirmation',
-                  'participation',
-                  'weather',
-                  'minTravelers',
-                  'private'
-                ].map((key) => (
-                  <List.Item key={key} className="!py-2 sm:!py-3 text-sm sm:text-base">
-                    {state.indexSection6.additional[key]}
-                  </List.Item>
-                ))}
+                <List.Item className="!py-2 sm:!py-3 text-sm sm:text-base">
+                  {state.indexSection6.additional.confirmation}
+                </List.Item>
+                <List.Item className="!py-2 sm:!py-3 text-sm sm:text-base">
+                  {state.indexSection6.additional.noFood}
+                </List.Item>
               </List>
             </Panel>
           </motion.div>
@@ -182,19 +180,27 @@ const IndexSection6 = () => {
               className={panelClass}
             >
               <List className={listClass}>
-                {[
-                  'free',
-                  'noRefund',
-                  'noChanges',
-                  'deadline',
-                  'weather',
-                  'minParticipants',
-                  'moreDetails'
-                ].map((key) => (
-                  <List.Item key={key} className="!py-2 sm:!py-3 text-sm sm:text-base">
-                    {state.indexSection6.cancellation[key]}
-                  </List.Item>
-                ))}
+                <List.Item className="!py-2 sm:!py-3 text-sm sm:text-base">
+                  {state.indexSection6.cancellation.free}
+                </List.Item>
+                <List.Item className="!py-2 sm:!py-3 text-sm sm:text-base">
+                  {state.indexSection6.cancellation.noRefund}
+                </List.Item>
+                <List.Item className="!py-2 sm:!py-3 text-sm sm:text-base">
+                  {state.indexSection6.cancellation.noChanges}
+                </List.Item>
+                <List.Item className="!py-2 sm:!py-3 text-sm sm:text-base">
+                  {state.indexSection6.cancellation.deadline}
+                </List.Item>
+                <List.Item className="!py-2 sm:!py-3 text-sm sm:text-base">
+                  {state.indexSection6.cancellation.weather}
+                </List.Item>
+                <List.Item className="!py-2 sm:!py-3 text-sm sm:text-base">
+                  {state.indexSection6.cancellation.minParticipants}
+                </List.Item>
+                <List.Item className="!py-2 sm:!py-3 text-sm sm:text-base">
+                  {state.indexSection6.cancellation.moreDetails}
+                </List.Item>
               </List>
             </Panel>
           </motion.div>

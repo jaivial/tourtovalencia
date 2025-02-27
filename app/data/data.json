@@ -541,7 +541,8 @@
       "accessibility": {
         "title": "Accessibility Information",
         "wheelchair": "Not wheelchair accessible",
-        "babies": "The minimum age for a passenger is more than 2 years"
+        "babies": "The minimum age for a passenger is more than 2 years",
+        "pets": "Pets are not allowed on tours"
       },
       "additional": {
         "title": "Additional Information",
@@ -549,7 +550,8 @@
         "participation": "Most travelers can participate in the experience",
         "weather": "The experience requires good weather conditions. If canceled due to bad weather, you will be offered an alternative date or a full refund",
         "minTravelers": "A minimum number of travelers is required for this experience. If canceled due to not meeting this requirement, you will be offered another date/experience or a full refund",
-        "private": "This is a private tour/activity; only your group will participate"
+        "private": "This is a private tour/activity; only your group will participate",
+        "noFood": "Food and drinks are not included"
       },
       "cancellation": {
         "title": "Cancellation Policy",
@@ -1247,7 +1249,8 @@
       "accessibility": {
         "title": "Información de Accesibilidad",
         "wheelchair": "No es accesible para sillas de ruedas",
-        "babies": "La edad mínima para un pasajero es de más de 2 años"
+        "babies": "La edad mínima para un pasajero es de más de 2 años",
+        "pets": "No se permiten mascotas en los tours"
       },
       "additional": {
         "title": "Información Adicional",
@@ -1255,7 +1258,8 @@
         "participation": "La mayoría de los viajeros pueden participar en la experiencia",
         "weather": "La experiencia requiere buenas condiciones climáticas. Si se cancela debido al mal tiempo, se le ofrecerá una fecha alternativa o un reembolso completo",
         "minTravelers": "Se requiere un número mínimo de viajeros para esta experiencia. Si se cancela por no cumplir con este requisito, se le ofrecerá otra fecha/experiencia o un reembolso completo",
-        "private": "Este es un tour/actividad privada; solo participará su grupo"
+        "private": "Este es un tour/actividad privada; solo participará su grupo",
+        "noFood": "No incluye comida ni bebida"
       },
       "cancellation": {
         "title": "Política de Cancelación",
