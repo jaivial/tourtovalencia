@@ -94,25 +94,34 @@ export async function processContent(content: Record<string, unknown>, translate
       if (value == null) continue;
 
       // Handle base64 images
-      if (typeof value === "string" && value.startsWith("data:image")) {
-        const size = Buffer.from(value.split(",")[1], "base64").length;
-        processed[key] = size > MAX_IMAGE_SIZE ? await optimizeImage(value) : value;
-      } else if (typeof value === "string" && value.startsWith("blob:")) {
-        // Handle blob URLs directly
-        console.log("Found blob URL:", value);
-        processed[key] = ""; // Set to empty string as fallback
+      if (typeof value === "string") {
+        if (value.startsWith("data:image")) {
+          try {
+            const size = Buffer.from(value.split(",")[1], "base64").length;
+            processed[key] = size > MAX_IMAGE_SIZE ? await optimizeImage(value) : value;
+          } catch (error) {
+            console.error("Error processing image:", error);
+            processed[key] = value; // Keep original if processing fails
+          }
+        } else if (value.startsWith("blob:")) {
+          // Handle blob URLs directly
+          console.log("Found blob URL:", value);
+          processed[key] = ""; // Set to empty string as fallback
+        } else if (value.trim() !== "") {
+          // For text content, only translate if translate flag is true
+          processed[key] = translate ? await translateText(value) : value;
+        } else {
+          processed[key] = value;
+        }
       } else if (isBlobImageObject(value)) {
         // Handle image objects with blob URL previews
         const imgObj = value as { preview: string; file?: unknown };
         processed[key] = {
           ...imgObj,
-          preview: imgObj.preview.startsWith("data:") 
+          preview: typeof imgObj.preview === "string" && imgObj.preview.startsWith("data:") 
             ? imgObj.preview 
             : "" // Set to empty string as fallback for blob URLs
         };
-      } else if (typeof value === "string" && value.trim() !== "") {
-        // For text content, only translate if translate flag is true
-        processed[key] = translate ? await translateText(value) : value;
       } else if (typeof value === "object") {
         processed[key] = await processContent(value as Record<string, unknown>, translate);
       } else {
@@ -122,17 +131,8 @@ export async function processContent(content: Record<string, unknown>, translate
     return processed;
   }
 
-  // For string values, handle translation if needed
-  if (typeof content === "string") {
-    // Only translate non-empty strings that aren't image data
-    if (content.trim() !== "" && !content.startsWith("data:image")) {
-      return { value: translate ? await translateText(content) : content } as unknown as Record<string, unknown>;
-    }
-    return { value: content } as unknown as Record<string, unknown>;
-  }
-
-  // For any other type, wrap in an object to maintain the Record<string, unknown> return type
-  return { value: content } as Record<string, unknown>;
+  // For primitive values, return as is
+  return { _value: content } as unknown as Record<string, unknown>;
 }
 
 // Helper function to translate text using OpenRouter API with a free model

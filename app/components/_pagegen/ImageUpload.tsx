@@ -23,7 +23,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     input.onchange = (e) => {
       const target = e.target as HTMLInputElement;
       if (target.files?.[0]) {
-        onImageChange(target.files[0]);
+        const file = target.files[0];
+        console.log('ImageUpload: File selected:', file.name, file.type, file.size);
+        onImageChange(file);
       }
     };
     input.click();
@@ -32,8 +34,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const handleRemoveClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('ImageUpload: Removing image');
     onImageRemove();
   };
+
+  // Add debugging for image URL
+  console.log('ImageUpload: Rendering with imageUrl:', 
+    imageUrl ? (imageUrl.length > 30 ? imageUrl.substring(0, 30) + '...' : imageUrl) : 'none');
 
   return (
     <div className={`relative w-full h-full group ${className}`}>

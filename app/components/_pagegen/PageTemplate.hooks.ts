@@ -1,5 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useFetcher, useNavigate } from '@remix-run/react';
+import { useImageProcessing } from '../../hooks/useImageProcessing';
+import type { 
+  IndexSection5Type, 
+  sanJuanSection1Type, 
+  sanJuanSection3Type, 
+  sanJuansection2Type, 
+  sanJuansection4Type, 
+  sanJuanSection5Type, 
+  SanJuanSection6Type 
+} from '~/data/data';
+import type { TimelineDataType } from '~/components/_index/EditableTimelineFeature';
 
 export const usePublishModal = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,62 +25,12 @@ export const usePublishModal = () => {
   };
 };
 
-const convertImageToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-};
-
-const processImages = async (content: Record<string, any>): Promise<Record<string, any>> => {
-  const processObject = async (obj: any): Promise<any> => {
-    if (!obj || typeof obj !== 'object') return obj;
-
-    const result: any = Array.isArray(obj) ? [] : {};
-
-    for (const [key, value] of Object.entries(obj)) {
-      if (value && typeof value === 'object') {
-        if ('preview' in value && value.file instanceof File) {
-          // Convert File to base64
-          result[key] = {
-            ...value,
-            preview: await convertImageToBase64(value.file)
-          };
-        } else if (Array.isArray(value) && value.some(item => item?.source instanceof File)) {
-          // Handle array of images (like in section3)
-          result[key] = await Promise.all(
-            value.map(async (item) => {
-              if (item?.source instanceof File) {
-                return {
-                  ...item,
-                  source: await convertImageToBase64(item.source)
-                };
-              }
-              return item;
-            })
-          );
-        } else {
-          // Recursively process nested objects
-          result[key] = await processObject(value);
-        }
-      } else {
-        result[key] = value;
-      }
-    }
-
-    return result;
-  };
-
-  return processObject(content);
-};
-
 export const usePageCreation = () => {
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { processImages } = useImageProcessing();
 
   const handleCreatePage = async (pageData: {
     name: string;
@@ -80,7 +41,7 @@ export const usePageCreation = () => {
     setError(null);
     
     try {
-      // Process images before sending to server
+      // Process images before sending to server using the new hook
       const processedContent = await processImages(pageData.content);
       
       // Ensure price is included at the top level of the content object
@@ -88,6 +49,8 @@ export const usePageCreation = () => {
         ...processedContent,
         price: processedContent.price || 0
       };
+      
+      console.log('Processed content:', JSON.stringify(contentWithPrice).slice(0, 200) + '...');
       
       fetcher.submit(
         { 

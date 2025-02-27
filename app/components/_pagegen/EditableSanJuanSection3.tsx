@@ -7,17 +7,8 @@ import { sanJuanSection3Type } from "~/data/data";
 type EditableSanJuanSection3Props = {
   width: number;
   data: sanJuanSection3Type;
-  onUpdate: (index: number, file: string) => void;
+  onUpdate: (index: number, file: File) => void;
   onRemove: (index: number) => void;
-};
-
-const convertToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 };
 
 const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({ 
@@ -37,8 +28,13 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
   };
 
   const handleImageUpdate = async (index: number, file: File) => {
-    const base64 = await convertToBase64(file);
-    onUpdate(index, base64 as any); // Using any here since we're changing the type
+    try {
+      console.log(`EditableSanJuanSection3: Processing image update for index ${index}:`, file.name, file.type, file.size);
+      // Pass the File directly to the parent component
+      onUpdate(index, file);
+    } catch (error) {
+      console.error(`EditableSanJuanSection3: Error updating image at index ${index}:`, error);
+    }
   };
 
   return (
@@ -63,6 +59,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
                 className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl"
+                onClick={() => handleImageClick(0)}
               >
                 <ImageUpload
                   imageUrl={data.images[0]?.source || ""}
@@ -79,6 +76,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
                 className="col-span-2 relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl"
+                onClick={() => handleImageClick(1)}
               >
                 <ImageUpload
                   imageUrl={data.images[1]?.source || ""}
@@ -95,6 +93,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
                 className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl"
+                onClick={() => handleImageClick(2)}
               >
                 <ImageUpload
                   imageUrl={data.images[2]?.source || ""}
@@ -110,6 +109,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
                 className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl"
+                onClick={() => handleImageClick(3)}
               >
                 <ImageUpload
                   imageUrl={data.images[3]?.source || ""}
@@ -128,6 +128,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
                   className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl"
+                  onClick={() => handleImageClick(index)}
                 >
                   <ImageUpload
                     imageUrl={data.images[index]?.source || ""}
@@ -149,6 +150,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3 }}
                     className="relative aspect-square rounded-2xl overflow-hidden shadow-lg hover:shadow-xl"
+                    onClick={() => handleImageClick(index)}
                   >
                     <ImageUpload
                       imageUrl={data.images[index]?.source || ""}

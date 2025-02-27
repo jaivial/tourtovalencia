@@ -2,7 +2,6 @@ import { useWindowSize } from "@uidotdev/usehooks";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { Input } from "@heroui/input";
-import { Textarea } from "@heroui/input";
 import EditableIndexSection5 from "./EditableIndexSection5";
 import EditableSanJuanSection1 from "./EditableSanJuanSection1";
 import EditableSanJuanSection2 from "./EditableSanJuanSection2";
@@ -28,7 +27,7 @@ export type PageTemplateProps = {
   section2Data?: sanJuansection2Type;
   onSection2Update: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => void;
   section3Data?: sanJuanSection3Type;
-  onSection3ImageUpdate: (index: number, file: File) => void;
+  onSection3ImageUpdate: (index: number, file: File) => void | Promise<void>;
   onSection3ImageRemove: (index: number) => void;
   section4Data?: sanJuansection4Type;
   onSection4Update: (field: keyof sanJuansection4Type, value: string) => void;
@@ -51,6 +50,18 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
   const width = size.width ?? 0;
   const { state } = useLanguageContext();
   const [loadingMessage, setLoadingMessage] = useState("Creando página...");
+
+  // Add a wrapper function to convert File to base64 before passing to EditableSanJuanSection3
+  const handleSection3ImageUpdate = async (index: number, file: File) => {
+    try {
+      console.log(`PageTemplate: Processing image update for index ${index}:`, file.name, file.type, file.size);
+      
+      // Call the original onSection3ImageUpdate with the File
+      await onSection3ImageUpdate(index, file);
+    } catch (error) {
+      console.error(`PageTemplate: Error updating image at index ${index}:`, error);
+    }
+  };
 
   useEffect(() => {
     if (!isCreating) return;
@@ -135,7 +146,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
 
           {section2Data && <EditableSanJuanSection2 width={width} height={0} data={section2Data} onUpdate={onSection2Update} />}
 
-          {section3Data && <EditableSanJuanSection3 width={width} data={section3Data} onUpdate={onSection3ImageUpdate} onRemove={onSection3ImageRemove} />}
+          {section3Data && <EditableSanJuanSection3 width={width} data={section3Data} onUpdate={handleSection3ImageUpdate} onRemove={onSection3ImageRemove} />}
 
           {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
 

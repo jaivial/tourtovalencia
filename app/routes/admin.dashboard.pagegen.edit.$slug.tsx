@@ -12,6 +12,7 @@ import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
 import { motion } from "framer-motion";
 import type { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
+import { convertFileToBase64 } from "~/utils/image.client";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { slug } = params;
@@ -82,15 +83,18 @@ export default function EditPageRoute() {
     handleSection2Update(updatedData);
   };
 
-  const adaptSection3ImageUpdate = (index: number, file: File) => {
-    // Convert File to data URL
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        handleSection3ImageUpdate(index, e.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+  const adaptSection3ImageUpdate = async (index: number, file: File) => {
+    try {
+      console.log(`EditPage: Processing image update for index ${index}:`, file.name, file.type, file.size);
+      // Convert File to base64 string
+      const base64 = await convertFileToBase64(file);
+      console.log(`EditPage: Converted image ${index} to base64:`, base64.substring(0, 30) + '...');
+      
+      // Now call the original handler with the base64 string
+      handleSection3ImageUpdate(index, base64);
+    } catch (error) {
+      console.error(`EditPage: Error updating image at index ${index}:`, error);
+    }
   };
 
   const adaptSection4Update = (field: keyof sanJuansection4Type, value: string) => {
