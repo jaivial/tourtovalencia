@@ -321,6 +321,13 @@
             "icon": "leaf"
           }
         ]
+      },
+      "travelGallery": {
+        "title": "Explore Valencia Through Our Lens",
+        "subtitle": "Discover the beauty of Valencia through our collection of stunning locations featured in our tours",
+        "viewAllButton": "View All Destinations",
+        "shareButton": "Share",
+        "infoButton": "More Info"
       }
     },
     "sanjuan": {
@@ -1010,6 +1017,13 @@
             "icon": "leaf"
           }
         ]
+      },
+      "travelGallery": {
+        "title": "Explora Valencia a Través de Nuestra Mirada",
+        "subtitle": "Descubre la belleza de Valencia a través de nuestra colección de impresionantes lugares que forman parte de nuestros tours",
+        "viewAllButton": "Ver Todos los Destinos",
+        "shareButton": "Compartir",
+        "infoButton": "Más Información"
       }
     },
     "sanjuan": {

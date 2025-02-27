@@ -10,6 +10,7 @@ import IndexSection6 from "./IndexSection6";
 import IndexSection1 from "./IndexSection1";
 import ToursSection from "./ToursSection";
 import WhyChooseUs from "./WhyChooseUs";
+import TravelGallery from "./TravelGallery";
 import { Tour, Page } from "~/utils/db.schema.server";
 import ArrowToTop from "./ArrowToTop";
 import PropTypes from "prop-types";
@@ -45,6 +46,7 @@ const IndexContainer: React.FC<IndexContainerProps> = ({ tours = [], pages = [] 
   const floatingButtonText = state.common.bookNow;
   const toursText = state.index.toursSection;
   const whyChooseUsText = state.index.whyChooseUs;
+  const travelGalleryText = state.index.travelGallery;
 
   // Convert serialized tours to Tour objects
   const processedTours: Tour[] = tours.map(tour => ({
@@ -81,6 +83,7 @@ const IndexContainer: React.FC<IndexContainerProps> = ({ tours = [], pages = [] 
       <IndexSection1 width={clientWidth} height={clientHeight} indexSection1Text={indexSection1Text} />
       <ToursSection width={clientWidth} toursText={toursText} tours={processedTours} pages={processedPages} />
       <WhyChooseUs width={clientWidth} whyChooseUsText={whyChooseUsText} />
+      <TravelGallery width={clientWidth} galleryText={travelGalleryText} />
       <IndexFeatures width={clientWidth} indexFeatures={indexFeatures} />
       <IndexSection3 width={clientWidth} indexSection3Text={indexSection3Text} />
       <IndexSection2 width={clientWidth} height={clientHeight} indexSection2Text={indexSection2Text} carouselIndexSection2={carouselIndexSection2} /> 
