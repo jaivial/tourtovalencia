@@ -87,11 +87,11 @@ const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ width, whyChooseUsText }) => 
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2 }}
             viewport={{ once: true }}
-            className="w-full h-[300px] md:h-[400px] rounded-2xl overflow-hidden"
+            className="w-full h-[500px] md:h-[600px] rounded-2xl overflow-hidden"
           >
             <img 
-              src="https://images.unsplash.com/photo-1558642084-fd07fae5282e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80" 
-              alt="Valencia cityscape" 
+              src="https://images.unsplash.com/photo-1624396372026-dac58b4fb3b8?q=80&w=3157&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+              alt="Torres de Serranos, Valencia" 
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-blue-900/70 to-transparent"></div>
