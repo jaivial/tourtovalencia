@@ -73,7 +73,7 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
-  const { initialLanguage, ENV, pages, tours } = useLoaderData<RootLoaderData>();
+  const { initialLanguage, ENV, pages } = useLoaderData<RootLoaderData>();
   const location = useLocation();
   const isAdminDashboard = location.pathname.includes("/admin/dashboard");
 
