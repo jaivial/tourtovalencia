@@ -7,6 +7,7 @@ import { useWindowSize } from "@uidotdev/usehooks";
 import SanJuanSection3Dynamic from "~/components/_sanjuan/SanJuanSection3Dynamic";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import ComingSoonCard from "~/components/_cards/ComingSoonCard";
+import FloatingButton from "~/components/ui/FloatingButton";
 
 // Error boundary component
 export function ErrorBoundary() {
@@ -96,9 +97,17 @@ export default function DynamicPage() {
     console.warn(`Content not available in ${languageCode}, falling back to Spanish for page: ${page.slug}`);
   }
 
+  // Get the "Book Now" text from the language context
+  const bookNowText = state.common.bookNow;
+
   // If this is not a dynamic page that uses section3, render the normal container
   if (!content?.section3?.images) {
-    return <DynamicPageContainer page={page} />;
+    return (
+      <>
+        <DynamicPageContainer page={page} />
+        <FloatingButton text={bookNowText} />
+      </>
+    );
   }
 
   return (
@@ -119,6 +128,9 @@ export default function DynamicPage() {
       {content.section5 && <DynamicPageContainer.Section5 width={width} SanJuanSection5Text={content.section5} />}
 
       {content.section6 && (page.status === "upcoming" ? <ComingSoonCard width={width} /> : <DynamicPageContainer.Section6 width={width} SanJuanSection6Text={content.section6} />)}
+      
+      {/* Add the floating button */}
+      <FloatingButton text={bookNowText} />
     </div>
   );
 }
