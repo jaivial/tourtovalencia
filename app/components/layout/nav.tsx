@@ -93,7 +93,7 @@ const Nav: React.FC<NavProps> = () => {
     <>
       {clientWidth >= 1280 ? (
         <motion.div 
-          className={`w-[95%] max-w-[920px] flex flex-row justify-between items-center h-[100px] backdrop-blur-xl mx-auto p-4 z-[90] rounded-2xl border ${isScrolled ? "fixed" : "absolute"} ${isScrolled ? "top-4" : "top-4"}`}
+          className={`w-[95%] max-w-[720px] flex flex-row justify-between items-center h-[80px] backdrop-blur-xl mx-auto p-4 z-[90] rounded-2xl border ${isScrolled ? "fixed" : "absolute"} ${isScrolled ? "top-4" : "top-4"}`}
           style={{ 
             left: "50%", 
             transform: "translateX(-50%)"
@@ -109,12 +109,12 @@ const Nav: React.FC<NavProps> = () => {
           }}
         >
           <div className="w-[45px]" />
-          <img src="/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[20px]" : "h-[100px]"} py-3 absolute left-1/2 -translate-x-1/2 w-auto`} />
+          <img src="/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[20px]" : "h-[80px]"} py-2 absolute left-1/2 -translate-x-1/2 w-auto`} />
           <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors" size={45} onClick={() => setMobileNavOpen(true)} />
         </motion.div>
       ) : (
         <motion.div 
-          className={`w-[90%] max-w-[920px] flex flex-row justify-between items-center h-[100px] backdrop-blur-xl mx-auto p-6 z-[90] rounded-2xl border ${isScrolled ? "fixed" : "absolute"} ${isScrolled ? "top-4" : "top-4"}`}
+          className={`w-[90%] max-w-[920px] flex flex-row justify-between items-center h-[70px] backdrop-blur-xl mx-auto p-6 z-[90] rounded-2xl border ${isScrolled ? "fixed" : "absolute"} ${isScrolled ? "top-4" : "top-4"}`}
           style={{ 
             left: "50%", 
             transform: "translateX(-50%)" 
@@ -129,7 +129,7 @@ const Nav: React.FC<NavProps> = () => {
             mass: 1
           }}
         >
-          <img src="/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[50px]" : clientWidth < 450 ? "h-[60px]" : clientWidth < 500 ? "h-[70px]" : "h-[80px]"}`} />
+          <img src="/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[50px]" : clientWidth < 450 ? "h-[50px]" : clientWidth < 500 ? "h-[50px]" : "h-[50px]"}`} />
           <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors z-[990]" size={45} onClick={() => setMobileNavOpen(true)} />
         </motion.div>
       )}
