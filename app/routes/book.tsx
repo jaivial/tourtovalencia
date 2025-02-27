@@ -35,7 +35,34 @@ interface StripeSession {
 }
 
 export const meta: MetaFunction = () => {
-  return [{ title: "Book Your Experience" }, { name: "description", content: "Book your unique dining experience with us" }];
+  const title = "Book Your Experience | Tour To Valencia";
+  const description = "Book your unique dining experience with us";
+  const url = "https://tourtovalencia.com/book";
+  const imageUrl = "https://tourtovalencia.com/tourtovalenciablackbg.webp";
+
+  return [
+    { title },
+    { name: "description", content: description },
+    
+    // Open Graph / Facebook
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: url },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { property: "og:image", content: imageUrl },
+
+    // Twitter
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:url", content: url },
+    { name: "twitter:title", content: title },
+    { name: "twitter:description", content: description },
+    { name: "twitter:image", content: imageUrl },
+
+    // WhatsApp
+    { property: "og:site_name", content: "Tour To Valencia" },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" }
+  ];
 };
 
 export type ActionData = {

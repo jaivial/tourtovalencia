@@ -100,8 +100,8 @@ export async function action({ request }: { request: Request }) {
     try {
       // Set the email subject based on the language
       const emailSubject = bookingData.language === "en" 
-        ? "Booking Confirmation - Excursiones Mediterráneo" 
-        : "Confirmación de Reserva - Excursiones Mediterráneo";
+        ? "Booking Confirmation - Tour to Valencia" 
+        : "Confirmación de Reserva - Tour to Valencia";
         
       await sendEmail({
         to: bookingData.email,
@@ -130,7 +130,7 @@ export async function action({ request }: { request: Request }) {
       
       await sendEmail({
         to: adminEmail,
-        subject: `Nueva Reserva: ${bookingData.fullName} - ${tourName || 'Excursiones Mediterráneo'}`,
+        subject: `Nueva Reserva: ${bookingData.fullName} - ${tourName || 'Tour to Valencia'}`,
         component: adminEmailComponent,
       });
       console.log(`✅ Admin notification email sent to ${adminEmail}`);
