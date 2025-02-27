@@ -118,7 +118,7 @@ export default function DynamicPage() {
 
       {content.section5 && <DynamicPageContainer.Section5 width={width} SanJuanSection5Text={content.section5} />}
 
-      {content.section6 && (page.status === "upcoming" ? <ComingSoonCard width={width} language={state.currentLanguage} /> : <DynamicPageContainer.Section6 width={width} SanJuanSection6Text={content.section6} />)}
+      {content.section6 && (page.status === "upcoming" ? <ComingSoonCard width={width} /> : <DynamicPageContainer.Section6 width={width} SanJuanSection6Text={content.section6} />)}
     </div>
   );
 }
