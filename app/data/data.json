@@ -18,8 +18,8 @@
     "currentLanguage": "English",
     "index": {
       "heroSection": {
-        "firstH2Orange": "MEDITERRANEAN",
-        "firstH2": "EXCURSIONS",
+        "firstH2Orange": "TOUR TO",
+        "firstH2": "VALENCIA",
         "firstH3": "EXPLORE THE BEST",
         "secondH3": "EXPERIENCES IN VALENCIA"
       },
@@ -726,8 +726,8 @@
     "currentLanguage": "Español",
     "index": {
       "heroSection": {
-        "firstH2Orange": "EXCURSIONES",
-        "firstH2": "MEDITERRÁNEAS",
+        "firstH2Orange": "TOUR TO",
+        "firstH2": "VALENCIA",
         "firstH3": "EXPLORA LAS MEJORES",
         "secondH3": "EXPERIENCIAS EN VALENCIA"
       },
