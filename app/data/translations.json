@@ -29,6 +29,11 @@
     "requisitos": "requirements",
     "información importante": "important information",
     "políticas": "policies",
-    "cancelación": "cancellation"
+    "cancelación": "cancellation",
+    "país": "country",
+    "seleccionar país": "select country",
+    "buscar país": "search country",
+    "no se encontraron países": "no countries found",
+    "nacionalidad": "nationality"
   }
 }

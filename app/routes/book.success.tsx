@@ -80,6 +80,8 @@ export async function action({ request }: { request: Request }) {
       totalAmount: finalAmount,
       amount: finalAmount,
       phoneNumber: bookingData.phoneNumber,
+      country: bookingData.country,
+      countryCode: bookingData.countryCode,
       tourSlug: bookingData.tourSlug,
       tourName: tourName,
       paymentMethod: "paypal" as const,

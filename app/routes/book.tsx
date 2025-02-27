@@ -21,6 +21,8 @@ interface StripeSessionMetadata {
   tourSlug?: string;
   tourName?: string;
   paymentMethod: string;
+  country?: string;
+  countryCode?: string;
 }
 
 // Extend the Stripe session type
@@ -148,6 +150,8 @@ export async function action({ request }: ActionFunctionArgs) {
         paymentIntentId: session.id,
         amount: session.amount_total || 0,
         phoneNumber: session.metadata?.phoneNumber || "",
+        country: session.metadata?.country || "",
+        countryCode: session.metadata?.countryCode || "",
         status: "confirmed" as const,
         tourSlug: session.metadata?.tourSlug || "",
         tourName: session.metadata?.tourName || "",

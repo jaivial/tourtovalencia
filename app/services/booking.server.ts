@@ -20,6 +20,8 @@ export interface BookingDocument extends Omit<BookingFormData, "emailConfirm" | 
   tourName?: string;
   tourType?: string;
   language?: string;
+  country: string;
+  countryCode: string;
 }
 
 export async function createBooking(bookingData: Omit<Booking, "_id">, paymentId: string): Promise<Booking> {
@@ -48,6 +50,8 @@ export async function createBooking(bookingData: Omit<Booking, "_id">, paymentId
     tourName: bookingData.tourName,
     tourType: bookingData.tourName,
     language: bookingData.language || "es",
+    country: bookingData.country || "",
+    countryCode: bookingData.countryCode || ""
   };
 
   const result = await db.collection("bookings").insertOne(bookingDocument);
@@ -65,6 +69,8 @@ export async function createBooking(bookingData: Omit<Booking, "_id">, paymentId
     paid: bookingDocument.paymentStatus === "paid",
     phoneNumber: bookingDocument.phoneNumber,
     language: bookingDocument.language,
+    country: bookingDocument.country,
+    countryCode: bookingDocument.countryCode
   };
 }
 

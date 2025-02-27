@@ -648,12 +648,16 @@
         "email": "Email",
         "emailConfirm": "Confirm Email",
         "phoneNumber": "Phone Number",
+        "country": "Country",
         "tourSelector": "Select Tour",
         "placeholders": {
           "fullName": "Enter your full name",
           "email": "Enter your email",
           "emailConfirm": "Confirm your email",
           "phoneNumber": "Enter your phone number",
+          "country": "Select your country",
+          "searchCountry": "Search country...",
+          "noCountryFound": "No country found",
           "tourSelector": "Choose a tour experience"
         }
       },
@@ -668,7 +672,9 @@
           "phone": "Phone:",
           "partySize": "Party Size:",
           "date": "Date:",
-          "totalPrice": "Total Price:"
+          "totalPrice": "Total Price:",
+          "tour": "Tour:",
+          "country": "Country:"
         },
         "notSelected": "Not selected",
         "people": "people",
@@ -1348,12 +1354,16 @@
         "email": "Correo Electrónico",
         "emailConfirm": "Confirmar Correo Electrónico",
         "phoneNumber": "Número de Teléfono",
+        "country": "País",
         "tourSelector": "Seleccionar Tour",
         "placeholders": {
           "fullName": "Ingrese su nombre completo",
           "email": "Ingrese su correo electrónico",
           "emailConfirm": "Confirme su correo electrónico",
           "phoneNumber": "Ingrese su número de teléfono",
+          "country": "Seleccione su país",
+          "searchCountry": "Buscar país...",
+          "noCountryFound": "No se encontró ningún país",
           "tourSelector": "Elija una experiencia de tour"
         }
       },
@@ -1368,7 +1378,9 @@
           "phone": "Teléfono:",
           "partySize": "Número de Personas:",
           "date": "Fecha:",
-          "totalPrice": "Precio Total:"
+          "totalPrice": "Precio Total:",
+          "tour": "Tour:",
+          "country": "País:"
         },
         "notSelected": "No seleccionado",
         "people": "personas",
