@@ -12,12 +12,20 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ text }) => {
   useEffect(() => {
     const handleScroll = () => {
       const heroSection = document.querySelector('#hero-section');
+      
+      // If hero-section exists, show button after scrolling past it
       if (heroSection) {
         const heroBottom = heroSection.getBoundingClientRect().bottom;
         setIsVisible(heroBottom < 0);
+      } else {
+        // If no hero-section exists (on dynamic pages), show button after scrolling a bit
+        setIsVisible(window.scrollY > 300);
       }
     };
 
+    // Initial check
+    handleScroll();
+    
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);

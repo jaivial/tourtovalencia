@@ -3,19 +3,36 @@ import { useState, useEffect } from "react";
 import HeroSection from "./HeroSection";
 import IndexSection2 from "./IndexSection2";
 import IndexSection3 from "./IndexSection3";
-import IndexSection5 from "./IndexSection5";
 import IndexFeatures from "./IndexFeatures";
-import SanJuanSection1 from "../_sanjuan/SanJuanSection1";
-import SanJuanSection2 from "../_sanjuan/SanJuanSection2";
-import SanJuanSection3 from "../_sanjuan/SanJuanSection3";
-import SanJuanSection5 from "../_sanjuan/SanJuanSection5";
-import SanJuanSection6 from "../_sanjuan/SanJuanSection6";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import FloatingButton from '../ui/FloatingButton';
-import { TimelineFeature } from "./TimelineFeature";
 import IndexSection6 from "./IndexSection6";
 import IndexSection1 from "./IndexSection1";
-const IndexContainer: React.FC = () => {
+import ToursSection from "./ToursSection";
+import WhyChooseUs from "./WhyChooseUs";
+import TravelGallery from "./TravelGallery";
+import { Tour, Page } from "~/utils/db.schema.server";
+import ArrowToTop from "./ArrowToTop";
+import PropTypes from "prop-types";
+
+// Define a serializable version of the Tour type for use with JSON
+type SerializableTour = Omit<Tour, 'createdAt' | 'updatedAt'> & {
+  createdAt: string;
+  updatedAt: string;
+};
+
+// Define a serializable version of the Page type for use with JSON
+type SerializablePage = Omit<Page, 'createdAt' | 'updatedAt'> & {
+  createdAt: string;
+  updatedAt: string;
+};
+
+interface IndexContainerProps {
+  tours?: SerializableTour[];
+  pages?: SerializablePage[];
+}
+
+const IndexContainer: React.FC<IndexContainerProps> = ({ tours = [], pages = [] }) => {
   const [clientWidth, setClientWidth] = useState(0);
   const [clientHeight, setClientHeight] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
@@ -25,14 +42,25 @@ const IndexContainer: React.FC = () => {
   const indexSection2Text = state.index.indexSection2;
   const indexSection3Text = state.index.indexSection3;
   const carouselIndexSection2 = state.index.carouselIndexSection2;
-  const indexSection5Text = state.index.indexSection5;
   const indexFeatures = state.index.indexFeatures;
-  const sanJuanSection1Text = state.sanjuan.sanJuanSection1;
-  const SanJuanSection2Text = state.sanjuan.sanJuanSection2;
-
-  const SanJuanSection5Text = state.sanjuan.sanJuanSection5;
-  const SanJuanSection6Text = state.sanjuan.sanJuanSection6;
   const floatingButtonText = state.common.bookNow;
+  const toursText = state.index.toursSection;
+  const whyChooseUsText = state.index.whyChooseUs;
+  const travelGalleryText = state.index.travelGallery;
+
+  // Convert serialized tours to Tour objects
+  const processedTours: Tour[] = tours.map(tour => ({
+    ...tour,
+    createdAt: new Date(tour.createdAt),
+    updatedAt: new Date(tour.updatedAt)
+  }));
+
+  // Convert serialized pages to Page objects
+  const processedPages: Page[] = pages.map(page => ({
+    ...page,
+    createdAt: new Date(page.createdAt),
+    updatedAt: new Date(page.updatedAt)
+  }));
 
   useEffect(() => {
     setIsMounted(true);
@@ -53,20 +81,22 @@ const IndexContainer: React.FC = () => {
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn">
       <HeroSection width={clientWidth} height={clientHeight} heroSectionText={heroSectionText} />
       <IndexSection1 width={clientWidth} height={clientHeight} indexSection1Text={indexSection1Text} />
-      {/* <IndexSection5 width={clientWidth} indexSection5Text={indexSection5Text} />
-      <SanJuanSection2 width={clientWidth} height={clientHeight} SanJuanSection2Text={SanJuanSection2Text} />
-      <SanJuanSection1 width={clientWidth} sanJuanSection1Text={sanJuanSection1Text} />
-      <SanJuanSection3 width={clientWidth} />
-      <SanJuanSection5 width={clientWidth} SanJuanSection5Text={SanJuanSection5Text} />
-      <TimelineFeature />
+      <ToursSection width={clientWidth} toursText={toursText} tours={processedTours} pages={processedPages} />
+      <WhyChooseUs width={clientWidth} whyChooseUsText={whyChooseUsText} />
+      <TravelGallery width={clientWidth} galleryText={travelGalleryText} />
       <IndexFeatures width={clientWidth} indexFeatures={indexFeatures} />
-      <SanJuanSection6 width={clientWidth} SanJuanSection6Text={SanJuanSection6Text} />
       <IndexSection3 width={clientWidth} indexSection3Text={indexSection3Text} />
-      <IndexSection2 width={clientWidth} height={clientHeight} indexSection2Text={indexSection2Text} carouselIndexSection2={carouselIndexSection2} /> */}
+      <IndexSection2 width={clientWidth} height={clientHeight} indexSection2Text={indexSection2Text} carouselIndexSection2={carouselIndexSection2} /> 
       <FloatingButton text={floatingButtonText} />
       <IndexSection6 />
+      <ArrowToTop />
     </div>
   );
+};
+
+IndexContainer.propTypes = {
+  tours: PropTypes.array,
+  pages: PropTypes.array
 };
 
 export default IndexContainer;
