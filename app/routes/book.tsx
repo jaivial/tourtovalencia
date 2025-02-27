@@ -1,8 +1,37 @@
-import { json } from "@remix-run/node";
-import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
+import { json } from "@remix-run/server-runtime";
+import type { ActionFunctionArgs } from "@remix-run/server-runtime";
 import { useNavigation, Outlet } from "@remix-run/react";
+import type { MetaFunction } from "@remix-run/react";
 import { BookingLoading } from "~/components/_book/BookingLoading";
 import type { Booking } from "~/types/booking";
+import { getToursCollection } from "~/utils/db.server";
+import { retrieveCheckoutSession } from "~/services/stripe.server";
+import { createBooking } from "~/services/booking.server";
+import { sendEmail } from "~/utils/email.server";
+import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
+import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
+
+// Define a type for the Stripe session metadata
+interface StripeSessionMetadata {
+  customerName?: string;
+  customerEmail?: string;
+  date?: string;
+  time?: string;
+  partySize?: string;
+  phoneNumber?: string;
+  tourSlug?: string;
+  tourName?: string;
+  paymentMethod: string;
+}
+
+// Extend the Stripe session type
+interface StripeSession {
+  id: string;
+  metadata?: StripeSessionMetadata;
+  customer_email?: string;
+  amount_total?: number;
+  payment_status?: string;
+}
 
 export const meta: MetaFunction = () => {
   return [{ title: "Book Your Experience" }, { name: "description", content: "Book your unique dining experience with us" }];
@@ -64,9 +93,6 @@ export interface BookingDocument {
 }
 
 export async function loader() {
-  // Import server-only modules inside the loader function
-  const { getToursCollection } = await import("~/utils/db.server");
-  
   try {
     // Get tours from the tours collection instead of pages
     const toursCollection = await getToursCollection();
@@ -98,20 +124,13 @@ export async function loader() {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  // Import server-only modules inside the action function
-  const { retrieveCheckoutSession } = await import("~/services/stripe.server");
-  const { createBooking } = await import("~/services/booking.server");
-  const { sendEmail } = await import("~/utils/email.server");
-  const { BookingConfirmationEmail } = await import("~/components/emails/BookingConfirmationEmail");
-  const { BookingAdminEmail } = await import("~/components/emails/BookingAdminEmail");
-  
   const formData = await request.formData();
   const intent = formData.get("intent");
 
   if (intent === "confirm-payment") {
     try {
       const sessionId = formData.get("session_id") as string;
-      const session = await retrieveCheckoutSession(sessionId);
+      const session = await retrieveCheckoutSession(sessionId) as StripeSession;
 
       if (session.payment_status !== "paid") {
         throw new Error("Payment not completed");

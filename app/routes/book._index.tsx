@@ -1,4 +1,4 @@
-import { json } from "@remix-run/node";
+import { json } from "@remix-run/server-runtime";
 import { useLoaderData } from "@remix-run/react";
 import { BookingProvider } from "~/context/BookingContext";
 import { BookingFeature } from "~/components/_book/BookingFeature";
@@ -9,6 +9,9 @@ import { useEffect } from "react";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import type { Tour } from "./book";
 import { ObjectId } from "mongodb";
+import { getToursCollection } from "~/utils/db.server";
+import { getAvailableDatesForTour } from "~/services/bookingAvailability.server";
+import type { DateAvailability } from "./book";
 
 // Define a type for the MongoDB tour document
 interface TourDocument {
@@ -34,16 +37,8 @@ interface TourDocument {
 }
 
 export type LoaderData = {
-  availableDates: Array<{
-    date: string;
-    availablePlaces: number;
-    isAvailable: boolean;
-  }>;
-  selectedDateAvailability?: {
-    date: string;
-    availablePlaces: number;
-    isAvailable: boolean;
-  };
+  availableDates: Array<DateAvailability>;
+  selectedDateAvailability?: DateAvailability;
   paypalClientId?: string;
   error?: string;
   emailConfig?: {
@@ -63,9 +58,7 @@ export type ActionData = {
 
 export async function loader({ request }: { request: Request }) {
   try {
-    // Import server-only modules inside the loader function
-    const { getToursCollection } = await import("~/utils/db.server");
-    const { getAvailableDatesForTour } = await import("~/services/bookingAvailability.server");
+    // Use the statically imported modules
     
     const url = new URL(request.url);
     const selectedDate = url.searchParams.get("date");
@@ -173,7 +166,7 @@ export async function loader({ request }: { request: Request }) {
       return tourData as Tour;
     });
 
-    return json({
+    return json<LoaderData>({
       availableDates,
       selectedDateAvailability,
       paypalClientId: process.env.PAYPAL_CLIENT_ID,
@@ -185,7 +178,7 @@ export async function loader({ request }: { request: Request }) {
     });
   } catch (error) {
     console.error("Error in loader:", error);
-    return json({
+    return json<LoaderData>({
       availableDates: [],
       error: "Failed to load available dates",
       tours: [],
@@ -242,7 +235,8 @@ export async function action({ request }: { request: Request }) {
 }
 
 export default function BookIndex() {
-  const { availableDates, selectedDateAvailability, paypalClientId, emailConfig, tours } = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>() as LoaderData;
+  const { availableDates, selectedDateAvailability, paypalClientId, emailConfig, tours } = data;
   
   // Debug: Log the tours from the loader data
   useEffect(() => {
@@ -252,19 +246,19 @@ export default function BookIndex() {
   return (
     <BookingProvider
       initialState={{
-        availableDates,
+        availableDates: availableDates || [],
         selectedDateAvailability,
         serverError: null,
-        paypalClientId,
-        emailConfig,
-        tours,
+        paypalClientId: paypalClientId || "",
+        emailConfig: emailConfig || { gmailUser: "", gmailAppPassword: "" },
+        tours: tours || [],
       }}
     >
       <div className="container mx-auto px-4 py-8">
         <div className="mt-8 flex justify-center">
           <PayPalScriptProvider
             options={{
-              clientId: paypalClientId,
+              clientId: paypalClientId || "",
               currency: "EUR",
               intent: "capture",
               components: "buttons,funding-eligibility",
