@@ -295,6 +295,32 @@
         "fourthSquareDescription": "Pets are not allowed during the tour.",
         "experienceTitle": "Unique Experiences",
         "experienceDescription": "Dare to enjoy something different and special. Feel the sensation of time standing still in a very special atmosphere."
+      },
+      "whyChooseUs": {
+        "title": "Why Choose Us",
+        "subtitle": "Discover what makes our tours truly special",
+        "reasons": [
+          {
+            "title": "Small Groups",
+            "description": "We believe in quality over quantity. Our small group sizes (maximum 10 people) ensure a personalized experience where you can connect with your guide and fellow travelers.",
+            "icon": "users"
+          },
+          {
+            "title": "Local Expertise",
+            "description": "Our guides are passionate locals with deep knowledge of Valencia's history, culture, and hidden gems. Experience the city through the eyes of someone who truly loves it.",
+            "icon": "map-pin"
+          },
+          {
+            "title": "Unforgettable Experiences",
+            "description": "We design our tours to create lasting memories. From underground cave explorations to cultural immersions, every moment is crafted to be special.",
+            "icon": "sparkles"
+          },
+          {
+            "title": "Sustainable Tourism",
+            "description": "We're committed to responsible tourism practices that respect local communities and the environment, ensuring that the places we love remain beautiful for generations to come.",
+            "icon": "leaf"
+          }
+        ]
       }
     },
     "sanjuan": {
@@ -958,6 +984,32 @@
         "fourthSquareDescription": "No se permiten mascotas durante el tour.",
         "experienceTitle": "Experiencias Únicas",
         "experienceDescription": "Atrévete a disfrutar algo diferente y especial. Siente la sensación de que el tiempo se ha parado en una atmósfera muy especial."
+      },
+      "whyChooseUs": {
+        "title": "Por Qué Elegirnos",
+        "subtitle": "Descubre lo que hace que nuestros tours sean verdaderamente especiales",
+        "reasons": [
+          {
+            "title": "Grupos Reducidos",
+            "description": "Creemos en la calidad sobre la cantidad. Nuestros grupos reducidos (máximo 10 personas) garantizan una experiencia personalizada donde puedes conectar con tu guía y compañeros de viaje.",
+            "icon": "users"
+          },
+          {
+            "title": "Experiencia Local",
+            "description": "Nuestros guías son locales apasionados con un profundo conocimiento de la historia, cultura y rincones ocultos de Valencia. Experimenta la ciudad a través de los ojos de alguien que realmente la ama.",
+            "icon": "map-pin"
+          },
+          {
+            "title": "Experiencias Inolvidables",
+            "description": "Diseñamos nuestros tours para crear recuerdos duraderos. Desde exploraciones de cuevas subterráneas hasta inmersiones culturales, cada momento está diseñado para ser especial.",
+            "icon": "sparkles"
+          },
+          {
+            "title": "Turismo Sostenible",
+            "description": "Estamos comprometidos con prácticas de turismo responsable que respetan las comunidades locales y el medio ambiente, asegurando que los lugares que amamos permanezcan hermosos para las generaciones futuras.",
+            "icon": "leaf"
+          }
+        ]
       }
     },
     "sanjuan": {
