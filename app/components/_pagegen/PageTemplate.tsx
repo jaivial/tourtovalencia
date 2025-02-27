@@ -23,9 +23,9 @@ export type PageTemplateProps = {
   indexSection5Data?: IndexSection5Type;
   onIndexSection5Update?: (field: keyof IndexSection5Type, value: string) => void;
   section1Data?: sanJuanSection1Type;
-  onSection1Update: (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => void;
+  onSection1Update: (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => void | Promise<void>;
   section2Data?: sanJuansection2Type;
-  onSection2Update: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => void;
+  onSection2Update: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => void | Promise<void>;
   section3Data?: sanJuanSection3Type;
   onSection3ImageUpdate: (index: number, file: File) => void | Promise<void>;
   onSection3ImageRemove: (index: number) => void;
@@ -50,6 +50,31 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
   const width = size.width ?? 0;
   const { state } = useLanguageContext();
   const [loadingMessage, setLoadingMessage] = useState("Creando página...");
+
+  // Add wrapper functions to handle async updates
+  const handleSection1Update = async (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
+    try {
+      console.log(`PageTemplate: Processing section1 update for field ${String(field)}:`, 
+        typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+      
+      // Call the original onSection1Update
+      await onSection1Update(field, value);
+    } catch (error) {
+      console.error(`PageTemplate: Error updating section1 field ${String(field)}:`, error);
+    }
+  };
+
+  const handleSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
+    try {
+      console.log(`PageTemplate: Processing section2 update for field ${String(field)}:`, 
+        typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+      
+      // Call the original onSection2Update
+      await onSection2Update(field, value);
+    } catch (error) {
+      console.error(`PageTemplate: Error updating section2 field ${String(field)}:`, error);
+    }
+  };
 
   // Add a wrapper function to convert File to base64 before passing to EditableSanJuanSection3
   const handleSection3ImageUpdate = async (index: number, file: File) => {
@@ -142,9 +167,9 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
         <div className="w-full flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
           {indexSection5Data && onIndexSection5Update && <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />}
 
-          {section1Data && <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={onSection1Update} />}
+          {section1Data && <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={handleSection1Update} />}
 
-          {section2Data && <EditableSanJuanSection2 width={width} height={0} data={section2Data} onUpdate={onSection2Update} />}
+          {section2Data && <EditableSanJuanSection2 width={width} height={0} data={section2Data} onUpdate={handleSection2Update} />}
 
           {section3Data && <EditableSanJuanSection3 width={width} data={section3Data} onUpdate={handleSection3ImageUpdate} onRemove={onSection3ImageRemove} />}
 

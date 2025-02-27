@@ -10,7 +10,7 @@ import { useEditPage } from "./admin.dashboard.pagegen.edit.$slug.hooks";
 import { getPageBySlug } from "~/utils/page.server";
 import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
 import { motion } from "framer-motion";
-import type { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
+import type { IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 import { convertFileToBase64 } from "~/utils/image.client";
 
@@ -73,14 +73,68 @@ export default function EditPageRoute() {
     handleStatusChange(checked ? 'active' : 'upcoming');
   };
 
-  const adaptSection1Update = (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
-    const updatedData = { ...section1Data, [field]: value };
-    handleSection1Update(updatedData);
+  const adaptSection1Update = async (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
+    console.log(`EditPage: Processing section1 update for field ${String(field)}:`, 
+      typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+    
+    // If the value is an object with a file, convert it to base64 before updating
+    if (typeof value !== 'string' && value.file) {
+      try {
+        const base64 = await convertFileToBase64(value.file);
+        console.log(`EditPage: Converted section1 ${String(field)} image to base64:`, base64.substring(0, 30) + '...');
+        
+        // Update with the base64 string as preview but keep the file reference
+        const updatedData = { 
+          ...section1Data, 
+          [field]: { 
+            preview: base64,
+            file: undefined // File objects can't be serialized for the database
+          } 
+        };
+        handleSection1Update(updatedData);
+      } catch (error) {
+        console.error(`EditPage: Error converting section1 image for field ${String(field)}:`, error);
+        // Still update with the preview URL if conversion fails
+        const updatedData = { ...section1Data, [field]: value };
+        handleSection1Update(updatedData);
+      }
+    } else {
+      // For non-file updates, just pass the value directly
+      const updatedData = { ...section1Data, [field]: value };
+      handleSection1Update(updatedData);
+    }
   };
 
-  const adaptSection2Update = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
-    const updatedData = { ...section2Data, [field]: value };
-    handleSection2Update(updatedData);
+  const adaptSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
+    console.log(`EditPage: Processing section2 update for field ${String(field)}:`, 
+      typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+    
+    // If the value is an object with a file, convert it to base64 before updating
+    if (typeof value !== 'string' && value.file) {
+      try {
+        const base64 = await convertFileToBase64(value.file);
+        console.log(`EditPage: Converted section2 ${String(field)} image to base64:`, base64.substring(0, 30) + '...');
+        
+        // Update with the base64 string as preview but keep the file reference
+        const updatedData = { 
+          ...section2Data, 
+          [field]: { 
+            preview: base64,
+            file: undefined // File objects can't be serialized for the database
+          } 
+        };
+        handleSection2Update(updatedData);
+      } catch (error) {
+        console.error(`EditPage: Error converting section2 image for field ${String(field)}:`, error);
+        // Still update with the preview URL if conversion fails
+        const updatedData = { ...section2Data, [field]: value };
+        handleSection2Update(updatedData);
+      }
+    } else {
+      // For non-file updates, just pass the value directly
+      const updatedData = { ...section2Data, [field]: value };
+      handleSection2Update(updatedData);
+    }
   };
 
   const adaptSection3ImageUpdate = async (index: number, file: File) => {
