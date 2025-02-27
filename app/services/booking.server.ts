@@ -1,14 +1,18 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "~/utils/db.server";
-import type { BookingFormData } from "~/hooks/book.hooks";
-import { localDateToUTCMidnight } from "~/utils/date";
 import { Booking } from "~/types/booking";
 import { refundPayPalPayment } from "~/utils/paypal.server";
+import { v4 as uuidv4 } from "uuid";
 
-export interface BookingDocument extends Omit<BookingFormData, "emailConfirm" | "date"> {
+// Define the booking document structure for MongoDB
+export interface BookingDocument {
   _id?: ObjectId;
+  bookingId: string;
+  fullName: string;
+  email: string;
   date: Date;
   time?: string;
+  partySize: number;
   status: "pending" | "confirmed" | "cancelled";
   createdAt: Date;
   updatedAt: Date;
@@ -24,7 +28,43 @@ export interface BookingDocument extends Omit<BookingFormData, "emailConfirm" | 
   countryCode: string;
 }
 
-export async function createBooking(bookingData: Omit<Booking, "_id">, paymentId: string): Promise<Booking> {
+/**
+ * Generate a unique booking ID
+ */
+function generateBookingId(): string {
+  // Generate a UUID and take the first 8 characters
+  return `BK-${uuidv4().substring(0, 8).toUpperCase()}`;
+}
+
+// Extend the Booking type to include the new fields
+export interface ExtendedBooking {
+  _id: string;
+  bookingId: string;
+  fullName: string;
+  email: string;
+  date: string;
+  time?: string;
+  partySize: number;
+  amount: number;
+  status: "pending" | "confirmed" | "cancelled";
+  paid: boolean;
+  phoneNumber: string;
+  language?: string;
+  country: string;
+  countryCode: string;
+}
+
+// Define the expected structure of the booking data
+export interface BookingInputData extends Omit<Booking, "_id"> {
+  time?: string;
+  tourSlug?: string;
+  tourName?: string;
+  language?: string;
+  country?: string;
+  countryCode?: string;
+}
+
+export async function createBooking(bookingData: BookingInputData, paymentId: string): Promise<ExtendedBooking> {
   const db = await getDb();
 
   // Convert amount from cents to euros if needed
@@ -33,7 +73,15 @@ export async function createBooking(bookingData: Omit<Booking, "_id">, paymentId
     totalAmount = totalAmount / 100;
   }
 
+  // Generate a unique booking ID
+  const bookingId = generateBookingId();
+
+  // Ensure country and countryCode are properly set with fallbacks
+  const country = bookingData.country || "Unknown";
+  const countryCode = bookingData.countryCode || "XX";
+
   const bookingDocument: Omit<BookingDocument, "_id"> = {
+    bookingId, // Add the unique bookingId
     fullName: bookingData.fullName,
     email: bookingData.email,
     phoneNumber: bookingData.phoneNumber || "",
@@ -50,31 +98,31 @@ export async function createBooking(bookingData: Omit<Booking, "_id">, paymentId
     tourName: bookingData.tourName,
     tourType: bookingData.tourName,
     language: bookingData.language || "es",
-    country: bookingData.country || "",
-    countryCode: bookingData.countryCode || ""
+    country: country,
+    countryCode: countryCode
   };
 
   const result = await db.collection("bookings").insertOne(bookingDocument);
 
   return {
     _id: result.insertedId.toString(),
+    bookingId: bookingDocument.bookingId,
     fullName: bookingDocument.fullName,
     email: bookingDocument.email,
     date: bookingDocument.date.toISOString(),
     time: bookingDocument.time,
     partySize: bookingDocument.partySize,
     amount: bookingDocument.totalAmount,
-    paymentId: bookingDocument.paymentIntentId,
     status: bookingDocument.status,
     paid: bookingDocument.paymentStatus === "paid",
     phoneNumber: bookingDocument.phoneNumber,
-    language: bookingDocument.language,
+    language: bookingDocument.language || "es",
     country: bookingDocument.country,
     countryCode: bookingDocument.countryCode
   };
 }
 
-export async function getBookingByPaymentIntent(paymentIntentId: string): Promise<Booking | null> {
+export async function getBookingByPaymentIntent(paymentIntentId: string): Promise<ExtendedBooking | null> {
   const db = await getDb();
   const booking = await db.collection("bookings").findOne({ paymentIntentId });
 
@@ -82,16 +130,19 @@ export async function getBookingByPaymentIntent(paymentIntentId: string): Promis
 
   return {
     _id: booking._id.toString(),
+    bookingId: booking.bookingId,
     fullName: booking.fullName,
     email: booking.email,
     date: booking.date.toISOString(),
     time: booking.time,
     partySize: booking.partySize,
     amount: booking.totalAmount,
-    paymentId: booking.paymentIntentId,
     status: booking.status,
-    phoneNumber: booking.phoneNumber,
     paid: booking.paymentStatus === "paid",
+    phoneNumber: booking.phoneNumber,
+    language: booking.language || "es",
+    country: booking.country || "Unknown",
+    countryCode: booking.countryCode || "XX",
   };
 }
 

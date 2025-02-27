@@ -249,6 +249,7 @@ git pull
 npm ci
 npm run build
 pm2 restart tourtovalencia
+pm2 save -force
 ```
 
 ## Troubleshooting
