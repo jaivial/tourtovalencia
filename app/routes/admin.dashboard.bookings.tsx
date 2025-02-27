@@ -157,8 +157,21 @@ export const loader = async ({ request }: LoaderArgs) => {
       }
       
       // Get country code and country name
-      const countryCode = booking.countryCode || "+34"; // Default to Spain
-      const country = booking.country || "ES"; // Default to Spain
+      let countryCode = booking.countryCode || "+34"; // Default to Spain
+      let country = booking.country || "ES"; // Default to Spain
+      
+      // Fix potential issues with country and countryCode
+      if (countryCode && !countryCode.startsWith('+')) {
+        // If countryCode doesn't start with '+', it might be a country code rather than a dial code
+        if (countryCode.length <= 3) {
+          // If it's short, it's likely a country code - keep it
+          country = countryCode; // Use as country
+          // We'll keep the default value for countryCode
+        } else {
+          // If it's longer, it might be a phone number - use default
+          countryCode = "+34";
+        }
+      }
       
       return {
         _id: booking._id.toString(),

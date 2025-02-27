@@ -8,6 +8,8 @@ export interface Booking {
   totalAmount?: number;
   paymentIntentId: string;
   phoneNumber: string;
+  country?: string;
+  countryCode?: string;
   status?: 'confirmed' | 'pending' | 'cancelled';
   paymentStatus?: 'paid' | 'pending' | 'failed';
   createdAt?: Date;

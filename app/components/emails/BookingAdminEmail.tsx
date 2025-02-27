@@ -25,6 +25,8 @@ interface EmailBooking {
   tourName?: string;
   language?: string;
   paymentMethod?: string;
+  country?: string;
+  countryCode?: string;
 }
 
 interface BookingAdminEmailProps {
@@ -112,10 +114,17 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
                 
                 <Text style={detailItem}>
                   <Text style={detailLabel}>Teléfono:</Text>
-                  <Text style={detailValue}>
-                    <Link href={`tel:${booking.phoneNumber}`} style={link}>{booking.phoneNumber}</Link>
-                  </Text>
+                  <Text style={detailValue}>{booking.phoneNumber || 'No proporcionado'}</Text>
                 </Text>
+                
+                {booking.country && booking.countryCode && (
+                  <Text style={detailItem}>
+                    <Text style={detailLabel}>País:</Text>
+                    <Text style={detailValue}>
+                      {booking.country} ({booking.countryCode})
+                    </Text>
+                  </Text>
+                )}
                 
                 <Hr style={dividerSmall} />
                 
@@ -135,7 +144,7 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
                 </Text>
                 
                 <Text style={detailItem}>
-                  <Text style={detailLabel}>Idioma del Cliente:</Text>
+                  <Text style={detailLabel}>Idioma:</Text>
                   <Text style={detailValue}>{customerLanguageDisplay}</Text>
                 </Text>
                 

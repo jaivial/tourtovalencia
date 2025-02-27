@@ -19,18 +19,33 @@ import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { CancellationDialog } from "~/components/ui/CancellationDialog";
 import { CancellationResultDialog } from "~/components/ui/CancellationResultDialog";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle, Search, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Search, Loader2, Phone, Globe } from "lucide-react";
 
 // Helper function to get country flag emoji from country code
 const getCountryFlag = (countryCode?: string): string => {
   if (!countryCode) return '🌍';
   
-  // Convert country code to flag emoji (each letter is converted to a regional indicator symbol emoji)
-  return countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => String.fromCodePoint(char.charCodeAt(0) + 127397))
-    .join('');
+  try {
+    // Clean up country code - ensure it's a 2-letter code without "+" prefix
+    let cleanedCode = countryCode.trim().toUpperCase();
+    
+    // If it starts with "+", it's likely a dial code, not a country code
+    if (cleanedCode.startsWith('+')) {
+      return '🌍'; // Return generic globe for dial codes
+    }
+    
+    // Ensure we only use the first two characters (ISO country code)
+    cleanedCode = cleanedCode.substring(0, 2);
+    
+    // Convert country code to flag emoji
+    return cleanedCode
+      .split('')
+      .map(char => String.fromCodePoint(char.charCodeAt(0) + 127397))
+      .join('');
+  } catch (error) {
+    console.error("Error creating flag from country code:", countryCode, error);
+    return '🌍';
+  }
 };
 
 // Helper function to get country dial code from country code
@@ -475,8 +490,18 @@ export const AdminBookingsUI = ({
                   <TableRow>
                     <TableHead className="w-[180px]">{strings.name}</TableHead>
                     <TableHead>{strings.email}</TableHead>
-                    <TableHead>{strings.phone}</TableHead>
-                    <TableHead>{strings.nationality}</TableHead>
+                    <TableHead>
+                      <span className="flex items-center gap-1">
+                        <Phone size={14} className="text-muted-foreground" />
+                        {strings.phone}
+                      </span>
+                    </TableHead>
+                    <TableHead>
+                      <span className="flex items-center gap-1">
+                        <Globe size={14} className="text-muted-foreground" />
+                        {strings.nationality}
+                      </span>
+                    </TableHead>
                     <TableHead>{strings.tour}</TableHead>
                     <TableHead className="text-center">{strings.people}</TableHead>
                     {selectedStatus === "confirmed" ? (
@@ -523,11 +548,11 @@ export const AdminBookingsUI = ({
                         <TableCell>{booking.email}</TableCell>
                         <TableCell>
                           {booking.countryCode ? (
-                            <span className="whitespace-nowrap">
-                              <span className="text-gray-500 mr-1">
-                                {getCountryDialCode(booking.countryCode)}
+                            <span className="whitespace-nowrap flex items-center">
+                              <span className="text-gray-500 font-medium mr-1.5 bg-gray-100 px-2 py-0.5 rounded-md text-sm">
+                                {booking.countryCode.startsWith('+') ? booking.countryCode : getCountryDialCode(booking.countryCode)}
                               </span>
-                              {booking.phoneNumber}
+                              <span>{booking.phoneNumber}</span>
                             </span>
                           ) : (
                             booking.phoneNumber
@@ -535,8 +560,18 @@ export const AdminBookingsUI = ({
                         </TableCell>
                         <TableCell>
                           {booking.country && (
-                            <span className="flex items-center">
-                              <span className="mr-1">{getCountryFlag(booking.countryCode)}</span>
+                            <span 
+                              className="flex items-center" 
+                              title={booking.country}
+                              aria-label={`Nationality: ${booking.country}`}
+                            >
+                              <span 
+                                className="mr-2 text-xl" 
+                                role="img" 
+                                aria-label={booking.country}
+                              >
+                                {getCountryFlag(booking.country)}
+                              </span>
                               {booking.country}
                             </span>
                           )}

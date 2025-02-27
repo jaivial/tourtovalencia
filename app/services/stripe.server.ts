@@ -30,6 +30,8 @@ export async function createPaymentIntent(booking: BookingFormData) {
         customerName: booking.fullName,
         customerEmail: booking.email,
         phoneNumber: booking.phoneNumber || "",
+        country: booking.country || "",
+        countryCode: booking.countryCode || "",
         partySize: booking.partySize.toString(),
       },
       automatic_payment_methods: {
@@ -72,67 +74,59 @@ export async function createCheckoutSession(booking: BookingFormData, baseUrl: s
     throw new Error(`Invalid base URL provided: ${baseUrl}`);
   }
 
-  // Get tour information from the tours collection if tourSlug is provided
-  let tourName = "Excursión a Cuevas de San Jose";
-  let tourPrice = 0.5; // Default price in EUR
+  // Find the tour by slug to get the correct price
+  let tourPrice = 0;
+  let tourName = "";
   
-  if (booking.tourSlug) {
-    try {
-      const toursCollection = await getToursCollection();
-      const tour = await toursCollection.findOne({ slug: booking.tourSlug });
-      
-      if (tour) {
-        tourName = tour.tourName.en;
-        tourPrice = tour.tourPrice || tourPrice;
-        console.log(`Found tour: ${tourName} with price: ${tourPrice}€`);
-      }
-    } catch (error) {
-      console.error("Error fetching tour information:", error);
-      // Continue with default values if there's an error
+  try {
+    const toursCollection = await getToursCollection();
+    const tour = await toursCollection.findOne({ slug: booking.tourSlug || "" });
+    if (tour) {
+      tourName = tour.tourName?.es || tour.tourName?.en || tour.content?.es?.title || tour.content?.en?.title || "";
+      tourPrice = tour.tourPrice || tour.content?.es?.price || tour.content?.en?.price || 0;
     }
+  } catch (error) {
+    console.error("Error finding tour:", error);
   }
 
-  // Calculate total amount in cents for Stripe
-  const totalAmount = booking.partySize * tourPrice * 100; // Convert to cents
-  console.log(`Calculating price: ${booking.partySize} people × ${tourPrice}€ = ${booking.partySize * tourPrice}€ (${totalAmount} cents)`);
+  // Fallback to default price if tour not found
+  const price = tourPrice > 0 ? tourPrice : 35; // default to 35 EUR
+  const totalAmount = booking.partySize * price;
 
   try {
     // Ensure the date is a string when sending to Stripe
     const date = new Date(booking.date).toISOString();
 
-    // Clean the base URL (remove trailing slashes)
-    const cleanBaseUrl = baseUrl.replace(/\/$/, "");
-    console.log('Creating Stripe session with base URL:', cleanBaseUrl);
-
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
       line_items: [
         {
           price_data: {
             currency: "eur",
             product_data: {
-              name: tourName,
-              description: `Reserva para ${booking.partySize} ${booking.partySize === 1 ? "persona" : "personas"} el ${new Date(date).toLocaleDateString("es-ES")}`,
+              name: tourName || "Excursion",
             },
-            unit_amount: Math.round(tourPrice * 100), // Price per person in cents
+            unit_amount: price * 100, // Convert from EUR to cents
           },
-          quantity: booking.partySize, // Number of people as quantity
+          quantity: booking.partySize,
         },
       ],
       mode: "payment",
-      success_url: `${cleanBaseUrl}/book/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${cleanBaseUrl}/book?error=payment-cancelled`,
+      success_url: `${baseUrl}/book/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/book`,
+      customer_email: booking.email,
       metadata: {
         date,
         time: booking.time,
         customerName: booking.fullName,
         customerEmail: booking.email,
         phoneNumber: booking.phoneNumber || "",
+        country: booking.country || "",
+        countryCode: booking.countryCode || "",
         partySize: booking.partySize.toString(),
         tourSlug: booking.tourSlug || "",
-        tourName: tourName,
+        tourName: tourName || "",
+        paymentMethod: "stripe", // Track payment method used
       },
-      customer_email: booking.email,
     });
 
     return { sessionId: session.id, url: session.url };
