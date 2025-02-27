@@ -9,7 +9,6 @@ interface BookingNavigationProps {
   currentStep: number;
   onNext: () => void;
   onPrevious: () => void;
-  onSubmit: () => void;
   isSubmitting: boolean;
   paypalClientId: string | undefined;
   bookingNavigationText: {
@@ -21,7 +20,14 @@ interface BookingNavigationProps {
   };
 }
 
-export const BookingNavigation = ({ currentStep, onNext, onPrevious, onSubmit, isSubmitting, paypalClientId, bookingNavigationText }: BookingNavigationProps) => {
+export const BookingNavigation = ({ 
+  currentStep, 
+  onNext, 
+  onPrevious, 
+  isSubmitting, 
+  paypalClientId, 
+  bookingNavigationText 
+}: BookingNavigationProps) => {
   const isLastStep = currentStep === 4;
   const [isOpen, setIsOpen] = useState(false);
   const { formData, selectedTour } = useBooking();
@@ -46,7 +52,8 @@ export const BookingNavigation = ({ currentStep, onNext, onPrevious, onSubmit, i
   // Handle action for the main button based on current step
   const handleAction = () => {
     if (isLastStep) {
-      onSubmit(); // Use the onSubmit prop for the last step
+      // Instead of submitting, open the PayPal payment modal
+      handleOpen();
     } else {
       onNext();
     }

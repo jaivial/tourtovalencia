@@ -99,7 +99,6 @@ export const BookingFeature = () => {
           currentStep={context.currentStep} 
           onNext={actions.handleNextStep} 
           onPrevious={actions.handlePreviousStep} 
-          onSubmit={actions.handleSubmit}
           isSubmitting={context.isSubmitting} 
           paypalClientId={context.paypalClientId} 
         />

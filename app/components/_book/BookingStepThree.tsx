@@ -2,7 +2,6 @@ import { useBooking } from "~/context/BookingContext";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Card } from "~/components/ui/card";
-import { PaymentFeature } from "../features/PaymentFeature";
 import { User, Mail, Phone, Users, Calendar, Receipt, AlertCircle, MapPin, Globe } from "lucide-react";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import { clsx, type ClassValue } from "clsx";
@@ -205,20 +204,14 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
         </div>
       </Card>
 
-      {states.paymentClientSecret ? (
-        <div className="w-full max-w-2xl">
-          <PaymentFeature tourPrice={tourPrice} />
+      <div className="space-y-4 w-full max-w-2xl">
+        <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
+          <p className="text-yellow-800 text-sm flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <span>{bookingStepThreeText.paymentMessage}</span>
+          </p>
         </div>
-      ) : (
-        <div className="space-y-4 w-full max-w-2xl">
-          <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
-            <p className="text-yellow-800 text-sm flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 flex-shrink-0" />
-              <span>{bookingStepThreeText.paymentMessage}</span>
-            </p>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -99,7 +99,7 @@ const PaymentOptions = () => {
   };
 
   return (
-    <div className="p-12 mt-0">
+    <div className="p-4 mt-0">
       <h1 className="text-xl font-bold mb-4 text-center">{paypalText.title}</h1>
       <div className="space-y-4">
         <PayPalButtons
