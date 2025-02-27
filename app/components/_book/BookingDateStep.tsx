@@ -101,10 +101,17 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       return false; // If we can't convert, don't disable the date
     }
     
-    // Always disable dates in the past
+    // Get today's date with time set to midnight for comparison
     const todayJs = new Date();
     todayJs.setHours(0, 0, 0, 0);
-    if (jsDate < todayJs) return true;
+    
+    // Disable today and dates in the past
+    // For today, we compare if the dates are the same day
+    const isSameDay = jsDate.getDate() === todayJs.getDate() && 
+                      jsDate.getMonth() === todayJs.getMonth() && 
+                      jsDate.getFullYear() === todayJs.getFullYear();
+    
+    if (jsDate < todayJs || isSameDay) return true;
     
     // If no tour is selected, disable all dates
     if (!formData.tourSlug) return true;
