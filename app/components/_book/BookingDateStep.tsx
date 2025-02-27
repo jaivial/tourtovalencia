@@ -2,32 +2,14 @@ import { useBooking } from "~/context/BookingContext";
 import { Calendar } from "../ui/calendar";
 import { Label } from "../ui/label";
 import { cn } from "~/lib/utils";
-import { format, isValid } from "date-fns";
-import { useFetcher } from "@remix-run/react";
-import { useEffect, useState, useRef } from "react";
+import { format, isValid, addMonths } from "date-fns";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import type { LoaderData } from "~/routes/book._index";
-import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
 import { TourSelectorUI } from "../ui/TourSelectorUI";
-import type { DateAvailability } from "~/routes/book";
 import { useLanguageContext } from "~/providers/LanguageContext";
 // Import date-fns locales
 import { es } from "date-fns/locale";
-
-// Define the API response type
-interface AvailabilityApiResponse {
-  availableDates?: DateAvailability[];
-  dateAvailability?: {
-    date: string;
-    tourSlug: string;
-    availablePlaces: number;
-    isAvailable: boolean;
-    maxBookings: number;
-    bookedPlaces: number;
-  };
-  error?: string;
-}
 
 interface BookingDateStepProps {
   tourSelectorText: {
@@ -41,11 +23,9 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     formData, 
     setFormData, 
     errors,
-    availableDates,
-    setSelectedDateAvailability,
     tours,
     setSelectedTour,
-    setAvailableDates
+    unavailableDates
   } = useBooking();
   
   // Get the current language from context
@@ -58,19 +38,13 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       dateLabel: "Date",
       selectDateError: "Please select a date",
       selectTourError: "Please select a tour first",
-      loadingAvailability: "Loading availability...",
-      timeoutMessage: "It's taking longer than expected to load availability data. Please try refreshing the page or selecting a different date or tour.",
-      dateUnavailable: "Sorry, this date is no longer available for booking.",
-      unexpectedResponse: "Unexpected response from server. Please try again."
+      dateUnavailable: "Sorry, this date is no longer available for booking."
     },
     es: {
       dateLabel: "Fecha",
       selectDateError: "Por favor, selecciona una fecha",
       selectTourError: "Por favor, selecciona un tour primero",
-      loadingAvailability: "Cargando disponibilidad...",
-      timeoutMessage: "Está tardando más de lo esperado en cargar los datos de disponibilidad. Por favor, intenta refrescar la página o seleccionar una fecha o tour diferente.",
-      dateUnavailable: "Lo sentimos, esta fecha ya no está disponible para reservar.",
-      unexpectedResponse: "Respuesta inesperada del servidor. Por favor, inténtalo de nuevo."
+      dateUnavailable: "Lo sentimos, esta fecha ya no está disponible para reservar."
     }
   };
 
@@ -79,69 +53,117 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
 
   // State to track if a tour has been selected
   const [isTourSelected, setIsTourSelected] = useState(!!formData.tourSlug);
-  // State to track loading timeouts
-  const [loadingTimeout, setLoadingTimeout] = useState(false);
   // State to track errors
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const fetcher = useFetcher<LoaderData>();
-  const availabilityFetcher = useFetcher<AvailabilityApiResponse>();
-
-  // Ref to store timeout IDs
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Ref to track the last fetched date and tour to prevent duplicate fetches
-  const lastFetchRef = useRef<{date: string, tourSlug: string} | null>(null);
-  
-  // Ref to track if we've already processed this data
-  const processedDataRef = useRef<boolean>(false);
-
-  // Clear timeout when component unmounts
+  // Log unavailable dates when component mounts
   useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
+    console.log("BookingDateStep mounted");
+    console.log("Total unavailable dates:", unavailableDates.length);
+    if (unavailableDates.length > 0) {
+      console.log("First few unavailable dates:", unavailableDates.slice(0, 3));
+      
+      // Group by tour and count
+      const countByTour = unavailableDates.reduce((acc, date) => {
+        acc[date.tourSlug] = (acc[date.tourSlug] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      console.log("Unavailable dates by tour:", countByTour);
+    }
+  }, [unavailableDates]);
+  
+  // Calculate disabled dates directly as Date objects for the Calendar component
+  const disabledDates = useMemo(() => {
+    if (!formData.tourSlug) return []; // No need to calculate if no tour selected
+    
+    // Today's date for past date filtering
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Create a set of past dates (3 months of past dates to be safe)
+    const pastDates: Date[] = [];
+    const threeMonthsAgo = new Date(today);
+    threeMonthsAgo.setMonth(today.getMonth() - 3);
+    
+    let loopDate = new Date(threeMonthsAgo);
+    while (loopDate < today) {
+      pastDates.push(new Date(loopDate));
+      loopDate.setDate(loopDate.getDate() + 1);
+    }
+    
+    // Find all unavailable dates for this tour
+    const tourUnavailableDates = unavailableDates
+      .filter(d => d.tourSlug === formData.tourSlug)
+      .map(d => {
+        const dateParts = d.date.split('-').map(Number);
+        const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+        return dateObj;
+      });
+    
+    console.log(`Generated ${tourUnavailableDates.length} disabled dates for ${formData.tourSlug}`);
+    if (tourUnavailableDates.length > 0) {
+      console.log("Sample disabled dates:", tourUnavailableDates.slice(0, 3).map(d => d.toISOString().split('T')[0]));
+    }
+    
+    // Combine past dates and unavailable dates
+    return [...pastDates, ...tourUnavailableDates];
+  }, [formData.tourSlug, unavailableDates]);
 
-  // Filter out any invalid dates and convert strings to Date objects
-  const disabledDates = availableDates
-    .filter(date => !date.isAvailable)
-    .map(date => {
-      try {
-        const dateObj = new Date(date.date);
-        return isValid(dateObj) ? dateObj : null;
-      } catch (e) {
-        console.error("Invalid date:", date.date);
-        return null;
-      }
-    })
-    .filter(Boolean) as Date[];
-
-  // Check if a date is disabled
+  // Check if a date is disabled - keep for validation when selecting dates
   const isDateDisabled = (date: Date) => {
-    // Check if the date is in the disabledDates array
-    return disabledDates.some(disabledDate => 
-      disabledDate.getFullYear() === date.getFullYear() &&
-      disabledDate.getMonth() === date.getMonth() &&
-      disabledDate.getDate() === date.getDate()
+    // Always disable dates in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (date < today) return true;
+    
+    // If no tour is selected, disable all dates
+    if (!formData.tourSlug) return true;
+    
+    // Format the date for comparison - make sure to use same format as in unavailableDates
+    const dateString = date.toISOString().split('T')[0];
+    
+    // Get all unavailable dates for the selected tour
+    const tourUnavailableDates = unavailableDates.filter(
+      unavailableDate => unavailableDate.tourSlug === formData.tourSlug
     );
+    
+    // Check if the current date is in the unavailable dates list
+    const isUnavailable = tourUnavailableDates.some(
+      unavailableDate => unavailableDate.date === dateString
+    );
+    
+    // For debugging: log when checking specific dates
+    if (date.getDate() === 1 || date.getDate() === 15) {
+      console.log(`Validation - Checking date ${dateString} for tour ${formData.tourSlug}:`);
+      console.log(`- isUnavailable: ${isUnavailable}`);
+    }
+    
+    return isUnavailable;
   };
 
   // Handle date selection
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
     
-    // Reset previous errors and timeouts
+    // Reset previous errors
     setFetchError(null);
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+
+    // Format the date for form data
+    const formattedDate = format(date, "yyyy-MM-dd");
+
+    // Check if a tour is selected
+    if (!formData.tourSlug) {
+      setFetchError(localizedText[currentLanguage].selectTourError);
+      return;
     }
 
-    // Format the date for API call
-    const formattedDate = format(date, "yyyy-MM-dd");
-    console.log("Selected date:", formattedDate);
+    // Double check if the date is available (extra validation)
+    if (isDateDisabled(date)) {
+      console.log(`Prevented selection of unavailable date: ${formattedDate}`);
+      setFetchError(localizedText[currentLanguage].dateUnavailable);
+      return;
+    }
 
     // Update form data with selected date
     setFormData({
@@ -149,153 +171,55 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       date: formattedDate,
       partySize: 1 // Reset party size when date changes
     });
-
-    // Check if a tour is selected
-    if (!formData.tourSlug) {
-      console.error("No tour selected");
-      setFetchError(localizedText[currentLanguage].selectTourError);
-      return;
-    }
-
-    const tourSlug = formData.tourSlug;
-    
-    // Check if we've already fetched this date and tour combination
-    if (lastFetchRef.current && 
-        lastFetchRef.current.date === formattedDate && 
-        lastFetchRef.current.tourSlug === tourSlug) {
-      console.log("Already fetched availability for this date and tour, skipping fetch");
-      return;
-    }
-    
-    console.log("Checking availability for tour:", tourSlug);
-
-    // Reset loading timeout state
-    setLoadingTimeout(false);
-    
-    // Reset the processed data flag
-    processedDataRef.current = false;
-
-    // Set a timeout to show a message if the fetcher takes too long
-    timeoutRef.current = setTimeout(() => {
-      console.log("Availability fetch timeout");
-      setLoadingTimeout(true);
-    }, 8000); // 8 seconds timeout
-
-    // Update the last fetched reference
-    lastFetchRef.current = { date: formattedDate, tourSlug };
-
-    // Fetch availability for the selected date and tour
-    availabilityFetcher.load(
-      `/api/booking-availability?tourSlug=${tourSlug}&date=${formattedDate}`
-    );
   };
-
-  // Effect to handle changes in the availability fetcher state
-  useEffect(() => {
-    // Clear timeout if fetcher is idle (completed or not started)
-    if (availabilityFetcher.state === "idle" && timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-
-    // Only process data if we're in idle state, have data, and haven't processed this data yet
-    if (availabilityFetcher.state === "idle" && 
-        availabilityFetcher.data && 
-        !processedDataRef.current) {
-      
-      // Set the flag to indicate we've processed this data
-      processedDataRef.current = true;
-      
-      const response = availabilityFetcher.data as AvailabilityApiResponse;
-      
-      // Handle error from API
-      if (response.error) {
-        console.error("API returned an error:", response.error);
-        setFetchError(response.error);
-        setLoadingTimeout(false);
-        return;
-      }
-
-      // If we have specific date availability data
-      if (response.dateAvailability) {
-        console.log("Date availability data:", response.dateAvailability);
-        const { isAvailable, availablePlaces } = response.dateAvailability;
-        
-        if (!isAvailable || availablePlaces <= 0) {
-          setFetchError(localizedText[currentLanguage].dateUnavailable);
-          setLoadingTimeout(false);
-          return;
-        }
-
-        // Update available places and set loading to false
-        setSelectedDateAvailability({
-          date: response.dateAvailability.date,
-          availablePlaces: response.dateAvailability.availablePlaces,
-          isAvailable: response.dateAvailability.isAvailable
-        });
-        setLoadingTimeout(false);
-      } 
-      // If we have general available dates
-      else if (response.availableDates) {
-        console.log("Available dates:", response.availableDates);
-        setAvailableDates(response.availableDates);
-        setLoadingTimeout(false);
-      }
-      else {
-        console.error("Unexpected API response format:", response);
-        setFetchError(localizedText[currentLanguage].unexpectedResponse);
-        setLoadingTimeout(false);
-      }
-    }
-  }, [availabilityFetcher.state, availabilityFetcher.data, currentLanguage, localizedText, setAvailableDates, setSelectedDateAvailability]);
 
   // Handle tour selection
   const handleTourChange = (tourSlug: string) => {
-    // Reset any previous errors and timeout
+    // Reset any previous errors
     setFetchError(null);
-    setLoadingTimeout(false);
     
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
+    console.log(`Tour selection changed to: ${tourSlug}`);
     
-    // Check if we've already fetched this tour
+    // Check if we're already on this tour
     if (formData.tourSlug === tourSlug) {
-      console.log("Tour already selected, skipping fetch");
+      console.log("Already on this tour, no changes needed");
       return;
     }
     
     // Update form data with the selected tour
-    setFormData({ tourSlug });
+    setFormData({ 
+      tourSlug,
+      date: "", // Clear any selected date when changing tours
+      partySize: 1 
+    });
     
     // Find the selected tour object
     const selectedTour = tours.find(tour => tour.slug === tourSlug);
+    console.log("Found selected tour:", selectedTour);
+    
     if (selectedTour) {
       setSelectedTour(selectedTour);
       // Set tour as selected to show the calendar
       setIsTourSelected(true);
-      // Reset date and partySize in form data
-      setFormData({ 
-        tourSlug,
-        date: "",
-        partySize: 1
-      });
+      
+      // Log unavailable dates for this tour
+      console.log(`Selected tour: ${tourSlug}`);
+      const tourUnavailableDates = unavailableDates.filter(
+        unavailableDate => unavailableDate.tourSlug === tourSlug
+      );
+      
+      console.log(`Total unavailable dates for ${tourSlug}:`, tourUnavailableDates.length);
+      console.log(`Sample unavailable dates for ${tourSlug}:`, tourUnavailableDates.slice(0, 5));
+      
+      // Check if any unavailable dates have unexpected format
+      const invalidFormatDates = tourUnavailableDates.filter(date => 
+        !date.date || typeof date.date !== 'string' || !date.date.match(/^\d{4}-\d{2}-\d{2}$/)
+      );
+      
+      if (invalidFormatDates.length > 0) {
+        console.warn("Found dates with invalid format:", invalidFormatDates);
+      }
     }
-    
-    // Reset the processed data flag
-    processedDataRef.current = false;
-    
-    // Set a timeout to handle cases where the fetcher might get stuck
-    timeoutRef.current = setTimeout(() => {
-      console.log("Loading timeout triggered for tour change");
-      setLoadingTimeout(true);
-    }, 8000); // 8 seconds timeout
-    
-    console.log("Fetching available dates for tour:", tourSlug);
-    // Fetch available dates for the selected tour from our API endpoint
-    availabilityFetcher.load(`/api/booking-availability?tourSlug=${tourSlug}`);
   };
 
   // Get the selected date for the calendar
@@ -312,12 +236,11 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     return undefined;
   };
 
-  // Check if we're in a loading state
-  const isLoading = (fetcher.state === "loading" || availabilityFetcher.state === "loading") && !loadingTimeout && !fetchError;
-
-  // Determine which message to show (prioritize error over timeout)
-  const showError = fetchError && !loadingTimeout;
-  const showTimeout = loadingTimeout && !fetchError;
+  // Determine which messages to show
+  const showError = !!fetchError;
+  
+  // Force re-render of calendar when tour changes
+  const calendarKey = `calendar-${formData.tourSlug || 'no-tour'}-${disabledDates.length}`;
 
   return (
     <div className="space-y-6">
@@ -344,23 +267,31 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
         {isTourSelected && (
           <>
             <Label htmlFor="date">{localizedText[currentLanguage].dateLabel}</Label>
+            {formData.tourSlug && (
+              <div className="text-sm text-gray-500 mb-2">
+                {unavailableDates.filter(d => d.tourSlug === formData.tourSlug).length} dates are unavailable for this tour.
+              </div>
+            )}
             <div className={cn(
               "border rounded-md p-4 flex justify-center", 
               errors.date ? "border-red-500" : "border-gray-200"
             )}>
               <Calendar
+                key={calendarKey}
                 mode="single"
                 selected={getSelectedDate()}
                 onSelect={handleDateSelect}
-                disabled={isDateDisabled}
+                disabled={disabledDates}
                 className="mx-auto"
                 classNames={{
                   table: "w-full border-collapse space-y-1 text-center",
                   head_row: "flex justify-center",
                   row: "flex w-full mt-2 justify-center",
                   cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                  day_disabled: "text-muted-foreground opacity-50 bg-gray-100 cursor-not-allowed",
                 }}
                 fromDate={new Date()} // Disable dates before today
+                toDate={addMonths(new Date(), 6)} // Limit calendar view to 6 months
                 locale={locale} // Add locale for month names
               />
             </div>
@@ -372,23 +303,6 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
           </>
         )}
       </motion.div>
-      
-      {/* Loading indicators */}
-      {isLoading && (
-        <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 py-4">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span>{localizedText[currentLanguage].loadingAvailability}</span>
-        </div>
-      )}
-      
-      {/* Timeout message */}
-      {showTimeout && (
-        <Alert className="bg-yellow-50 border-yellow-200">
-          <AlertDescription>
-            {localizedText[currentLanguage].timeoutMessage}
-          </AlertDescription>
-        </Alert>
-      )}
       
       {/* Error message */}
       {showError && (

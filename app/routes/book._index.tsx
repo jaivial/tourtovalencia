@@ -2,22 +2,57 @@ import { json } from "@remix-run/server-runtime";
 import { useLoaderData } from "@remix-run/react";
 import { BookingProvider } from "~/context/BookingContext";
 import { BookingFeature } from "~/components/_book/BookingFeature";
-import { getAvailableDatesInRange, getDateAvailability } from "~/models/bookingAvailability.server";
 import { addMonths } from "date-fns";
 import type { Booking } from "~/types/booking";
 import { useEffect, useRef } from "react";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import type { Tour } from "./book";
 import { ObjectId } from "mongodb";
-import { getToursCollection } from "~/utils/db.server";
-import { getAvailableDatesForTour } from "~/services/bookingAvailability.server";
-import type { DateAvailability } from "./book";
+import { getToursCollection, getCollection } from "~/utils/db.server";
+import type { Tour } from "./book";
+import { localDateToUTCMidnight } from "~/utils/date";
+
+// Define types for booking documents
+interface BookingDocument {
+  _id?: string;
+  date: Date;
+  status: string;
+  tourSlug?: string;
+  tourType?: string;
+  partySize?: number;
+  numberOfPeople?: number;
+}
+
+// Define types for booking limits
+interface BookingLimit {
+  _id?: string;
+  date: Date;
+  tourSlug: string;
+  maxBookings: number;
+  currentBookings?: number;
+}
+
+// Define unavailable date structure
+export interface UnavailableDate {
+  tourName: string;
+  tourSlug: string;
+  date: string;
+  state: "unavailable";
+}
+
+// Define type for date availability
+export interface DateAvailability {
+  date: string;
+  availablePlaces: number;
+  isAvailable: boolean;
+  tourSlug?: string;
+}
 
 // Define a type for the MongoDB tour document
 interface TourDocument {
   _id: ObjectId;
   slug?: string;
   name?: string;
+  status?: string;
   content?: {
     en?: {
       title?: string;
@@ -46,6 +81,7 @@ export type LoaderData = {
     gmailAppPassword: string;
   };
   tours: Tour[];
+  unavailableDates: UnavailableDate[];
 };
 
 export type ActionData = {
@@ -56,72 +92,129 @@ export type ActionData = {
   sessionId?: string;
 };
 
-export async function loader({ request }: { request: Request }) {
+export async function loader() {
   try {
-    // Use the statically imported modules
-    
-    const url = new URL(request.url);
-    const selectedDate = url.searchParams.get("date");
-    const tourSlug = url.searchParams.get("tourSlug");
-
-    console.log("Loader called with date:", selectedDate, "and tourSlug:", tourSlug);
-
     // Get dates for the next 3 months
     const startDate = new Date();
     const endDate = addMonths(startDate, 3);
-
-    // Get available dates
-    let availableDates;
     
-    // If a tour is selected, get available dates for that specific tour
-    if (tourSlug) {
-      console.log("Getting available dates for tour:", tourSlug);
-      availableDates = await getAvailableDatesForTour(tourSlug);
-    } else {
-      // Otherwise, get general availability
-      console.log("Getting general availability for all tours");
-      availableDates = await getAvailableDatesInRange(startDate, endDate);
-    }
+    // Convert to UTC midnight for consistent querying
+    const utcStartDate = localDateToUTCMidnight(startDate);
+    const utcEndDate = localDateToUTCMidnight(endDate);
 
-    // Get availability for the selected date if provided
-    let selectedDateAvailability;
-    if (selectedDate && tourSlug) {
-      console.log("Checking availability for date:", selectedDate, "and tour:", tourSlug);
-      try {
-        const date = new Date(selectedDate);
-        if (!isNaN(date.getTime())) {
-          selectedDateAvailability = await getDateAvailability(date, tourSlug);
-          console.log("Date availability result:", selectedDateAvailability);
-        } else {
-          console.error("Invalid date format:", selectedDate);
-        }
-      } catch (error) {
-        console.error("Error getting date availability:", error);
-      }
-    } else if (selectedDate) {
-      console.log("Checking general availability for date:", selectedDate);
-      try {
-        const date = new Date(selectedDate);
-        if (!isNaN(date.getTime())) {
-          selectedDateAvailability = await getDateAvailability(date);
-          console.log("General date availability result:", selectedDateAvailability);
-        } else {
-          console.error("Invalid date format:", selectedDate);
-        }
-      } catch (error) {
-        console.error("Error getting general date availability:", error);
-      }
-    }
-
-    // Get tours
+    // Get collections
     const toursCollection = await getToursCollection();
-    console.log("Querying tours collection...");
+    const bookingsCollection = await getCollection<BookingDocument>("bookings");
+    const bookingLimitsCollection = await getCollection<BookingLimit>("bookingLimits");
+
+    // Find all active tours
     const tours = await toursCollection.find({ status: "active" }).toArray() as unknown as TourDocument[];
-    console.log(`Found ${tours.length} active tours in the database`);
     
-    if (tours.length > 0) {
-      console.log("First tour:", JSON.stringify(tours[0]));
+    // Create an array to store unavailable dates
+    const unavailableDates: UnavailableDate[] = [];
+    
+    // Get booking limits and bookings for each tour
+    for (const tour of tours) {
+      if (!tour.slug) continue;
+      
+      const tourSlug = tour.slug;
+      const tourName = tour.tourName?.en || tour.name || tour.slug;
+      
+      // Get booking limits for this tour
+      const tourLimits = await bookingLimitsCollection.find({
+        tourSlug: tourSlug,
+        date: { $gte: utcStartDate, $lte: utcEndDate }
+      }).toArray();
+      
+      // Get default limits that might apply
+      const defaultLimits = await bookingLimitsCollection.find({
+        tourSlug: "default",
+        date: { $gte: utcStartDate, $lte: utcEndDate }
+      }).toArray();
+      
+      // Get all bookings for this tour
+      const tourBookings = await bookingsCollection.find({
+        date: { $gte: utcStartDate, $lte: utcEndDate },
+        status: "confirmed",
+        $or: [
+          { tourSlug: tourSlug },
+          { tourType: tourSlug }
+        ]
+      }).toArray();
+      
+      // Create a map of dates to booking counts
+      const bookingCounts: Record<string, number> = {};
+      tourBookings.forEach(booking => {
+        const dateStr = booking.date.toISOString().split('T')[0];
+        const partySize = booking.partySize || booking.numberOfPeople || 0;
+        bookingCounts[dateStr] = (bookingCounts[dateStr] || 0) + partySize;
+      });
+      
+      // Create a map of dates to limits
+      const limitMap: Record<string, number> = {};
+      tourLimits.forEach(limit => {
+        const dateStr = limit.date.toISOString().split('T')[0];
+        limitMap[dateStr] = limit.maxBookings;
+      });
+      
+      // Add default limits to the map (only if no specific limit exists)
+      defaultLimits.forEach(limit => {
+        const dateStr = limit.date.toISOString().split('T')[0];
+        if (limitMap[dateStr] === undefined) {
+          limitMap[dateStr] = limit.maxBookings;
+        }
+      });
+      
+      // Check each date in the range for availability
+      const currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const formattedDate = dateStr;
+        
+        // Get the limit for this date (specific, default, or fallback to 10)
+        const maxBookings = limitMap[dateStr] !== undefined ? limitMap[dateStr] : 10;
+        
+        // Get booked places for this date
+        const bookedPlaces = bookingCounts[dateStr] || 0;
+        
+        // Calculate available places
+        const availablePlaces = maxBookings - bookedPlaces;
+        
+        // If no places available or explicitly blocked (maxBookings = 0)
+        if (maxBookings === 0 || availablePlaces <= 0) {
+          unavailableDates.push({
+            tourSlug,
+            tourName,
+            date: formattedDate,
+            state: "unavailable"
+          });
+        }
+        
+        // Move to next day
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
     }
+
+    // Also mark today and past dates as unavailable for all tours
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    for (const tour of tours) {
+      if (!tour.slug) continue;
+      
+      const tourSlug = tour.slug;
+      const tourName = tour.tourName?.en || tour.name || tour.slug;
+
+      // Add today as unavailable
+      unavailableDates.push({
+        tourSlug,
+        tourName,
+        date: today.toISOString().split('T')[0],
+        state: "unavailable"
+      });
+    }
+    
+    console.log("LOADER - Unavailable dates generated:", unavailableDates.length);
+    console.log("LOADER - Sample unavailable dates:", unavailableDates.slice(0, 5));
     
     // Convert MongoDB documents to Tour type
     const formattedTours = tours.map(tour => {
@@ -167,14 +260,15 @@ export async function loader({ request }: { request: Request }) {
     });
 
     return json<LoaderData>({
-      availableDates,
-      selectedDateAvailability,
+      availableDates: [],
+      selectedDateAvailability: undefined,
       paypalClientId: process.env.PAYPAL_CLIENT_ID,
       emailConfig: {
         gmailUser: process.env.GMAIL_USER || "",
         gmailAppPassword: process.env.GMAIL_APP_PASSWORD || "",
       },
       tours: formattedTours,
+      unavailableDates
     });
   } catch (error) {
     console.error("Error in loader:", error);
@@ -182,6 +276,7 @@ export async function loader({ request }: { request: Request }) {
       availableDates: [],
       error: "Failed to load available dates",
       tours: [],
+      unavailableDates: []
     });
   }
 }
@@ -213,7 +308,6 @@ export async function action({ request }: { request: Request }) {
 
       // Construct the base URL
       const baseUrl = `${protocol}://${host}`;
-      console.log("Using base URL:", baseUrl);
 
       const { url, sessionId } = await createCheckoutSession(bookingData, baseUrl);
 
@@ -236,7 +330,7 @@ export async function action({ request }: { request: Request }) {
 
 export default function BookIndex() {
   const data = useLoaderData<typeof loader>() as LoaderData;
-  const { availableDates, selectedDateAvailability, paypalClientId, emailConfig, tours } = data;
+  const { availableDates, selectedDateAvailability, paypalClientId, emailConfig, tours, unavailableDates } = data;
   
   // Use a ref to track if we've already logged the tours
   const hasLoggedToursRef = useRef(false);
@@ -244,7 +338,6 @@ export default function BookIndex() {
   // Debug: Log the tours from the loader data only once
   useEffect(() => {
     if (!hasLoggedToursRef.current) {
-      console.log("Tours in BookIndex component:", tours);
       hasLoggedToursRef.current = true;
     }
   }, [tours]);
@@ -258,6 +351,7 @@ export default function BookIndex() {
         paypalClientId: paypalClientId || "",
         emailConfig: emailConfig || { gmailUser: "", gmailAppPassword: "" },
         tours: tours || [],
+        unavailableDates: unavailableDates || [],
       }}
     >
       <div className="container mx-auto px-4 py-8">
