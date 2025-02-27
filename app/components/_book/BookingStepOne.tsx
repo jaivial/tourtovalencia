@@ -3,6 +3,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { CountrySelect } from "../ui/CountrySelect";
 import { useLanguageContext } from "~/providers/LanguageContext";
+import { countries } from "../../data/countries";
 
 interface BookingStepOneProps {
   bookingStepOneText: {
@@ -28,11 +29,17 @@ export default function BookingStepOne({ bookingStepOneText }: BookingStepOnePro
   const { state } = useLanguageContext();
   const currentLanguage = state.currentLanguage === "English" ? "en" : "es";
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleCountryChange = ({ country, countryCode }: { country: string; countryCode: string }) => {
+    // Find the country from our countries data to get the dial code
+    const selectedCountry = countries.find(c => c.code === countryCode);
+    
+    console.log("Country selected:", countryCode, "Dial code:", selectedCountry?.dialCode);
+    
     setFormData({
       ...formData,
-      country,
-      countryCode
+      country: countryCode, // Store the country code (e.g., "ES") in the country field
+      countryCode: selectedCountry?.dialCode || "+34" // Store the dial code (e.g., "+34") in the countryCode field
     });
   };
 
@@ -92,8 +99,6 @@ export default function BookingStepOne({ bookingStepOneText }: BookingStepOnePro
           value={formData.country || "ES"}
           onChange={handleCountryChange}
           placeholder={bookingStepOneText.placeholders.country}
-          searchPlaceholder={bookingStepOneText.placeholders.searchCountry}
-          notFoundText={bookingStepOneText.placeholders.noCountryFound}
           language={currentLanguage as 'en' | 'es'}
           className={errors.country ? "border-destructive" : ""}
         />
@@ -108,9 +113,9 @@ export default function BookingStepOne({ bookingStepOneText }: BookingStepOnePro
           <div className="flex-shrink-0 w-24">
             <Input
               type="text"
-              disabled
+              readOnly
               value={formData.countryCode || "+34"}
-              className="bg-muted"
+              className="bg-muted text-center"
             />
           </div>
           <Input
@@ -123,6 +128,11 @@ export default function BookingStepOne({ bookingStepOneText }: BookingStepOnePro
             className={errors.phoneNumber ? "border-destructive" : ""}
           />
         </div>
+        <p className="text-xs text-muted-foreground">
+          {currentLanguage === 'en' 
+            ? "You can change the country code by selecting a different country above."
+            : "Puede cambiar el código de país seleccionando un país diferente arriba."}
+        </p>
         {errors.phoneNumber && (
           <p className="text-sm text-destructive">{errors.phoneNumber}</p>
         )}
