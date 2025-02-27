@@ -143,18 +143,22 @@ export const loader = async ({ request }: LoaderArgs) => {
     const limitDoc = await db.collection("bookingLimits").findOne(limitQuery);
 
     const processedBookings: BookingData[] = bookings.map((booking) => {
-      // Obtener número de teléfono de cualquiera de los campos
+      // Obtain phone number from any of the fields
       const phoneNumber = booking.phoneNumber || booking.phone || "";
       
-      // Obtener cantidad de totalAmount o amount y convertir de céntimos a euros si es necesario
+      // Get amount from totalAmount or amount and convert from cents to euros if necessary
       let amount = 0;
       if (booking.totalAmount !== undefined) {
-        // Si totalAmount existe, usarlo (ya debería estar en euros)
+        // If totalAmount exists, use it (should already be in euros)
         amount = booking.totalAmount;
       } else if (booking.amount !== undefined) {
-        // Si amount existe, usarlo (podría estar en céntimos o euros)
+        // If amount exists, use it (could be in cents or euros)
         amount = booking.amount > 100 ? booking.amount / 100 : booking.amount;
       }
+      
+      // Get country code and country name
+      const countryCode = booking.countryCode || "+34"; // Default to Spain
+      const country = booking.country || "ES"; // Default to Spain
       
       return {
         _id: booking._id.toString(),
@@ -164,7 +168,9 @@ export const loader = async ({ request }: LoaderArgs) => {
         tourType: booking.tourName || booking.tourType || "",
         numberOfPeople: Number(booking.partySize || booking.numberOfPeople) || 1,
         status: booking.status || "pending",
-        phoneNumber: phoneNumber,  // Usar el número de teléfono extraído
+        phoneNumber: phoneNumber,
+        countryCode: countryCode,
+        country: country,
         specialRequests: booking.specialRequests,
         paid: booking.paymentStatus === "paid" || Boolean(booking.paid),
         amount: amount,
@@ -333,6 +339,7 @@ export default function AdminDashboardBookings() {
     name: "Nombre",
     email: "Correo",
     phone: "Teléfono",
+    nationality: "Nacionalidad",
     tour: "Tour",
     price: "Precio",
     paid: "Pagado",

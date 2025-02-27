@@ -14,6 +14,8 @@ export interface BookingFormData {
   phoneNumber: string;
   tourSlug: string;
   language?: string;
+  country?: string;
+  countryCode?: string;
 }
 
 export type BookingStates = Omit<BookingContextState, "setCurrentStep" | "setFormData" | "setErrors" | "setSelectedDateAvailability" | "setIsSubmitting" | "setIsSuccess" | "setPaymentClientSecret" | "setPaymentIntentId" | "setServerError">;
@@ -56,6 +58,8 @@ export function useBookingStates(initialState?: {
     emailConfirm: "",
     phoneNumber: "",
     tourSlug: "",
+    country: "ES", // Default to Spain
+    countryCode: "+34", // Default to Spain's dial code
   });
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
   const [serverError, setServerError] = useState<string | null>(initialState?.serverError || null);

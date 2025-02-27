@@ -9,6 +9,7 @@ interface BookingNavigationProps {
   currentStep: number;
   onNext: () => void;
   onPrevious: () => void;
+  onSubmit: () => void;
   isSubmitting: boolean;
   paypalClientId: string | undefined;
   bookingNavigationText: {
@@ -20,7 +21,7 @@ interface BookingNavigationProps {
   };
 }
 
-export const BookingNavigation = ({ currentStep, onNext, onPrevious, isSubmitting, paypalClientId, bookingNavigationText }: BookingNavigationProps) => {
+export const BookingNavigation = ({ currentStep, onNext, onPrevious, onSubmit, isSubmitting, paypalClientId, bookingNavigationText }: BookingNavigationProps) => {
   const isLastStep = currentStep === 4;
   const [isOpen, setIsOpen] = useState(false);
   const { formData, selectedTour } = useBooking();
@@ -42,6 +43,15 @@ export const BookingNavigation = ({ currentStep, onNext, onPrevious, isSubmittin
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
 
+  // Handle action for the main button based on current step
+  const handleAction = () => {
+    if (isLastStep) {
+      onSubmit(); // Use the onSubmit prop for the last step
+    } else {
+      onNext();
+    }
+  };
+
   if (!paypalClientId) {
     console.error("PayPal Client ID is not configured");
     return null;
@@ -56,7 +66,7 @@ export const BookingNavigation = ({ currentStep, onNext, onPrevious, isSubmittin
       ) : (
         <div /> // Empty div for spacing
       )}
-      <Button onClick={isLastStep ? handleOpen : onNext} className="bg-primary hover:bg-primary/90 text-white" disabled={isSubmitting}>
+      <Button onClick={handleAction} className="bg-primary hover:bg-primary/90 text-white" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
         <span>{isLastStep ? bookingNavigationText.bookNow : bookingNavigationText.next}</span>
       </Button>

@@ -94,7 +94,15 @@ export const BookingFeature = () => {
 
         <div className="mt-8">{renderStep()}</div>
 
-        <BookingNavigation bookingNavigationText={bookingNavigationText} currentStep={context.currentStep} onNext={actions.handleNextStep} onPrevious={actions.handlePreviousStep} onSubmit={actions.handleSubmit} isSubmitting={context.isSubmitting} paypalClientId={context.paypalClientId} />
+        <BookingNavigation 
+          bookingNavigationText={bookingNavigationText} 
+          currentStep={context.currentStep} 
+          onNext={actions.handleNextStep} 
+          onPrevious={actions.handlePreviousStep} 
+          onSubmit={actions.handleSubmit}
+          isSubmitting={context.isSubmitting} 
+          paypalClientId={context.paypalClientId} 
+        />
       </div>
     </div>
   );

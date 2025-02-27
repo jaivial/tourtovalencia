@@ -3,8 +3,10 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Card } from "~/components/ui/card";
 import { PaymentFeature } from "../features/PaymentFeature";
-import { User, Mail, Phone, Users, Calendar, Receipt, AlertCircle, MapPin } from "lucide-react";
+import { User, Mail, Phone, Users, Calendar, Receipt, AlertCircle, MapPin, Globe } from "lucide-react";
 import { useLanguageContext } from "~/providers/LanguageContext";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 interface BookingStepThreeProps {
   bookingStepThreeText: {
@@ -19,6 +21,7 @@ interface BookingStepThreeProps {
       date: string;
       totalPrice: string;
       tour: string;
+      country: string;
     };
     notSelected: string;
     people: string;
@@ -26,6 +29,15 @@ interface BookingStepThreeProps {
     paymentMessage: string;
     selectedTour: string;
   };
+}
+
+/**
+ * Combines multiple class names and merges Tailwind CSS classes
+ * @param inputs - Class names to combine
+ * @returns Merged class names
+ */
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
 
 export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps) => {
@@ -66,6 +78,31 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
     }
   };
 
+  // Determine country name based on country code in the right language
+  const getCountryName = () => {
+    // This would normally come from the countries data
+    // For this example, we're hardcoding based on common country codes
+    const countryMap: Record<string, { en: string, es: string }> = {
+      'ES': { en: 'Spain', es: 'España' },
+      'US': { en: 'United States', es: 'Estados Unidos' },
+      'GB': { en: 'United Kingdom', es: 'Reino Unido' },
+      'DE': { en: 'Germany', es: 'Alemania' },
+      'FR': { en: 'France', es: 'Francia' }
+    };
+    
+    const country = formData.country || 'ES';
+    return countryMap[country]?.[currentLanguage] || country;
+  };
+
+  // Get flag emoji based on country code
+  const getCountryFlag = () => {
+    const country = formData.country || 'ES';
+    // Convert country code to flag emoji
+    const flagOffset = 127397; // Offset to convert ASCII to regional indicator symbols
+    const countryCodePoints = [...country].map(char => char.charCodeAt(0) + flagOffset);
+    return String.fromCodePoint(...countryCodePoints);
+  };
+
   return (
     <div className="space-y-6 flex flex-col items-center">
       <h2 className="text-2xl font-semibold tracking-tight text-center sm:text-left">{bookingStepThreeText.bookingSummary}</h2>
@@ -100,9 +137,24 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
                 <Phone className="h-4 w-4" />
                 {bookingStepThreeText.labels.phone}
               </span>
-              <span className="sm:hidden">{states.formData.phoneNumber}</span>
+              <span className="sm:hidden">
+                {formData.countryCode && <span className="text-muted-foreground">{formData.countryCode} </span>}
+                {states.formData.phoneNumber}
+              </span>
             </div>
-            <span className="hidden sm:block">{states.formData.phoneNumber}</span>
+            <span className="hidden sm:block">
+              {formData.countryCode && <span className="text-muted-foreground">{formData.countryCode} </span>}
+              {states.formData.phoneNumber}
+            </span>
+            
+            <div className="flex flex-col space-y-1 sm:space-y-0 items-center sm:items-start">
+              <span className="text-muted-foreground flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                {bookingStepThreeText.labels.country}
+              </span>
+              <span className="sm:hidden">{getCountryFlag()} {getCountryName()}</span>
+            </div>
+            <span className="hidden sm:block">{getCountryFlag()} {getCountryName()}</span>
           </div>
         </div>
 
