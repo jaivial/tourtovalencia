@@ -2,11 +2,20 @@ import { useBooking } from "~/context/BookingContext";
 import { BookingStepTwoUI } from "../ui/BookingStepTwoUI";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 export const BookingStepTwo = () => {
   const { formData, setFormData, errors, selectedDateAvailability } = useBooking();
   const { state } = useLanguageContext();
   const bookingStepTwoText = state.booking.bookingStepTwo;
+
+  // Log selected date availability for debugging
+  useEffect(() => {
+    if (selectedDateAvailability) {
+      console.log("BookingStepTwo - Selected date availability:", selectedDateAvailability);
+      console.log(`Available places for ${selectedDateAvailability.date}: ${selectedDateAvailability.availablePlaces}`);
+    }
+  }, [selectedDateAvailability]);
 
   // Check if a date has been selected but availability data is not yet loaded
   if (!selectedDateAvailability) {
@@ -41,7 +50,10 @@ export const BookingStepTwo = () => {
   const handlePartySizeChange = (value: string) => {
     const partySize = parseInt(value);
     if (isNaN(partySize)) return;
-    setFormData({ ...formData, partySize });
+    
+    // Ensure party size doesn't exceed available places
+    const safePartySize = Math.min(partySize, selectedDateAvailability.availablePlaces);
+    setFormData({ ...formData, partySize: safePartySize });
   };
 
   return <BookingStepTwoUI 

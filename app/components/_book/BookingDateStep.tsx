@@ -25,7 +25,8 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     errors,
     tours,
     setSelectedTour,
-    unavailableDates
+    unavailableDates,
+    setSelectedDateAvailability
   } = useBooking();
   
   // Get the current language from context
@@ -86,6 +87,7 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     const threeMonthsAgo = new Date(today);
     threeMonthsAgo.setMonth(today.getMonth() - 3);
     
+    // Note: we need to use 'let' here because we're modifying loopDate in the loop
     let loopDate = new Date(threeMonthsAgo);
     while (loopDate < today) {
       pastDates.push(new Date(loopDate));
@@ -143,7 +145,7 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
   };
 
   // Handle date selection
-  const handleDateSelect = (date: Date | undefined) => {
+  const handleDateSelect = async (date: Date | undefined) => {
     if (!date) return;
     
     // Reset previous errors
@@ -165,12 +167,41 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       return;
     }
 
-    // Update form data with selected date
-    setFormData({
-      ...formData,
-      date: formattedDate,
-      partySize: 1 // Reset party size when date changes
-    });
+    try {
+      // Fetch available places from the API
+      console.log(`Fetching available places for ${formattedDate} and tour ${formData.tourSlug}`);
+      const response = await fetch(`/api/booking-places?date=${formattedDate}&tourSlug=${formData.tourSlug}`);
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const availabilityData = await response.json();
+      console.log("Availability data:", availabilityData);
+      
+      if (!availabilityData.isAvailable) {
+        setFetchError(localizedText[currentLanguage].dateUnavailable);
+        return;
+      }
+      
+      // Update form data with selected date
+      setFormData({
+        ...formData,
+        date: formattedDate,
+        partySize: 1 // Reset party size when date changes
+      });
+      
+      // Update the selected date availability in context
+      setSelectedDateAvailability({
+        date: formattedDate,
+        availablePlaces: availabilityData.availablePlaces,
+        isAvailable: availabilityData.isAvailable
+      });
+      
+    } catch (error) {
+      console.error("Error fetching availability:", error);
+      setFetchError("Error checking availability. Please try again.");
+    }
   };
 
   // Handle tour selection
