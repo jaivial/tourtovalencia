@@ -16,14 +16,6 @@ const Footer: React.FC = () => {
         <div className="mx-auto w-[90%] sm:w-auto transition-transform duration-300 hover:scale-105">
           <img src="/logonuevoolga3.png" alt="Olga Travel" className="h-16 mb-6" />
           <p className="text-gray-300 text-base leading-relaxed max-w-[350px] mb-6">{footerText.firstp}</p>
-          <div className="mt-6 flex space-x-6">
-            <Link to="#" aria-label="Facebook" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 text-base">
-              <Facebook className="w-6 h-6" />
-            </Link>
-            <Link to="#" aria-label="Instagram" className="text-gray-300 hover:text-pink-400 transition-colors duration-300 text-base">
-              <Instagram className="w-6 h-6" />
-            </Link>
-          </div>
         </div>
 
         {/* Section 2: Quick Links */}
@@ -44,20 +36,20 @@ const Footer: React.FC = () => {
         <div className="mx-auto w-[90%] sm:w-auto">
           <h4 className="text-xl font-bold mb-6 text-blue-300">{footerText.thirdH4}</h4>
           <ul className="text-base space-y-4">
-            <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
+            {/* <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
               <span className="font-semibold text-blue-200 block mb-1">{footerText.firstspan}</span>
               <span className="text-gray-300">{footerText.firstli}</span>
-            </li>
+            </li> */}
             <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
               <span className="font-semibold text-blue-200 block mb-1">{footerText.secondspan}</span>
-              <Link to="tel:+34123456789" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 block">
-                +34 123 456 789
+              <Link to="tel:+34625291391" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 block">
+                +34 625 291 391
               </Link>
             </li>
             <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
               <span className="font-semibold text-blue-200 block mb-1">{footerText.thirdspan}</span>
-              <Link to="mailto:info@olgatravel.com" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 block">
-                info@olgatravel.com
+              <Link to="mailto:tourtovalencia@gmail.com" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 block">
+                tourtovalencia@gmail.com
               </Link>
             </li>
           </ul>
