@@ -13,9 +13,9 @@ import type {
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 
 // Helper function to deserialize JSON content
-const deserializeContent = (page: any): Page => {
+const deserializeContent = (page: Record<string, unknown>): Page => {
   // Create a deep copy of the page
-  const deserializedPage = { ...page };
+  const deserializedPage = { ...page } as Record<string, unknown>;
   
   // Ensure status is valid
   if (deserializedPage.status !== 'active' && deserializedPage.status !== 'upcoming') {
@@ -24,28 +24,33 @@ const deserializeContent = (page: any): Page => {
   
   // Handle File objects and other complex types that might be serialized
   if (deserializedPage.content?.es) {
+    const content = deserializedPage.content as Record<string, Record<string, unknown>>;
     // Process each section that might contain File objects
-    if (deserializedPage.content.es.section1?.backgroundImage) {
-      deserializedPage.content.es.section1.backgroundImage = {
-        preview: deserializedPage.content.es.section1.backgroundImage.preview || '',
+    if (content.es.section1?.backgroundImage) {
+      const section1 = content.es.section1 as Record<string, unknown>;
+      section1.backgroundImage = {
+        preview: (section1.backgroundImage as Record<string, string>)?.preview || '',
         file: undefined // File objects can't be serialized, so we set to undefined
       };
     }
     
-    if (deserializedPage.content.es.section2?.sectionImage) {
-      deserializedPage.content.es.section2.sectionImage = {
-        preview: deserializedPage.content.es.section2.sectionImage.preview || '',
+    if (content.es.section2?.sectionImage) {
+      const section2 = content.es.section2 as Record<string, unknown>;
+      section2.sectionImage = {
+        preview: (section2.sectionImage as Record<string, string>)?.preview || '',
         file: undefined
       };
     }
     
     // Handle section3 images array
-    if (deserializedPage.content.es.section3?.images) {
-      deserializedPage.content.es.section3.images = 
-        deserializedPage.content.es.section3.images.map((img: any) => ({
-          source: img.source || '',
-          alt: img.alt || 'Gallery image'
+    if (content.es.section3?.images) {
+      const section3 = content.es.section3 as Record<string, unknown>;
+      if (Array.isArray(section3.images)) {
+        section3.images = section3.images.map((img: unknown) => ({
+          source: (img as Record<string, string>)?.source || '',
+          alt: (img as Record<string, string>)?.alt || 'Gallery image'
         }));
+      }
     }
   }
   
@@ -110,7 +115,9 @@ export const useEditPage = (initialPage: any) => {
     deserializedPage.content.es.section6 
       ? {
           ...deserializedPage.content.es.section6,
-          list: deserializedPage.content.es.section6.list || []
+          list: Array.isArray(deserializedPage.content.es.section6.list) 
+            ? deserializedPage.content.es.section6.list 
+            : []
         }
       : defaultSection6Data
   );
@@ -225,26 +232,59 @@ export const useEditPage = (initialPage: any) => {
       formData.append("status", status);
       formData.append("id", deserializedPage._id || "");
 
-      // Send update request
-      const response = await fetch(`/api/pages/update/${deserializedPage._id}`, {
-        method: "PUT",
-        body: formData,
-      });
+      // Create an AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al actualizar el tour");
+      try {
+        // Send update request with timeout
+        const response = await fetch(`/api/pages/update/${deserializedPage._id}`, {
+          method: "PUT",
+          body: formData,
+          signal: controller.signal
+        });
+
+        // Clear the timeout
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          // Check the content type to handle HTML error pages
+          const contentType = response.headers.get("content-type");
+          
+          if (contentType && contentType.includes("application/json")) {
+            // If it's JSON, parse it normally
+            const errorData = await response.json() as { error?: string };
+            throw new Error(errorData.error || "Error al actualizar el tour");
+          } else {
+            // If it's not JSON (likely HTML), provide a more specific error
+            const statusText = response.statusText || "";
+            const status = response.status;
+            throw new Error(
+              `Error del servidor (${status}): ${statusText}. Posible problema con la traducción o procesamiento de imágenes.`
+            );
+          }
+        }
+
+        // Parse the response as JSON
+        const result = await response.json() as { success: boolean; message?: string };
+        
+        setSaveSuccess(true);
+        console.log("Page updated successfully:", result);
+        
+        // Navigate back to the edit page list after a short delay
+        setTimeout(() => {
+          navigate("/admin/dashboard/pagegen/editpage", { replace: true });
+        }, 2000);
+      } catch (error) {
+        // Handle AbortError (timeout)
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          throw new Error("La operación ha tardado demasiado tiempo. Posible problema con la traducción o procesamiento de imágenes.");
+        }
+        throw error; // Re-throw other errors to be caught by the outer catch
       }
-
-      setSaveSuccess(true);
-      
-      // Navigate back to the edit page list after a short delay
-      setTimeout(() => {
-        navigate("/admin/dashboard/pagegen/editpage", { replace: true });
-      }, 2000);
     } catch (error) {
       console.error("Error saving page:", error);
-      setSaveError(error instanceof Error ? error.message : "Error al guardar el tour");
+      setSaveError(error instanceof Error ? error.message : "Error al guardar el tour. Posible problema con la traducción o procesamiento de imágenes.");
     } finally {
       setIsSaving(false);
     }

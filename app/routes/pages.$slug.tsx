@@ -1,5 +1,7 @@
-import { json, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
 import { useLoaderData, useNavigation } from "@remix-run/react";
+import type { MetaFunction } from "@remix-run/react";
 import { getPageBySlug } from "~/utils/page.server";
 import DynamicPageContainer from "~/components/_pages/DynamicPageContainer";
 import DynamicPageSkeleton from "~/components/_pages/DynamicPageSkeleton";
@@ -37,7 +39,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 // Meta function for SEO
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
+export const meta: MetaFunction = ({ data }: { data: any }) => {
   if (!data?.page) {
     return [{ title: "Página no encontrada | Viajes Olga" }, { name: "description", content: "La página que buscas no existe o ha sido movida." }];
   }
@@ -75,7 +77,7 @@ export default function DynamicPage() {
   const { page } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "loading";
-  const { width = 0 } = useWindowSize();
+  const { width = 0, height = 0 } = useWindowSize();
   const { state } = useLanguageContext();
 
   if (isLoading) {
@@ -104,6 +106,10 @@ export default function DynamicPage() {
   // Get the "Book Now" text from the language context
   const bookNowText = state.common.bookNow;
 
+  // Ensure width is a number (not null)
+  const safeWidth = width || 0;
+  const safeHeight = height || 0;
+
   // If this is not a dynamic page that uses section3, render the normal container
   if (!content?.section3?.images) {
     return (
@@ -116,22 +122,22 @@ export default function DynamicPage() {
 
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
-      {content.indexSection5 && <DynamicPageContainer.IndexSection width={width} indexSection5Text={content.indexSection5} />}
+      {content.indexSection5 && <DynamicPageContainer.IndexSection width={safeWidth} indexSection5Text={content.indexSection5} />}
 
-      {content.section1 && <DynamicPageContainer.Section1 width={width} sanJuanSection1Text={content.section1} />}
+      {content.section1 && <DynamicPageContainer.Section1 width={safeWidth} sanJuanSection1Text={content.section1} />}
 
-      {content.section2 && <DynamicPageContainer.Section2 width={width} SanJuanSection2Text={content.section2} />}
+      {content.section2 && <DynamicPageContainer.Section2 width={safeWidth} height={safeHeight} SanJuanSection2Text={content.section2} />}
 
       {/* Render our dynamic section3 */}
-      {content.section3 && <SanJuanSection3Dynamic width={width} images={content.section3.images} />}
+      {content.section3 && <SanJuanSection3Dynamic width={safeWidth} images={content.section3.images} />}
 
-      {content.section4 && <DynamicPageContainer.Section4 width={width} SanJuanSection4Text={content.section4} />}
+      {content.section4 && <DynamicPageContainer.Section4 width={safeWidth} SanJuanSection4Text={content.section4} />}
 
-      {content.timeline && <DynamicPageContainer.Timeline width={width} timelineData={content.timeline} />}
+      {content.timeline && <DynamicPageContainer.Timeline width={safeWidth} timelineData={content.timeline} />}
 
-      {content.section5 && <DynamicPageContainer.Section5 width={width} SanJuanSection5Text={content.section5} />}
+      {content.section5 && <DynamicPageContainer.Section5 width={safeWidth} SanJuanSection5Text={content.section5} />}
 
-      {content.section6 && (page.status === "upcoming" ? <ComingSoonCard width={width} /> : <DynamicPageContainer.Section6 width={width} SanJuanSection6Text={content.section6} />)}
+      {content.section6 && (page.status === "upcoming" ? <ComingSoonCard width={safeWidth} /> : <DynamicPageContainer.Section6 width={safeWidth} SanJuanSection6Text={content.section6} />)}
       
       {/* Add the floating button */}
       <FloatingButton text={bookNowText} />

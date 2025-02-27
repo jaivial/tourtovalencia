@@ -19,10 +19,46 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
 }) => {
   const ref = React.useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
+  
+  // Handle case where list might be a JSON string instead of an array
+  const getList = () => {
+    if (Array.isArray(data.list)) {
+      return data.list;
+    }
+    
+    // Try to parse if it's a string
+    if (typeof data.list === 'string') {
+      try {
+        const parsed = JSON.parse(data.list);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.error('Failed to parse list:', e);
+        return [];
+      }
+    }
+    
+    // If list is null or undefined, return empty array
+    if (data.list === null || data.list === undefined) {
+      return [];
+    }
+    
+    console.error('Unexpected list type:', typeof data.list, data.list);
+    return [];
+  };
 
   const handleTextUpdate = (field: keyof SanJuanSection6Type) => (value: string) => {
     onUpdate(field, value);
   };
+  
+  // Add a default list item if the list is empty
+  const listItems = getList();
+  if (listItems.length === 0) {
+    // Add a default item if the list is empty
+    setTimeout(() => {
+      const newList = [{ li: "Elemento de lista", index: 0 }];
+      onUpdate("list", JSON.stringify(newList));
+    }, 0);
+  }
 
   return (
     <div className="w-full overflow-x-hidden">
@@ -56,15 +92,15 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
                 }
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <CardTitle>
+                <CardTitle className={`
+                  text-center bg-gradient-to-r from-blue-900 to-blue-600 
+                  bg-clip-text text-transparent font-bold
+                  ${width <= 350 ? "text-[1.5rem]" : "text-[2rem]"}
+                `}>
                   <EditableText
                     value={data.cardTitle}
                     onUpdate={handleTextUpdate("cardTitle")}
-                    className={`
-                      text-center bg-gradient-to-r from-blue-900 to-blue-600 
-                      bg-clip-text text-transparent font-bold
-                      ${width <= 350 ? "text-[1.5rem]" : "text-[2rem]"}
-                    `}
+                    className="text-transparent"
                   />
                 </CardTitle>
               </motion.div>
@@ -76,14 +112,14 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
                 }
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <CardDescription>
+                <CardDescription className={`
+                  text-center text-blue-800/80
+                  ${width <= 350 ? "text-[1rem]" : "text-[1.2rem]"}
+                `}>
                   <EditableText
                     value={data.cardDescription}
                     onUpdate={handleTextUpdate("cardDescription")}
-                    className={`
-                      text-center text-blue-800/80
-                      ${width <= 350 ? "text-[1rem]" : "text-[1.2rem]"}
-                    `}
+                    className="text-blue-800/80"
                   />
                 </CardDescription>
               </motion.div>
@@ -101,7 +137,7 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
                 <EditableText
                   value={data.firstH4}
                   onUpdate={handleTextUpdate("firstH4")}
-                  className="font-semibold text-blue-900 text-xl"
+                  className="text-blue-900"
                 />
               </motion.h4>
               <ul className={`flex flex-col gap-6 mt-2 ${
@@ -109,9 +145,9 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
                 width < 500 ? "ml-2 text-[0.9rem]" : 
                 "ml-6"
               }`}>
-                {data.list.map((li, index) => (
+                {listItems.map((li, index) => (
                   <motion.li 
-                    key={li.index}
+                    key={li.index || index}
                     initial={{ opacity: 0, x: -20 }}
                     animate={isInView ? 
                       { opacity: 1, x: 0 } : 
@@ -131,7 +167,7 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
                     <EditableText
                       value={li.li}
                       onUpdate={(value) => {
-                        const newList = [...data.list];
+                        const newList = [...listItems];
                         newList[index] = { ...li, li: value };
                         onUpdate("list", JSON.stringify(newList));
                       }}
@@ -161,14 +197,14 @@ const EditableSanJuanSection6: React.FC<EditableSanJuanSection6Props> = ({
                   <EditableText
                     value={data.secondH4}
                     onUpdate={handleTextUpdate("secondH4")}
-                    className="font-extrabold tracking-wider text-blue-900"
+                    className="text-blue-900"
                   />
                 </motion.h4>
                 <span className="text-sm font-medium text-blue-600 mt-2 block">
                   <EditableText
                     value={data.secondH4span}
                     onUpdate={handleTextUpdate("secondH4span")}
-                    className="text-sm font-medium text-blue-600"
+                    className="text-blue-600"
                   />
                 </span>
               </motion.div>

@@ -35,22 +35,51 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       return json({ error: "Status must be either 'active' or 'upcoming'" }, { status: 400 });
     }
 
-    const content = JSON.parse(contentStr);
+    let content;
+    try {
+      content = JSON.parse(contentStr);
+    } catch (parseError) {
+      console.error("Error parsing content JSON:", parseError);
+      return json({ error: "Invalid content format: Unable to parse JSON" }, { status: 400 });
+    }
     
     // Process the Spanish content (optimize images, no translation)
     console.log("Processing Spanish content for update...");
-    const processedSpanishContent = await processContent(content, false);
+    let processedSpanishContent;
+    try {
+      processedSpanishContent = await processContent(content, false);
+    } catch (processError) {
+      console.error("Error processing Spanish content:", processError);
+      return json({ 
+        error: "Error processing content: " + (processError instanceof Error ? processError.message : "Unknown error") 
+      }, { status: 500 });
+    }
 
     // Create English content by translating the processed Spanish content
     console.log("Translating content to English...");
-    const englishContent = await translateContent({ ...processedSpanishContent });
+    let englishContent;
+    try {
+      englishContent = await translateContent({ ...processedSpanishContent });
+    } catch (translateError) {
+      console.error("Error translating content:", translateError);
+      return json({ 
+        error: "Error translating content: " + (translateError instanceof Error ? translateError.message : "Unknown error") 
+      }, { status: 500 });
+    }
 
     // Get the pages collection
     const pagesCollection = await getPagesCollection();
     const toursCollection = await getToursCollection();
     
     // Create a properly typed filter
-    const objectId = new ObjectId(id);
+    let objectId;
+    try {
+      objectId = new ObjectId(id);
+    } catch (idError) {
+      console.error("Invalid ObjectId format:", idError);
+      return json({ error: "Invalid page ID format" }, { status: 400 });
+    }
+    
     const filter: Filter<Page> = { _id: objectId as unknown as string };
     
     // Find the existing page to get the English content
@@ -106,86 +135,104 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       
       if (existingTour) {
         // Update the existing tour
-        const tourUpdateResult = await toursCollection.updateOne(
-          tourFilter,
-          {
-            $set: {
-              tourName: {
-                es: name,
-                en: translatedTourName
-              },
-              tourPrice: content.price,
-              status: status as 'active' | 'upcoming',
-              updatedAt: new Date()
+        try {
+          const tourUpdateResult = await toursCollection.updateOne(
+            tourFilter,
+            {
+              $set: {
+                tourName: {
+                  es: name,
+                  en: translatedTourName
+                },
+                tourPrice: content.price,
+                status: status as 'active' | 'upcoming',
+                updatedAt: new Date()
+              }
             }
-          }
-        );
-        
-        tourUpdated = tourUpdateResult.modifiedCount > 0;
-        console.log(`Updated tour for page "${name}" with price ${content.price}€`);
-        console.log(`Tour name updated - ES: "${name}", EN: "${translatedTourName}"`);
+          );
+          
+          tourUpdated = tourUpdateResult.modifiedCount > 0;
+          console.log(`Updated tour for page "${name}" with price ${content.price}€`);
+          console.log(`Tour name updated - ES: "${name}", EN: "${translatedTourName}"`);
+        } catch (tourUpdateError) {
+          console.error("Error updating tour:", tourUpdateError);
+          // Continue with page update even if tour update fails
+        }
       } else {
         // Create a new tour if it doesn't exist
-        const newTour = {
-          slug: existingPage.slug,
-          tourName: {
-            es: name,
-            en: translatedTourName
-          },
-          tourPrice: content.price,
-          status: status as 'active' | 'upcoming',
-          description: {
-            es: (processedSpanishContent.section1 as any)?.title || "",
-            en: (englishContent.section1 as any)?.title || ""
-          },
-          duration: {
-            es: (processedSpanishContent.section4 as any)?.duration || "",
-            en: (englishContent.section4 as any)?.duration || ""
-          },
-          includes: {
-            es: (processedSpanishContent.section4 as any)?.includes || "",
-            en: (englishContent.section4 as any)?.includes || ""
-          },
-          meetingPoint: {
-            es: (processedSpanishContent.section4 as any)?.meetingPoint || "",
-            en: (englishContent.section4 as any)?.meetingPoint || ""
-          },
-          pageId: pageIdString,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        
-        await toursCollection.insertOne(newTour);
-        tourUpdated = true;
-        console.log(`Created new tour for page "${name}" with price ${content.price}€`);
-        console.log(`Tour name set - ES: "${name}", EN: "${translatedTourName}"`);
+        try {
+          const newTour: Tour = {
+            slug: existingPage.slug,
+            tourName: {
+              es: name,
+              en: translatedTourName
+            },
+            tourPrice: content.price,
+            status: status as 'active' | 'upcoming',
+            description: {
+              es: String((processedSpanishContent.section1 as Record<string, unknown>)?.title || ""),
+              en: String((englishContent.section1 as Record<string, unknown>)?.title || "")
+            },
+            duration: {
+              es: String((processedSpanishContent.section4 as Record<string, unknown>)?.duration || ""),
+              en: String((englishContent.section4 as Record<string, unknown>)?.duration || "")
+            },
+            includes: {
+              es: String((processedSpanishContent.section4 as Record<string, unknown>)?.includes || ""),
+              en: String((englishContent.section4 as Record<string, unknown>)?.includes || "")
+            },
+            meetingPoint: {
+              es: String((processedSpanishContent.section4 as Record<string, unknown>)?.meetingPoint || ""),
+              en: String((englishContent.section4 as Record<string, unknown>)?.meetingPoint || "")
+            },
+            pageId: pageIdString,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+          
+          await toursCollection.insertOne(newTour);
+          tourUpdated = true;
+          console.log(`Created new tour for page "${name}" with price ${content.price}€`);
+          console.log(`Tour name set - ES: "${name}", EN: "${translatedTourName}"`);
+        } catch (tourCreateError) {
+          console.error("Error creating tour:", tourCreateError);
+          // Continue with page update even if tour creation fails
+        }
       }
     }
     
     // Update the page with new Spanish content and translated English content
-    const result = await pagesCollection.updateOne(
-      filter,
-      {
-        $set: {
-          name,
-          status,
-          template,
-          "content.es": processedSpanishContent,
-          "content.en": englishContent,
-          updatedAt: new Date()
+    try {
+      const result = await pagesCollection.updateOne(
+        filter,
+        {
+          $set: {
+            name,
+            status,
+            template,
+            "content.es": processedSpanishContent,
+            "content.en": englishContent,
+            updatedAt: new Date()
+          }
         }
+      );
+
+      if (result.matchedCount === 0) {
+        return json({ error: "Page not found" }, { status: 404 });
       }
-    );
 
-    if (result.matchedCount === 0) {
-      return json({ error: "Page not found" }, { status: 404 });
+      return json({ 
+        success: true, 
+        message: "Page updated successfully with translations",
+        tourUpdated
+      });
+    } catch (updateError) {
+      console.error("Error updating page in database:", updateError);
+      return json(
+        { error: "Database error: " + (updateError instanceof Error ? updateError.message : "Unknown error") },
+        { status: 500 }
+      );
     }
-
-    return json({ 
-      success: true, 
-      message: "Page updated successfully with translations",
-      tourUpdated
-    });
   } catch (error) {
     console.error("Error updating page:", error);
     return json(
