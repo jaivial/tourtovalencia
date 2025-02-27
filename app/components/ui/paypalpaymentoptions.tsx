@@ -161,7 +161,7 @@ const PaymentOptions = () => {
       supportedNetworks: ['visa', 'masterCard', 'amex'],
       merchantCapabilities: ['supports3DS'],
       total: {
-        label: states.selectedTour?.tourName?.en || 'Excursiones Mediterráneo',
+        label: states.selectedTour?.tourName?.en || 'Tour To Valencia',
         amount: formattedTotalPrice
       }
     };
