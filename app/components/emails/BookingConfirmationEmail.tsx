@@ -30,8 +30,8 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
   // Text content based on language
   const texts = {
     previewText: isEnglish 
-      ? `Booking confirmation for ${booking.tourName || 'Excursiones Mediterráneo'}`
-      : `Confirmación de reserva para ${booking.tourName || 'Excursiones Mediterráneo'}`,
+      ? `Booking confirmation for ${booking.tourName || 'Tour to Valencia'}`
+      : `Confirmación de reserva para ${booking.tourName || 'Tour to Valencia'}`,
     
     heroHeading: isEnglish 
       ? "Booking Confirmed!"
@@ -42,8 +42,8 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
       : `Estimado/a ${booking.fullName},`,
     
     thankYouMessage: isEnglish
-      ? `Thank you for booking with <strong>Excursiones Mediterráneo</strong>! We have received your booking and are pleased to confirm the following details:`
-      : `¡Gracias por reservar con <strong>Excursiones Mediterráneo</strong>! Hemos recibido tu reserva y estamos encantados de confirmar los siguientes detalles:`,
+      ? `Thank you for booking with <strong>Tour to Valencia</strong>! We have received your booking and are pleased to confirm the following details:`
+      : `¡Gracias por reservar con <strong>Tour to Valencia</strong>! Hemos recibido tu reserva y estamos encantados de confirmar los siguientes detalles:`,
     
     detailsHeading: isEnglish
       ? "Your Booking Details"
@@ -96,8 +96,8 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
       : "¡Esperamos proporcionarle una experiencia inolvidable!",
     
     footerSignature: isEnglish
-      ? "The Excursiones Mediterráneo Team"
-      : "El Equipo de Excursiones Mediterráneo",
+      ? "The Tour to Valencia Team"
+      : "El Equipo de Tour to Valencia",
   };
   
   const bookingDate = new Date(booking.date);
@@ -127,10 +127,10 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
         <Container style={container}>
           <Section style={logoSection}>
             <Img
-              src="https://via.placeholder.com/200x80?text=Excursiones+Mediterraneo"
+              src="https://tourtovalencia.com/tourtovalencialogo.png"
               width="200"
               height="80"
-              alt="Excursiones Mediterráneo"
+              alt="Tour to Valencia"
               style={logo}
             />
           </Section>
@@ -227,12 +227,12 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
                 <Text style={infoContent}>
                   {texts.contactUsDetails}
                   <br />
-                  <Link href="mailto:info@excursionesmediterraneo.com" style={link}>
-                    info@excursionesmediterraneo.com
+                  <Link href="mailto:tourtovalencia@gmail.com" style={link}>
+                    tourtovalencia@gmail.com
                   </Link>
                   <br />
-                  <Link href="tel:+34612345678" style={link}>
-                    +34 612 345 678
+                  <Link href="tel:+34625291391" style={link}>
+                    +34 625 291 391
                   </Link>
                 </Text>
               </Section>
@@ -250,7 +250,7 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
           
           <Section style={footer}>
             <Text style={footerText}>
-              © {new Date().getFullYear()} Excursiones Mediterráneo. Todos los derechos reservados.
+              © {new Date().getFullYear()} Tour to Valencia. Todos los derechos reservados.
             </Text>
           </Section>
         </Container>

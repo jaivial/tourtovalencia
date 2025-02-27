@@ -67,10 +67,10 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
         <Container style={container}>
           <Section style={logoSection}>
             <Img
-              src="https://via.placeholder.com/200x80?text=Excursiones+Mediterraneo"
+              src="https://tourtovalencia.com/tourtovalencialogo.png"
               width="200"
               height="80"
-              alt="Excursiones Mediterráneo"
+              alt="Tour To Valencia"
               style={logo}
             />
           </Section>
@@ -130,7 +130,7 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
                 
                 <Text style={detailItem}>
                   <Text style={detailLabel}>Tour:</Text>
-                  <Text style={detailValue}>{booking.tourName || 'Excursiones Mediterráneo'}</Text>
+                  <Text style={detailValue}>{booking.tourName || 'Tour to Valencia'}</Text>
                 </Text>
                 
                 <Text style={detailItem}>
@@ -185,7 +185,7 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
           
           <Section style={footer}>
             <Text style={footerText}>
-              © {new Date().getFullYear()} Excursiones Mediterráneo. Todos los derechos reservados.
+              © {new Date().getFullYear()} Tour To Valencia. Todos los derechos reservados.
             </Text>
             <Text style={footerText}>
               Este es un email automático, por favor no responda a este mensaje.

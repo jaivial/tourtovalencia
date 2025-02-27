@@ -41,7 +41,7 @@ export const sendEmail = async ({ to, subject, component }: SendEmailProps): Pro
     const htmlContent = renderToString(component);
 
     const info = await emailTransporter.sendMail({
-      from: `"Excursiones Tour Tour Valencia" <jaimebillanueba99@gmail.com>`,
+      from: `"Excursiones Tour Tour Valencia" <tourtovalencia@gmail.com>`,
       to,
       subject,
       html: htmlContent,
