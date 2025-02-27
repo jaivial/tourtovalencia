@@ -143,7 +143,12 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
     }
   ];
 
-  const displayTours = tours.length > 0 ? tours : mockTours;
+  // Sort tours to display active tours first, then upcoming tours
+  const displayTours = [...(tours.length > 0 ? tours : mockTours)].sort((a, b) => {
+    if (a.status === "active" && b.status === "upcoming") return -1;
+    if (a.status === "upcoming" && b.status === "active") return 1;
+    return 0;
+  });
 
   // Function to get the base64 image for a tour
   const getTourImage = (tour: Tour) => {
@@ -320,11 +325,11 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
                   </div>
                 </div>
 
-                {/* Overlay for upcoming tours */}
+                {/* Overlay for upcoming tours - more subtle version */}
                 {tour.status === "upcoming" && (
-                  <div className="absolute inset-0 bg-gray-800/50 backdrop-blur-sm flex items-center justify-center">
-                    <div className="bg-white/90 px-8 py-6 rounded-lg text-center transform rotate-12 shadow-xl">
-                      <p className="text-2xl font-bold text-blue-900">{toursText.comingSoon}</p>
+                  <div className="absolute top-0 right-0 m-4">
+                    <div className="bg-blue-600/90 px-4 py-2 rounded-lg text-center shadow-md">
+                      <p className="text-sm font-bold text-white">{toursText.comingSoon}</p>
                     </div>
                   </div>
                 )}
