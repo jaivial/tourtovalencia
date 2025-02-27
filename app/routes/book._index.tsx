@@ -5,7 +5,7 @@ import { BookingFeature } from "~/components/_book/BookingFeature";
 import { getAvailableDatesInRange, getDateAvailability } from "~/models/bookingAvailability.server";
 import { addMonths } from "date-fns";
 import type { Booking } from "~/types/booking";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import type { Tour } from "./book";
 import { ObjectId } from "mongodb";
@@ -238,9 +238,15 @@ export default function BookIndex() {
   const data = useLoaderData<typeof loader>() as LoaderData;
   const { availableDates, selectedDateAvailability, paypalClientId, emailConfig, tours } = data;
   
-  // Debug: Log the tours from the loader data
+  // Use a ref to track if we've already logged the tours
+  const hasLoggedToursRef = useRef(false);
+  
+  // Debug: Log the tours from the loader data only once
   useEffect(() => {
-    console.log("Tours in BookIndex component:", tours);
+    if (!hasLoggedToursRef.current) {
+      console.log("Tours in BookIndex component:", tours);
+      hasLoggedToursRef.current = true;
+    }
   }, [tours]);
 
   return (

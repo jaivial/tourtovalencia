@@ -1,6 +1,6 @@
 import { Button } from "~/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { PaymentModal } from "~/components/ui/PaymentModal";
 import PaymentOptions from "~/components/ui/paypalpaymentoptions";
 import { useBooking } from "~/context/BookingContext";
@@ -24,13 +24,19 @@ export const BookingNavigation = ({ currentStep, onNext, onPrevious, isSubmittin
   const isLastStep = currentStep === 4;
   const [isOpen, setIsOpen] = useState(false);
   const { formData, selectedTour } = useBooking();
+  
+  // Use a ref to track if we've already logged the text
+  const hasLoggedTextRef = useRef(false);
 
   // Calculate price based on selected tour price or use a default price
   const tourPrice = selectedTour?.content?.en?.price || selectedTour?.tourPrice || 120;
   const totalPrice = formData.partySize * tourPrice;
 
   useEffect(() => {
-    console.log("bookingNavigationText", bookingNavigationText.bookNow);
+    if (!hasLoggedTextRef.current) {
+      console.log("bookingNavigationText", bookingNavigationText.bookNow);
+      hasLoggedTextRef.current = true;
+    }
   }, [bookingNavigationText]);
 
   const handleOpen = () => setIsOpen(true);

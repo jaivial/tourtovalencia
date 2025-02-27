@@ -1,5 +1,5 @@
-import { json } from "@remix-run/node";
-import type { LoaderFunction } from "@remix-run/node";
+import { json } from "@remix-run/server-runtime";
+import type { LoaderFunction } from "@remix-run/server-runtime";
 import { getAvailableDatesForTour } from "~/services/bookingAvailability.server";
 import { checkDateAvailability } from "~/services/bookingAvailability.server";
 
@@ -7,7 +7,7 @@ import { checkDateAvailability } from "~/services/bookingAvailability.server";
  * Resource route to get available dates for a specific tour
  * or check availability for a specific date and tour
  */
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader: LoaderFunction = async ({ request }: { request: Request }) => {
   try {
     const url = new URL(request.url);
     const tourSlug = url.searchParams.get("tourSlug");
@@ -36,8 +36,13 @@ export const loader: LoaderFunction = async ({ request }) => {
           }, { status: 400 });
         }
         
+        console.log(`Calling checkDateAvailability with date: ${dateObj.toISOString()} and tourSlug: ${tourSlug}`);
         const availability = await checkDateAvailability(dateObj, tourSlug);
-        console.log("Date availability result:", availability);
+        console.log("Date availability result:", JSON.stringify(availability, null, 2));
+        
+        // If no booking limit was found, the default of 10 should be used
+        // This is already handled in the checkDateAvailability function
+        console.log(`Returning dateAvailability with maxBookings: ${availability.maxBookings} (should be 10 if no limit was found)`);
         
         return json({ 
           dateAvailability: {
@@ -62,6 +67,11 @@ export const loader: LoaderFunction = async ({ request }) => {
     console.log("Fetching available dates for tour:", tourSlug);
     const availableDates = await getAvailableDatesForTour(tourSlug);
     console.log(`Found ${availableDates.length} available dates for tour:`, tourSlug);
+    
+    // Log a few sample dates to verify the default limit is being applied
+    if (availableDates.length > 0) {
+      console.log("Sample dates:", availableDates.slice(0, 3));
+    }
     
     return json({ availableDates });
   } catch (error) {

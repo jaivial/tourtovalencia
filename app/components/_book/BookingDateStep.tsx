@@ -45,8 +45,7 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     setSelectedDateAvailability,
     tours,
     setSelectedTour,
-    setAvailableDates,
-    selectedDateAvailability
+    setAvailableDates
   } = useBooking();
   
   // Get the current language from context
@@ -80,8 +79,6 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
 
   // State to track if a tour has been selected
   const [isTourSelected, setIsTourSelected] = useState(!!formData.tourSlug);
-  // State to track if a date has been selected
-  const [isDateSelected, setIsDateSelected] = useState(false);
   // State to track loading timeouts
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   // State to track errors
@@ -92,15 +89,12 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
 
   // Ref to store timeout IDs
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Debug logging
-  useEffect(() => {
-    console.log("Fetcher state:", fetcher.state);
-    console.log("Fetcher data:", fetcher.data);
-    console.log("Selected date availability:", selectedDateAvailability);
-    console.log("Is date selected:", isDateSelected);
-    console.log("Current language:", currentLanguage);
-  }, [fetcher.state, fetcher.data, selectedDateAvailability, isDateSelected, currentLanguage]);
+  
+  // Ref to track the last fetched date and tour to prevent duplicate fetches
+  const lastFetchRef = useRef<{date: string, tourSlug: string} | null>(null);
+  
+  // Ref to track if we've already processed this data
+  const processedDataRef = useRef<boolean>(false);
 
   // Clear timeout when component unmounts
   useEffect(() => {
@@ -124,6 +118,16 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       }
     })
     .filter(Boolean) as Date[];
+
+  // Check if a date is disabled
+  const isDateDisabled = (date: Date) => {
+    // Check if the date is in the disabledDates array
+    return disabledDates.some(disabledDate => 
+      disabledDate.getFullYear() === date.getFullYear() &&
+      disabledDate.getMonth() === date.getMonth() &&
+      disabledDate.getDate() === date.getDate()
+    );
+  };
 
   // Handle date selection
   const handleDateSelect = (date: Date | undefined) => {
@@ -154,16 +158,31 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     }
 
     const tourSlug = formData.tourSlug;
+    
+    // Check if we've already fetched this date and tour combination
+    if (lastFetchRef.current && 
+        lastFetchRef.current.date === formattedDate && 
+        lastFetchRef.current.tourSlug === tourSlug) {
+      console.log("Already fetched availability for this date and tour, skipping fetch");
+      return;
+    }
+    
     console.log("Checking availability for tour:", tourSlug);
 
     // Reset loading timeout state
     setLoadingTimeout(false);
+    
+    // Reset the processed data flag
+    processedDataRef.current = false;
 
     // Set a timeout to show a message if the fetcher takes too long
     timeoutRef.current = setTimeout(() => {
       console.log("Availability fetch timeout");
       setLoadingTimeout(true);
     }, 8000); // 8 seconds timeout
+
+    // Update the last fetched reference
+    lastFetchRef.current = { date: formattedDate, tourSlug };
 
     // Fetch availability for the selected date and tour
     availabilityFetcher.load(
@@ -173,17 +192,20 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
 
   // Effect to handle changes in the availability fetcher state
   useEffect(() => {
-    console.log("Fetcher state:", availabilityFetcher.state);
-    console.log("Fetcher data:", availabilityFetcher.data);
-    
     // Clear timeout if fetcher is idle (completed or not started)
     if (availabilityFetcher.state === "idle" && timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
 
-    // Handle fetcher data when it's available
-    if (availabilityFetcher.state === "idle" && availabilityFetcher.data) {
+    // Only process data if we're in idle state, have data, and haven't processed this data yet
+    if (availabilityFetcher.state === "idle" && 
+        availabilityFetcher.data && 
+        !processedDataRef.current) {
+      
+      // Set the flag to indicate we've processed this data
+      processedDataRef.current = true;
+      
       const response = availabilityFetcher.data as AvailabilityApiResponse;
       
       // Handle error from API
@@ -212,7 +234,6 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
           isAvailable: response.dateAvailability.isAvailable
         });
         setLoadingTimeout(false);
-        setIsDateSelected(true);
       } 
       // If we have general available dates
       else if (response.availableDates) {
@@ -226,17 +247,7 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
         setLoadingTimeout(false);
       }
     }
-  }, [availabilityFetcher.state, availabilityFetcher.data, currentLanguage, localizedText]);
-
-  // Check if a date is disabled
-  const isDateDisabled = (date: Date) => {
-    // Check if the date is in the disabledDates array
-    return disabledDates.some(disabledDate => 
-      disabledDate.getFullYear() === date.getFullYear() &&
-      disabledDate.getMonth() === date.getMonth() &&
-      disabledDate.getDate() === date.getDate()
-    );
-  };
+  }, [availabilityFetcher.state, availabilityFetcher.data, currentLanguage, localizedText, setAvailableDates, setSelectedDateAvailability]);
 
   // Handle tour selection
   const handleTourChange = (tourSlug: string) => {
@@ -250,6 +261,12 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       timeoutRef.current = null;
     }
     
+    // Check if we've already fetched this tour
+    if (formData.tourSlug === tourSlug) {
+      console.log("Tour already selected, skipping fetch");
+      return;
+    }
+    
     // Update form data with the selected tour
     setFormData({ tourSlug });
     
@@ -259,8 +276,6 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       setSelectedTour(selectedTour);
       // Set tour as selected to show the calendar
       setIsTourSelected(true);
-      // Reset date selection when tour changes
-      setIsDateSelected(false);
       // Reset date and partySize in form data
       setFormData({ 
         tourSlug,
@@ -268,6 +283,9 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
         partySize: 1
       });
     }
+    
+    // Reset the processed data flag
+    processedDataRef.current = false;
     
     // Set a timeout to handle cases where the fetcher might get stuck
     timeoutRef.current = setTimeout(() => {

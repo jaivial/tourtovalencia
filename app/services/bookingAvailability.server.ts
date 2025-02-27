@@ -43,28 +43,37 @@ export async function checkDateAvailability(date: Date, tourSlug: string): Promi
     const utcDate = localDateToUTCMidnight(date);
     console.log(`UTC date for query: ${utcDate.toISOString()}`);
     
-    // Check if there's a specific booking limit for this date and tour
-    const limitQuery = { 
-      date: utcDate,
-      tourSlug: tourSlug
-    };
+    // Use Promise.all to run both queries in parallel
+    const [bookingLimit, defaultLimit, dateBookings] = await Promise.all([
+      // 1. Check if there's a specific booking limit for this date and tour
+      bookingLimits.findOne({ 
+        date: utcDate,
+        tourSlug: tourSlug
+      }),
+      
+      // 2. Check for a default limit for the same date
+      bookingLimits.findOne({
+        date: utcDate,
+        tourSlug: "default"
+      }),
+      
+      // 3. Get all confirmed bookings for this date and tour
+      bookings.find({
+        date: utcDate,
+        status: "confirmed",
+        $or: [
+          { tourSlug: tourSlug },
+          { tourType: tourSlug }
+        ]
+      }).toArray()
+    ]);
     
-    console.log("Querying booking limits with:", JSON.stringify(limitQuery));
-    const bookingLimit = await bookingLimits.findOne(limitQuery);
     console.log("Booking limit result:", bookingLimit);
-    
-    // If no specific limit is found, check for a default limit
-    const defaultLimitQuery = {
-      date: utcDate,
-      tourSlug: "default"
-    };
-    
-    console.log("Querying default booking limits with:", JSON.stringify(defaultLimitQuery));
-    const defaultLimit = !bookingLimit ? await bookingLimits.findOne(defaultLimitQuery) : null;
     console.log("Default booking limit result:", defaultLimit);
+    console.log(`Found ${dateBookings.length} bookings for this date and tour`);
     
-    // Use the specific limit, default limit, or fallback to 10
-    const maxBookings = bookingLimit?.maxBookings || defaultLimit?.maxBookings || 10;
+    // Use the specific limit, default limit for the same date, or fallback to 10
+    const maxBookings = bookingLimit?.maxBookings ?? defaultLimit?.maxBookings ?? 10;
     console.log(`Max bookings for this date: ${maxBookings}`);
     
     // If maxBookings is 0, the date is not available (explicitly blocked)
@@ -77,20 +86,6 @@ export async function checkDateAvailability(date: Date, tourSlug: string): Promi
         bookedPlaces: 0
       };
     }
-    
-    // Get all confirmed bookings for this date and tour
-    const bookingsQuery = {
-      date: utcDate,
-      status: "confirmed",
-      $or: [
-        { tourSlug: tourSlug },
-        { tourType: tourSlug }
-      ]
-    };
-    
-    console.log("Querying bookings with:", JSON.stringify(bookingsQuery));
-    const dateBookings = await bookings.find(bookingsQuery).toArray();
-    console.log(`Found ${dateBookings.length} bookings for this date and tour`);
     
     // Calculate total booked places
     const bookedPlaces = dateBookings.reduce((sum: number, booking: BookingDocument) => {
@@ -128,70 +123,92 @@ export async function checkDateAvailability(date: Date, tourSlug: string): Promi
  */
 export async function getAvailableDatesForTour(tourSlug: string): Promise<DateAvailability[]> {
   try {
+    console.log(`Getting available dates for tour: ${tourSlug}`);
+    
     // Get dates for the next 3 months
     const startDate = new Date();
     const endDate = addMonths(startDate, 3);
     
-    // Get all bookings for this tour to check against booking limits
+    // Convert to UTC midnight for consistent querying
+    const utcStartDate = localDateToUTCMidnight(startDate);
+    const utcEndDate = localDateToUTCMidnight(endDate);
+    
+    console.log(`Date range: ${utcStartDate.toISOString()} to ${utcEndDate.toISOString()}`);
+    
+    // Get collections
     const bookings = await getCollection<BookingDocument>("bookings");
     const bookingLimits = await getCollection<BookingLimit>("bookingLimits");
     
-    // Get all dates between start and end
+    // 1. Get all booking limits for this tour in the date range
+    const tourLimitsQuery = {
+      tourSlug: tourSlug,
+      date: { $gte: utcStartDate, $lte: utcEndDate }
+    };
+    
+    console.log("Querying tour-specific limits with:", JSON.stringify(tourLimitsQuery));
+    const tourLimits = await bookingLimits.find(tourLimitsQuery).toArray();
+    console.log(`Found ${tourLimits.length} tour-specific limits`);
+    
+    // 2. Get default limits that might apply
+    const defaultLimitsQuery = {
+      tourSlug: "default",
+      date: { $gte: utcStartDate, $lte: utcEndDate }
+    };
+    
+    console.log("Querying default limits with:", JSON.stringify(defaultLimitsQuery));
+    const defaultLimits = await bookingLimits.find(defaultLimitsQuery).toArray();
+    console.log(`Found ${defaultLimits.length} default limits`);
+    
+    // 3. Get all confirmed bookings for this tour in the date range
+    const bookingsQuery = {
+      date: { $gte: utcStartDate, $lte: utcEndDate },
+      status: "confirmed",
+      $or: [
+        { tourSlug: tourSlug },
+        { tourType: tourSlug }
+      ]
+    };
+    
+    console.log("Querying bookings with:", JSON.stringify(bookingsQuery));
+    const tourBookings = await bookings.find(bookingsQuery).toArray();
+    console.log(`Found ${tourBookings.length} bookings for this tour in the date range`);
+    
+    // Create a map of dates to booking counts
+    const bookingCounts: Record<string, number> = {};
+    tourBookings.forEach(booking => {
+      const dateStr = booking.date.toISOString().split('T')[0];
+      const partySize = booking.partySize || booking.numberOfPeople || 0;
+      bookingCounts[dateStr] = (bookingCounts[dateStr] || 0) + partySize;
+    });
+    
+    // Create a map of dates to limits
+    const limitMap: Record<string, number> = {};
+    tourLimits.forEach(limit => {
+      const dateStr = limit.date.toISOString().split('T')[0];
+      limitMap[dateStr] = limit.maxBookings;
+    });
+    
+    // Add default limits to the map (only if no specific limit exists)
+    defaultLimits.forEach(limit => {
+      const dateStr = limit.date.toISOString().split('T')[0];
+      if (limitMap[dateStr] === undefined) {
+        limitMap[dateStr] = limit.maxBookings;
+      }
+    });
+    
+    // Generate all dates in the range
     const dates: DateAvailability[] = [];
     const currentDate = new Date(startDate);
     
     while (currentDate <= endDate) {
-      const utcDate = localDateToUTCMidnight(currentDate);
       const dateStr = format(currentDate, "yyyy-MM-dd");
+      const isoDateStr = localDateToUTCMidnight(currentDate).toISOString().split('T')[0];
       
-      // Check if there's a specific booking limit for this date and tour
-      const limitQuery = { 
-        date: utcDate,
-        tourSlug: tourSlug
-      };
+      // Get the limit for this date (specific, default, or fallback to 10)
+      const maxBookings = limitMap[isoDateStr] !== undefined ? limitMap[isoDateStr] : 10;
       
-      const bookingLimit = await bookingLimits.findOne(limitQuery);
-      
-      // If no specific limit is found, check for a default limit
-      const defaultLimitQuery = {
-        date: utcDate,
-        tourSlug: "default"
-      };
-      
-      const defaultLimit = !bookingLimit ? await bookingLimits.findOne(defaultLimitQuery) : null;
-      
-      // Use the specific limit, default limit, or fallback to 10
-      const maxBookings = bookingLimit?.maxBookings || defaultLimit?.maxBookings || 10;
-      
-      // If maxBookings is 0, the date is not available (explicitly blocked)
-      if (maxBookings === 0) {
-        dates.push({
-          date: dateStr,
-          availablePlaces: 0,
-          isAvailable: false,
-          tourSlug
-        });
-        
-        // Move to next day
-        currentDate.setDate(currentDate.getDate() + 1);
-        continue;
-      }
-      
-      // Get all confirmed bookings for this date and tour
-      const bookingsQuery = {
-        date: utcDate,
-        status: "confirmed",
-        $or: [
-          { tourSlug: tourSlug },
-          { tourType: tourSlug }
-        ]
-      };
-      
-      const dateBookings = await bookings.find(bookingsQuery).toArray();
-      
-      // Calculate total booked places
-      const bookedPlaces = dateBookings.reduce((sum: number, booking: BookingDocument) => 
-        sum + (booking.partySize || booking.numberOfPeople || 0), 0);
+      // Get booked places for this date
+      const bookedPlaces = bookingCounts[isoDateStr] || 0;
       
       // Calculate available places
       const availablePlaces = Math.max(0, maxBookings - bookedPlaces);
@@ -199,7 +216,7 @@ export async function getAvailableDatesForTour(tourSlug: string): Promise<DateAv
       dates.push({
         date: dateStr,
         availablePlaces,
-        isAvailable: availablePlaces > 0,
+        isAvailable: maxBookings > 0 && availablePlaces > 0,
         tourSlug
       });
       
@@ -207,6 +224,7 @@ export async function getAvailableDatesForTour(tourSlug: string): Promise<DateAv
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
+    console.log(`Returning ${dates.length} dates for tour ${tourSlug}`);
     return dates;
   } catch (error) {
     console.error("Error getting available dates for tour:", error);

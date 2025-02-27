@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useRef, useEffect } from "react";
 import type { BookingFormData } from "~/hooks/book.hooks";
 import type { Tour } from "~/routes/book";
 
@@ -58,6 +58,10 @@ export interface BookingContextState {
   }) => void;
   setSelectedTour: (tour: Tour | null) => void;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  bookingSuccess: boolean;
+  setBookingSuccess: (success: boolean) => void;
+  bookingReference: string;
+  setBookingReference: (reference: string) => void;
 }
 
 const BookingContext = createContext<BookingContextState | null>(null);
@@ -95,9 +99,17 @@ export function BookingProvider({
     tours: Tour[];
   };
 }) {
-  // Log the initial state tours
-  console.log("BookingProvider initialState tours:", initialState?.tours);
-  console.log("BookingProvider initialState tours length:", initialState?.tours?.length || 0);
+  // Use a ref to track if this is the first render
+  const isFirstRender = useRef(true);
+  
+  // Log the initial state tours only on the first render
+  useEffect(() => {
+    if (isFirstRender.current) {
+      console.log("BookingProvider initialState tours:", initialState?.tours);
+      console.log("BookingProvider initialState tours length:", initialState?.tours?.length || 0);
+      isFirstRender.current = false;
+    }
+  }, []); // Empty dependency array to ensure it only runs once
   
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<BookingFormData>({
@@ -134,6 +146,8 @@ export function BookingProvider({
   const [emailConfig, setEmailConfig] = useState(initialState?.emailConfig);
   const tours = initialState?.tours || [];
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [bookingReference, setBookingReference] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -170,6 +184,10 @@ export function BookingProvider({
     setEmailConfig,
     setSelectedTour,
     handleInputChange,
+    bookingSuccess,
+    setBookingSuccess,
+    bookingReference,
+    setBookingReference,
   };
 
   return <BookingContext.Provider value={value}>{children}</BookingContext.Provider>;
