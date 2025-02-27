@@ -6,6 +6,10 @@
         "linkText": "Home"
       },
       {
+        "path": "/valencia-things-to-do",
+        "linkText": "Valencia Things to Do"
+      },
+      {
         "path": "/book",
         "linkText": "Book Now"
       }
@@ -700,6 +704,10 @@
       {
         "path": "/",
         "linkText": "Inicio"
+      },
+      {
+        "path": "/valencia-things-to-do",
+        "linkText": "Qué Hacer en Valencia"
       },
       {
         "path": "/book",
