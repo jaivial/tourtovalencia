@@ -5,7 +5,6 @@ import type { MetaFunction } from "@remix-run/react";
 import { BookingLoading } from "~/components/_book/BookingLoading";
 import type { Booking } from "~/types/booking";
 import { getToursCollection } from "~/utils/db.server";
-import { retrieveCheckoutSession } from "~/services/stripe.server";
 import { createBooking } from "~/services/booking.server";
 import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
@@ -129,6 +128,9 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (intent === "confirm-payment") {
     try {
+      // Dynamic import of stripe service
+      const { retrieveCheckoutSession } = await import("~/services/stripe.server");
+      
       const sessionId = formData.get("session_id") as string;
       const session = await retrieveCheckoutSession(sessionId) as StripeSession;
 

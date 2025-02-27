@@ -22,6 +22,15 @@ interface BookingDocument {
   numberOfPeople?: number;
 }
 
+// Cache for available dates by tour
+const availableDatesCache: Record<string, {
+  dates: DateAvailability[];
+  timestamp: number;
+}> = {};
+
+// Cache TTL in milliseconds (10 minutes)
+const CACHE_TTL = 10 * 60 * 1000;
+
 /**
  * Check availability for a specific date and tour
  * This function directly queries the database for booking limits and current bookings
@@ -33,15 +42,12 @@ export async function checkDateAvailability(date: Date, tourSlug: string): Promi
   bookedPlaces: number;
 }> {
   try {
-    console.log(`Checking availability for date: ${date.toISOString()} and tour: ${tourSlug}`);
-    
     // Get collections
     const bookings = await getCollection<BookingDocument>("bookings");
     const bookingLimits = await getCollection<BookingLimit>("bookingLimits");
     
     // Convert to UTC midnight for consistent querying
     const utcDate = localDateToUTCMidnight(date);
-    console.log(`UTC date for query: ${utcDate.toISOString()}`);
     
     // Use Promise.all to run both queries in parallel
     const [bookingLimit, defaultLimit, dateBookings] = await Promise.all([
@@ -68,17 +74,11 @@ export async function checkDateAvailability(date: Date, tourSlug: string): Promi
       }).toArray()
     ]);
     
-    console.log("Booking limit result:", bookingLimit);
-    console.log("Default booking limit result:", defaultLimit);
-    console.log(`Found ${dateBookings.length} bookings for this date and tour`);
-    
     // Use the specific limit, default limit for the same date, or fallback to 10
     const maxBookings = bookingLimit?.maxBookings ?? defaultLimit?.maxBookings ?? 10;
-    console.log(`Max bookings for this date: ${maxBookings}`);
     
     // If maxBookings is 0, the date is not available (explicitly blocked)
     if (maxBookings === 0) {
-      console.log("Date is explicitly blocked (maxBookings = 0)");
       return {
         availablePlaces: 0,
         isAvailable: false,
@@ -90,15 +90,11 @@ export async function checkDateAvailability(date: Date, tourSlug: string): Promi
     // Calculate total booked places
     const bookedPlaces = dateBookings.reduce((sum: number, booking: BookingDocument) => {
       const partySize = booking.partySize || booking.numberOfPeople || 0;
-      console.log(`Booking ${booking._id}: Party size = ${partySize}`);
       return sum + partySize;
     }, 0);
     
-    console.log(`Total booked places: ${bookedPlaces}`);
-    
     // Calculate available places
     const availablePlaces = Math.max(0, maxBookings - bookedPlaces);
-    console.log(`Available places: ${availablePlaces}`);
     
     return {
       availablePlaces,
@@ -123,6 +119,14 @@ export async function checkDateAvailability(date: Date, tourSlug: string): Promi
  */
 export async function getAvailableDatesForTour(tourSlug: string): Promise<DateAvailability[]> {
   try {
+    // Check cache first
+    const now = Date.now();
+    if (availableDatesCache[tourSlug] && 
+        now - availableDatesCache[tourSlug].timestamp < CACHE_TTL) {
+      console.log(`Using cached dates for tour: ${tourSlug}`);
+      return availableDatesCache[tourSlug].dates;
+    }
+
     console.log(`Getting available dates for tour: ${tourSlug}`);
     
     // Get dates for the next 3 months
@@ -133,63 +137,68 @@ export async function getAvailableDatesForTour(tourSlug: string): Promise<DateAv
     const utcStartDate = localDateToUTCMidnight(startDate);
     const utcEndDate = localDateToUTCMidnight(endDate);
     
-    console.log(`Date range: ${utcStartDate.toISOString()} to ${utcEndDate.toISOString()}`);
-    
     // Get collections
     const bookings = await getCollection<BookingDocument>("bookings");
     const bookingLimits = await getCollection<BookingLimit>("bookingLimits");
     
-    // 1. Get all booking limits for this tour in the date range
-    const tourLimitsQuery = {
-      tourSlug: tourSlug,
-      date: { $gte: utcStartDate, $lte: utcEndDate }
-    };
-    
-    console.log("Querying tour-specific limits with:", JSON.stringify(tourLimitsQuery));
-    const tourLimits = await bookingLimits.find(tourLimitsQuery).toArray();
-    console.log(`Found ${tourLimits.length} tour-specific limits`);
-    
-    // 2. Get default limits that might apply
-    const defaultLimitsQuery = {
-      tourSlug: "default",
-      date: { $gte: utcStartDate, $lte: utcEndDate }
-    };
-    
-    console.log("Querying default limits with:", JSON.stringify(defaultLimitsQuery));
-    const defaultLimits = await bookingLimits.find(defaultLimitsQuery).toArray();
-    console.log(`Found ${defaultLimits.length} default limits`);
-    
-    // 3. Get all confirmed bookings for this tour in the date range
-    const bookingsQuery = {
-      date: { $gte: utcStartDate, $lte: utcEndDate },
-      status: "confirmed",
-      $or: [
-        { tourSlug: tourSlug },
-        { tourType: tourSlug }
-      ]
-    };
-    
-    console.log("Querying bookings with:", JSON.stringify(bookingsQuery));
-    const tourBookings = await bookings.find(bookingsQuery).toArray();
-    console.log(`Found ${tourBookings.length} bookings for this tour in the date range`);
+    // Create aggregated queries for better performance
+    const [tourLimitsResults, defaultLimitsResults, bookingsResults] = await Promise.all([
+      // 1. Tour-specific limits
+      bookingLimits.find({
+        tourSlug: tourSlug,
+        date: { $gte: utcStartDate, $lte: utcEndDate }
+      }).toArray(),
+      
+      // 2. Default limits
+      bookingLimits.find({
+        tourSlug: "default",
+        date: { $gte: utcStartDate, $lte: utcEndDate }
+      }).toArray(),
+      
+      // 3. Bookings with aggregation to get counts per date
+      bookings.aggregate([
+        {
+          $match: {
+            date: { $gte: utcStartDate, $lte: utcEndDate },
+            status: "confirmed",
+            $or: [
+              { tourSlug: tourSlug },
+              { tourType: tourSlug }
+            ]
+          }
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+            totalBooked: {
+              $sum: {
+                $cond: [
+                  { $or: [{ $eq: ["$partySize", null] }, { $eq: ["$partySize", 0] }] },
+                  { $ifNull: ["$numberOfPeople", 1] },
+                  "$partySize"
+                ]
+              }
+            }
+          }
+        }
+      ]).toArray()
+    ]);
     
     // Create a map of dates to booking counts
     const bookingCounts: Record<string, number> = {};
-    tourBookings.forEach(booking => {
-      const dateStr = booking.date.toISOString().split('T')[0];
-      const partySize = booking.partySize || booking.numberOfPeople || 0;
-      bookingCounts[dateStr] = (bookingCounts[dateStr] || 0) + partySize;
+    bookingsResults.forEach(result => {
+      bookingCounts[result._id] = result.totalBooked;
     });
     
     // Create a map of dates to limits
     const limitMap: Record<string, number> = {};
-    tourLimits.forEach(limit => {
+    tourLimitsResults.forEach(limit => {
       const dateStr = limit.date.toISOString().split('T')[0];
       limitMap[dateStr] = limit.maxBookings;
     });
     
     // Add default limits to the map (only if no specific limit exists)
-    defaultLimits.forEach(limit => {
+    defaultLimitsResults.forEach(limit => {
       const dateStr = limit.date.toISOString().split('T')[0];
       if (limitMap[dateStr] === undefined) {
         limitMap[dateStr] = limit.maxBookings;
@@ -224,7 +233,13 @@ export async function getAvailableDatesForTour(tourSlug: string): Promise<DateAv
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    console.log(`Returning ${dates.length} dates for tour ${tourSlug}`);
+    // Update cache
+    availableDatesCache[tourSlug] = {
+      dates,
+      timestamp: now
+    };
+    
+    console.log(`Generated ${dates.length} dates for tour ${tourSlug}`);
     return dates;
   } catch (error) {
     console.error("Error getting available dates for tour:", error);

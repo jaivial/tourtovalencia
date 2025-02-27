@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from "react";
 import type { BookingFormData } from "~/hooks/book.hooks";
 import type { Tour } from "~/routes/book";
+import type { UnavailableDate } from "~/routes/book._index";
 
 export interface BookingContextState {
   currentStep: number;
@@ -28,6 +29,7 @@ export interface BookingContextState {
   };
   tours: Tour[];
   selectedTour: Tour | null;
+  unavailableDates: UnavailableDate[];
   setCurrentStep: (step: number) => void;
   setFormData: (data: Partial<BookingFormData>) => void;
   setErrors: (errors: Partial<Record<keyof BookingFormData, string>>) => void;
@@ -97,6 +99,7 @@ export function BookingProvider({
       gmailAppPassword: string;
     };
     tours: Tour[];
+    unavailableDates: UnavailableDate[];
   };
 }) {
   // Use a ref to track if this is the first render
@@ -107,6 +110,10 @@ export function BookingProvider({
     if (isFirstRender.current) {
       console.log("BookingProvider initialState tours:", initialState?.tours);
       console.log("BookingProvider initialState tours length:", initialState?.tours?.length || 0);
+      console.log("BookingProvider unavailableDates count:", initialState?.unavailableDates?.length || 0);
+      if (initialState?.unavailableDates?.length) {
+        console.log("BookingProvider unavailableDates sample:", initialState.unavailableDates.slice(0, 5));
+      }
       isFirstRender.current = false;
     }
   }, []); // Empty dependency array to ensure it only runs once
@@ -148,6 +155,7 @@ export function BookingProvider({
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingReference, setBookingReference] = useState("");
+  const unavailableDates = initialState?.unavailableDates || [];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -169,6 +177,7 @@ export function BookingProvider({
     emailConfig,
     tours,
     selectedTour,
+    unavailableDates,
     setCurrentStep,
     setFormData: (data) => {
       setFormData((prev) => ({ ...prev, ...data }));

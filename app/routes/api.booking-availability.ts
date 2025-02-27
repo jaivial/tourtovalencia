@@ -1,84 +1,143 @@
-import { json } from "@remix-run/server-runtime";
-import type { LoaderFunction } from "@remix-run/server-runtime";
-import { getAvailableDatesForTour } from "~/services/bookingAvailability.server";
-import { checkDateAvailability } from "~/services/bookingAvailability.server";
+import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
+import { getAvailableDatesForTour, checkDateAvailability } from "~/services/bookingAvailability.server";
 
 /**
  * Resource route to get available dates for a specific tour
  * or check availability for a specific date and tour
  */
-export const loader: LoaderFunction = async ({ request }: { request: Request }) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  // Set caching headers - cache for 5 minutes in browser and CDN
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Cache-Control": "public, max-age=300, s-maxage=300"
+  };
+
+  // Add X-Remix- header to indicate this is a resource route
+  headers["X-Remix-Response"] = "yes";
+  
   try {
     const url = new URL(request.url);
     const tourSlug = url.searchParams.get("tourSlug");
     const date = url.searchParams.get("date");
     
-    console.log("API booking-availability called with tourSlug:", tourSlug, "and date:", date);
+    // Track performance
+    const startTime = Date.now();
     
     if (!tourSlug) {
-      console.error("No tour slug provided");
-      return json({ 
-        error: "Tour slug is required",
-        availableDates: [] 
-      }, { status: 400 });
+      return new Response(
+        JSON.stringify({ 
+          error: "Tour slug is required",
+          availableDates: [] 
+        }), 
+        { 
+          status: 400,
+          headers
+        }
+      );
     }
     
     // If a specific date is provided, check availability for that date
     if (date) {
-      console.log(`Checking availability for specific date: ${date} and tour: ${tourSlug}`);
       try {
         const dateObj = new Date(date);
         if (isNaN(dateObj.getTime())) {
-          console.error("Invalid date format:", date);
-          return json({ 
-            error: "Invalid date format",
-            availableDates: [] 
-          }, { status: 400 });
+          return new Response(
+            JSON.stringify({ 
+              error: "Invalid date format",
+              availableDates: [] 
+            }), 
+            { 
+              status: 400,
+              headers
+            }
+          );
         }
         
-        console.log(`Calling checkDateAvailability with date: ${dateObj.toISOString()} and tourSlug: ${tourSlug}`);
         const availability = await checkDateAvailability(dateObj, tourSlug);
-        console.log("Date availability result:", JSON.stringify(availability, null, 2));
         
-        // If no booking limit was found, the default of 10 should be used
-        // This is already handled in the checkDateAvailability function
-        console.log(`Returning dateAvailability with maxBookings: ${availability.maxBookings} (should be 10 if no limit was found)`);
+        // If date check is particularly fast, add more aggressive caching
+        if (Date.now() - startTime < 100) {
+          headers["Cache-Control"] = "public, max-age=600, s-maxage=600";
+        }
         
-        return json({ 
-          dateAvailability: {
-            date,
-            tourSlug,
-            availablePlaces: availability.availablePlaces,
-            isAvailable: availability.isAvailable,
-            maxBookings: availability.maxBookings,
-            bookedPlaces: availability.bookedPlaces
+        return new Response(
+          JSON.stringify({ 
+            dateAvailability: {
+              date,
+              tourSlug,
+              availablePlaces: availability.availablePlaces,
+              isAvailable: availability.isAvailable,
+              maxBookings: availability.maxBookings,
+              bookedPlaces: availability.bookedPlaces
+            },
+            processingTime: Date.now() - startTime
+          }),
+          { 
+            status: 200,
+            headers
           }
-        });
+        );
       } catch (error) {
         console.error("Error checking date availability:", error);
-        return json({ 
-          error: "Failed to check date availability",
-          availableDates: [] 
-        }, { status: 500 });
+        return new Response(
+          JSON.stringify({ 
+            error: "Failed to check date availability",
+            availableDates: [] 
+          }),
+          { 
+            status: 500,
+            headers
+          }
+        );
       }
     }
     
     // Otherwise, get all available dates for the tour
-    console.log("Fetching available dates for tour:", tourSlug);
     const availableDates = await getAvailableDatesForTour(tourSlug);
-    console.log(`Found ${availableDates.length} available dates for tour:`, tourSlug);
     
-    // Log a few sample dates to verify the default limit is being applied
-    if (availableDates.length > 0) {
-      console.log("Sample dates:", availableDates.slice(0, 3));
+    // If getting dates is fast, add more aggressive caching
+    if (Date.now() - startTime < 200) {
+      headers["Cache-Control"] = "public, max-age=1800, s-maxage=1800"; // 30 minutes
     }
     
-    return json({ availableDates });
+    return new Response(
+      JSON.stringify({ 
+        availableDates,
+        processingTime: Date.now() - startTime
+      }),
+      { 
+        status: 200,
+        headers
+      }
+    );
   } catch (error) {
     console.error("Error getting available dates:", error);
-    return json({ 
-      error: "Failed to get available dates",
-      availableDates: [] 
-    }, { status: 500 });
+    return new Response(
+      JSON.stringify({ 
+        error: "Failed to get available dates",
+        availableDates: [] 
+      }),
+      { 
+        status: 500,
+        headers
+      }
+    );
   }
+};
+
+// Add an action function to handle non-GET requests (if needed in the future)
+export const action = async () => {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Cache-Control": "no-store",
+    "X-Remix-Response": "yes"
+  };
+  
+  return new Response(
+    JSON.stringify({ error: "Method not allowed" }),
+    { 
+      status: 405,
+      headers
+    }
+  );
 }; 
