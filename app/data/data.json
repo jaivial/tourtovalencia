@@ -292,7 +292,9 @@
         "thirdSquareTitle": "Languages",
         "thirdSquareDescription": "All our tours can be narrated in Spanish and English.",
         "fourthSquareTitle": "Pets",
-        "fourthSquareDescription": "Pets are not allowed during the tour."
+        "fourthSquareDescription": "Pets are not allowed during the tour.",
+        "experienceTitle": "Unique Experiences",
+        "experienceDescription": "Dare to enjoy something different and special. Feel the sensation of time standing still in a very special atmosphere."
       }
     },
     "sanjuan": {
@@ -947,13 +949,15 @@
       },
       "indexFeatures": {
         "firstSquareTitle": "Reservas",
-        "firstSquareDescription": "Normalmente aceptamos reservas con al menos 24 horas de antelación. La edad mínima legal para un pasajero es de más de 2 años.",
+        "firstSquareDescription": "Normalmente aceptaremos reservas al menos 24 horas antes del tour. La edad legal mínima para un pasajero es de más de 2 años.",
         "secondSquareTitle": "Precios",
         "secondSquareDescription": "120€ por persona. El número máximo de participantes por tour es de 10 personas.",
         "thirdSquareTitle": "Idiomas",
-        "thirdSquareDescription": "Todos nuestros tours pueden narrarse en español e inglés.",
+        "thirdSquareDescription": "Todos nuestros tours pueden ser narrados en español e inglés.",
         "fourthSquareTitle": "Mascotas",
-        "fourthSquareDescription": "No se permiten mascotas durante el tour."
+        "fourthSquareDescription": "No se permiten mascotas durante el tour.",
+        "experienceTitle": "Experiencias Únicas",
+        "experienceDescription": "Atrévete a disfrutar algo diferente y especial. Siente la sensación de que el tiempo se ha parado en una atmósfera muy especial."
       }
     },
     "sanjuan": {

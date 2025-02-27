@@ -56,6 +56,8 @@ export type IndexFeaturesType = {
   thirdSquareDescription: string;
   fourthSquareTitle: string;
   fourthSquareDescription: string;
+  experienceTitle: string;
+  experienceDescription: string;
 };
 
 export type CardProps = {
@@ -466,6 +468,8 @@ export const languages: Record<string, LanguageData> = {
         thirdSquareDescription: "All our tours can be narrated in Spanish and English.",
         fourthSquareTitle: "Pets",
         fourthSquareDescription: "Pets are not allowed during the tour.",
+        experienceTitle: "Unique Experiences",
+        experienceDescription: "Dare to enjoy something different and special. Feel the sensation of time standing still in a very special atmosphere.",
       },
     },
     sanjuan: {
@@ -858,6 +862,8 @@ export const languages: Record<string, LanguageData> = {
         thirdSquareDescription: "Todos nuestros tours pueden ser narrados en español e inglés.",
         fourthSquareTitle: "Mascotas",
         fourthSquareDescription: "No se permiten mascotas durante el tour.",
+        experienceTitle: "Experiencias Únicas",
+        experienceDescription: "Atrévete a disfrutar algo diferente y especial. Siente la sensación de que el tiempo se ha parado en una atmósfera muy especial.",
       },
     },
     sanjuan: {
