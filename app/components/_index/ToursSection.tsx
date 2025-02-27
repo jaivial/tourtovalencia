@@ -206,7 +206,7 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
   };
 
   return (
-    <div className="w-full py-16 bg-blue-50">
+    <div className="w-full py-20 bg-blue-50 tours-section">
       <div className="w-[95%] max-w-[1280px] mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

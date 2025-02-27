@@ -1,7 +1,7 @@
 // UI Component: just responsible for displaying pure html with props passed from feature component
 import { motion } from "framer-motion";
 import { useState, useRef } from "react";
-import { Camera, Heart, Share2, Info } from "lucide-react";
+import { Camera, Info } from "lucide-react";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import PropTypes from "prop-types";
 
@@ -24,7 +24,6 @@ type TravelGalleryProps = {
 
 const TravelGallery: React.FC<TravelGalleryProps> = ({ width, galleryText }) => {
   const [activeImage, setActiveImage] = useState<number | null>(null);
-  const [liked, setLiked] = useState<number[]>([]);
   const galleryRef = useRef<HTMLDivElement>(null);
   const { state } = useLanguageContext();
   const language = state.currentLanguage === "English" ? "en" : "es";
@@ -63,20 +62,20 @@ const TravelGallery: React.FC<TravelGalleryProps> = ({ width, galleryText }) => 
     }
   ];
 
-  const handleLike = (index: number) => {
-    if (liked.includes(index)) {
-      setLiked(liked.filter(i => i !== index));
-    } else {
-      setLiked([...liked, index]);
-    }
-  };
-
   const handleImageClick = (index: number) => {
     setActiveImage(activeImage === index ? null : index);
   };
 
+  // Function to scroll to the Tours section
+  const scrollToToursSection = () => {
+    const toursSection = document.querySelector('.tours-section');
+    if (toursSection) {
+      toursSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
-    <div className="w-full py-20 bg-white overflow-hidden">
+    <div className="w-full py-20 bg-blue-50 overflow-hidden">
       <div className="w-[95%] max-w-[1280px] mx-auto" ref={galleryRef}>
         {/* Header */}
         <motion.div
@@ -129,30 +128,6 @@ const TravelGallery: React.FC<TravelGalleryProps> = ({ width, galleryText }) => 
                     <p className="text-white font-medium text-sm">{image.location}</p>
                   </div>
                 </div>
-
-                {/* Action Buttons */}
-                <div className="absolute top-3 right-3 flex space-x-2">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className={`p-2 rounded-full ${liked.includes(index) ? 'bg-red-500' : 'bg-white/80 hover:bg-white'}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLike(index);
-                    }}
-                  >
-                    <Heart className={`w-4 h-4 ${liked.includes(index) ? 'text-white fill-current' : 'text-gray-700'}`} />
-                  </motion.button>
-                  
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="p-2 rounded-full bg-white/80 hover:bg-white"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Share2 className="w-4 h-4 text-gray-700" />
-                  </motion.button>
-                </div>
               </div>
 
               {/* Expanded Info (shows when active) */}
@@ -191,6 +166,8 @@ const TravelGallery: React.FC<TravelGalleryProps> = ({ width, galleryText }) => 
             whileHover={{ scale: 1.05, y: -3 }}
             whileTap={{ scale: 0.95 }}
             className="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-lg hover:bg-blue-700 hover:shadow-xl transition-all duration-300"
+            onClick={scrollToToursSection}
+            aria-label={galleryText.viewAllButton}
           >
             {galleryText.viewAllButton}
           </motion.button>

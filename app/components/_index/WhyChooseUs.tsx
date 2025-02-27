@@ -52,7 +52,7 @@ const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ width, whyChooseUsText }) => 
   };
 
   return (
-    <div className="w-full py-20 bg-gradient-to-b from-blue-50 to-white overflow-hidden">
+    <div className="w-full py-20 bg-blue-50 overflow-hidden">
       <motion.div 
         ref={containerRef}
         style={{ opacity, scale }}
