@@ -22,8 +22,17 @@ import {
   Anchor, 
   MapPin, 
   Mountain, 
-  Cloud 
+  Cloud,
+  X
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose
+} from "~/components/ui/dialog";
 
 interface EditableSanJuanSection2Props {
   width: number;
@@ -215,7 +224,7 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
   const isInView = useInView(ref, { margin: "-100px" });
   const { handleTextUpdate, handleImageChange, handleImageRemove, handleLottieToggle, handleLottieSourceChange } = useEditableSanJuanSection2(data);
   const [showLottieControls, setShowLottieControls] = useState(false);
-  const [showAnimationCarousel, setShowAnimationCarousel] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [lottieSource, setLottieSource] = useState(data.lottieAnimation?.src || "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie");
   const [isLottieEnabled, setIsLottieEnabled] = useState(data.lottieAnimation?.enabled ?? true);
   const [currentAnimationIndex, setCurrentAnimationIndex] = useState(0);
@@ -261,16 +270,6 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
     });
   };
 
-  const handlePrevAnimation = () => {
-    const newIndex = (currentAnimationIndex - 1 + animationOptions.length) % animationOptions.length;
-    setCurrentAnimationIndex(newIndex);
-  };
-
-  const handleNextAnimation = () => {
-    const newIndex = (currentAnimationIndex + 1) % animationOptions.length;
-    setCurrentAnimationIndex(newIndex);
-  };
-
   const handleSelectAnimation = (src: string) => {
     setLottieSource(src);
     handleLottieSourceChange(src);
@@ -278,7 +277,35 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
       enabled: isLottieEnabled, 
       src: src 
     });
-    setShowAnimationCarousel(false);
+    setDialogOpen(false);
+  };
+
+  // Get the current animation preview
+  const getCurrentAnimationPreview = () => {
+    const currentOption = animationOptions.find(option => option.src === lottieSource);
+    if (!currentOption) return null;
+
+    if (currentOption.preview === "lottie") {
+      return (
+        <DotLottieReact 
+          src={currentOption.src} 
+          loop 
+          autoplay 
+          className="w-12 h-12" 
+        />
+      );
+    } else if (currentOption.preview === "icon" && currentOption.icon) {
+      return <currentOption.icon size={32} className="text-blue-500" />;
+    } else if (currentOption.preview === "gif") {
+      return (
+        <img 
+          src={currentOption.src} 
+          alt={currentOption.name} 
+          className="w-12 h-12 object-contain" 
+        />
+      );
+    }
+    return null;
   };
 
   return (
@@ -342,126 +369,88 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
             </div>
             
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  setShowAnimationCarousel(!showAnimationCarousel);
-                  setShowLottieControls(false);
-                }}
-                className="text-xs"
-              >
-                {showAnimationCarousel ? "Ocultar galería" : "Elegir animación"}
-              </Button>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs flex items-center gap-2"
+                  >
+                    {getCurrentAnimationPreview()}
+                    <span>Elegir animación</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-center">Galería de animaciones</DialogTitle>
+                    <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">Cerrar</span>
+                    </DialogClose>
+                  </DialogHeader>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 p-2">
+                    {animationOptions.map((option) => (
+                      <div 
+                        key={option.id}
+                        className={`
+                          relative flex flex-col items-center p-2 border rounded-lg cursor-pointer
+                          ${lottieSource === option.src ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}
+                          transition-all duration-200 aspect-square
+                        `}
+                        onClick={() => handleSelectAnimation(option.src)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleSelectAnimation(option.src);
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Seleccionar animación ${option.name}`}
+                      >
+                        <div className="w-full h-full flex items-center justify-center">
+                          {option.preview === "lottie" ? (
+                            <DotLottieReact 
+                              src={option.src} 
+                              loop 
+                              autoplay 
+                              className="w-full h-full max-w-[60px] max-h-[60px]" 
+                            />
+                          ) : option.preview === "icon" ? (
+                            <div className="text-blue-500">
+                              {option.icon && <option.icon size={40} />}
+                            </div>
+                          ) : option.preview === "gif" ? (
+                            <img 
+                              src={option.src} 
+                              alt={option.name} 
+                              className="w-full h-full object-contain max-w-[60px] max-h-[60px]" 
+                            />
+                          ) : null}
+                        </div>
+                        
+                        {lottieSource === option.src && (
+                          <div className="absolute top-1 right-1 bg-blue-500 text-white rounded-full p-1">
+                            <Check className="w-3 h-3" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
               
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={() => {
                   setShowLottieControls(!showLottieControls);
-                  setShowAnimationCarousel(false);
                 }}
                 className="text-xs"
               >
                 {showLottieControls ? "Ocultar URL" : "URL personalizada"}
               </Button>
             </div>
-            
-            {/* Animation Carousel */}
-            {showAnimationCarousel && (
-              <div className="w-full mt-2">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm font-medium text-gray-700">Galería de animaciones</h4>
-                </div>
-                
-                <div className="relative flex items-center">
-                  <button 
-                    onClick={handlePrevAnimation}
-                    className="absolute left-0 z-10 p-1 bg-white rounded-full shadow-md"
-                  >
-                    <ChevronLeft className="w-5 h-5 text-gray-600" />
-                  </button>
-                  
-                  <div className="flex overflow-hidden mx-8">
-                    <div 
-                      className="flex transition-transform duration-300 ease-in-out"
-                      style={{ transform: `translateX(-${currentAnimationIndex * 33.33}%)` }}
-                    >
-                      {animationOptions.map((option, idx) => (
-                        <div 
-                          key={option.id}
-                          className="flex-shrink-0 w-1/3 px-2"
-                        >
-                          <div 
-                            className={`
-                              relative flex flex-col items-center p-3 border rounded-lg cursor-pointer
-                              ${lottieSource === option.src ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}
-                            `}
-                            onClick={() => handleSelectAnimation(option.src)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                handleSelectAnimation(option.src);
-                              }
-                            }}
-                            tabIndex={0}
-                            role="button"
-                            aria-label={`Seleccionar animación ${option.name}`}
-                          >
-                            <div className="w-full h-24 flex items-center justify-center mb-2 overflow-hidden">
-                              {option.preview === "lottie" ? (
-                                <DotLottieReact 
-                                  src={option.src} 
-                                  loop 
-                                  autoplay 
-                                  className="w-20 h-20" 
-                                />
-                              ) : option.preview === "icon" ? (
-                                <div className="text-blue-500">
-                                  {option.icon && <option.icon size={48} />}
-                                </div>
-                              ) : option.preview === "gif" ? (
-                                <img 
-                                  src={option.src} 
-                                  alt={option.name} 
-                                  className="w-20 h-20 object-contain" 
-                                />
-                              ) : null}
-                            </div>
-                            <span className="text-xs font-medium text-gray-700">{option.name}</span>
-                            
-                            {lottieSource === option.src && (
-                              <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
-                                <Check className="w-3 h-3" />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <button 
-                    onClick={handleNextAnimation}
-                    className="absolute right-0 z-10 p-1 bg-white rounded-full shadow-md"
-                  >
-                    <ChevronRight className="w-5 h-5 text-gray-600" />
-                  </button>
-                </div>
-                
-                <div className="flex justify-center mt-2 flex-wrap max-w-full overflow-hidden">
-                  {animationOptions.map((_, index) => (
-                    <button
-                      key={index}
-                      className={`w-2 h-2 mx-1 mb-1 rounded-full ${
-                        index === currentAnimationIndex ? 'bg-blue-500' : 'bg-gray-300'
-                      }`}
-                      onClick={() => setCurrentAnimationIndex(index)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
             
             {/* Custom URL Input */}
             {showLottieControls && (
