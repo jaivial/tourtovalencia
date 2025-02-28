@@ -47,6 +47,18 @@ export type IndexSection5Type = {
   secondH3: string;
 };
 
+export type EditableCardType = {
+  title: string;
+  duration: string;
+  description: string;
+  additionalInfo?: string;
+  quote?: string;
+  image: {
+    preview: string;
+    file?: File;
+  };
+};
+
 export type IndexFeaturesType = {
   firstSquareTitle: string;
   firstSquareDescription: string;

@@ -10,7 +10,7 @@ import { useEditPage } from "./admin.dashboard.pagegen.edit.$slug.hooks";
 import { getPageBySlug } from "~/utils/page.server";
 import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
 import { motion } from "framer-motion";
-import type { IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
+import type { EditableCardType, IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 import { convertFileToBase64 } from "~/utils/image.client";
 import { LoadingOverlay } from "~/components/ui/loading-overlay";
@@ -50,6 +50,7 @@ export default function EditPageRoute() {
     section6Data,
     indexSection5Data,
     timelineData,
+    cardData,
     isSaving,
     saveError,
     saveSuccess,
@@ -70,6 +71,7 @@ export default function EditPageRoute() {
     handleSection6Update,
     handleIndexSection5Update,
     handleTimelineUpdate,
+    handleCardUpdate,
     handleSavePage,
     handleCancel,
     isBackgroundProcess
@@ -229,6 +231,38 @@ export default function EditPageRoute() {
     handleTimelineUpdate(updatedData);
   };
 
+  const adaptCardUpdate = async (field: keyof EditableCardType, value: string | { file?: File; preview: string }) => {
+    console.log(`EditPage: Processing card update for field ${String(field)}:`, 
+      typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+    
+    // If the value is an object with a file, convert it to base64 before updating
+    if (typeof value !== 'string' && value.file) {
+      try {
+        const base64 = await convertFileToBase64(value.file);
+        console.log(`EditPage: Converted card ${String(field)} image to base64:`, base64.substring(0, 30) + '...');
+        
+        // Update with the base64 string as preview but keep the file reference
+        const updatedData = { 
+          ...cardData, 
+          [field]: { 
+            preview: base64,
+            file: undefined // File objects can't be serialized for the database
+          } 
+        };
+        handleCardUpdate(updatedData);
+      } catch (error) {
+        console.error(`EditPage: Error converting card image for field ${String(field)}:`, error);
+        // Still update with the preview URL if conversion fails
+        const updatedData = { ...cardData, [field]: value };
+        handleCardUpdate(updatedData);
+      }
+    } else {
+      // For non-file updates, just pass the value directly
+      const updatedData = { ...cardData, [field]: value };
+      handleCardUpdate(updatedData);
+    }
+  };
+
   return (
     <div className="w-full min-h-screen bg-gray-100 p-0">
       {/* Loading Overlay */}
@@ -336,6 +370,8 @@ export default function EditPageRoute() {
             onSection6Update={adaptSection6Update}
             timelineData={timelineData}
             onTimelineUpdate={adaptTimelineUpdate}
+            cardData={cardData}
+            onCardUpdate={adaptCardUpdate}
             isEditMode={true}
           />
         </div>
