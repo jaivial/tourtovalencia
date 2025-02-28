@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import type { IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 import { convertFileToBase64 } from "~/utils/image.client";
+import { LoadingOverlay } from "~/components/ui/loading-overlay";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { slug } = params;
@@ -52,6 +53,9 @@ export default function EditPageRoute() {
     isSaving,
     saveError,
     saveSuccess,
+    isLoadingOverlayOpen,
+    loadingProgress,
+    loadingSteps,
     setPageName,
     handleStatusChange,
     handlePriceChange,
@@ -208,6 +212,14 @@ export default function EditPageRoute() {
 
   return (
     <div className="w-full min-h-screen bg-gray-100 p-0">
+      {/* Loading Overlay */}
+      <LoadingOverlay 
+        isOpen={isLoadingOverlayOpen}
+        message="Actualizando la página..."
+        progress={loadingProgress}
+        steps={loadingSteps}
+      />
+      
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center p-6">
           <Link to="/admin/dashboard/pagegen/editpage" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">

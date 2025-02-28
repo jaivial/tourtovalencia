@@ -63,6 +63,45 @@ export const useEditPage = (initialPage: any) => {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   
+  // Loading overlay states
+  const [isLoadingOverlayOpen, setIsLoadingOverlayOpen] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingSteps, setLoadingSteps] = useState<Array<{
+    label: string;
+    status: "pending" | "processing" | "completed";
+  }>>([
+    { label: "Preparando datos", status: "pending" },
+    { label: "Traduciendo contenido", status: "pending" },
+    { label: "Procesando imágenes", status: "pending" },
+    { label: "Actualizando base de datos", status: "pending" },
+    { label: "Finalizando", status: "pending" }
+  ]);
+  
+  // Helper function to update loading steps
+  const updateLoadingStep = (stepIndex: number, status: "pending" | "processing" | "completed") => {
+    setLoadingSteps(prevSteps => 
+      prevSteps.map((step, index) => 
+        index === stepIndex ? { ...step, status } : step
+      )
+    );
+    
+    // Update progress based on completed steps
+    if (status === "completed") {
+      const completedSteps = loadingSteps.filter((_, index) => 
+        index < stepIndex || (index === stepIndex && status === "completed")
+      ).length;
+      
+      const newProgress = Math.round((completedSteps / loadingSteps.length) * 100);
+      setLoadingProgress(newProgress);
+    } else if (status === "processing") {
+      const completedSteps = loadingSteps.filter((_, index) => index < stepIndex).length;
+      const inProgressStep = 0.5; // Count in-progress step as half complete
+      
+      const newProgress = Math.round(((completedSteps + inProgressStep) / loadingSteps.length) * 100);
+      setLoadingProgress(newProgress);
+    }
+  };
+  
   // Deserialize the page content
   const deserializedPage = deserializeContent(initialPage);
   
@@ -240,8 +279,24 @@ export const useEditPage = (initialPage: any) => {
     setIsSaving(true);
     setSaveError(null);
     setSaveSuccess(false);
+    
+    // Show loading overlay
+    setIsLoadingOverlayOpen(true);
+    setLoadingProgress(0);
+    
+    // Reset loading steps
+    setLoadingSteps([
+      { label: "Preparando datos", status: "pending" },
+      { label: "Traduciendo contenido", status: "pending" },
+      { label: "Procesando imágenes", status: "pending" },
+      { label: "Actualizando base de datos", status: "pending" },
+      { label: "Finalizando", status: "pending" }
+    ]);
 
     try {
+      // Step 1: Preparing data
+      updateLoadingStep(0, "processing");
+      
       // Prepare content object
       const content = {
         indexSection5: indexSection5Data,
@@ -254,13 +309,31 @@ export const useEditPage = (initialPage: any) => {
         timeline: timelineData,
         price: price
       };
-
+      
+      // Simulate a short delay for data preparation
+      await new Promise(resolve => setTimeout(resolve, 500));
+      updateLoadingStep(0, "completed");
+      
+      // Step 2: Translating content (simulated)
+      updateLoadingStep(1, "processing");
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      updateLoadingStep(1, "completed");
+      
+      // Step 3: Processing images (simulated)
+      updateLoadingStep(2, "processing");
+      
       // Create form data
       const formData = new FormData();
       formData.append("name", pageName);
       formData.append("content", JSON.stringify(content));
       formData.append("status", status);
       formData.append("id", deserializedPage._id || "");
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      updateLoadingStep(2, "completed");
+      
+      // Step 4: Updating database
+      updateLoadingStep(3, "processing");
 
       // Create an AbortController for timeout
       const controller = new AbortController();
@@ -276,6 +349,11 @@ export const useEditPage = (initialPage: any) => {
 
         // Clear the timeout
         clearTimeout(timeoutId);
+        
+        updateLoadingStep(3, "completed");
+        
+        // Step 5: Finalizing
+        updateLoadingStep(4, "processing");
 
         if (!response.ok) {
           // Check the content type to handle HTML error pages
@@ -298,6 +376,12 @@ export const useEditPage = (initialPage: any) => {
         // Parse the response as JSON
         const result = await response.json() as { success: boolean; message?: string };
         
+        updateLoadingStep(4, "completed");
+        setLoadingProgress(100);
+        
+        // Short delay before closing the loading overlay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         setSaveSuccess(true);
         console.log("Page updated successfully:", result);
         
@@ -317,6 +401,7 @@ export const useEditPage = (initialPage: any) => {
       setSaveError(error instanceof Error ? error.message : "Error al guardar el tour. Posible problema con la traducción o procesamiento de imágenes.");
     } finally {
       setIsSaving(false);
+      setIsLoadingOverlayOpen(false);
     }
   };
 
@@ -340,6 +425,9 @@ export const useEditPage = (initialPage: any) => {
     isSaving,
     saveError,
     saveSuccess,
+    isLoadingOverlayOpen,
+    loadingProgress,
+    loadingSteps,
     setPageName,
     handleStatusChange,
     handlePriceChange,
