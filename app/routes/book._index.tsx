@@ -283,8 +283,8 @@ export async function loader() {
 
 export async function action({ request }: { request: Request }) {
   try {
-    // Import server-only modules inside the action function
-    const { createCheckoutSession } = await import("~/services/stripe.server");
+    // Eliminar la importación de stripe.server
+    // const { createCheckoutSession } = await import("~/services/stripe.server");
     
     const formData = await request.formData();
     const intent = formData.get("intent");
@@ -309,13 +309,20 @@ export async function action({ request }: { request: Request }) {
       // Construct the base URL
       const baseUrl = `${protocol}://${host}`;
 
-      const { url, sessionId } = await createCheckoutSession(bookingData, baseUrl);
+      // Comentar o eliminar la llamada a createCheckoutSession de Stripe
+      // const { url, sessionId } = await createCheckoutSession(bookingData, baseUrl);
+      
+      // Usar PayPal en su lugar o simplemente devolver un error por ahora
+      return json<ActionData>({ 
+        success: false, 
+        error: "Stripe payment is not available. Please use PayPal instead." 
+      }, { status: 400 });
 
-      if (!url) {
-        throw new Error("No redirect URL received from Stripe");
-      }
+      // if (!url) {
+      //   throw new Error("No redirect URL received from Stripe");
+      // }
 
-      return json<ActionData>({ success: true, redirectUrl: url, sessionId });
+      // return json<ActionData>({ success: true, redirectUrl: url, sessionId });
     }
 
     return json<ActionData>({ success: false, error: "Invalid intent" }, { status: 400 });
