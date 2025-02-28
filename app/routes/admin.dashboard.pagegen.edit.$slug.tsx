@@ -217,8 +217,57 @@ export default function EditPageRoute() {
   };
 
   const adaptSection6Update = (field: keyof SanJuanSection6Type, value: string) => {
-    const updatedData = { ...section6Data, [field]: value };
-    handleSection6Update(updatedData);
+    console.log(`EditPage: Processing section6 update for field ${String(field)}:`, value);
+    
+    // Special handling for the list field
+    if (field === 'list') {
+      console.log(`EditPage: Updating list with new value:`, value);
+      try {
+        // Parse the JSON string to ensure it's a valid array before updating
+        const parsedList = JSON.parse(value);
+        if (Array.isArray(parsedList)) {
+          // Create a new object with the updated list
+          const updatedData = { 
+            ...section6Data, 
+            list: parsedList // Use the parsed array
+          };
+          handleSection6Update(updatedData);
+        } else {
+          console.error("EditPage: Invalid list format, expected array but got:", typeof parsedList);
+        }
+      } catch (error) {
+        console.error("EditPage: Error parsing list JSON:", error);
+      }
+      return;
+    }
+    
+    // For other fields, preserve the existing list value
+    // Check if the list is an empty array and we're in edit mode
+    const isEmptyArray = Array.isArray(section6Data.list) && section6Data.list.length === 0;
+    
+    if (isEmptyArray) {
+      console.log("EditPage: Empty list array detected, using default items");
+      // Use default items for edit mode
+      const defaultItems = [
+        { li: "Inherit", index: 0 },
+        { li: "Heir", index: 1 },
+        { li: "New", index: 2 }
+      ];
+      
+      const updatedData = { 
+        ...section6Data, 
+        [field]: value,
+        list: defaultItems
+      };
+      handleSection6Update(updatedData);
+    } else {
+      // Normal update with existing list
+      const updatedData = { 
+        ...section6Data, 
+        [field]: value
+      };
+      handleSection6Update(updatedData);
+    }
   };
 
   const adaptIndexSection5Update = (field: keyof IndexSection5Type, value: string) => {
