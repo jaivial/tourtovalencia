@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@remix-run/react";
 import type { Page } from "~/utils/db.schema.server";
 import type { 
+  EditableCardType,
   IndexSection5Type, 
   sanJuanSection1Type, 
   sanJuanSection3Type, 
@@ -112,13 +113,30 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
   const deserializedPage = deserializeContent(initialPage);
   
   // Page data states
-  const [pageName, setPageName] = useState(deserializedPage.name);
-  const [status, setStatus] = useState<'active' | 'upcoming'>(deserializedPage.status);
-  const [price, setPrice] = useState(deserializedPage.content.es.price || 0);
+  const [pageName, setPageName] = useState<string>(deserializedPage.name || '');
+  const [status, setStatus] = useState<'active' | 'upcoming'>(deserializedPage.status || 'upcoming');
+  const [price, setPrice] = useState<number>(
+    (deserializedPage.content?.es?.price as number) || 
+    (deserializedPage.content?.en?.price as number) || 
+    49.99
+  );
   
   // Section data states
   const [section1Data, setSection1Data] = useState<sanJuanSection1Type>(
-    deserializedPage.content.es.section1 || {} as sanJuanSection1Type
+    (deserializedPage.content?.es?.section1 as sanJuanSection1Type) || 
+    {
+      firstH3: '',
+      firstSquareH3: '',
+      firstSquareP: '',
+      secondSquareH3: '',
+      secondSquareP: '',
+      thirdSquareH3: '',
+      thirdSquareP: '',
+      button: '',
+      backgroundImage: {
+        preview: ''
+      }
+    }
   );
   const [section2Data, setSection2Data] = useState<sanJuansection2Type>(
     deserializedPage.content.es.section2 || {} as sanJuansection2Type
@@ -180,6 +198,20 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
   
   const [timelineData, setTimelineData] = useState<TimelineDataType>(
     deserializedPage.content.es.timeline || defaultTimeline
+  );
+
+  const [cardData, setCardData] = useState<EditableCardType>(
+    (deserializedPage.content?.es?.card as EditableCardType) || 
+    {
+      title: '',
+      duration: '',
+      description: '',
+      additionalInfo: '',
+      quote: '',
+      image: {
+        preview: ''
+      }
+    }
   );
 
   // Status change handler
@@ -270,6 +302,10 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
     setTimelineData(data);
   };
 
+  const handleCardUpdate = (data: EditableCardType) => {
+    setCardData(data);
+  };
+
   const handleSavePage = async () => {
     if (!pageName.trim()) {
       setSaveError("El nombre del tour es obligatorio");
@@ -306,15 +342,16 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
       
       // Prepare content object
       const content = {
-        indexSection5: indexSection5Data,
         section1: section1Data,
         section2: section2Data,
         section3: section3Data,
         section4: section4Data,
         section5: section5Data,
         section6: section6Data,
+        indexSection5: indexSection5Data,
         timeline: timelineData,
-        price: price
+        card: cardData,
+        price
       };
       
       // Short delay for data preparation
@@ -523,6 +560,7 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
     section6Data,
     indexSection5Data,
     timelineData,
+    cardData,
     isSaving,
     saveError,
     saveSuccess,
@@ -544,6 +582,7 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
     handleSection6Update,
     handleIndexSection5Update,
     handleTimelineUpdate,
+    handleCardUpdate,
     handleSavePage,
     handleCancel
   };
