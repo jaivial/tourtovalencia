@@ -35,7 +35,6 @@ import {
 
 interface EditableSanJuanSection2Props {
   width: number;
-  height: number;
   data: sanJuansection2Type;
   onUpdate: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => void;
 }
@@ -215,7 +214,6 @@ const animationOptions = [
 
 const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({ 
   width, 
-  height, 
   data, 
   onUpdate 
 }) => {
@@ -226,14 +224,14 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [lottieSource, setLottieSource] = useState(data.lottieAnimation?.src || "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie");
   const [isLottieEnabled, setIsLottieEnabled] = useState(data.lottieAnimation?.enabled ?? true);
-  const [currentAnimationIndex, setCurrentAnimationIndex] = useState(0);
 
   // Find the current animation index on mount
   useEffect(() => {
     const currentSrc = data.lottieAnimation?.src || "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie";
     const index = animationOptions.findIndex(option => option.src === currentSrc);
     if (index !== -1) {
-      setCurrentAnimationIndex(index);
+      // We found the index but don't need to use it currently
+      console.log(`Found animation at index ${index}`);
     }
   }, [data.lottieAnimation?.src]);
 
@@ -262,20 +260,58 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
   };
 
   const handleLottieSourceSubmit = () => {
-    handleLottieSourceChange(lottieSource);
+    // Validate the URL
+    let validatedUrl = lottieSource.trim();
+    
+    // Basic URL validation
+    if (validatedUrl && !validatedUrl.startsWith('http')) {
+      console.warn('Invalid URL format, adding https:// prefix');
+      validatedUrl = `https://${validatedUrl}`;
+    }
+    
+    console.log(`Updating lottie animation source to: ${validatedUrl}`);
+    
+    // Update local state
+    setLottieSource(validatedUrl);
+    
+    // Update parent component state
+    handleLottieSourceChange(validatedUrl);
+    
+    // Send update to parent component
     onUpdate('lottieAnimation', { 
       enabled: isLottieEnabled, 
-      src: lottieSource 
+      src: validatedUrl 
     });
+    
+    // Log for debugging
+    console.log(`Lottie animation updated: enabled=${isLottieEnabled}, src=${validatedUrl}`);
   };
 
   const handleSelectAnimation = (src: string) => {
+    console.log(`Selecting animation with source: ${src}`);
+    
+    // Validate the URL
+    if (!src) {
+      console.error('Empty animation source provided');
+      return;
+    }
+    
+    // Update local state
     setLottieSource(src);
+    
+    // Update parent component state
     handleLottieSourceChange(src);
+    
+    // Send update to parent component
     onUpdate('lottieAnimation', { 
       enabled: isLottieEnabled, 
       src: src 
     });
+    
+    // Log for debugging
+    console.log(`Animation selected: enabled=${isLottieEnabled}, src=${src}`);
+    
+    // Close the dialog
     setDialogOpen(false);
   };
 

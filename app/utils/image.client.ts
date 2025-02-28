@@ -64,6 +64,7 @@ export function convertFileToBase64(file: File): Promise<string> {
 // Define types for image-related objects
 type ImageWithPreview = { preview: string; file?: File; [key: string]: unknown };
 type ImageWithSource = { source: string | File; alt?: string; [key: string]: unknown };
+type LottieAnimation = { enabled: boolean; src: string; [key: string]: unknown };
 
 /**
  * Processes all image data in a content object, converting blob URLs and File objects to base64 strings
@@ -101,6 +102,28 @@ export async function processImageData(content: Record<string, unknown>): Promis
 
     // Handle image objects with blob URL previews or File objects
     if (typeof value === 'object' && !Array.isArray(value)) {
+      // Handle lottieAnimation objects with enabled and src properties
+      if ('enabled' in value && 'src' in value) {
+        const lottieObj = value as LottieAnimation;
+        console.log(`Found lottieAnimation object for key "${key}":`, 
+          `enabled=${lottieObj.enabled}`,
+          typeof lottieObj.src === 'string' ? `src=${lottieObj.src.substring(0, 30)}...` : 'src is not a string');
+        
+        // Convert blob URL src to base64 if it's a blob URL
+        if (typeof lottieObj.src === 'string' && lottieObj.src.startsWith('blob:')) {
+          result[key] = {
+            ...lottieObj,
+            src: await convertBlobUrlToBase64(lottieObj.src)
+          };
+          continue;
+        }
+        
+        // Keep the lottieAnimation object as is if src is not a blob URL
+        // This ensures custom GIF URLs are preserved
+        result[key] = lottieObj;
+        continue;
+      }
+      
       // Handle image objects with preview property
       if ('preview' in value) {
         const imgObj = value as ImageWithPreview;

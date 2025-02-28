@@ -31,9 +31,9 @@ export type PageTemplateProps = {
   onSection3ImageUpdate: (index: number, file: File) => void | Promise<void>;
   onSection3ImageRemove: (index: number) => void;
   section4Data?: sanJuansection4Type;
-  onSection4Update: (field: keyof sanJuansection4Type, value: string) => void;
+  onSection4Update: (field: keyof sanJuansection4Type, value: string | { enabled: boolean; src: string }) => void;
   section5Data?: sanJuanSection5Type;
-  onSection5Update: (field: keyof sanJuanSection5Type, value: string) => void;
+  onSection5Update: (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string }) => void;
   onSection5ImageUpdate?: (file: File) => void | Promise<void>;
   onSection5ImageRemove?: () => void | Promise<void>;
   section6Data?: SanJuanSection6Type;
@@ -98,10 +98,17 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
 
   const handleSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => {
     try {
-      console.log(`PageTemplate: Processing section2 update for field ${String(field)}:`, 
-        typeof value === 'string' ? value : 
-        'file' in value ? `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...` :
-        `Lottie: enabled=${value.enabled}, src=${value.src.substring(0, 30)}...`);
+      if (typeof value === 'string') {
+        console.log(`PageTemplate: Processing section2 update for field ${String(field)}:`, value);
+      } else if ('file' in value || 'preview' in value) {
+        const imgObj = value as { file?: File; preview: string };
+        console.log(`PageTemplate: Processing section2 update for field ${String(field)}:`, 
+          `File: ${imgObj.file?.name || 'none'}, Preview: ${imgObj.preview.substring(0, 30)}...`);
+      } else if ('enabled' in value && 'src' in value) {
+        const lottieObj = value as { enabled: boolean; src: string };
+        console.log(`PageTemplate: Processing section2 update for field ${String(field)}:`, 
+          `Lottie: enabled=${lottieObj.enabled}, src=${lottieObj.src.substring(0, 30)}...`);
+      }
       
       // Call the original onSection2Update
       await onSection2Update(field, value);
@@ -162,6 +169,34 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
       }
     } catch (error) {
       console.error(`PageTemplate: Error updating card field ${String(field)}:`, error);
+    }
+  };
+
+  // Add a wrapper function for section4 updates
+  const handleSection4Update = (field: keyof sanJuansection4Type, value: string | { enabled: boolean; src: string }) => {
+    try {
+      console.log(`PageTemplate: Processing section4 update for field ${String(field)}:`, 
+        typeof value === 'string' ? value : 
+        `Lottie: enabled=${value.enabled}, src=${value.src.substring(0, 30)}...`);
+      
+      // Call the original onSection4Update
+      onSection4Update(field, value);
+    } catch (error) {
+      console.error(`PageTemplate: Error updating section4 field ${String(field)}:`, error);
+    }
+  };
+
+  // Add a wrapper function for section5 updates
+  const handleSection5Update = (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string }) => {
+    try {
+      console.log(`PageTemplate: Processing section5 update for field ${String(field)}:`, 
+        typeof value === 'string' ? value : 
+        `Lottie: enabled=${value.enabled}, src=${value.src.substring(0, 30)}...`);
+      
+      // Call the original onSection5Update
+      onSection5Update(field, value);
+    } catch (error) {
+      console.error(`PageTemplate: Error updating section5 field ${String(field)}:`, error);
     }
   };
 
@@ -247,13 +282,13 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
 
           {section1Data && <EditableSanJuanSection1 width={width} data={section1Data} onUpdate={handleSection1Update} />}
 
-          {section2Data && <EditableSanJuanSection2 width={width} height={0} data={section2Data} onUpdate={handleSection2Update} />}
+          {section2Data && <EditableSanJuanSection2 width={width} data={section2Data} onUpdate={handleSection2Update} />}
 
           {section3Data && <EditableSanJuanSection3 width={width} data={section3Data} onUpdate={handleSection3ImageUpdate} onRemove={onSection3ImageRemove} />}
 
-          {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
+          {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={handleSection4Update} />}
 
-          {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} onImageUpdate={handleSection5ImageUpdate} onImageRemove={handleSection5ImageRemove} />}
+          {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={handleSection5Update} onImageUpdate={handleSection5ImageUpdate} onImageRemove={handleSection5ImageRemove} />}
 
           {timelineData && onTimelineUpdate && (
             <EditableTimelineFeature 
