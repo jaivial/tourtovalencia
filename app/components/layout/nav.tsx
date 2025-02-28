@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Menu, ArrowRightToLine, ChevronDown, Settings } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { useFetcher, Link, useLocation, useLoaderData } from "@remix-run/react";
+import { useFetcher, useLocation, useLoaderData, useNavigate } from "@remix-run/react";
 import type { RootLoaderData } from "~/root";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 
@@ -19,6 +19,7 @@ const Nav: React.FC<NavProps> = () => {
   const currentLanguage = state.currentLanguage;
   const flag = state.flag;
   const location = useLocation();
+  const navigate = useNavigate();
   const [clientWidth, setClientWidth] = useState(0);
   const [mobileNavOpen, setMobileNavOpen] = useState<boolean>(false);
   const [isToursOpen, setIsToursOpen] = useState(false);
@@ -71,8 +72,21 @@ const Nav: React.FC<NavProps> = () => {
     fetcher.submit({ language: selectedLanguage }, { method: "post", action: "/set-language" });
   };
 
-  const handleLinkClick = () => {
+  const handleLinkClick = (path: string) => {
     setMobileNavOpen(false);
+    
+    // If we're navigating from a book route to a non-book route
+    if (location.pathname.startsWith('/book') && !path.startsWith('/book')) {
+      // Use window.location for a full page reload
+      setTimeout(() => {
+        window.location.href = path;
+      }, 10);
+    } else {
+      // Use navigate for client-side navigation
+      setTimeout(() => {
+        navigate(path);
+      }, 10);
+    }
   };
 
   // Animation variants for the navigation bar
@@ -186,9 +200,12 @@ const Nav: React.FC<NavProps> = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.1 * index }}
                       >
-                        <Link to={link.path} onClick={handleLinkClick} className="text-white text-xl hover:text-blue-200 transition-colors">
+                        <button 
+                          onClick={() => handleLinkClick(link.path)} 
+                          className="text-white text-xl hover:text-blue-200 transition-colors text-left w-full"
+                        >
                           {link.linkText}
-                        </Link>
+                        </button>
                       </motion.div>
                     ))}
                     
@@ -220,13 +237,12 @@ const Nav: React.FC<NavProps> = () => {
                               animate={{ opacity: isToursOpen ? 1 : 0, x: isToursOpen ? 0 : 20 }}
                               transition={{ delay: 0.05 * idx, duration: 0.2 }}
                             >
-                              <Link
-                                to={`/pages/${tour.slug}`}
-                                onClick={handleLinkClick}
-                                className="pl-4 text-blue-50 hover:text-blue-200 transition-colors font-sans text-lg block py-2"
+                              <button
+                                onClick={() => handleLinkClick(`/pages/${tour.slug}`)}
+                                className="pl-4 text-blue-50 hover:text-blue-200 transition-colors font-sans text-lg block py-2 text-left w-full"
                               >
                                 {currentLanguage === "English" ? tour.tourName.en : tour.tourName.es}
-                              </Link>
+                              </button>
                             </motion.div>
                           ))}
                         </motion.div>
@@ -241,10 +257,13 @@ const Nav: React.FC<NavProps> = () => {
                     size={clientWidth < 500 ? 65 : 70} 
                     onClick={() => setMobileNavOpen(false)} 
                   />
-                  <Link to="/admin" onClick={handleLinkClick} className="flex items-center gap-2 px-4 py-2 bg-blue-900 hover:bg-blue-950 rounded-lg transition-colors">
+                  <button 
+                    onClick={() => handleLinkClick("/admin")} 
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-900 hover:bg-blue-950 rounded-lg transition-colors"
+                  >
                     <Settings size={20} className="text-blue-100" />
                     <span className="text-blue-100 text-lg font-medium">Admin</span>
-                  </Link>
+                  </button>
                 </div>
               </div>
             </motion.div>

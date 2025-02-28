@@ -1,131 +1,177 @@
-import { PaymentElement, useStripe, useElements, Elements } from "@stripe/react-stripe-js";
-import { loadStripe, StripeElementsOptions } from "@stripe/stripe-js";
 import { Button } from "./button";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "./alert";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface PaymentUIProps {
+  onSuccess: (orderId: string) => void;
+  onError: (error: string) => void;
+  isSubmitting: boolean;
+  tourPrice?: number;
+  tourName?: string;
+  customerData?: {
+    fullName: string;
+    email: string;
+    date: string;
+    time: string;
+    partySize: number;
+    phoneNumber: string;
+    country: string;
+    countryCode: string;
+    tourSlug: string;
+  };
+  paymentText: {
+    buttons: {
+      payNow: string;
+      processing: string;
+    };
+    errors: {
+      paymentFailed: string;
+      configError: string;
+      initError: string;
+    };
+  };
+}
+
+// Simplified PayPal types
+interface PayPalNamespace {
+  Buttons: (options: unknown) => {
+    render: (selector: string) => void;
+  };
+}
 
 declare global {
   interface Window {
+    paypal?: PayPalNamespace;
     ENV: {
-      STRIPE_PUBLIC_KEY: string;
+      PAYPAL_CLIENT_ID: string;
     };
   }
 }
 
-interface PaymentFormProps {
-  onSuccess: () => void;
-  onError: (error: string) => void;
-  isSubmitting: boolean;
-  tourPrice?: number;
-  paymentText: {
-    buttons: {
-      payNow: string;
-      processing: string;
-    };
-    errors: {
-      stripeInit: string;
-      paymentFailed: string;
-      configError: string;
-      initError: string;
-    };
-  };
-}
+export const PaymentUI = ({ 
+  onSuccess, 
+  onError, 
+  isSubmitting, 
+  tourPrice = 120, 
+  tourName = "Tour",
+  customerData,
+  paymentText 
+}: PaymentUIProps) => {
+  const [paypalLoaded, setPaypalLoaded] = useState(false);
+  const [paypalButtonsRendered, setPaypalButtonsRendered] = useState(false);
 
-const PaymentForm = ({ onSuccess, onError, isSubmitting, tourPrice = 120, paymentText }: PaymentFormProps) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!stripe || !elements) {
-      onError(paymentText.errors.stripeInit);
+  useEffect(() => {
+    // Check if PayPal script is already loaded
+    if (window.paypal) {
+      setPaypalLoaded(true);
       return;
     }
 
-    setIsProcessing(true);
-
-    try {
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: window.location.origin + "/book/success",
-        },
-      });
-
-      if (error) {
-        console.error("Payment error:", error);
-        onError(error.message || paymentText.errors.paymentFailed);
-      } else {
-        onSuccess();
-      }
-    } catch (error) {
-      console.error("Payment error:", error);
-      onError(paymentText.errors.paymentFailed);
-    } finally {
-      setIsProcessing(false);
+    if (!window.ENV?.PAYPAL_CLIENT_ID) {
+      console.error("PayPal client ID is not set");
+      onError(paymentText.errors.configError);
+      return;
     }
-  };
 
-  return (
-    <form onSubmit={handleSubmit} className="w-full space-y-6">
-      <PaymentElement options={{
-        fields: {
-          billingDetails: {
-            name: 'auto',
-            email: 'auto',
-          }
-        },
-        business: {
-          name: 'Viajes Olga',
+    // Load PayPal script
+    const script = document.createElement('script');
+    script.src = `https://www.paypal.com/sdk/js?client-id=${window.ENV.PAYPAL_CLIENT_ID}&currency=EUR`;
+    script.async = true;
+    script.onload = () => setPaypalLoaded(true);
+    script.onerror = () => onError(paymentText.errors.initError);
+    document.body.appendChild(script);
+
+    return () => {
+      // Clean up script if component unmounts before script loads
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, [onError, paymentText.errors.configError, paymentText.errors.initError]);
+
+  useEffect(() => {
+    // Render PayPal buttons once script is loaded
+    if (paypalLoaded && !paypalButtonsRendered && !isSubmitting) {
+      const paypalButtonContainer = document.getElementById('paypal-button-container');
+      
+      if (paypalButtonContainer && window.paypal?.Buttons) {
+        // Clear any existing buttons
+        paypalButtonContainer.innerHTML = '';
+        
+        try {
+          // Create custom data to pass with the payment
+          const customData = customerData ? JSON.stringify({
+            customerName: customerData.fullName,
+            customerEmail: customerData.email,
+            date: customerData.date,
+            time: customerData.time,
+            partySize: customerData.partySize.toString(),
+            phoneNumber: customerData.phoneNumber,
+            country: customerData.country,
+            countryCode: customerData.countryCode,
+            tourSlug: customerData.tourSlug,
+            tourName: tourName
+          }) : '';
+
+          // We need to use any here to avoid complex PayPal SDK typing issues
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const paypalButtons = window.paypal.Buttons({
+            style: {
+              layout: 'vertical',
+              color: 'gold',
+              shape: 'rect',
+              label: 'pay'
+            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            createOrder: function(data: any, actions: any) {
+              return actions.order.create({
+                intent: "CAPTURE",
+                purchase_units: [{
+                  description: `Booking for ${tourName}`,
+                  custom_id: customData,
+                  amount: {
+                    value: tourPrice.toString(),
+                    currency_code: 'EUR'
+                  }
+                }]
+              });
+            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onApprove: function(data: any, actions: any) {
+              return actions.order.capture().then(function() {
+                onSuccess(data.orderID);
+              });
+            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onError: function(err: any) {
+              console.error('PayPal error:', err);
+              onError(paymentText.errors.paymentFailed);
+            }
+          });
+          
+          paypalButtons.render('#paypal-button-container');
+          setPaypalButtonsRendered(true);
+        } catch (error) {
+          console.error('Error rendering PayPal buttons:', error);
+          onError(paymentText.errors.initError);
         }
-      }} />
-      <div className="text-sm text-gray-500 mb-4">
-        Tour Price: {tourPrice}€ per person
-      </div>
-      <Button 
-        type="submit" 
-        disabled={!stripe || !elements || isProcessing || isSubmitting}
-        className="w-full"
-      >
-        {isProcessing || isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {paymentText.buttons.processing}
-          </>
-        ) : (
-          paymentText.buttons.payNow
-        )}
-      </Button>
-    </form>
-  );
-};
+      }
+    }
+  }, [
+    paypalLoaded, 
+    paypalButtonsRendered, 
+    isSubmitting, 
+    onSuccess, 
+    onError, 
+    tourPrice, 
+    tourName, 
+    customerData, 
+    paymentText.errors.paymentFailed, 
+    paymentText.errors.initError
+  ]);
 
-interface PaymentUIProps {
-  clientSecret: string | null;
-  onSuccess: () => void;
-  onError: (error: string) => void;
-  isSubmitting: boolean;
-  tourPrice?: number;
-  paymentText: {
-    buttons: {
-      payNow: string;
-      processing: string;
-    };
-    errors: {
-      stripeInit: string;
-      paymentFailed: string;
-      configError: string;
-      initError: string;
-    };
-  };
-}
-
-export const PaymentUI = ({ clientSecret, onSuccess, onError, isSubmitting, tourPrice = 120, paymentText }: PaymentUIProps) => {
-  if (!window.ENV?.STRIPE_PUBLIC_KEY) {
-    console.error("Stripe publishable key is not set");
+  if (!window.ENV?.PAYPAL_CLIENT_ID) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
@@ -136,34 +182,20 @@ export const PaymentUI = ({ clientSecret, onSuccess, onError, isSubmitting, tour
     );
   }
 
-  if (!clientSecret) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          {paymentText.errors.initError}
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  const stripePromise = loadStripe(window.ENV.STRIPE_PUBLIC_KEY);
-  const options: StripeElementsOptions = {
-    clientSecret,
-    appearance: {
-      theme: 'stripe',
-    },
-  };
-
   return (
-    <Elements stripe={stripePromise} options={options}>
-      <PaymentForm
-        onSuccess={onSuccess}
-        onError={onError}
-        isSubmitting={isSubmitting}
-        tourPrice={tourPrice}
-        paymentText={paymentText}
-      />
-    </Elements>
+    <div className="w-full space-y-6">
+      <div className="text-sm text-gray-500 mb-4">
+        Tour Price: {tourPrice}€ per person
+      </div>
+      
+      {isSubmitting ? (
+        <Button disabled className="w-full">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          {paymentText.buttons.processing}
+        </Button>
+      ) : (
+        <div id="paypal-button-container" className="w-full min-h-[150px]"></div>
+      )}
+    </div>
   );
 };

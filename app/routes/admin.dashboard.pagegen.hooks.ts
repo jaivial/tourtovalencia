@@ -31,6 +31,10 @@ const DEFAULT_SECTION2_DATA: sanJuansection2Type = {
   thirdH3: "",
   sectionImage: {
     preview: '/olgaphoto3.jpeg'
+  },
+  lottieAnimation: {
+    enabled: false,
+    src: "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie"
   }
 };
 
@@ -127,7 +131,7 @@ export const usePageGenerator = () => {
   };
 
   // Section 2 handlers
-  const handleSection2Update = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
+  const handleSection2Update = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => {
     setSection2Data(prev => ({
       ...prev,
       [field]: value
@@ -186,6 +190,38 @@ export const usePageGenerator = () => {
     setSection5Data(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  // Section 5 image handler
+  const handleSection5ImageUpdate = (file: File) => {
+    console.log(`PageGenerator: Processing section5 image update:`, file.name, file.type, file.size);
+    
+    const reader = new FileReader();
+    
+    // Set up the onload handler before calling readAsDataURL
+    reader.onload = (e) => {
+      const base64String = e.target?.result as string;
+      console.log(`PageGenerator: Base64 image created, length:`, base64String.length);
+      
+      setSection5Data(prev => {
+        console.log(`PageGenerator: Updating section5Data with new image`);
+        return {
+          ...prev,
+          image: base64String
+        };
+      });
+    };
+    
+    // Start reading the file
+    reader.readAsDataURL(file);
+  };
+
+  // Section 5 image remove handler
+  const handleSection5ImageRemove = () => {
+    setSection5Data(prev => ({
+      ...prev,
+      image: "/plazareina2.jpg" // Reset to default image
     }));
   };
 
@@ -286,6 +322,8 @@ export const usePageGenerator = () => {
     handleSection3ImageRemove,
     handleSection4Update,
     handleSection5Update,
+    handleSection5ImageUpdate,
+    handleSection5ImageRemove,
     handleSection6Update,
     handleIndexSection5Update,
     handleTimelineUpdate,

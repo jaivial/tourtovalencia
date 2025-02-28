@@ -47,6 +47,18 @@ export type IndexSection5Type = {
   secondH3: string;
 };
 
+export type EditableCardType = {
+  title: string;
+  duration: string;
+  description: string;
+  additionalInfo?: string;
+  quote?: string;
+  image: {
+    preview: string;
+    file?: File;
+  };
+};
+
 export type IndexFeaturesType = {
   firstSquareTitle: string;
   firstSquareDescription: string;
@@ -95,12 +107,20 @@ export type sanJuansection2Type = {
     file?: File;
     preview: string;
   };
+  lottieAnimation?: {
+    enabled: boolean;
+    src: string;
+  };
 };
 
 export type sanJuansection4Type = {
   firstH3: string;
   secondH3: string;
   thirdH3: string;
+  lottieAnimation?: {
+    enabled: boolean;
+    src: string;
+  };
 };
 
 export type sanJuanSection5Type = {
@@ -109,6 +129,11 @@ export type sanJuanSection5Type = {
   thirdH3: string;
   fourthH3: string;
   fifthH3: string;
+  image?: string; // Add image field to store the image as base64 or URL
+  lottieAnimation?: {
+    enabled: boolean;
+    src: string;
+  };
 };
 
 export type SanJuanSection6listType = {
@@ -525,6 +550,8 @@ export const languages: Record<string, LanguageData> = {
         thirdH3: "Private transport to La Vall d'Uixó (Castellón).",
         fourthH3: "Guided tour: 3h 30m (approx).",
         fifthH3: "Return to Valencia by private transport.",
+        image: undefined, // Add image field to store the image as base64 or URL
+        lottieAnimation: undefined,
       },
       sanJuanSection6: {
         cardTitle: "GUIDED TOUR",
@@ -919,6 +946,8 @@ export const languages: Record<string, LanguageData> = {
         thirdH3: "Transporte privado a La Vall d'Uixó (Castellón).",
         fourthH3: "Tour guiado: 3h 30m (aprox).",
         fifthH3: "Regreso a Valencia por transporte privado.",
+        image: undefined, // Add image field to store the image as base64 or URL
+        lottieAnimation: undefined,
       },
       sanJuanSection6: {
         cardTitle: "TOUR GUIADO",

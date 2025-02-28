@@ -39,7 +39,9 @@ export default function EditPageRoute() {
     isDeleteDialogOpen, 
     pageToDelete, 
     confirmDelete, 
-    cancelDelete 
+    cancelDelete,
+    isDeleting,
+    deleteError
   } = useEditPageList();
 
   const containerVariants = {
@@ -159,12 +161,33 @@ export default function EditPageRoute() {
               <p className="text-gray-600 mb-6">
                 ¿Estás seguro de que deseas eliminar el tour &quot;{pageToDelete?.name}&quot;? Esta acción no se puede deshacer.
               </p>
+              {deleteError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">
+                  {deleteError}
+                </div>
+              )}
               <div className="flex justify-end space-x-3">
-                <Button variant="outline" onClick={cancelDelete}>
+                <Button variant="outline" onClick={cancelDelete} disabled={isDeleting}>
                   Cancelar
                 </Button>
-                <Button variant="destructive" onClick={confirmDelete}>
-                  Eliminar
+                <Button 
+                  variant="destructive" 
+                  onClick={confirmDelete}
+                  disabled={isDeleting}
+                  className="flex items-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="h-4 w-4 border-2 border-white border-t-transparent rounded-full"
+                      />
+                      Eliminando...
+                    </>
+                  ) : (
+                    "Eliminar"
+                  )}
                 </Button>
               </div>
             </div>

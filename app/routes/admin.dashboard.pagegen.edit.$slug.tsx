@@ -10,9 +10,10 @@ import { useEditPage } from "./admin.dashboard.pagegen.edit.$slug.hooks";
 import { getPageBySlug } from "~/utils/page.server";
 import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
 import { motion } from "framer-motion";
-import type { IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
+import type { EditableCardType, IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 import { convertFileToBase64 } from "~/utils/image.client";
+import { LoadingOverlay } from "~/components/ui/loading-overlay";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { slug } = params;
@@ -49,9 +50,13 @@ export default function EditPageRoute() {
     section6Data,
     indexSection5Data,
     timelineData,
+    cardData,
     isSaving,
     saveError,
     saveSuccess,
+    isLoadingOverlayOpen,
+    loadingProgress,
+    loadingSteps,
     setPageName,
     handleStatusChange,
     handlePriceChange,
@@ -61,11 +66,15 @@ export default function EditPageRoute() {
     handleSection3ImageRemove,
     handleSection4Update,
     handleSection5Update,
+    handleSection5ImageUpdate,
+    handleSection5ImageRemove,
     handleSection6Update,
     handleIndexSection5Update,
     handleTimelineUpdate,
+    handleCardUpdate,
     handleSavePage,
-    handleCancel
+    handleCancel,
+    isBackgroundProcess
   } = useEditPage(page);
 
   // Adapter functions to match PageTemplate prop types
@@ -105,12 +114,30 @@ export default function EditPageRoute() {
     }
   };
 
-  const adaptSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
+  const adaptSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => {
     console.log(`EditPage: Processing section2 update for field ${String(field)}:`, 
-      typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+      typeof value === 'string' 
+        ? value 
+        : 'file' in value 
+          ? `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`
+          : `Lottie: enabled=${(value as { enabled: boolean; src: string }).enabled}, src=${(value as { enabled: boolean; src: string }).src}`);
+    
+    // Handle lottieAnimation object
+    if (field === 'lottieAnimation' && typeof value === 'object' && 'enabled' in value) {
+      const lottieValue = value as { enabled: boolean; src: string };
+      const updatedData = { 
+        ...section2Data, 
+        lottieAnimation: {
+          enabled: lottieValue.enabled,
+          src: lottieValue.src
+        }
+      };
+      handleSection2Update(updatedData);
+      return;
+    }
     
     // If the value is an object with a file, convert it to base64 before updating
-    if (typeof value !== 'string' && value.file) {
+    if (typeof value !== 'string' && 'file' in value && value.file) {
       try {
         const base64 = await convertFileToBase64(value.file);
         console.log(`EditPage: Converted section2 ${String(field)} image to base64:`, base64.substring(0, 30) + '...');
@@ -161,6 +188,34 @@ export default function EditPageRoute() {
     handleSection5Update(updatedData);
   };
 
+  const adaptSection5ImageUpdate = async (file: File) => {
+    try {
+      console.log(`EditPage: Processing section5 image update:`, file.name, file.type, file.size);
+      
+      // Create a local preview immediately
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64 = e.target?.result as string;
+        console.log(`EditPage: Local preview created, length:`, base64.length);
+        
+        // No need to convert again, just pass the file to the handler
+        handleSection5ImageUpdate(file);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error(`EditPage: Error updating section5 image:`, error);
+    }
+  };
+
+  const adaptSection5ImageRemove = () => {
+    try {
+      console.log(`EditPage: Processing section5 image removal`);
+      handleSection5ImageRemove();
+    } catch (error) {
+      console.error(`EditPage: Error removing section5 image:`, error);
+    }
+  };
+
   const adaptSection6Update = (field: keyof SanJuanSection6Type, value: string) => {
     const updatedData = { ...section6Data, [field]: value };
     handleSection6Update(updatedData);
@@ -176,8 +231,49 @@ export default function EditPageRoute() {
     handleTimelineUpdate(updatedData);
   };
 
+  const adaptCardUpdate = async (field: keyof EditableCardType, value: string | { file?: File; preview: string }) => {
+    console.log(`EditPage: Processing card update for field ${String(field)}:`, 
+      typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+    
+    // If the value is an object with a file, convert it to base64 before updating
+    if (typeof value !== 'string' && value.file) {
+      try {
+        const base64 = await convertFileToBase64(value.file);
+        console.log(`EditPage: Converted card ${String(field)} image to base64:`, base64.substring(0, 30) + '...');
+        
+        // Update with the base64 string as preview but keep the file reference
+        const updatedData = { 
+          ...cardData, 
+          [field]: { 
+            preview: base64,
+            file: undefined // File objects can't be serialized for the database
+          } 
+        };
+        handleCardUpdate(updatedData);
+      } catch (error) {
+        console.error(`EditPage: Error converting card image for field ${String(field)}:`, error);
+        // Still update with the preview URL if conversion fails
+        const updatedData = { ...cardData, [field]: value };
+        handleCardUpdate(updatedData);
+      }
+    } else {
+      // For non-file updates, just pass the value directly
+      const updatedData = { ...cardData, [field]: value };
+      handleCardUpdate(updatedData);
+    }
+  };
+
   return (
     <div className="w-full min-h-screen bg-gray-100 p-0">
+      {/* Loading Overlay */}
+      <LoadingOverlay 
+        isOpen={isLoadingOverlayOpen}
+        message="Actualizando la página..."
+        progress={loadingProgress}
+        steps={loadingSteps}
+        isBackgroundProcess={isBackgroundProcess}
+      />
+      
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center p-6">
           <Link to="/admin/dashboard/pagegen/editpage" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
@@ -225,7 +321,11 @@ export default function EditPageRoute() {
 
         {saveSuccess && (
           <Alert className="mb-4 mx-6 bg-green-50 text-green-800 border-green-200">
-            <AlertDescription>¡Tour actualizado con éxito! Redirigiendo...</AlertDescription>
+            <AlertDescription>
+              {saveError 
+                ? "La actualización está en proceso. Por favor, espere hasta que se complete la traducción y el procesamiento de imágenes."
+                : "¡Tour actualizado con éxito! Redirigiendo..."}
+            </AlertDescription>
           </Alert>
         )}
 
@@ -264,10 +364,14 @@ export default function EditPageRoute() {
             onSection4Update={adaptSection4Update}
             section5Data={section5Data}
             onSection5Update={adaptSection5Update}
+            onSection5ImageUpdate={adaptSection5ImageUpdate}
+            onSection5ImageRemove={adaptSection5ImageRemove}
             section6Data={section6Data}
             onSection6Update={adaptSection6Update}
             timelineData={timelineData}
             onTimelineUpdate={adaptTimelineUpdate}
+            cardData={cardData}
+            onCardUpdate={adaptCardUpdate}
             isEditMode={true}
           />
         </div>

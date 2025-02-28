@@ -10,6 +10,10 @@ import SanJuanSection3Dynamic from "~/components/_sanjuan/SanJuanSection3Dynamic
 import { useLanguageContext } from "~/providers/LanguageContext";
 import ComingSoonCard from "~/components/_cards/ComingSoonCard";
 import FloatingButton from "~/components/ui/FloatingButton";
+import SanJuanSection5Dynamic from "~/components/_sanjuan/SanJuanSection5Dynamic";
+import type { Page } from "~/utils/db.schema.server";
+import type { IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuanSection3Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
+import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 
 // Error boundary component
 export function ErrorBoundary() {
@@ -39,13 +43,15 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 // Meta function for SEO
-export const meta: MetaFunction = ({ data }: { data: any }) => {
-  if (!data?.page) {
+export const meta: MetaFunction = ({ data }) => {
+  const typedData = data as unknown as { page: Page } | undefined;
+  
+  if (!typedData?.page) {
     return [{ title: "Página no encontrada | Viajes Olga" }, { name: "description", content: "La página que buscas no existe o ha sido movida." }];
   }
 
   // Get the first few words from section1 or section4 for description
-  const content = data.page.content.es;
+  const content = typedData.page.content.es;
   let description = "";
 
   if (content.section1?.firstH3) {
@@ -59,9 +65,9 @@ export const meta: MetaFunction = ({ data }: { data: any }) => {
   }
 
   return [
-    { title: `${data.page.name} | Tour To Valencia` },
+    { title: `${typedData.page.name} | Tour To Valencia` },
     { name: "description", content: description },
-    { property: "og:title", content: `${data.page.name} | Tour To Valencia` },
+    { property: "og:title", content: `${typedData.page.name} | Tour To Valencia` },
     { property: "og:description", content: description },
     { property: "og:image", content: "/tourtovalencialogo.png" },
     { property: "og:image:width", content: "1200" },
@@ -95,11 +101,13 @@ export default function DynamicPage() {
 
   console.log(`Current language: ${state.currentLanguage} (${languageCode})`);
 
-  // Get content based on current language code, fallback to Spanish if the language version doesn't exist
-  const content = page.content[languageCode] || page.content.es;
+  // Type assertion for content access
+  const content = (languageCode === "es" || languageCode === "en") 
+    ? page.content[languageCode] 
+    : page.content.es;
 
   // If the selected language content doesn't exist and we're falling back to Spanish, log a warning
-  if (!page.content[languageCode] && languageCode !== "es") {
+  if (languageCode !== "es" && !page.content[languageCode as "en"]) {
     console.warn(`Content not available in ${languageCode}, falling back to Spanish for page: ${page.slug}`);
   }
 
@@ -114,30 +122,81 @@ export default function DynamicPage() {
   if (!content?.section3?.images) {
     return (
       <>
-        <DynamicPageContainer page={page} />
+        <DynamicPageContainer page={page as unknown as Page} />
         <FloatingButton text={bookNowText} />
       </>
     );
   }
 
+  // Helper function to safely cast content sections to their expected types
+  const castSection = <T,>(section: unknown): T => section as T;
+
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
-      {content.indexSection5 && <DynamicPageContainer.IndexSection width={safeWidth} indexSection5Text={content.indexSection5} />}
+      {content.indexSection5 && (
+        <DynamicPageContainer.IndexSection 
+          width={safeWidth} 
+          indexSection5Text={castSection<IndexSection5Type>(content.indexSection5)} 
+        />
+      )}
 
-      {content.section1 && <DynamicPageContainer.Section1 width={safeWidth} sanJuanSection1Text={content.section1} />}
+      {content.section1 && (
+        <DynamicPageContainer.Section1 
+          width={safeWidth} 
+          sanJuanSection1Text={castSection<sanJuanSection1Type>(content.section1)} 
+        />
+      )}
 
-      {content.section2 && <DynamicPageContainer.Section2 width={safeWidth} height={safeHeight} SanJuanSection2Text={content.section2} />}
+      {content.section2 && (
+        <DynamicPageContainer.Section2 
+          width={safeWidth} 
+          height={safeHeight} 
+          SanJuanSection2Text={castSection<sanJuansection2Type>(content.section2)} 
+        />
+      )}
 
       {/* Render our dynamic section3 */}
-      {content.section3 && <SanJuanSection3Dynamic width={safeWidth} images={content.section3.images} />}
+      {content.section3 && content.section3.images && (
+        <SanJuanSection3Dynamic 
+          width={safeWidth} 
+          images={castSection<sanJuanSection3Type>(content.section3).images} 
+        />
+      )}
 
-      {content.section4 && <DynamicPageContainer.Section4 width={safeWidth} SanJuanSection4Text={content.section4} />}
+      {content.section4 && (
+        <DynamicPageContainer.Section4 
+          width={safeWidth} 
+          SanJuanSection4Text={castSection<sanJuansection4Type>(content.section4)} 
+        />
+      )}
 
-      {content.timeline && <DynamicPageContainer.Timeline width={safeWidth} timelineData={content.timeline} />}
+      {/* Update to use the dynamic section5 component with image support */}
+      {content.section5 && (() => {
+        console.log("pages.$slug.tsx: Section5 data:", content.section5);
+        console.log("pages.$slug.tsx: Section5 lottieAnimation:", content.section5.lottieAnimation);
+        return (
+          <SanJuanSection5Dynamic 
+            width={safeWidth} 
+            SanJuanSection5Text={castSection<sanJuanSection5Type>(content.section5)} 
+          />
+        );
+      })()}
 
-      {content.section5 && <DynamicPageContainer.Section5 width={safeWidth} SanJuanSection5Text={content.section5} />}
+      {content.timeline && (
+        <DynamicPageContainer.Timeline 
+          width={safeWidth} 
+          timelineData={castSection<TimelineDataType>(content.timeline)} 
+        />
+      )}
 
-      {content.section6 && (page.status === "upcoming" ? <ComingSoonCard width={safeWidth} /> : <DynamicPageContainer.Section6 width={safeWidth} SanJuanSection6Text={content.section6} />)}
+      {content.section6 && (
+        page.status === "upcoming" 
+          ? <ComingSoonCard width={safeWidth} /> 
+          : <DynamicPageContainer.Section6 
+              width={safeWidth} 
+              SanJuanSection6Text={castSection<SanJuanSection6Type>(content.section6)} 
+            />
+      )}
       
       {/* Add the floating button */}
       <FloatingButton text={bookNowText} />

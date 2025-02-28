@@ -34,6 +34,8 @@ export default function PageGeneratorRoute() {
     handleSection3ImageRemove,
     handleSection4Update,
     handleSection5Update,
+    handleSection5ImageUpdate,
+    handleSection5ImageRemove,
     handleSection6Update,
     handleIndexSection5Update,
     handleTimelineUpdate,
@@ -168,6 +170,8 @@ export default function PageGeneratorRoute() {
                 onSection4Update={handleSection4Update}
                 section5Data={section5Data}
                 onSection5Update={handleSection5Update}
+                onSection5ImageUpdate={handleSection5ImageUpdate}
+                onSection5ImageRemove={handleSection5ImageRemove}
                 section6Data={section6Data}
                 onSection6Update={handleSection6Update}
                 timelineData={timelineData}

@@ -3,19 +3,28 @@ import { useNavigate } from "@remix-run/react";
 import type { Page } from "~/utils/db.schema.server";
 
 export const useEditPageList = () => {
+  const navigate = useNavigate();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [pageToDelete, setPageToDelete] = useState<Page | null>(null);
-  const navigate = useNavigate();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleDeleteConfirmation = (page: Page) => {
     setPageToDelete(page);
     setIsDeleteDialogOpen(true);
   };
 
+  const cancelDelete = () => {
+    setIsDeleteDialogOpen(false);
+    setPageToDelete(null);
+  };
+
   const confirmDelete = async () => {
     if (!pageToDelete?._id) return;
     
     try {
+      setIsDeleting(true);
+      
       const response = await fetch(`/api/pages/delete/${pageToDelete._id}`, {
         method: 'DELETE',
       });
@@ -25,23 +34,22 @@ export const useEditPageList = () => {
         navigate('.', { replace: true });
       } else {
         console.error('Failed to delete page');
-        // You could add toast notification here
+        setDeleteError('Failed to delete page. Please try again.');
       }
     } catch (error) {
       console.error('Error deleting page:', error);
+      setDeleteError('Failed to delete page. Please try again.');
     } finally {
+      setIsDeleting(false);
       cancelDelete();
     }
-  };
-
-  const cancelDelete = () => {
-    setIsDeleteDialogOpen(false);
-    setPageToDelete(null);
   };
 
   return {
     isDeleteDialogOpen,
     pageToDelete,
+    isDeleting,
+    deleteError,
     handleDeleteConfirmation,
     confirmDelete,
     cancelDelete,

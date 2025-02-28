@@ -8,9 +8,10 @@ import PropTypes from "prop-types";
 
 type ComingSoonCardProps = {
   width: number;
+  imageSrc?: string;
 };
 
-const ComingSoonCard: React.FC<ComingSoonCardProps> = ({ width }) => {
+const ComingSoonCard: React.FC<ComingSoonCardProps> = ({ width, imageSrc }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
   const { state } = useLanguageContext();
@@ -61,7 +62,17 @@ const ComingSoonCard: React.FC<ComingSoonCardProps> = ({ width }) => {
           transition={{ duration: 0.5 }}
           className="w-[95%] max-w-[600px] mx-auto px-4"
         >
-          <Card className="backdrop-blur-md bg-white/80 border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <Card className="backdrop-blur-md bg-white/80 border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
+            {imageSrc && (
+              <div className="relative h-56 w-full overflow-hidden">
+                <div className="absolute inset-0 bg-gray-500 opacity-50 z-10"></div>
+                <img 
+                  src={imageSrc} 
+                  alt="Coming soon" 
+                  className="w-full h-full object-cover grayscale"
+                />
+              </div>
+            )}
             <CardHeader className="flex flex-col justify-center items-center space-y-6">
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -112,7 +123,8 @@ const ComingSoonCard: React.FC<ComingSoonCardProps> = ({ width }) => {
 };
 
 ComingSoonCard.propTypes = {
-  width: PropTypes.number.isRequired
+  width: PropTypes.number.isRequired,
+  imageSrc: PropTypes.string
 };
 
 export default ComingSoonCard;

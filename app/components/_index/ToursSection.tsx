@@ -157,43 +157,72 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
     // Find the page that corresponds to this tour
     const page = pages.find(p => p._id === tour.pageId || p.slug === tour.slug);
     
-    if (page && 
-        page.content && 
-        page.content.es && 
-        page.content.es.section1 && 
-        page.content.es.section1.backgroundImage && 
-        page.content.es.section1.backgroundImage.preview) {
-      return page.content.es.section1.backgroundImage.preview;
+    if (page && page.content) {
+      // First try to get the card image if it exists
+      if (page.content[language]?.card?.image?.preview) {
+        return page.content[language].card.image.preview;
+      } else if (page.content.es?.card?.image?.preview) {
+        return page.content.es.card.image.preview;
+      }
+      
+      // Fallback to section1 background image
+      if (page.content[language]?.section1?.backgroundImage?.preview) {
+        return page.content[language].section1.backgroundImage.preview;
+      } else if (page.content.es?.section1?.backgroundImage?.preview) {
+        return page.content.es.section1.backgroundImage.preview;
+      }
     }
     
     return null;
   };
 
-  // Function to get additional description text from the page
-  const getAdditionalDescription = (tour: Tour) => {
-    if (!pages || pages.length === 0) return { section2FirstH3: null, indexSection5SecondH3: null };
+  // Function to get card data from the page
+  const getCardData = (tour: Tour) => {
+    if (!pages || pages.length === 0) {
+      return {
+        title: tour.tourName[language],
+        duration: tour.duration[language],
+        description: tour.description[language],
+        quote: null,
+        additionalInfo: null
+      };
+    }
     
     // Find the page that corresponds to this tour
     const page = pages.find(p => p._id === tour.pageId || p.slug === tour.slug);
     
     const result = {
-      section2FirstH3: null as string | null,
-      indexSection5SecondH3: null as string | null
+      title: tour.tourName[language],
+      duration: tour.duration[language],
+      description: tour.description[language],
+      quote: null as string | null,
+      additionalInfo: null as string | null
     };
     
     if (page && page.content) {
-      // Get section2.firstH3
-      if (page.content[language]?.section2?.firstH3) {
-        result.section2FirstH3 = page.content[language].section2.firstH3;
-      } else if (page.content.es?.section2?.firstH3) {
-        result.section2FirstH3 = page.content.es.section2.firstH3;
-      }
+      // Try to get card data if it exists
+      const cardData = page.content[language]?.card || page.content.es?.card;
       
-      // Get indexSection5.secondH3
-      if (page.content[language]?.indexSection5?.secondH3) {
-        result.indexSection5SecondH3 = page.content[language].indexSection5.secondH3;
-      } else if (page.content.es?.indexSection5?.secondH3) {
-        result.indexSection5SecondH3 = page.content.es.indexSection5.secondH3;
+      if (cardData) {
+        if (cardData.title) result.title = cardData.title;
+        if (cardData.duration) result.duration = cardData.duration;
+        if (cardData.description) result.description = cardData.description;
+        if (cardData.quote) result.quote = cardData.quote;
+        if (cardData.additionalInfo) result.additionalInfo = cardData.additionalInfo;
+      } else {
+        // Fallback to section2.firstH3 for quote
+        if (page.content[language]?.section2?.firstH3) {
+          result.quote = page.content[language].section2.firstH3;
+        } else if (page.content.es?.section2?.firstH3) {
+          result.quote = page.content.es.section2.firstH3;
+        }
+        
+        // Fallback to indexSection5.secondH3 for additional info
+        if (page.content[language]?.indexSection5?.secondH3) {
+          result.additionalInfo = page.content[language].indexSection5.secondH3;
+        } else if (page.content.es?.indexSection5?.secondH3) {
+          result.additionalInfo = page.content.es.indexSection5.secondH3;
+        }
       }
     }
     
@@ -232,7 +261,7 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {displayTours.map((tour, index) => {
             const tourImage = getTourImage(tour);
-            const additionalDesc = getAdditionalDescription(tour);
+            const cardData = getCardData(tour);
             
             return (
               <motion.div
@@ -252,40 +281,45 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
                   {tourImage ? (
                     <img 
                       src={tourImage} 
-                      alt={tour.tourName[language]} 
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                      alt={cardData.title} 
+                      className={`w-full h-full object-cover transition-transform duration-500 hover:scale-110 ${tour.status === "upcoming" ? "grayscale" : ""}`}
                     />
                   ) : (
                     <img 
                       src={`/tour-${index + 1}.jpg`} 
-                      alt={tour.tourName[language]} 
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                      alt={cardData.title} 
+                      className={`w-full h-full object-cover transition-transform duration-500 hover:scale-110 ${tour.status === "upcoming" ? "grayscale" : ""}`}
                       onError={(e) => {
                         e.currentTarget.src = "/tour-placeholder.jpg";
                       }}
                     />
                   )}
+                  
+                  {/* Gray overlay for upcoming tours */}
+                  {tour.status === "upcoming" && (
+                    <div className="absolute inset-0 bg-gray-500 opacity-50 z-10"></div>
+                  )}
                 </div>
 
                 {/* Tour Content */}
                 <div className="p-6 flex flex-col flex-grow">
-                  <h3 className="text-2xl font-bold text-blue-900 mb-3">{tour.tourName[language]}</h3>
+                  <h3 className="text-2xl font-bold text-blue-900 mb-3">{cardData.title}</h3>
                   
                   <div className="flex items-center mb-4 text-blue-700">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <p className="text-sm">{tour.duration[language]}</p>
+                    <p className="text-sm">{cardData.duration}</p>
                   </div>
                   
-                  {additionalDesc?.section2FirstH3 && (
-                    <p className="text-gray-700 text-sm mb-3 italic">&ldquo;{additionalDesc.section2FirstH3}&rdquo;</p>
+                  {cardData.quote && (
+                    <p className="text-gray-700 text-sm mb-3 italic">&ldquo;{cardData.quote}&rdquo;</p>
                   )}
                   
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">{tour.description[language]}</p>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">{cardData.description}</p>
                   
-                  {additionalDesc?.indexSection5SecondH3 && (
-                    <p className="text-gray-700 text-sm mb-3 font-medium">{additionalDesc.indexSection5SecondH3}</p>
+                  {cardData.additionalInfo && (
+                    <p className="text-gray-700 text-sm mb-3 font-medium">{cardData.additionalInfo}</p>
                   )}
                   
                   <div className="mt-auto">

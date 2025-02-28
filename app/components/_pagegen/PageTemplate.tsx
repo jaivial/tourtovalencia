@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useWindowSize } from "@uidotdev/usehooks";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
@@ -9,9 +10,9 @@ import EditableSanJuanSection3 from "./EditableSanJuanSection3";
 import EditableSanJuanSection4 from "./EditableSanJuanSection4";
 import EditableSanJuanSection5 from "./EditableSanJuanSection5";
 import EditableSanJuanSection6 from "./EditableSanJuanSection6";
+import EditableCard from "~/components/_cards/EditableCard";
 import { EditableTimelineFeature, TimelineDataType } from "~/components/_index/EditableTimelineFeature";
-import { useLanguageContext } from "~/providers/LanguageContext";
-import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
+import { EditableCardType, IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 import { PublishModal } from "./PublishModal";
 import { usePublishModal, usePageCreation } from "./PageTemplate.hooks";
 import { useEffect, useState } from "react";
@@ -25,7 +26,7 @@ export type PageTemplateProps = {
   section1Data?: sanJuanSection1Type;
   onSection1Update: (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => void | Promise<void>;
   section2Data?: sanJuansection2Type;
-  onSection2Update: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => void | Promise<void>;
+  onSection2Update: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => void | Promise<void>;
   section3Data?: sanJuanSection3Type;
   onSection3ImageUpdate: (index: number, file: File) => void | Promise<void>;
   onSection3ImageRemove: (index: number) => void;
@@ -33,22 +34,53 @@ export type PageTemplateProps = {
   onSection4Update: (field: keyof sanJuansection4Type, value: string) => void;
   section5Data?: sanJuanSection5Type;
   onSection5Update: (field: keyof sanJuanSection5Type, value: string) => void;
+  onSection5ImageUpdate?: (file: File) => void | Promise<void>;
+  onSection5ImageRemove?: () => void | Promise<void>;
   section6Data?: SanJuanSection6Type;
   onSection6Update: (field: keyof SanJuanSection6Type, value: string) => void;
   timelineData?: TimelineDataType;
   onTimelineUpdate?: (field: keyof TimelineDataType, value: string | Array<{title: string, description: string}>) => void;
+  cardData?: EditableCardType;
+  onCardUpdate?: (field: keyof EditableCardType, value: string | { file?: File; preview: string }) => void | Promise<void>;
   pageName: string;
   price: number;
   onPriceChange: (value: number) => void;
   isEditMode?: boolean;
 };
 
-const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, indexSection5Data, onIndexSection5Update, section1Data, onSection1Update, section2Data, onSection2Update, section3Data, onSection3ImageUpdate, onSection3ImageRemove, section4Data, onSection4Update, section5Data, onSection5Update, section6Data, onSection6Update, timelineData, onTimelineUpdate, pageName, price, onPriceChange, isEditMode = false }) => {
+const PageTemplate: React.FC<PageTemplateProps> = ({ 
+  status, 
+  onStatusChange, 
+  indexSection5Data, 
+  onIndexSection5Update, 
+  section1Data, 
+  onSection1Update, 
+  section2Data, 
+  onSection2Update, 
+  section3Data, 
+  onSection3ImageUpdate, 
+  onSection3ImageRemove, 
+  section4Data, 
+  onSection4Update, 
+  section5Data, 
+  onSection5Update, 
+  onSection5ImageUpdate, 
+  onSection5ImageRemove, 
+  section6Data, 
+  onSection6Update, 
+  timelineData, 
+  onTimelineUpdate,
+  cardData,
+  onCardUpdate,
+  pageName, 
+  price, 
+  onPriceChange, 
+  isEditMode = false 
+}) => {
   const size = useWindowSize();
   const { isModalOpen, closeModal } = usePublishModal();
   const { handleCreatePage, isCreating, error } = usePageCreation();
   const width = size.width ?? 0;
-  const { state } = useLanguageContext();
   const [loadingMessage, setLoadingMessage] = useState("Creando página...");
 
   // Add wrapper functions to handle async updates
@@ -64,10 +96,12 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
     }
   };
 
-  const handleSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
+  const handleSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => {
     try {
       console.log(`PageTemplate: Processing section2 update for field ${String(field)}:`, 
-        typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+        typeof value === 'string' ? value : 
+        'file' in value ? `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...` :
+        `Lottie: enabled=${value.enabled}, src=${value.src.substring(0, 30)}...`);
       
       // Call the original onSection2Update
       await onSection2Update(field, value);
@@ -85,6 +119,49 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
       await onSection3ImageUpdate(index, file);
     } catch (error) {
       console.error(`PageTemplate: Error updating image at index ${index}:`, error);
+    }
+  };
+
+  // Add a wrapper function for section5 image update
+  const handleSection5ImageUpdate = async (file: File) => {
+    try {
+      console.log(`PageTemplate: Processing section5 image update:`, file.name, file.type, file.size);
+      
+      // Call the original onSection5ImageUpdate if provided
+      if (onSection5ImageUpdate) {
+        await onSection5ImageUpdate(file);
+      }
+    } catch (error) {
+      console.error(`PageTemplate: Error updating section5 image:`, error);
+    }
+  };
+
+  // Add a wrapper function for section5 image removal
+  const handleSection5ImageRemove = async () => {
+    try {
+      console.log(`PageTemplate: Processing section5 image removal`);
+      
+      // Call the original onSection5ImageRemove if provided
+      if (onSection5ImageRemove) {
+        await onSection5ImageRemove();
+      }
+    } catch (error) {
+      console.error(`PageTemplate: Error removing section5 image:`, error);
+    }
+  };
+
+  // Add a wrapper function for card updates
+  const handleCardUpdate = async (field: keyof EditableCardType, value: string | { file?: File; preview: string }) => {
+    try {
+      console.log(`PageTemplate: Processing card update for field ${String(field)}:`, 
+        typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+      
+      // Call the original onCardUpdate if provided
+      if (onCardUpdate) {
+        await onCardUpdate(field, value);
+      }
+    } catch (error) {
+      console.error(`PageTemplate: Error updating card field ${String(field)}:`, error);
     }
   };
 
@@ -112,6 +189,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
       section5: section5Data,
       section6: section6Data,
       timeline: timelineData,
+      card: cardData,
       price: price
     };
 
@@ -137,7 +215,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
             <div className="flex flex-col items-center gap-6 w-full max-w-md">
               <div className="flex flex-col items-center gap-3">
                 <Label htmlFor="status" className="text-sm font-medium text-gray-700">
-                  {status === "active" ? "Activo" : "Proximamente"}
+                  {status === "active" ? "Activo" : "Próximamente"}
                 </Label>
                 <Switch id="status" checked={status === "active"} onCheckedChange={onStatusChange} />
               </div>
@@ -175,7 +253,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
 
           {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
 
-          {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} />}
+          {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} onImageUpdate={handleSection5ImageUpdate} onImageRemove={handleSection5ImageRemove} />}
 
           {timelineData && onTimelineUpdate && (
             <EditableTimelineFeature 
@@ -185,6 +263,29 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
           )}
 
           {section6Data && <EditableSanJuanSection6 width={width} data={section6Data} onUpdate={onSection6Update} />}
+          
+          {/* Editable Card Section */}
+          {cardData && onCardUpdate && (
+            <div className="w-full py-12 bg-blue-50">
+              <div className="w-[95%] max-w-[1280px] mx-auto">
+                <h2 className="text-2xl font-bold text-blue-900 mb-8 text-center">
+                  {status === "active" ? "Vista previa de la tarjeta del tour" : "Vista previa de la tarjeta de próximamente"}
+                </h2>
+                <div className="flex justify-center">
+                  <div className="w-full max-w-md">
+                    <EditableCard
+                      width={width}
+                      data={cardData}
+                      price={price}
+                      status={status}
+                      onUpdate={handleCardUpdate}
+                      isEditMode={isEditMode}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       
@@ -233,7 +334,6 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
         }}
       />
 
-     
     </div>
   );
 };

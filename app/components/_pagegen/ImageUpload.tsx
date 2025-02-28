@@ -1,5 +1,6 @@
 import { Button } from "../ui/button";
 import { Upload, X } from "lucide-react";
+import { useEffect } from "react";
 
 type ImageUploadProps = {
   imageUrl: string;
@@ -14,6 +15,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   onImageChange,
   onImageRemove
 }) => {
+  // Debug logs
+  console.log('ImageUpload: Component rendered with imageUrl:', 
+    imageUrl ? (imageUrl.length > 30 ? imageUrl.substring(0, 30) + '...' : imageUrl) : 'none');
+
+  useEffect(() => {
+    console.log('ImageUpload: useEffect - imageUrl:', 
+      imageUrl ? (imageUrl.length > 30 ? imageUrl.substring(0, 30) + '...' : imageUrl) : 'none');
+  }, [imageUrl]);
+
   const handleUploadClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -38,21 +48,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     onImageRemove();
   };
 
-  // Add debugging for image URL
-  console.log('ImageUpload: Rendering with imageUrl:', 
-    imageUrl ? (imageUrl.length > 30 ? imageUrl.substring(0, 30) + '...' : imageUrl) : 'none');
-
   return (
     <div className={`relative w-full h-full group ${className}`}>
-      <div 
-        className="absolute inset-0 bg-cover bg-center transform transition-transform duration-700 rounded-2xl"
-        style={{ 
-          backgroundImage: `url(${imageUrl || '/olgaphoto3.jpeg'})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
+      {/* Image element with styling matching SanJuanSection5.tsx */}
+      <img 
+        src={imageUrl || '/plazareina2.jpg'}
+        alt="Section content"
+        className="w-full h-full object-cover rounded-2xl transition-transform duration-700"
       />
       
+      {/* Overlay with buttons */}
       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl flex items-center justify-center z-10">
         <div className="flex gap-2 pointer-events-auto">
           <Button

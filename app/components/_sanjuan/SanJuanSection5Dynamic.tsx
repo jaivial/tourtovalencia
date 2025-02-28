@@ -1,10 +1,8 @@
-// app/components/IndexSection1.tsx
-//UI Component: just responsible for displaying pure html with props passed from feature component
 /* eslint-disable react/prop-types */
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect } from "react";
-import { sanJuanSection5Type } from "~/data/data";
+import type { sanJuanSection5Type } from "~/data/data";
 import { 
   Palmtree, 
   Sun, 
@@ -17,13 +15,15 @@ import {
   Cloud 
 } from "lucide-react";
 
-// Child Props type
-type ChildProps = {
+interface SanJuanSection5DynamicProps {
   width: number;
   SanJuanSection5Text: sanJuanSection5Type;
-};
+}
 
-const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) => {
+const SanJuanSection5Dynamic: React.FC<SanJuanSection5DynamicProps> = ({ 
+  width, 
+  SanJuanSection5Text 
+}) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
   const isLottieEnabled = SanJuanSection5Text.lottieAnimation?.enabled ?? true;
@@ -31,10 +31,10 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
 
   // Debug logging
   useEffect(() => {
-    console.log("SanJuanSection5: Animation source:", lottieSource);
-    console.log("SanJuanSection5: Animation enabled:", isLottieEnabled);
-    console.log("SanJuanSection5: Is GIF?", lottieSource.includes("giphy.gif"));
-    console.log("SanJuanSection5: Is Lottie?", lottieSource.endsWith(".lottie"));
+    console.log("SanJuanSection5Dynamic: Animation source:", lottieSource);
+    console.log("SanJuanSection5Dynamic: Animation enabled:", isLottieEnabled);
+    console.log("SanJuanSection5Dynamic: Is GIF?", lottieSource.includes("giphy.gif") || lottieSource.includes("giphy.com"));
+    console.log("SanJuanSection5Dynamic: Is Lottie?", lottieSource.endsWith(".lottie"));
   }, [lottieSource, isLottieEnabled]);
 
   // Common text styles for h3 elements
@@ -44,14 +44,17 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
     leading-normal
   `;
 
-  const getResponsiveTextSize = (small: string, semismall: string, medium: string,  semilarge: string, large: string) => 
-    `${width <= 350 ? small : width <= 450 ? semismall :  width <= 580 ? medium : width <= 768 ? semilarge : large}`;  
+  const getResponsiveTextSize = (small: string, semismall: string, medium: string, semilarge: string, large: string) => 
+    `${width <= 350 ? small : width <= 450 ? semismall : width <= 580 ? medium : width <= 768 ? semilarge : large}`;  
+
+  // Use the image from the database or fallback to the default
+  const imageUrl = SanJuanSection5Text.image || "/plazareina2.jpg";
 
   // Function to render the appropriate animation based on the source
   const renderAnimation = () => {
     // Check if it's a GIF animation
     if (lottieSource.includes("giphy.gif") || lottieSource.includes("giphy.com")) {
-      console.log("SanJuanSection5: Rendering GIF animation");
+      console.log("SanJuanSection5Dynamic: Rendering GIF animation");
       return (
         <img 
           src={lottieSource} 
@@ -62,7 +65,7 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
     }
     // Check if it's a Lottie animation or an icon
     else if (lottieSource.endsWith(".lottie")) {
-      console.log("SanJuanSection5: Rendering Lottie animation");
+      console.log("SanJuanSection5Dynamic: Rendering Lottie animation");
       return (
         <DotLottieReact 
           src={lottieSource} 
@@ -73,7 +76,7 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
       );
     } else {
       // Render the appropriate icon based on the source identifier
-      console.log("SanJuanSection5: Rendering icon or default animation");
+      console.log("SanJuanSection5Dynamic: Rendering icon or default animation");
       const iconSize = 100;
       const iconClassName = "text-blue-500";
       
@@ -144,7 +147,8 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
           >
             {isLottieEnabled && renderAnimation()}
           </motion.div>
-          <motion.h3 
+
+          <motion.div 
             whileHover={{ scale: 1.02 }}
             animate={isInView ? 
               { opacity: 1, x: 0 } : 
@@ -159,7 +163,7 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
             `}
           >
             {SanJuanSection5Text.firstH3}
-          </motion.h3>
+          </motion.div>
         </motion.div>
 
         {/* Content Section */}
@@ -175,8 +179,8 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
           <motion.img 
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.3 }}
-            src={SanJuanSection5Text.image || "/plazareina2.jpg"} 
-            alt="Viajes en Barca en San Juan desde Valencia. BOAT TRIP AND EXCURSION FROM VALENCIA" 
+            src={imageUrl}
+            alt="Tour experience image" 
             className="
               rounded-2xl max-h-[350px] object-cover 
               shadow-lg hover:shadow-xl transition-shadow duration-300
@@ -200,7 +204,7 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
               SanJuanSection5Text.fourthH3,
               SanJuanSection5Text.fifthH3
             ].map((text, index) => (
-              <motion.h3 
+              <motion.div 
                 key={index}
                 whileHover={{ scale: 1.02, x: 10 }}
                 animate={isInView ? 
@@ -215,11 +219,10 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
                   ${commonH3Styles}
                   font-medium
                   ${getResponsiveTextSize("text-[1rem]", "text-[1.2rem]", "text-[1.4rem]", "text-[1.6rem]", "text-[1.8rem]")}
-                  hover:text-blue-900
                 `}
               >
                 {text}
-              </motion.h3>
+              </motion.div>
             ))}
           </motion.div>
         </motion.div>
@@ -244,4 +247,4 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
   );
 };
 
-export default SanJuanSection5;
+export default SanJuanSection5Dynamic; 
