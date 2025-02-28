@@ -9,9 +9,18 @@ import PropTypes from "prop-types";
 type ComingSoonCardProps = {
   width: number;
   imageSrc?: string;
+  title?: string;
+  description?: string;
+  price?: number;
 };
 
-const ComingSoonCard: React.FC<ComingSoonCardProps> = ({ width, imageSrc }) => {
+const ComingSoonCard: React.FC<ComingSoonCardProps> = ({ 
+  width, 
+  imageSrc,
+  title,
+  description,
+  price = 0
+}) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
   const { state } = useLanguageContext();
@@ -29,16 +38,19 @@ const ComingSoonCard: React.FC<ComingSoonCardProps> = ({ width, imageSrc }) => {
   const texts = {
     en: {
       title: "Adventure coming soon",
-      description: "Stay tuned for updates about this exciting adventure!"
+      description: "Stay tuned for updates about this exciting adventure!",
+      perPerson: "per person"
     },
     es: {
       title: "Excursión disponible próximamente",
-      description: "¡Mantente atento para actualizaciones sobre esta emocionante excursión!"
+      description: "¡Mantente atento para actualizaciones sobre esta emocionante excursión!",
+      perPerson: "por persona"
     }
   };
   
   // Get text based on current language
   const currentText = texts[languageCode as keyof typeof texts] || texts.es;
+  const perPersonText = currentText.perPerson;
 
   return (
     <div className="w-full overflow-x-hidden">
@@ -98,7 +110,7 @@ const ComingSoonCard: React.FC<ComingSoonCardProps> = ({ width, imageSrc }) => {
                   bg-clip-text text-transparent font-bold
                   ${width <= 350 ? "text-[1.5rem]" : "text-[2rem]"}
                 `}>
-                  {currentText.title}
+                  {title || currentText.title}
                 </CardTitle>
               </motion.div>
             </CardHeader>
@@ -112,8 +124,25 @@ const ComingSoonCard: React.FC<ComingSoonCardProps> = ({ width, imageSrc }) => {
                 transition={{ duration: 0.5, delay: 0.4 }}
                 className="text-blue-800/80 text-lg"
               >
-                {currentText.description}
+                {description || currentText.description}
               </motion.p>
+              
+              {price > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? 
+                    { opacity: 1, y: 0 } : 
+                    { opacity: 0, y: 20 }
+                  }
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                  className="mt-6"
+                >
+                  <div className="flex items-center justify-center bg-blue-50 py-3 px-4 rounded-lg">
+                    <span className="text-2xl font-bold text-blue-800">{price.toFixed(2)}€</span>
+                    <span className="text-sm text-blue-600 ml-1">{perPersonText}</span>
+                  </div>
+                </motion.div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -124,7 +153,10 @@ const ComingSoonCard: React.FC<ComingSoonCardProps> = ({ width, imageSrc }) => {
 
 ComingSoonCard.propTypes = {
   width: PropTypes.number.isRequired,
-  imageSrc: PropTypes.string
+  imageSrc: PropTypes.string,
+  title: PropTypes.string,
+  description: PropTypes.string,
+  price: PropTypes.number
 };
 
 export default ComingSoonCard;
