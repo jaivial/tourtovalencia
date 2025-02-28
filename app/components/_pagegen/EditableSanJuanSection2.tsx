@@ -9,6 +9,21 @@ import { Switch } from "~/components/ui/switch";
 import { Label } from "~/components/ui/label";
 import { Input } from "@heroui/input";
 import { Button } from "~/components/ui/button";
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Check, 
+  Ship, 
+  Palmtree, 
+  Sun, 
+  Waves, 
+  Umbrella, 
+  Compass, 
+  Anchor, 
+  MapPin, 
+  Mountain, 
+  Cloud 
+} from "lucide-react";
 
 interface EditableSanJuanSection2Props {
   width: number;
@@ -16,6 +31,87 @@ interface EditableSanJuanSection2Props {
   data: sanJuansection2Type;
   onUpdate: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => void;
 }
+
+// Predefined animation options
+const animationOptions = [
+  {
+    id: "default",
+    name: "Barco",
+    src: "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie",
+    preview: "lottie",
+    icon: Ship
+  },
+  {
+    id: "beach",
+    name: "Playa",
+    src: "beach-icon",
+    preview: "icon",
+    icon: Palmtree
+  },
+  {
+    id: "sun",
+    name: "Sol",
+    src: "sun-icon",
+    preview: "icon",
+    icon: Sun
+  },
+  {
+    id: "waves",
+    name: "Olas",
+    src: "waves-icon",
+    preview: "icon",
+    icon: Waves
+  },
+  {
+    id: "palm",
+    name: "Palmera",
+    src: "palm-icon",
+    preview: "icon",
+    icon: Palmtree
+  },
+  {
+    id: "umbrella",
+    name: "Sombrilla",
+    src: "umbrella-icon",
+    preview: "icon",
+    icon: Umbrella
+  },
+  {
+    id: "compass",
+    name: "Brújula",
+    src: "compass-icon",
+    preview: "icon",
+    icon: Compass
+  },
+  {
+    id: "anchor",
+    name: "Ancla",
+    src: "anchor-icon",
+    preview: "icon",
+    icon: Anchor
+  },
+  {
+    id: "map",
+    name: "Mapa",
+    src: "map-icon",
+    preview: "icon",
+    icon: MapPin
+  },
+  {
+    id: "mountain",
+    name: "Montaña",
+    src: "mountain-icon",
+    preview: "icon",
+    icon: Mountain
+  },
+  {
+    id: "cloud",
+    name: "Nube",
+    src: "cloud-icon",
+    preview: "icon",
+    icon: Cloud
+  }
+];
 
 const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({ 
   width, 
@@ -27,8 +123,19 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
   const isInView = useInView(ref, { margin: "-100px" });
   const { handleTextUpdate, handleImageChange, handleImageRemove, handleLottieToggle, handleLottieSourceChange } = useEditableSanJuanSection2(data);
   const [showLottieControls, setShowLottieControls] = useState(false);
+  const [showAnimationCarousel, setShowAnimationCarousel] = useState(false);
   const [lottieSource, setLottieSource] = useState(data.lottieAnimation?.src || "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie");
   const [isLottieEnabled, setIsLottieEnabled] = useState(data.lottieAnimation?.enabled ?? true);
+  const [currentAnimationIndex, setCurrentAnimationIndex] = useState(0);
+
+  // Find the current animation index on mount
+  useEffect(() => {
+    const currentSrc = data.lottieAnimation?.src || "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie";
+    const index = animationOptions.findIndex(option => option.src === currentSrc);
+    if (index !== -1) {
+      setCurrentAnimationIndex(index);
+    }
+  }, [data.lottieAnimation?.src]);
 
   // Update local state when props change
   useEffect(() => {
@@ -60,6 +167,26 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
       enabled: isLottieEnabled, 
       src: lottieSource 
     });
+  };
+
+  const handlePrevAnimation = () => {
+    const newIndex = (currentAnimationIndex - 1 + animationOptions.length) % animationOptions.length;
+    setCurrentAnimationIndex(newIndex);
+  };
+
+  const handleNextAnimation = () => {
+    const newIndex = (currentAnimationIndex + 1) % animationOptions.length;
+    setCurrentAnimationIndex(newIndex);
+  };
+
+  const handleSelectAnimation = (src: string) => {
+    setLottieSource(src);
+    handleLottieSourceChange(src);
+    onUpdate('lottieAnimation', { 
+      enabled: isLottieEnabled, 
+      src: src 
+    });
+    setShowAnimationCarousel(false);
   };
 
   return (
@@ -122,15 +249,123 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
               />
             </div>
             
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setShowLottieControls(!showLottieControls)}
-              className="text-xs"
-            >
-              {showLottieControls ? "Ocultar opciones" : "Cambiar animación"}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setShowAnimationCarousel(!showAnimationCarousel);
+                  setShowLottieControls(false);
+                }}
+                className="text-xs"
+              >
+                {showAnimationCarousel ? "Ocultar galería" : "Elegir animación"}
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setShowLottieControls(!showLottieControls);
+                  setShowAnimationCarousel(false);
+                }}
+                className="text-xs"
+              >
+                {showLottieControls ? "Ocultar URL" : "URL personalizada"}
+              </Button>
+            </div>
             
+            {/* Animation Carousel */}
+            {showAnimationCarousel && (
+              <div className="w-full mt-2">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-medium text-gray-700">Galería de animaciones</h4>
+                </div>
+                
+                <div className="relative flex items-center">
+                  <button 
+                    onClick={handlePrevAnimation}
+                    className="absolute left-0 z-10 p-1 bg-white rounded-full shadow-md"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-gray-600" />
+                  </button>
+                  
+                  <div className="flex overflow-hidden mx-8">
+                    <div 
+                      className="flex transition-transform duration-300 ease-in-out"
+                      style={{ transform: `translateX(-${currentAnimationIndex * 33.33}%)` }}
+                    >
+                      {animationOptions.map((option, idx) => (
+                        <div 
+                          key={option.id}
+                          className="flex-shrink-0 w-1/3 px-2"
+                        >
+                          <div 
+                            className={`
+                              relative flex flex-col items-center p-3 border rounded-lg cursor-pointer
+                              ${lottieSource === option.src ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}
+                            `}
+                            onClick={() => handleSelectAnimation(option.src)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                handleSelectAnimation(option.src);
+                              }
+                            }}
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`Seleccionar animación ${option.name}`}
+                          >
+                            <div className="w-full h-24 flex items-center justify-center mb-2 overflow-hidden">
+                              {option.preview === "lottie" ? (
+                                <DotLottieReact 
+                                  src={option.src} 
+                                  loop 
+                                  autoplay 
+                                  className="w-20 h-20" 
+                                />
+                              ) : (
+                                <div className="text-blue-500">
+                                  {option.icon && <option.icon size={48} />}
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-xs font-medium text-gray-700">{option.name}</span>
+                            
+                            {lottieSource === option.src && (
+                              <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
+                                <Check className="w-3 h-3" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <button 
+                    onClick={handleNextAnimation}
+                    className="absolute right-0 z-10 p-1 bg-white rounded-full shadow-md"
+                  >
+                    <ChevronRight className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+                
+                <div className="flex justify-center mt-2 flex-wrap max-w-full overflow-hidden">
+                  {animationOptions.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`w-2 h-2 mx-1 mb-1 rounded-full ${
+                        index === currentAnimationIndex ? 'bg-blue-500' : 'bg-gray-300'
+                      }`}
+                      onClick={() => setCurrentAnimationIndex(index)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Custom URL Input */}
             {showLottieControls && (
               <div className="w-full flex flex-col gap-2 mt-2">
                 <Label htmlFor="lottie-source" className="text-xs font-medium text-gray-700">
@@ -167,16 +402,31 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
               transition={{ duration: 0.5, delay: 0.3 }} 
               className="w-full flex justify-center"
             >
-              <DotLottieReact 
-                key={`lottie-${lottieSource}-${isLottieEnabled}`}
-                src={lottieSource} 
-                loop 
-                autoplay 
-                className={`
-                  -translate-y-[50px] -mb-16
-                  ${width <= 450 ? "w-[300px]" : "w-[400px]"}
-                `} 
-              />
+              {lottieSource === "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie" ? (
+                <DotLottieReact 
+                  key={`lottie-${lottieSource}-${isLottieEnabled}`}
+                  src={lottieSource} 
+                  loop 
+                  autoplay 
+                  className={`
+                    -translate-y-[50px] -mb-16
+                    ${width <= 450 ? "w-[300px]" : "w-[400px]"}
+                  `} 
+                />
+              ) : (
+                <div className="text-blue-500 -translate-y-[50px] -mb-16">
+                  {lottieSource === "beach-icon" && <Palmtree size={width <= 450 ? 100 : 150} />}
+                  {lottieSource === "sun-icon" && <Sun size={width <= 450 ? 100 : 150} />}
+                  {lottieSource === "waves-icon" && <Waves size={width <= 450 ? 100 : 150} />}
+                  {lottieSource === "palm-icon" && <Palmtree size={width <= 450 ? 100 : 150} />}
+                  {lottieSource === "umbrella-icon" && <Umbrella size={width <= 450 ? 100 : 150} />}
+                  {lottieSource === "compass-icon" && <Compass size={width <= 450 ? 100 : 150} />}
+                  {lottieSource === "anchor-icon" && <Anchor size={width <= 450 ? 100 : 150} />}
+                  {lottieSource === "map-icon" && <MapPin size={width <= 450 ? 100 : 150} />}
+                  {lottieSource === "mountain-icon" && <Mountain size={width <= 450 ? 100 : 150} />}
+                  {lottieSource === "cloud-icon" && <Cloud size={width <= 450 ? 100 : 150} />}
+                </div>
+              )}
             </motion.div>
           )}
 
