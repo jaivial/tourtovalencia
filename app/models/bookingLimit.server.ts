@@ -18,7 +18,7 @@ export async function updateBookingLimit(localDate: Date, maxBookings: number, t
     console.log("updateBookingLimit: Starting with params:", {
       localDate: localDate.toISOString(),
       localDateYear: localDate.getFullYear(),
-      localDateMonth: localDate.getMonth(),
+      localDateMonth: localDate.getMonth() + 1, // Add 1 to match human-readable month (1-12)
       localDateDay: localDate.getDate(),
       maxBookings,
       tourSlug,
@@ -34,7 +34,7 @@ export async function updateBookingLimit(localDate: Date, maxBookings: number, t
     console.log("updateBookingLimit: Converted date to UTC:", {
       utcDate: utcDate.toISOString(),
       utcDateYear: utcDate.getUTCFullYear(),
-      utcDateMonth: utcDate.getUTCMonth(),
+      utcDateMonth: utcDate.getUTCMonth() + 1, // Add 1 to match human-readable month (1-12)
       utcDateDay: utcDate.getUTCDate()
     });
 

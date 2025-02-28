@@ -2,7 +2,7 @@ import { AdminBookingsUI } from "~/components/ui/AdminBookingsUI";
 import { useStates } from "~/routes/admin.dashboard.bookings.hooks";
 import type { LoaderData } from "~/types/booking";
 import { useEffect } from "react";
-import { parseLocalDate } from "~/utils/date";
+import { parseLocalDate, formatLocalDate } from "~/utils/date";
 import { useSubmit } from "@remix-run/react";
 
 interface AdminBookingsFeatureProps {
@@ -86,8 +86,12 @@ export const AdminBookingsFeature = ({
     const formData = new FormData();
     formData.append("intent", "updateLimit");
     
-    // Format the date as ISO string to preserve timezone information
-    formData.append("date", states.selectedDate.toISOString());
+    // Use formatLocalDate to ensure consistent date format
+    // This ensures we're using the same date format as in the URL and other parts of the app
+    const formattedDate = formatLocalDate(states.selectedDate);
+    console.log("AdminBookingsFeature: Formatted date for update:", formattedDate);
+    formData.append("date", formattedDate);
+    
     formData.append("maxBookings", newMax.toString());
     
     // Include the selected tour slug if available, otherwise use "default"
@@ -96,7 +100,7 @@ export const AdminBookingsFeature = ({
     
     console.log("AdminBookingsFeature: Submitting form data:", {
       intent: "updateLimit",
-      date: states.selectedDate.toISOString(),
+      date: formattedDate,
       maxBookings: newMax.toString(),
       tourSlug: effectiveTourSlug
     });

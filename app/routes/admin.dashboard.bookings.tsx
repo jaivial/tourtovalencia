@@ -296,14 +296,18 @@ export const action = async ({ request }: ActionArgs) => {
     }
 
     try {
+      // Use parseLocalDate to ensure consistent date handling
+      const parsedDate = parseLocalDate(date.toString());
+      
       console.log("Updating booking limit with:", {
-        date: new Date(date.toString()),
+        dateString: date.toString(),
+        parsedDate: parsedDate.toISOString(),
         maxBookings: parseInt(maxBookings.toString()),
         tourSlug: tourSlug ? tourSlug.toString() : "default"
       });
       
       const result = await updateBookingLimit(
-        new Date(date.toString()), 
+        parsedDate, 
         parseInt(maxBookings.toString()), 
         tourSlug ? tourSlug.toString() : "default"
       );
