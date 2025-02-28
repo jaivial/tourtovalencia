@@ -167,7 +167,7 @@ const EditableCard: React.FC<EditableCardProps> = ({
                   className="mt-6"
                 >
                   <div className="flex items-center justify-center bg-blue-50 py-3 px-4 rounded-lg">
-                    <span className="text-2xl font-bold text-blue-800">{price.toFixed(2)}€</span>
+                    <span className="text-2xl font-bold text-blue-800">{Math.round(price)}€</span>
                     <span className="text-sm text-blue-600 ml-1">{perPersonText}</span>
                   </div>
                 </motion.div>
@@ -283,7 +283,7 @@ const EditableCard: React.FC<EditableCardProps> = ({
         <div className="mt-auto">
           <div className="flex flex-col space-y-4">
             <div className="flex items-center justify-center bg-blue-50 py-3 px-4 rounded-lg">
-              <span className="text-2xl font-bold text-blue-800">{price.toFixed(2)}€</span>
+              <span className="text-2xl font-bold text-blue-800">{Math.round(price)}€</span>
               <span className="text-sm text-blue-600 ml-1">{perPersonText}</span>
             </div>
             

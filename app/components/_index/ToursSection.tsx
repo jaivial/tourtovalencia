@@ -325,7 +325,7 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
                   <div className="mt-auto">
                     <div className="flex flex-col space-y-4">
                       <div className="flex items-center justify-center bg-blue-50 py-3 px-4 rounded-lg">
-                        <span className="text-2xl font-bold text-blue-800">{tour.tourPrice.toFixed(2)}€</span>
+                        <span className="text-2xl font-bold text-blue-800">{Math.round(tour.tourPrice)}€</span>
                         <span className="text-sm text-blue-600 ml-1">{perPersonText}</span>
                       </div>
                       
