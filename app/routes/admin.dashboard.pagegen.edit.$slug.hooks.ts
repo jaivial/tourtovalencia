@@ -15,7 +15,7 @@ import type { TimelineDataType } from "~/components/_index/EditableTimelineFeatu
 // Helper function to deserialize JSON content
 const deserializeContent = (page: Record<string, unknown>): Page => {
   // Create a deep copy of the page
-  const deserializedPage = { ...page } as Record<string, unknown>;
+  const deserializedPage = { ...page } as unknown as Page;
   
   // Ensure status is valid
   if (deserializedPage.status !== 'active' && deserializedPage.status !== 'upcoming') {
@@ -25,17 +25,22 @@ const deserializeContent = (page: Record<string, unknown>): Page => {
   // Handle File objects and other complex types that might be serialized
   if (deserializedPage.content?.es) {
     const content = deserializedPage.content as Record<string, Record<string, unknown>>;
+    
     // Process each section that might contain File objects
-    if (content.es.section1?.backgroundImage) {
-      const section1 = content.es.section1 as Record<string, unknown>;
+    const esContent = content.es || {};
+    
+    // Handle section1 backgroundImage
+    const section1 = esContent.section1 as Record<string, unknown> | undefined;
+    if (section1 && typeof section1 === 'object' && section1.backgroundImage) {
       section1.backgroundImage = {
         preview: (section1.backgroundImage as Record<string, string>)?.preview || '',
         file: undefined // File objects can't be serialized, so we set to undefined
       };
     }
     
-    if (content.es.section2?.sectionImage) {
-      const section2 = content.es.section2 as Record<string, unknown>;
+    // Handle section2 sectionImage
+    const section2 = esContent.section2 as Record<string, unknown> | undefined;
+    if (section2 && typeof section2 === 'object' && section2.sectionImage) {
       section2.sectionImage = {
         preview: (section2.sectionImage as Record<string, string>)?.preview || '',
         file: undefined
@@ -43,8 +48,8 @@ const deserializeContent = (page: Record<string, unknown>): Page => {
     }
     
     // Handle section3 images array
-    if (content.es.section3?.images) {
-      const section3 = content.es.section3 as Record<string, unknown>;
+    const section3 = esContent.section3 as Record<string, unknown> | undefined;
+    if (section3 && typeof section3 === 'object' && section3.images) {
       if (Array.isArray(section3.images)) {
         section3.images = section3.images.map((img: unknown) => ({
           source: (img as Record<string, string>)?.source || '',
@@ -54,10 +59,10 @@ const deserializeContent = (page: Record<string, unknown>): Page => {
     }
   }
   
-  return deserializedPage as Page;
+  return deserializedPage;
 };
 
-export const useEditPage = (initialPage: any) => {
+export const useEditPage = (initialPage: Record<string, unknown>) => {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -66,14 +71,15 @@ export const useEditPage = (initialPage: any) => {
   // Loading overlay states
   const [isLoadingOverlayOpen, setIsLoadingOverlayOpen] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isBackgroundProcess, setIsBackgroundProcess] = useState(false);
   const [loadingSteps, setLoadingSteps] = useState<Array<{
     label: string;
     status: "pending" | "processing" | "completed";
   }>>([
     { label: "Preparando datos", status: "pending" },
-    { label: "Traduciendo contenido", status: "pending" },
-    { label: "Procesando imágenes", status: "pending" },
-    { label: "Actualizando base de datos", status: "pending" },
+    { label: "Enviando solicitud", status: "pending" },
+    { label: "Procesando en segundo plano", status: "pending" },
+    { label: "Verificando estado", status: "pending" },
     { label: "Finalizando", status: "pending" }
   ]);
   
@@ -283,13 +289,14 @@ export const useEditPage = (initialPage: any) => {
     // Show loading overlay
     setIsLoadingOverlayOpen(true);
     setLoadingProgress(0);
+    setIsBackgroundProcess(true);
     
     // Reset loading steps
     setLoadingSteps([
       { label: "Preparando datos", status: "pending" },
-      { label: "Traduciendo contenido", status: "pending" },
-      { label: "Procesando imágenes", status: "pending" },
-      { label: "Actualizando base de datos", status: "pending" },
+      { label: "Enviando solicitud", status: "pending" },
+      { label: "Procesando en segundo plano", status: "pending" },
+      { label: "Verificando estado", status: "pending" },
       { label: "Finalizando", status: "pending" }
     ]);
 
@@ -310,17 +317,12 @@ export const useEditPage = (initialPage: any) => {
         price: price
       };
       
-      // Simulate a short delay for data preparation
+      // Short delay for data preparation
       await new Promise(resolve => setTimeout(resolve, 500));
       updateLoadingStep(0, "completed");
       
-      // Step 2: Translating content (simulated)
+      // Step 2: Sending request
       updateLoadingStep(1, "processing");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      updateLoadingStep(1, "completed");
-      
-      // Step 3: Processing images (simulated)
-      updateLoadingStep(2, "processing");
       
       // Create form data
       const formData = new FormData();
@@ -329,79 +331,178 @@ export const useEditPage = (initialPage: any) => {
       formData.append("status", status);
       formData.append("id", deserializedPage._id || "");
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      updateLoadingStep(2, "completed");
+      // Set a flag to indicate this is a background processing request
+      formData.append("background", "true");
       
-      // Step 4: Updating database
-      updateLoadingStep(3, "processing");
-
-      // Create an AbortController for timeout
+      // Create an AbortController with a longer timeout (2 minutes)
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
-
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+      
       try {
-        // Send update request with timeout
+        // Send initial request to start background processing
         const response = await fetch(`/api/pages/update/${deserializedPage._id}`, {
           method: "PUT",
           body: formData,
           signal: controller.signal
         });
-
+        
         // Clear the timeout
         clearTimeout(timeoutId);
         
-        updateLoadingStep(3, "completed");
-        
-        // Step 5: Finalizing
-        updateLoadingStep(4, "processing");
-
         if (!response.ok) {
-          // Check the content type to handle HTML error pages
           const contentType = response.headers.get("content-type");
           
           if (contentType && contentType.includes("application/json")) {
-            // If it's JSON, parse it normally
             const errorData = await response.json() as { error?: string };
-            throw new Error(errorData.error || "Error al actualizar el tour");
+            throw new Error(errorData.error || "Error al iniciar la actualización del tour");
           } else {
-            // If it's not JSON (likely HTML), provide a more specific error
             const statusText = response.statusText || "";
             const status = response.status;
             throw new Error(
-              `Error del servidor (${status}): ${statusText}. Posible problema con la traducción o procesamiento de imágenes.`
+              `Error del servidor (${status}): ${statusText}. No se pudo iniciar la actualización.`
             );
           }
         }
-
-        // Parse the response as JSON
-        const result = await response.json() as { success: boolean; message?: string };
         
-        updateLoadingStep(4, "completed");
-        setLoadingProgress(100);
+        // Parse the response
+        const result = await response.json() as { 
+          success: boolean; 
+          message?: string;
+          jobId?: string;
+          status?: string;
+        };
         
-        // Short delay before closing the loading overlay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        updateLoadingStep(1, "completed");
         
-        setSaveSuccess(true);
-        console.log("Page updated successfully:", result);
-        
-        // Navigate back to the edit page list after a short delay
-        setTimeout(() => {
-          navigate("/admin/dashboard/pagegen/editpage", { replace: true });
-        }, 2000);
+        // If we have a jobId, it means the request is being processed in the background
+        if (result.jobId) {
+          // Step 3: Background processing
+          updateLoadingStep(2, "processing");
+          
+          // Update the message to inform the user
+          setSaveError("La actualización está en proceso. Por favor, espere hasta que se complete la traducción y el procesamiento de imágenes.");
+          
+          // Show a success message that indicates background processing
+          setSaveSuccess(true);
+          
+          // Set up polling to check job status
+          const pollJobStatus = async (jobId: string) => {
+            try {
+              const statusResponse = await fetch(`/api/pages/update/${deserializedPage._id}?jobId=${jobId}`);
+              
+              if (!statusResponse.ok) {
+                throw new Error("Error al verificar el estado del proceso");
+              }
+              
+              const jobStatus = await statusResponse.json() as {
+                status: 'pending' | 'processing' | 'completed' | 'failed';
+                message: string;
+                error?: string;
+              };
+              
+              console.log(`Job status: ${jobStatus.status}, message: ${jobStatus.message}`);
+              
+              // Update progress based on job status
+              switch (jobStatus.status) {
+                case 'pending':
+                  setLoadingProgress(25);
+                  break;
+                case 'processing':
+                  setLoadingProgress(50);
+                  // Update the message to show what's happening
+                  setSaveError(`Procesando: ${jobStatus.message}`);
+                  break;
+                case 'completed':
+                  // Job completed successfully
+                  updateLoadingStep(2, "completed");
+                  updateLoadingStep(3, "completed");
+                  updateLoadingStep(4, "completed");
+                  setLoadingProgress(100);
+                  setSaveError(null);
+                  setSaveSuccess(true);
+                  
+                  // Short delay before navigating
+                  setTimeout(() => {
+                    setIsLoadingOverlayOpen(false);
+                    navigate("/admin/dashboard/pagegen/editpage", { replace: true });
+                  }, 2000);
+                  
+                  return; // Exit polling
+                case 'failed':
+                  // Job failed
+                  setSaveError(`Error: ${jobStatus.error || "Error desconocido durante el procesamiento"}`);
+                  setIsSaving(false);
+                  
+                  // Keep overlay open but mark steps as failed
+                  updateLoadingStep(2, "completed");
+                  updateLoadingStep(3, "completed");
+                  updateLoadingStep(4, "completed");
+                  
+                  // Allow user to dismiss after a delay
+                  setTimeout(() => {
+                    setIsLoadingOverlayOpen(false);
+                  }, 5000);
+                  
+                  return; // Exit polling
+              }
+              
+              // Continue polling if job is still in progress
+              if (jobStatus.status === 'pending' || jobStatus.status === 'processing') {
+                setTimeout(() => pollJobStatus(jobId), 3000); // Poll every 3 seconds
+              }
+            } catch (error) {
+              console.error("Error polling job status:", error);
+              setSaveError("Error al verificar el estado del proceso. El proceso continúa en segundo plano.");
+              
+              // Continue polling despite errors
+              setTimeout(() => pollJobStatus(jobId), 5000); // Retry after 5 seconds on error
+            }
+          };
+          
+          // Start polling
+          pollJobStatus(result.jobId);
+        } else {
+          // If no jobId, it means the update was processed synchronously
+          updateLoadingStep(2, "completed");
+          updateLoadingStep(3, "completed");
+          updateLoadingStep(4, "completed");
+          setLoadingProgress(100);
+          
+          // Close the loading overlay after a short delay
+          setTimeout(() => {
+            setIsLoadingOverlayOpen(false);
+            setSaveSuccess(true);
+            
+            // Navigate back to the edit page list after a short delay
+            setTimeout(() => {
+              navigate("/admin/dashboard/pagegen/editpage", { replace: true });
+            }, 2000);
+          }, 1000);
+        }
       } catch (error) {
         // Handle AbortError (timeout)
         if (error instanceof DOMException && error.name === 'AbortError') {
-          throw new Error("La operación ha tardado demasiado tiempo. Posible problema con la traducción o procesamiento de imágenes.");
+          // Instead of showing an error, inform the user that processing continues in the background
+          setSaveError("La operación está tardando más de lo esperado. Por favor, espere hasta que se complete la traducción y el procesamiento de imágenes.");
+          setSaveSuccess(true);
+          
+          // Keep the loading overlay open
+          updateLoadingStep(1, "completed");
+          updateLoadingStep(2, "processing");
+          
+          return; // Exit early but keep overlay open
         }
         throw error; // Re-throw other errors to be caught by the outer catch
       }
     } catch (error) {
       console.error("Error saving page:", error);
-      setSaveError(error instanceof Error ? error.message : "Error al guardar el tour. Posible problema con la traducción o procesamiento de imágenes.");
-    } finally {
-      setIsSaving(false);
-      setIsLoadingOverlayOpen(false);
+      setSaveError(error instanceof Error ? error.message : "Error al guardar el tour. Por favor, inténtelo de nuevo.");
+      
+      // Keep the loading overlay open for a moment so the user can see the error
+      setTimeout(() => {
+        setIsSaving(false);
+        setIsLoadingOverlayOpen(false);
+      }, 3000);
     }
   };
 
@@ -428,6 +529,7 @@ export const useEditPage = (initialPage: any) => {
     isLoadingOverlayOpen,
     loadingProgress,
     loadingSteps,
+    isBackgroundProcess,
     setPageName,
     handleStatusChange,
     handlePriceChange,

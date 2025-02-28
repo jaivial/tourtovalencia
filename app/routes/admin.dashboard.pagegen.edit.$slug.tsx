@@ -71,7 +71,8 @@ export default function EditPageRoute() {
     handleIndexSection5Update,
     handleTimelineUpdate,
     handleSavePage,
-    handleCancel
+    handleCancel,
+    isBackgroundProcess
   } = useEditPage(page);
 
   // Adapter functions to match PageTemplate prop types
@@ -236,6 +237,7 @@ export default function EditPageRoute() {
         message="Actualizando la página..."
         progress={loadingProgress}
         steps={loadingSteps}
+        isBackgroundProcess={isBackgroundProcess}
       />
       
       <div className="max-w-7xl mx-auto">
@@ -285,7 +287,11 @@ export default function EditPageRoute() {
 
         {saveSuccess && (
           <Alert className="mb-4 mx-6 bg-green-50 text-green-800 border-green-200">
-            <AlertDescription>¡Tour actualizado con éxito! Redirigiendo...</AlertDescription>
+            <AlertDescription>
+              {saveError 
+                ? "La actualización está en proceso. Por favor, espere hasta que se complete la traducción y el procesamiento de imágenes."
+                : "¡Tour actualizado con éxito! Redirigiendo..."}
+            </AlertDescription>
           </Alert>
         )}
 

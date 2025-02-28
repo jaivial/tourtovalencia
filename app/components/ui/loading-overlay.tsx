@@ -9,6 +9,7 @@ interface LoadingOverlayProps {
     label: string;
     status: "pending" | "processing" | "completed";
   }>;
+  isBackgroundProcess?: boolean;
 }
 
 export const LoadingOverlay = ({
@@ -16,6 +17,7 @@ export const LoadingOverlay = ({
   message,
   progress = 0,
   steps = [],
+  isBackgroundProcess = false,
 }: LoadingOverlayProps) => {
   if (!isOpen) return null;
 
@@ -28,7 +30,9 @@ export const LoadingOverlay = ({
           <div className="text-center">
             <h3 className="text-lg font-semibold mb-2">{message}</h3>
             <p className="text-sm text-muted-foreground">
-              Por favor, espere mientras procesamos su solicitud
+              {isBackgroundProcess 
+                ? "Este proceso puede tardar varios minutos. Por favor, espere hasta que se complete la traducción y el procesamiento de imágenes."
+                : "Por favor, espere mientras procesamos su solicitud"}
             </p>
           </div>
           
@@ -36,7 +40,10 @@ export const LoadingOverlay = ({
           <div className="w-full">
             <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
               <div 
-                className="h-full bg-primary transition-all duration-300 ease-in-out"
+                className={cn(
+                  "h-full transition-all duration-300 ease-in-out",
+                  isBackgroundProcess ? "bg-blue-500" : "bg-primary"
+                )}
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -53,7 +60,7 @@ export const LoadingOverlay = ({
                   <div className={cn(
                     "w-4 h-4 rounded-full mr-3 flex-shrink-0",
                     step.status === "completed" ? "bg-green-500" : 
-                    step.status === "processing" ? "bg-primary" : "bg-muted"
+                    step.status === "processing" ? (isBackgroundProcess ? "bg-blue-500" : "bg-primary") : "bg-muted"
                   )}>
                     {step.status === "processing" && (
                       <div className="w-full h-full flex items-center justify-center">
@@ -64,12 +71,22 @@ export const LoadingOverlay = ({
                   <span className={cn(
                     "text-sm",
                     step.status === "completed" ? "text-green-500" : 
-                    step.status === "processing" ? "text-primary font-medium" : "text-muted-foreground"
+                    step.status === "processing" ? (isBackgroundProcess ? "text-blue-500 font-medium" : "text-primary font-medium") : "text-muted-foreground"
                   )}>
                     {step.label}
                   </span>
                 </div>
               ))}
+            </div>
+          )}
+          
+          {/* Background processing note */}
+          {isBackgroundProcess && (
+            <div className="w-full mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm text-blue-700">
+                <strong>Nota:</strong> La actualización de tours implica traducción y procesamiento de imágenes, lo que puede tardar varios minutos. 
+                Por favor, no cierre esta ventana hasta que el proceso se complete.
+              </p>
             </div>
           )}
         </div>
