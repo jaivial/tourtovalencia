@@ -1,6 +1,6 @@
 import { json } from "@remix-run/server-runtime";
 import type { ActionFunctionArgs } from "@remix-run/server-runtime";
-import { useNavigation, Outlet } from "@remix-run/react";
+import { useNavigation, Outlet, useLocation } from "@remix-run/react";
 import type { MetaFunction } from "@remix-run/react";
 import { BookingLoading } from "~/components/_book/BookingLoading";
 import type { Booking } from "~/types/booking";
@@ -9,6 +9,7 @@ import { createBooking } from "~/services/booking.server";
 import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
 import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
+import { useEffect, useState, useRef } from "react";
 
 // PayPal order type
 interface PayPalOrder {
@@ -225,6 +226,58 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function Book() {
   const navigation = useNavigation();
+  const location = useLocation();
+  const [isNavigating, setIsNavigating] = useState(false);
+  const previousPathRef = useRef(location.pathname);
+  
+  // Handle navigation state changes
+  useEffect(() => {
+    if (navigation.state === "loading") {
+      setIsNavigating(true);
+    } else if (navigation.state === "idle" && isNavigating) {
+      // Reset the state after navigation completes
+      setIsNavigating(false);
+    }
+  }, [navigation.state, isNavigating]);
+  
+  // Track location changes to detect navigation away from book routes
+  useEffect(() => {
+    const currentPath = location.pathname;
+    
+    // If we're navigating away from a book route to a non-book route
+    if (previousPathRef.current.startsWith('/book') && !currentPath.startsWith('/book')) {
+      console.log('Navigating away from book route:', previousPathRef.current, 'to', currentPath);
+      // Force a reload to ensure proper navigation
+      window.location.href = currentPath;
+    }
+    
+    previousPathRef.current = currentPath;
+  }, [location.pathname]);
+
+  // Add a global click handler to force reload when clicking on links outside of book routes
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      // Check if the clicked element is a link
+      const target = e.target as HTMLElement;
+      const link = target.closest('a');
+      
+      if (link) {
+        const href = link.getAttribute('href');
+        
+        // If the link is to a non-book route
+        if (href && !href.startsWith('/book') && !href.startsWith('#')) {
+          e.preventDefault();
+          window.location.href = href;
+        }
+      }
+    };
+    
+    document.addEventListener('click', handleClick);
+    
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, []);
 
   // Handle loading state
   if (navigation.state === "loading") {
