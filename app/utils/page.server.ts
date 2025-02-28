@@ -93,8 +93,31 @@ export async function processContent(content: Record<string, unknown>, translate
       // Skip null or undefined values
       if (value == null) continue;
 
+      // Special handling for lottieAnimation object
+      if (key === 'lottieAnimation' && typeof value === 'object' && value !== null) {
+        const lottieObj = value as Record<string, unknown>;
+        const processedLottie: Record<string, unknown> = {};
+        
+        for (const [lottieKey, lottieValue] of Object.entries(lottieObj)) {
+          if (lottieKey === 'src' && typeof lottieValue === 'string') {
+            // Preserve the src value without translation
+            processedLottie[lottieKey] = lottieValue;
+          } else if (typeof lottieValue === 'string') {
+            // Process string values normally
+            processedLottie[lottieKey] = translate ? await translateText(lottieValue) : lottieValue;
+          } else if (typeof lottieValue === 'object' && lottieValue !== null) {
+            // Process nested objects
+            processedLottie[lottieKey] = await processContent(lottieValue as Record<string, unknown>, translate);
+          } else {
+            // Keep other values as is
+            processedLottie[lottieKey] = lottieValue;
+          }
+        }
+        
+        processed[key] = processedLottie;
+      }
       // Handle base64 images
-      if (typeof value === "string") {
+      else if (typeof value === "string") {
         if (value.startsWith("data:image")) {
           try {
             const size = Buffer.from(value.split(",")[1], "base64").length;
@@ -229,7 +252,33 @@ export async function translateContent(content: Record<string, unknown>): Promis
           })
         );
       } else if (typeof value === "object") {
-        translated[key] = await translateContent(value as Record<string, unknown>);
+        // Special handling for lottieAnimation object
+        if (key === 'lottieAnimation' && typeof value === 'object' && value !== null) {
+          const lottieObj = value as Record<string, unknown>;
+          // Create a new object with translated properties except for 'src'
+          const translatedLottie: Record<string, unknown> = {};
+          
+          for (const [lottieKey, lottieValue] of Object.entries(lottieObj)) {
+            if (lottieKey === 'src' && typeof lottieValue === 'string') {
+              // Preserve the src value without translation
+              translatedLottie[lottieKey] = lottieValue;
+            } else if (typeof lottieValue === 'string') {
+              // Translate string values
+              translatedLottie[lottieKey] = await translateText(lottieValue);
+            } else if (typeof lottieValue === 'object' && lottieValue !== null) {
+              // Translate nested objects
+              translatedLottie[lottieKey] = await translateContent(lottieValue as Record<string, unknown>);
+            } else {
+              // Keep other values as is
+              translatedLottie[lottieKey] = lottieValue;
+            }
+          }
+          
+          translated[key] = translatedLottie;
+        } else {
+          // Normal object translation
+          translated[key] = await translateContent(value as Record<string, unknown>);
+        }
       } else if (typeof value === "string") {
         translated[key] = isImageRelatedString(value) || value.startsWith("data:image") ? value : await translateText(value);
       } else {
@@ -244,14 +293,23 @@ export async function translateContent(content: Record<string, unknown>): Promis
   return translated;
 }
 
-// Helper function to check if a string is image-related
+// Helper function to check if a string is image-related or animation-related
 function isImageRelatedString(str: string): boolean {
   // Check for common image extensions
   const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i;
   // Check for image-related keywords
   const imageKeywords = /(image|photo|picture|preview|thumbnail|icon)/i;
+  // Check for animation-related keywords and extensions
+  const animationKeywords = /(animation|lottie|animate|dotlottie|motion)/i;
+  const animationExtensions = /\.(json|lottie)$/i;
+  // Check for URLs to animation hosting services
+  const animationUrls = /(lottie\.host|lottiefiles\.com)/i;
 
-  return imageExtensions.test(str) || imageKeywords.test(str);
+  return imageExtensions.test(str) || 
+         imageKeywords.test(str) || 
+         animationKeywords.test(str) || 
+         animationExtensions.test(str) || 
+         animationUrls.test(str);
 }
 
 export async function createPage(name: string, content: Record<string, unknown>, status: "active" | "upcoming", template: string = ""): Promise<Page> {

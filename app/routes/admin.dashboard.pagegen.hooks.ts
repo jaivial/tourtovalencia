@@ -31,6 +31,10 @@ const DEFAULT_SECTION2_DATA: sanJuansection2Type = {
   thirdH3: "",
   sectionImage: {
     preview: '/olgaphoto3.jpeg'
+  },
+  lottieAnimation: {
+    enabled: false,
+    src: "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie"
   }
 };
 
@@ -127,7 +131,7 @@ export const usePageGenerator = () => {
   };
 
   // Section 2 handlers
-  const handleSection2Update = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
+  const handleSection2Update = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => {
     setSection2Data(prev => ({
       ...prev,
       [field]: value

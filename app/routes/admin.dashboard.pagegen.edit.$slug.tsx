@@ -111,12 +111,30 @@ export default function EditPageRoute() {
     }
   };
 
-  const adaptSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
+  const adaptSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => {
     console.log(`EditPage: Processing section2 update for field ${String(field)}:`, 
-      typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+      typeof value === 'string' 
+        ? value 
+        : 'file' in value 
+          ? `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`
+          : `Lottie: enabled=${(value as { enabled: boolean; src: string }).enabled}, src=${(value as { enabled: boolean; src: string }).src}`);
+    
+    // Handle lottieAnimation object
+    if (field === 'lottieAnimation' && typeof value === 'object' && 'enabled' in value) {
+      const lottieValue = value as { enabled: boolean; src: string };
+      const updatedData = { 
+        ...section2Data, 
+        lottieAnimation: {
+          enabled: lottieValue.enabled,
+          src: lottieValue.src
+        }
+      };
+      handleSection2Update(updatedData);
+      return;
+    }
     
     // If the value is an object with a file, convert it to base64 before updating
-    if (typeof value !== 'string' && value.file) {
+    if (typeof value !== 'string' && 'file' in value && value.file) {
       try {
         const base64 = await convertFileToBase64(value.file);
         console.log(`EditPage: Converted section2 ${String(field)} image to base64:`, base64.substring(0, 30) + '...');
