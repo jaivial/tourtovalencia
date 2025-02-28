@@ -105,6 +105,10 @@ export type sanJuansection4Type = {
   firstH3: string;
   secondH3: string;
   thirdH3: string;
+  lottieAnimation?: {
+    enabled: boolean;
+    src: string;
+  };
 };
 
 export type sanJuanSection5Type = {
@@ -114,6 +118,10 @@ export type sanJuanSection5Type = {
   fourthH3: string;
   fifthH3: string;
   image?: string; // Add image field to store the image as base64 or URL
+  lottieAnimation?: {
+    enabled: boolean;
+    src: string;
+  };
 };
 
 export type SanJuanSection6listType = {
@@ -531,6 +539,7 @@ export const languages: Record<string, LanguageData> = {
         fourthH3: "Guided tour: 3h 30m (approx).",
         fifthH3: "Return to Valencia by private transport.",
         image: undefined, // Add image field to store the image as base64 or URL
+        lottieAnimation: undefined,
       },
       sanJuanSection6: {
         cardTitle: "GUIDED TOUR",
@@ -926,6 +935,7 @@ export const languages: Record<string, LanguageData> = {
         fourthH3: "Tour guiado: 3h 30m (aprox).",
         fifthH3: "Regreso a Valencia por transporte privado.",
         image: undefined, // Add image field to store the image as base64 or URL
+        lottieAnimation: undefined,
       },
       sanJuanSection6: {
         cardTitle: "TOUR GUIADO",

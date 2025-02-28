@@ -505,7 +505,7 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
                   src={lottieSource} 
                   alt="Animation" 
                   className={`
-                    -translate-y-[50px] -mb-16
+                    -translate-y-[0px] mb-0
                     ${width <= 450 ? "w-[200px]" : "w-[250px]"}
                     object-contain
                   `} 

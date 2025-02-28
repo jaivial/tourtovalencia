@@ -4,6 +4,17 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { sanJuanSection5Type } from "~/data/data";
+import { 
+  Palmtree, 
+  Sun, 
+  Waves, 
+  Umbrella, 
+  Compass, 
+  Anchor, 
+  MapPin, 
+  Mountain, 
+  Cloud 
+} from "lucide-react";
 
 // Child Props type
 type ChildProps = {
@@ -14,6 +25,8 @@ type ChildProps = {
 const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
+  const isLottieEnabled = SanJuanSection5Text.lottieAnimation?.enabled ?? true;
+  const lottieSource = SanJuanSection5Text.lottieAnimation?.src || "https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie";
 
   // Common text styles for h3 elements
   const commonH3Styles = `
@@ -24,6 +37,68 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
 
   const getResponsiveTextSize = (small: string, semismall: string, medium: string,  semilarge: string, large: string) => 
     `${width <= 350 ? small : width <= 450 ? semismall :  width <= 580 ? medium : width <= 768 ? semilarge : large}`;  
+
+  // Function to render the appropriate animation based on the source
+  const renderAnimation = () => {
+    // Check if it's a GIF animation
+    if (lottieSource.includes("giphy.gif")) {
+      return (
+        <img 
+          src={lottieSource} 
+          alt="Animation" 
+          className="h-[170px] w-auto object-contain" 
+        />
+      );
+    }
+    // Check if it's a Lottie animation or an icon
+    else if (lottieSource === "https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie") {
+      return (
+        <DotLottieReact 
+          src={lottieSource} 
+          loop 
+          autoplay 
+          className="h-[170px] w-auto" 
+        />
+      );
+    } else {
+      // Render the appropriate icon based on the source identifier
+      const iconSize = 100;
+      const iconClassName = "text-blue-500";
+      
+      switch (lottieSource) {
+        case "beach-icon":
+          return <Palmtree size={iconSize} className={iconClassName} />;
+        case "sun-icon":
+          return <Sun size={iconSize} className={iconClassName} />;
+        case "waves-icon":
+          return <Waves size={iconSize} className={iconClassName} />;
+        case "palm-icon":
+          return <Palmtree size={iconSize} className={iconClassName} />;
+        case "umbrella-icon":
+          return <Umbrella size={iconSize} className={iconClassName} />;
+        case "compass-icon":
+          return <Compass size={iconSize} className={iconClassName} />;
+        case "anchor-icon":
+          return <Anchor size={iconSize} className={iconClassName} />;
+        case "map-icon":
+          return <MapPin size={iconSize} className={iconClassName} />;
+        case "mountain-icon":
+          return <Mountain size={iconSize} className={iconClassName} />;
+        case "cloud-icon":
+          return <Cloud size={iconSize} className={iconClassName} />;
+        default:
+          // If it's not a recognized icon identifier, try to render it as a Lottie animation
+          return (
+            <DotLottieReact 
+              src={lottieSource} 
+              loop 
+              autoplay 
+              className="h-[170px] w-auto" 
+            />
+          );
+      }
+    }
+  };
 
   return (
     <div className="w-full overflow-x-hidden">
@@ -55,12 +130,7 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
             whileHover={{ scale: 1.05, rotate: 5 }}
             transition={{ duration: 0.3 }}
           >
-            <DotLottieReact 
-              src="https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie" 
-              loop 
-              autoplay 
-              className="h-[170px] w-auto" 
-            />
+            {isLottieEnabled && renderAnimation()}
           </motion.div>
           <motion.h3 
             whileHover={{ scale: 1.02 }}
@@ -93,7 +163,7 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
           <motion.img 
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.3 }}
-            src="/plazareina2.jpg" 
+            src={SanJuanSection5Text.image || "/plazareina2.jpg"} 
             alt="Viajes en Barca en San Juan desde Valencia. BOAT TRIP AND EXCURSION FROM VALENCIA" 
             className="
               rounded-2xl max-h-[350px] object-cover 

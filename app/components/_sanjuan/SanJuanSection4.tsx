@@ -4,6 +4,17 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { sanJuansection4Type } from "~/data/data";
+import { 
+  Palmtree, 
+  Sun, 
+  Waves, 
+  Umbrella, 
+  Compass, 
+  Anchor, 
+  MapPin, 
+  Mountain, 
+  Cloud 
+} from "lucide-react";
 
 // Child Props type
 type ChildProps = {
@@ -14,6 +25,8 @@ type ChildProps = {
 const SanJuanSection4: React.FC<ChildProps> = ({ width, SanJuanSection4Text }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
+  const isLottieEnabled = SanJuanSection4Text.lottieAnimation?.enabled ?? true;
+  const lottieSource = SanJuanSection4Text.lottieAnimation?.src || "https://lottie.host/f8570958-3acf-4c42-8ae6-2ad50fe220c7/N8q8bzQLK3.lottie";
 
   const commonH3Styles = `
     transition-all duration-500 ease-in-out 
@@ -23,6 +36,71 @@ const SanJuanSection4: React.FC<ChildProps> = ({ width, SanJuanSection4Text }) =
 
   const getResponsiveTextSize = (small: string, semismall: string, medium: string, semilarge: string, large: string) => 
     `${width <= 350 ? small : width <= 450 ? semismall : width <= 580 ? medium : width <= 768 ? semilarge : large}`;
+
+  // Function to render the appropriate animation based on the source
+  const renderAnimation = () => {
+    // Check if it's a GIF animation
+    if (lottieSource.includes("giphy.gif")) {
+      return (
+        <img 
+          src={lottieSource} 
+          alt="Animation" 
+          className={`
+            ${width <= 500 ? "w-[300px]" : "w-[400px]"}
+            object-contain
+          `} 
+        />
+      );
+    }
+    // Check if it's a Lottie animation or an icon
+    else if (lottieSource === "https://lottie.host/f8570958-3acf-4c42-8ae6-2ad50fe220c7/N8q8bzQLK3.lottie") {
+      return (
+        <DotLottieReact 
+          src={lottieSource} 
+          loop 
+          autoplay 
+          className={`${width <= 500 ? "w-[400px]" : "w-[600px]"}`} 
+        />
+      );
+    } else {
+      // Render the appropriate icon based on the source identifier
+      const iconSize = width <= 450 ? 100 : 150;
+      const iconClassName = "text-blue-500";
+      
+      switch (lottieSource) {
+        case "beach-icon":
+          return <Palmtree size={iconSize} className={iconClassName} />;
+        case "sun-icon":
+          return <Sun size={iconSize} className={iconClassName} />;
+        case "waves-icon":
+          return <Waves size={iconSize} className={iconClassName} />;
+        case "palm-icon":
+          return <Palmtree size={iconSize} className={iconClassName} />;
+        case "umbrella-icon":
+          return <Umbrella size={iconSize} className={iconClassName} />;
+        case "compass-icon":
+          return <Compass size={iconSize} className={iconClassName} />;
+        case "anchor-icon":
+          return <Anchor size={iconSize} className={iconClassName} />;
+        case "map-icon":
+          return <MapPin size={iconSize} className={iconClassName} />;
+        case "mountain-icon":
+          return <Mountain size={iconSize} className={iconClassName} />;
+        case "cloud-icon":
+          return <Cloud size={iconSize} className={iconClassName} />;
+        default:
+          // If it's not a recognized icon identifier, try to render it as a Lottie animation
+          return (
+            <DotLottieReact 
+              src={lottieSource} 
+              loop 
+              autoplay 
+              className={`${width <= 500 ? "w-[400px]" : "w-[600px]"}`} 
+            />
+          );
+      }
+    }
+  };
 
   return (
     <motion.div 
@@ -50,12 +128,7 @@ const SanJuanSection4: React.FC<ChildProps> = ({ width, SanJuanSection4Text }) =
           p-6 gap-8 -translate-y-[50px]
         `}
       >
-        <DotLottieReact 
-          src="https://lottie.host/f8570958-3acf-4c42-8ae6-2ad50fe220c7/N8q8bzQLK3.lottie" 
-          loop 
-          autoplay 
-          className={`${width <= 500 ? "w-[400px]" : "w-[600px]"}`} 
-        />
+        {isLottieEnabled && renderAnimation()}
 
         <motion.h3 
           whileHover={{ scale: 1.02 }}
