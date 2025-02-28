@@ -168,15 +168,16 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.3 }}
             className="
-              rounded-2xl max-h-[350px] 
+              rounded-2xl overflow-hidden
               shadow-lg hover:shadow-xl transition-shadow duration-300
+              w-full max-w-[750px] h-[500px]
             "
           >
             <ImageUpload
               imageUrl={sectionData.image || "/plazareina2.jpg"}
               onImageChange={handleImageChange}
               onImageRemove={handleImageRemove}
-              className="rounded-2xl max-h-[350px] object-cover w-full h-full"
+              className="w-full h-full"
             />
           </motion.div>
           

@@ -54,7 +54,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       <img 
         src={imageUrl || '/plazareina2.jpg'}
         alt="Section content"
-        className="w-full h-full object-cover rounded-2xl transition-transform duration-700 max-h-[350px]"
+        className="w-full h-full object-cover rounded-2xl transition-transform duration-700"
       />
       
       {/* Overlay with buttons */}
