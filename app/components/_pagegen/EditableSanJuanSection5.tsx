@@ -201,6 +201,9 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
   onImageUpdate,
   onImageRemove
 }) => {
+  // Add console log to debug the data
+  console.log("EditableSanJuanSection5 data:", data);
+  
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
   const { sectionData, handleTextUpdate } = useEditableSanJuanSection5(data);
@@ -229,45 +232,6 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
 
   const getResponsiveTextSize = (small: string, semismall: string, medium: string, semilarge: string, large: string) => 
     `${width <= 350 ? small : width <= 450 ? semismall : width <= 580 ? medium : width <= 768 ? semilarge : large}`;  
-
-  const handleImageChange = async (file: File) => {
-    if (onImageUpdate) {
-      try {
-        console.log("EditableSanJuanSection5: Processing image update:", file.name, file.type, file.size);
-        
-        // Create a local preview immediately
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const base64 = e.target?.result as string;
-          console.log("EditableSanJuanSection5: Local preview created:", base64.substring(0, 30) + '...');
-          
-          // Update local state for immediate preview
-          handleTextUpdate("image", base64);
-        };
-        reader.readAsDataURL(file);
-        
-        // Also call the parent handler for saving to database
-        await onImageUpdate(file);
-      } catch (error) {
-        console.error("EditableSanJuanSection5: Error updating image:", error);
-      }
-    }
-  };
-
-  const handleImageRemove = async () => {
-    if (onImageRemove) {
-      try {
-        console.log("EditableSanJuanSection5: Removing image");
-        await onImageRemove();
-      } catch (error) {
-        console.error("EditableSanJuanSection5: Error removing image:", error);
-      }
-    } else {
-      // If no remove handler is provided, just update the local state
-      handleTextUpdate("image", "/plazareina2.jpg");
-      onUpdate("image", "/plazareina2.jpg");
-    }
-  };
 
   const handleLottieToggleChange = (checked: boolean) => {
     setIsLottieEnabled(checked);
@@ -381,6 +345,45 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
       );
     }
     return null;
+  };
+
+  const handleImageChange = async (file: File) => {
+    if (onImageUpdate) {
+      try {
+        console.log("EditableSanJuanSection5: Processing image update:", file.name, file.type, file.size);
+        
+        // Create a local preview immediately
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64 = e.target?.result as string;
+          console.log("EditableSanJuanSection5: Local preview created:", base64.substring(0, 30) + '...');
+          
+          // Update local state for immediate preview
+          handleTextUpdate("image", base64);
+        };
+        reader.readAsDataURL(file);
+        
+        // Also call the parent handler for saving to database
+        await onImageUpdate(file);
+      } catch (error) {
+        console.error("EditableSanJuanSection5: Error updating image:", error);
+      }
+    }
+  };
+
+  const handleImageRemove = async () => {
+    if (onImageRemove) {
+      try {
+        console.log("EditableSanJuanSection5: Removing image");
+        await onImageRemove();
+      } catch (error) {
+        console.error("EditableSanJuanSection5: Error removing image:", error);
+      }
+    } else {
+      // If no remove handler is provided, just update the local state
+      handleTextUpdate("image", "/plazareina2.jpg");
+      onUpdate("image", "/plazareina2.jpg");
+    }
   };
 
   return (

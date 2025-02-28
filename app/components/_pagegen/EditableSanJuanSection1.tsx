@@ -1,10 +1,9 @@
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion } from "framer-motion";
-import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 import { sanJuanSection1Type } from "~/data/data";
 import ImageUpload from "./ImageUpload";
 import EditableText from "./EditableText";
+import { useEditableSanJuanSection1 } from "./EditableSanJuanSection1.hooks";
 
 type EditableSanJuanSection1Props = {
   width: number;
@@ -17,13 +16,27 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
   data,
   onUpdate
 }) => {
-  const handleImageChange = (file: File) => {
+  // Add console log to debug the data
+  console.log("EditableSanJuanSection1 data:", data);
+  
+  // Use the hook to manage state
+  const { sectionData, handleTextUpdate, handleImageChange, handleImageRemove } = useEditableSanJuanSection1(data);
+
+  // Wrapper functions to call both the hook's functions and the parent's onUpdate
+  const handleLocalTextUpdate = (field: keyof sanJuanSection1Type) => (value: string) => {
+    handleTextUpdate(field, value);
+    onUpdate(field, value);
+  };
+
+  const handleLocalImageChange = (file: File) => {
+    handleImageChange(file);
     const preview = URL.createObjectURL(file);
     onUpdate('backgroundImage', { file, preview });
   };
 
-  const handleTextUpdate = (field: keyof sanJuanSection1Type) => (value: string) => {
-    onUpdate(field, value);
+  const handleLocalImageRemove = () => {
+    handleImageRemove();
+    onUpdate('backgroundImage', { preview: "" });
   };
 
   return (
@@ -38,9 +51,9 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
         {/* Background image with overlay */}
         <div className="w-full h-[600px] relative bg-white rounded-2xl overflow-hidden mb-0 px-0">
           <ImageUpload
-            imageUrl={data.backgroundImage?.preview || ""}
-            onImageChange={handleImageChange}
-            onImageRemove={() => onUpdate('backgroundImage', { preview: "" })}
+            imageUrl={sectionData.backgroundImage?.preview || ""}
+            onImageChange={handleLocalImageChange}
+            onImageRemove={handleLocalImageRemove}
             className="w-full h-full object-cover"
           />
         </div>
@@ -61,8 +74,8 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
             className="w-full"
           >
             <EditableText
-              text={data.firstH3}
-              onUpdate={handleTextUpdate('firstH3')}
+              value={sectionData.firstH3}
+              onUpdate={handleLocalTextUpdate('firstH3')}
               placeholder="Título principal"
               className={`max-w-3xl font-medium ${
                 width <= 350 ? "text-xl" : 
@@ -87,14 +100,14 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
             ].map((fields, index) => (
               <div key={index} className="bg-blue-50/50 rounded-xl p-6 transform hover:scale-105 transition-transform">
                 <EditableText
-                  text={data[fields.titleField as keyof sanJuanSection1Type] as string}
-                  onUpdate={handleTextUpdate(fields.titleField as keyof sanJuanSection1Type)}
+                  value={sectionData[fields.titleField as keyof sanJuanSection1Type] as string}
+                  onUpdate={handleLocalTextUpdate(fields.titleField as keyof sanJuanSection1Type)}
                   placeholder="Título de característica"
                   className="text-2xl font-bold text-blue-900 mb-2"
                 />
                 <EditableText
-                  text={data[fields.descField as keyof sanJuanSection1Type] as string}
-                  onUpdate={handleTextUpdate(fields.descField as keyof sanJuanSection1Type)}
+                  value={sectionData[fields.descField as keyof sanJuanSection1Type] as string}
+                  onUpdate={handleLocalTextUpdate(fields.descField as keyof sanJuanSection1Type)}
                   placeholder="Descripción de característica"
                   className="text-blue-800"
                   multiline={true}
@@ -112,8 +125,8 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
           >
             <div className="group relative">
               <EditableText
-                text={data.button}
-                onUpdate={handleTextUpdate('button')}
+                value={sectionData.button}
+                onUpdate={handleLocalTextUpdate('button')}
                 placeholder="Texto del botón"
                 className="bg-blue-900 hover:bg-blue-800 text-white px-8 py-6 text-xl rounded-full transition-all duration-300 hover:shadow-lg cursor-pointer inline-block min-w-[200px]"
               />
