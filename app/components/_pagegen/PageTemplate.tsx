@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useWindowSize } from "@uidotdev/usehooks";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
@@ -10,7 +11,6 @@ import EditableSanJuanSection4 from "./EditableSanJuanSection4";
 import EditableSanJuanSection5 from "./EditableSanJuanSection5";
 import EditableSanJuanSection6 from "./EditableSanJuanSection6";
 import { EditableTimelineFeature, TimelineDataType } from "~/components/_index/EditableTimelineFeature";
-import { useLanguageContext } from "~/providers/LanguageContext";
 import { IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 import { PublishModal } from "./PublishModal";
 import { usePublishModal, usePageCreation } from "./PageTemplate.hooks";
@@ -50,7 +50,6 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
   const { isModalOpen, closeModal } = usePublishModal();
   const { handleCreatePage, isCreating, error } = usePageCreation();
   const width = size.width ?? 0;
-  const { state } = useLanguageContext();
   const [loadingMessage, setLoadingMessage] = useState("Creando página...");
 
   // Add wrapper functions to handle async updates

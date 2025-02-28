@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
@@ -6,6 +7,7 @@ import EditableText from "./EditableText";
 import { useEditableSanJuanSection5 } from "./EditableSanJuanSection5.hooks";
 import ImageUpload from "./ImageUpload";
 
+// eslint-disable-next-line react/prop-types
 interface EditableSanJuanSection5Props {
   width: number;
   data?: sanJuanSection5Type;
@@ -23,6 +25,7 @@ const DEFAULT_SECTION5_DATA: sanJuanSection5Type = {
   image: "/plazareina2.jpg" // Default fallback image
 };
 
+// eslint-disable-next-line react/prop-types
 const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({ 
   width, 
   data = DEFAULT_SECTION5_DATA,
