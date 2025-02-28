@@ -45,8 +45,22 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, SanJuanSection2Text }) =
 
   // Function to render the appropriate animation based on the source
   const renderAnimation = () => {
+    // Check if it's a GIF animation
+    if (lottieSource.includes("giphy.gif")) {
+      return (
+        <img 
+          src={lottieSource} 
+          alt="Animation" 
+          className={`
+            translate-y-[50px] mb-4
+            ${width <= 450 ? "w-[200px]" : "w-[250px]"}
+            object-contain
+          `} 
+        />
+      );
+    }
     // Check if it's a Lottie animation or an icon
-    if (lottieSource === "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie") {
+    else if (lottieSource === "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie") {
       return (
         <DotLottieReact 
           src={lottieSource} 
