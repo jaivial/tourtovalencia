@@ -290,24 +290,26 @@ export async function action({ request }: { request: Request }) {
     const intent = formData.get("intent");
 
     if (intent === "create-checkout-session") {
-      const bookingData = JSON.parse(formData.get("booking") as string);
+      // Comentar la variable bookingData ya que no se usa
+      // const bookingData = JSON.parse(formData.get("booking") as string);
 
+      // Comentar todo el código relacionado con la construcción de la URL base
       // Get the host and construct the base URL
-      const host = request.headers.get("host");
-      if (!host) {
-        throw new Error("No host header found");
-      }
+      // const host = request.headers.get("host");
+      // if (!host) {
+      //   throw new Error("No host header found");
+      // }
 
       // Determine the protocol
-      let protocol: string;
-      if (process.env.NODE_ENV === "production") {
-        protocol = "https";
-      } else {
-        protocol = "http";
-      }
+      // let protocol: string;
+      // if (process.env.NODE_ENV === "production") {
+      //   protocol = "https";
+      // } else {
+      //   protocol = "http";
+      // }
 
       // Construct the base URL
-      const baseUrl = `${protocol}://${host}`;
+      // const baseUrl = `${protocol}://${host}`;
 
       // Comentar o eliminar la llamada a createCheckoutSession de Stripe
       // const { url, sessionId } = await createCheckoutSession(bookingData, baseUrl);
