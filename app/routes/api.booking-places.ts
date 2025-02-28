@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import { getDb } from "../utils/db.server";
+import { parseLocalDate, localDateToUTCMidnight } from "../utils/date";
 
 // Define types for booking documents
 interface BookingDocument {
@@ -37,12 +38,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   console.log("API.BOOKING-PLACES: Received request", request.url);
   try {
     const url = new URL(request.url);
-    const date = url.searchParams.get("date");
+    const dateParam = url.searchParams.get("date");
     const tourSlug = url.searchParams.get("tourSlug");
 
-    console.log("API.BOOKING-PLACES: Parameters", { date, tourSlug });
+    console.log("API.BOOKING-PLACES: Parameters", { dateParam, tourSlug });
 
-    if (!date || !tourSlug) {
+    if (!dateParam || !tourSlug) {
       console.log("API.BOOKING-PLACES: Missing parameters");
       return json(
         { error: "Date and tourSlug are required parameters" },
@@ -50,10 +51,23 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       );
     }
 
-    // Convert date string to Date object for MongoDB query
-    const queryDate = new Date(date);
-    // Set time to midnight UTC to match the format we store in the database
-    queryDate.setUTCHours(0, 0, 0, 0);
+    // Parse the date string to a local date object
+    const localDate = parseLocalDate(dateParam);
+    console.log("API.BOOKING-PLACES: Parsed local date:", {
+      iso: localDate.toISOString(),
+      year: localDate.getFullYear(),
+      month: localDate.getMonth(),
+      day: localDate.getDate()
+    });
+    
+    // Convert to UTC midnight for database queries
+    const utcDate = localDateToUTCMidnight(localDate);
+    console.log("API.BOOKING-PLACES: Converted to UTC date:", {
+      iso: utcDate.toISOString(),
+      year: utcDate.getUTCFullYear(),
+      month: utcDate.getUTCMonth(),
+      day: utcDate.getUTCDate()
+    });
     
     // Get database connection
     const db = await getDb();
@@ -64,13 +78,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
     // Find all confirmed bookings for the specified tour and date
     const bookings = await bookingsCollection.find({
-      date: queryDate,
+      date: utcDate,
       status: "confirmed",
       $or: [
         { tourSlug },
         { tourType: tourSlug }
       ]
     }).toArray();
+
+    console.log(`API.BOOKING-PLACES: Found ${bookings.length} bookings for date ${utcDate.toISOString()} and tour ${tourSlug}`);
 
     // Calculate total party size from all bookings
     let totalPartySize = 0;
@@ -83,14 +99,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     // Check if there's a specific booking limit for this tour and date
     const specificLimit = await bookingLimitsCollection.findOne({
       tourSlug,
-      date: queryDate
+      date: utcDate
     });
+
+    console.log(`API.BOOKING-PLACES: Specific limit for ${tourSlug}:`, specificLimit);
 
     // Check if there's a default booking limit for this date
     const defaultLimit = await bookingLimitsCollection.findOne({
       tourSlug: "default",
-      date: queryDate
+      date: utcDate
     });
+
+    console.log(`API.BOOKING-PLACES: Default limit:`, defaultLimit);
 
     // Determine the max bookings allowed (specific, default, or fallback to 10)
     const maxBookings = specificLimit?.maxBookings ?? defaultLimit?.maxBookings ?? 10;
@@ -98,10 +118,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     // Calculate available places
     const availablePlaces = Math.max(0, maxBookings - totalPartySize);
 
-    console.log(`API: Date ${date}, Tour ${tourSlug}: Available places: ${availablePlaces}/${maxBookings} (Used: ${totalPartySize})`);
+    console.log(`API.BOOKING-PLACES: Date ${dateParam}, Tour ${tourSlug}: Available places: ${availablePlaces}/${maxBookings} (Used: ${totalPartySize})`);
 
     return json({
-      date,
+      date: dateParam,
       tourSlug,
       maxBookings,
       totalBookings: bookings.length,

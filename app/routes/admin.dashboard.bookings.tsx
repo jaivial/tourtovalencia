@@ -5,7 +5,7 @@ import type { LoaderArgs, ActionArgs } from "@remix-run/node";
 import { useLoaderData, useSubmit } from "@remix-run/react";
 import { AdminBookingsFeature } from "~/components/features/AdminBookingsFeature";
 import { getDb, getToursCollection } from "~/utils/db.server";
-import { getLocalMidnight, getLocalEndOfDay, formatLocalDate, parseLocalDate } from "~/utils/date";
+import { getLocalMidnight, getLocalEndOfDay, formatLocalDate, parseLocalDate, localDateToUTCMidnight } from "~/utils/date";
 import type { LoaderData, BookingData, PaginationInfo } from "~/types/booking";
 import { updateBookingLimit } from "~/models/bookingLimit.server";
 import { cancelBooking } from "~/services/bookingCancellation.server";
@@ -124,23 +124,50 @@ export const loader = async ({ request }: LoaderArgs) => {
       .toArray();
 
     // Obtener límite de reservas para la fecha seleccionada y tour (si se especifica)
-    interface LimitQuery {
-      date: { 
-        $gte: Date; 
-        $lte: Date;
-      };
-      tourSlug?: string;
-    }
+    // We need to ensure we're using the same date conversion logic as in updateBookingLimit
+    // First parse the date string to get a local date
+    const localDate = parseLocalDate(dateParam || formatLocalDate(new Date()));
+    console.log("Loader: Local date from param:", localDate.toISOString());
+    
+    // Then convert to UTC midnight using the same function as updateBookingLimit
+    const utcDate = localDateToUTCMidnight(localDate);
+    console.log("Loader: Converted to UTC date:", utcDate.toISOString());
+    
+    // For the query, we'll use exact date matching instead of range
+    console.log("Querying booking limit with exact date:", {
+      localDate: localDate.toISOString(),
+      utcDate: utcDate.toISOString(),
+      tourSlug: tourSlugParam || "default"
+    });
 
-    const limitQuery: LimitQuery = {
-      date: { $gte: startDate, $lte: endDate }
+    // Use the effective tour slug (convert "all" to "default")
+    const effectiveTourSlug = tourSlugParam === "all" ? "default" : tourSlugParam;
+    
+    // Query with exact date match instead of range
+    const limitQuery = {
+      date: utcDate,
+      ...(effectiveTourSlug ? { tourSlug: effectiveTourSlug } : {})
     };
 
-    if (tourSlugParam) {
-      limitQuery.tourSlug = tourSlugParam;
-    }
+    console.log("Exact limit query:", JSON.stringify(limitQuery));
+    
+    // First try to get the exact limit for this tour and date
+    let limitDoc = await db.collection("bookingLimits").findOne(limitQuery);
+    
+    console.log("Found booking limit with exact query:", limitDoc);
 
-    const limitDoc = await db.collection("bookingLimits").findOne(limitQuery);
+    // If no specific limit is found and we're querying for a specific tour,
+    // try to get the default limit for this date (tourSlug = "default")
+    if (!limitDoc && effectiveTourSlug && effectiveTourSlug !== "default") {
+      const defaultLimitQuery = {
+        date: utcDate,
+        tourSlug: "default"
+      };
+      
+      console.log("No specific limit found, trying default limit with query:", defaultLimitQuery);
+      limitDoc = await db.collection("bookingLimits").findOne(defaultLimitQuery);
+      console.log("Found default limit:", limitDoc);
+    }
 
     const processedBookings: BookingData[] = bookings.map((booking) => {
       // Obtain phone number from any of the fields
@@ -269,11 +296,19 @@ export const action = async ({ request }: ActionArgs) => {
     }
 
     try {
+      console.log("Updating booking limit with:", {
+        date: new Date(date.toString()),
+        maxBookings: parseInt(maxBookings.toString()),
+        tourSlug: tourSlug ? tourSlug.toString() : "default"
+      });
+      
       const result = await updateBookingLimit(
         new Date(date.toString()), 
         parseInt(maxBookings.toString()), 
         tourSlug ? tourSlug.toString() : "default"
       );
+
+      console.log("Update booking limit result:", result);
 
       if (result.success) {
         return json({
@@ -282,11 +317,17 @@ export const action = async ({ request }: ActionArgs) => {
           data: result.data,
         });
       } else {
-        return json({ error: "Error al actualizar el límite de reservas" }, { status: 500 });
+        // This should not happen as updateBookingLimit throws an error on failure
+        // but we'll handle it just in case
+        console.error("Error updating booking limit: Unexpected result format");
+        return json({ 
+          error: "Error al actualizar el límite de reservas" 
+        }, { status: 500 });
       }
     } catch (error) {
-      console.error("Error al actualizar el límite de reservas:", error);
-      return json({ error: "Error al actualizar el límite de reservas" }, { status: 500 });
+      console.error("Exception when updating booking limit:", error);
+      const errorMessage = error instanceof Error ? error.message : "Error al actualizar el límite de reservas";
+      return json({ error: errorMessage }, { status: 500 });
     }
   }
   

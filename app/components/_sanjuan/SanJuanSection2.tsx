@@ -53,7 +53,7 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, SanJuanSection2Text }) =
           src={lottieSource} 
           alt="Animation" 
           className={`
-            translate-y-[50px] mb-4
+            translate-y-[50px] mb-4 mt-6
             ${width <= 450 ? "w-[200px]" : "w-[250px]"}
             object-contain
           `} 

@@ -168,8 +168,16 @@ export async function loader() {
       // Check each date in the range for availability
       const currentDate = new Date(startDate);
       while (currentDate <= endDate) {
-        const dateStr = currentDate.toISOString().split('T')[0];
+        // Format the date consistently using our utility functions
+        const localDate = new Date(currentDate);
+        const utcDate = localDateToUTCMidnight(localDate);
+        
+        // Get the ISO date string and split to get YYYY-MM-DD format
+        const dateStr = utcDate.toISOString().split('T')[0];
         const formattedDate = dateStr;
+        
+        // Log the date conversion for debugging
+        console.log(`Processing date: ${currentDate.toISOString()} -> UTC: ${utcDate.toISOString()} -> formatted: ${formattedDate}`);
         
         // Get the limit for this date (specific, default, or fallback to 10)
         const maxBookings = limitMap[dateStr] !== undefined ? limitMap[dateStr] : 10;
@@ -180,6 +188,9 @@ export async function loader() {
         // Calculate available places
         const availablePlaces = maxBookings - bookedPlaces;
         
+        // Log availability for debugging
+        console.log(`Tour ${tourSlug}, Date ${formattedDate}: Max=${maxBookings}, Booked=${bookedPlaces}, Available=${availablePlaces}`);
+        
         // If no places available or explicitly blocked (maxBookings = 0)
         if (maxBookings === 0 || availablePlaces <= 0) {
           unavailableDates.push({
@@ -188,6 +199,7 @@ export async function loader() {
             date: formattedDate,
             state: "unavailable"
           });
+          console.log(`Marked as unavailable: Tour ${tourSlug}, Date ${formattedDate}`);
         }
         
         // Move to next day
@@ -198,6 +210,13 @@ export async function loader() {
     // Also mark today and past dates as unavailable for all tours
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    
+    // Convert to UTC for consistent handling
+    const todayUTC = localDateToUTCMidnight(today);
+    const todayFormatted = todayUTC.toISOString().split('T')[0];
+    
+    console.log(`Marking today as unavailable: ${today.toISOString()} -> UTC: ${todayUTC.toISOString()} -> formatted: ${todayFormatted}`);
+    
     for (const tour of tours) {
       if (!tour.slug) continue;
       
@@ -208,9 +227,11 @@ export async function loader() {
       unavailableDates.push({
         tourSlug,
         tourName,
-        date: today.toISOString().split('T')[0],
+        date: todayFormatted,
         state: "unavailable"
       });
+      
+      console.log(`Marked today as unavailable for tour ${tourSlug}: ${todayFormatted}`);
     }
     
     console.log("LOADER - Unavailable dates generated:", unavailableDates.length);

@@ -15,43 +15,88 @@ export async function updateBookingLimit(localDate: Date, maxBookings: number, t
     // If tourSlug is "all", use "default" as the tourSlug
     const effectiveTourSlug = tourSlug === "all" ? "default" : tourSlug;
     
+    console.log("updateBookingLimit: Starting with params:", {
+      localDate: localDate.toISOString(),
+      localDateYear: localDate.getFullYear(),
+      localDateMonth: localDate.getMonth(),
+      localDateDay: localDate.getDate(),
+      maxBookings,
+      tourSlug,
+      effectiveTourSlug
+    });
+    
     const bookingLimits = await getCollection<BookingLimit>("bookingLimits");
     
     // Convert local date to UTC midnight for storage
+    // We'll use Date.UTC to create a UTC date directly
     const utcDate = localDateToUTCMidnight(localDate);
+    
+    console.log("updateBookingLimit: Converted date to UTC:", {
+      utcDate: utcDate.toISOString(),
+      utcDateYear: utcDate.getUTCFullYear(),
+      utcDateMonth: utcDate.getUTCMonth(),
+      utcDateDay: utcDate.getUTCDate()
+    });
 
+    // First check if a document already exists with exact date match
+    const existingLimit = await bookingLimits.findOne({ 
+      date: utcDate, 
+      tourSlug: effectiveTourSlug 
+    });
+    
+    console.log("updateBookingLimit: Existing limit found:", existingLimit);
+
+    // Prepare the update operation
+    const updateOperation = {
+      $set: { 
+        date: utcDate,
+        tourSlug: effectiveTourSlug,
+        maxBookings: parseInt(String(maxBookings))
+      },
+      $setOnInsert: { currentBookings: 0 }
+    };
+    
+    console.log("updateBookingLimit: Update operation:", JSON.stringify(updateOperation));
+
+    // Perform the update with exact date match
     const result = await bookingLimits.updateOne(
       { date: utcDate, tourSlug: effectiveTourSlug },
-      {
-        $set: { 
-          date: utcDate,
-          tourSlug: effectiveTourSlug,
-          maxBookings: parseInt(String(maxBookings))
-        },
-        $setOnInsert: { currentBookings: 0 }
-      },
+      updateOperation,
       { upsert: true }
     );
 
+    console.log("updateBookingLimit: Update result:", JSON.stringify(result));
+
     if (result.acknowledged) {
-      // Get the updated document to return
-      const updatedLimit = await bookingLimits.findOne({ date: utcDate, tourSlug: effectiveTourSlug });
+      // Get the updated document to return with exact date match
+      const updatedLimit = await bookingLimits.findOne({ 
+        date: utcDate, 
+        tourSlug: effectiveTourSlug 
+      });
+      
+      console.log("updateBookingLimit: Updated limit:", updatedLimit);
+      
+      // Convert the date back to local time for the response
+      const responseDate = updatedLimit ? utcDateToLocalMidnight(updatedLimit.date) : null;
+      console.log("updateBookingLimit: Response date:", responseDate);
+      
       return { 
         success: true, 
         data: {
           ...result,
           document: updatedLimit ? {
             ...updatedLimit,
-            date: utcDateToLocalMidnight(updatedLimit.date)
+            date: responseDate
           } : null
         }
       };
     } else {
+      console.error("updateBookingLimit: Database operation not acknowledged");
       throw new Error("Database operation not acknowledged");
     }
   } catch (error) {
     console.error("Error in updateBookingLimit:", error);
-    throw new Error("Failed to update booking limit");
+    throw new Error(`Failed to update booking limit: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 

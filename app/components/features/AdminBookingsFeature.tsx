@@ -79,15 +79,27 @@ export const AdminBookingsFeature = ({
   }, [isSearching]);
 
   const handleUpdateMaxBookings = (newMax: number) => {
+    console.log("AdminBookingsFeature: Updating max bookings to", newMax);
+    console.log("AdminBookingsFeature: Selected date:", states.selectedDate.toISOString());
+    console.log("AdminBookingsFeature: Selected tour slug:", states.selectedTourSlug || "default");
+    
     const formData = new FormData();
     formData.append("intent", "updateLimit");
+    
+    // Format the date as ISO string to preserve timezone information
     formData.append("date", states.selectedDate.toISOString());
     formData.append("maxBookings", newMax.toString());
     
-    // Include the selected tour slug if available
-    if (states.selectedTourSlug) {
-      formData.append("tourSlug", states.selectedTourSlug);
-    }
+    // Include the selected tour slug if available, otherwise use "default"
+    const effectiveTourSlug = states.selectedTourSlug || "default";
+    formData.append("tourSlug", effectiveTourSlug);
+    
+    console.log("AdminBookingsFeature: Submitting form data:", {
+      intent: "updateLimit",
+      date: states.selectedDate.toISOString(),
+      maxBookings: newMax.toString(),
+      tourSlug: effectiveTourSlug
+    });
     
     submit(formData, { method: "post" });
   };

@@ -95,7 +95,24 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     try {
       // Assuming it's a CalendarDate
       const calendarDate = date as CalendarDate;
+      
+      // Log the date components for debugging
+      console.log("Checking availability for date:", {
+        year: calendarDate.year,
+        month: calendarDate.month,
+        day: calendarDate.day
+      });
+      
+      // Create a date at midnight in local timezone
       jsDate = new Date(calendarDate.year, calendarDate.month - 1, calendarDate.day);
+      
+      // Log the created JavaScript Date
+      console.log("Converted to JS Date:", {
+        iso: jsDate.toISOString(),
+        year: jsDate.getFullYear(),
+        month: jsDate.getMonth(),
+        day: jsDate.getDate()
+      });
     } catch (error) {
       console.error("Error converting date:", error);
       return false; // If we can't convert, don't disable the date
@@ -116,13 +133,22 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     // If no tour is selected, disable all dates
     if (!formData.tourSlug) return true;
     
-    // Format the date for comparison
+    // Format the date for comparison - ensure consistent format with backend
     const dateString = format(jsDate, "yyyy-MM-dd");
     
+    // Log the formatted date string
+    console.log(`Checking if ${dateString} is unavailable for tour ${formData.tourSlug}`);
+    
     // Check if the date is in the unavailable dates list for this tour
-    const isUnavailable = unavailableDates
-      .filter(d => d.tourSlug === formData.tourSlug)
-      .some(d => d.date === dateString);
+    const matchingUnavailableDates = unavailableDates
+      .filter(d => d.tourSlug === formData.tourSlug && d.date === dateString);
+    
+    const isUnavailable = matchingUnavailableDates.length > 0;
+    
+    // Log the result for debugging
+    if (isUnavailable) {
+      console.log(`Date ${dateString} is unavailable for tour ${formData.tourSlug}`, matchingUnavailableDates);
+    }
     
     return isUnavailable;
   };
@@ -131,14 +157,30 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
   const handleDateSelect = async (date: CalendarDate | null) => {
     if (!date) return;
     
+    // Log the selected date components
+    console.log("Date selected:", {
+      year: date.year,
+      month: date.month,
+      day: date.day
+    });
+    
     // Convert CalendarDate to JavaScript Date
     const jsDate = new Date(date.year, date.month - 1, date.day);
+    
+    // Log the converted JavaScript Date
+    console.log("Converted to JS Date:", {
+      iso: jsDate.toISOString(),
+      year: jsDate.getFullYear(),
+      month: jsDate.getMonth(),
+      day: jsDate.getDate()
+    });
     
     // Reset previous errors
     setFetchError(null);
 
     // Format the date for form data
     const formattedDate = format(jsDate, "yyyy-MM-dd");
+    console.log("Formatted date for API:", formattedDate);
 
     // Check if a tour is selected
     if (!formData.tourSlug) {
@@ -163,9 +205,10 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       }
       
       const availabilityData = await response.json();
-      console.log("Availability data:", availabilityData);
+      console.log("Availability data from API:", availabilityData);
       
       if (!availabilityData.isAvailable) {
+        console.log(`API reports date ${formattedDate} is not available`);
         setFetchError(localizedText[currentLanguage].dateUnavailable);
         return;
       }
@@ -183,6 +226,8 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
         availablePlaces: availabilityData.availablePlaces,
         isAvailable: availabilityData.isAvailable
       });
+      
+      console.log(`Successfully selected date ${formattedDate} with ${availabilityData.availablePlaces} available places`);
       
     } catch (error) {
       console.error("Error fetching availability:", error);
@@ -270,11 +315,7 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
         {isTourSelected && (
           <>
             <Label htmlFor="date">{localizedText[currentLanguage].dateLabel}</Label>
-            {formData.tourSlug && (
-              <div className="text-sm text-gray-500 mb-2">
-                {unavailableDates.filter(d => d.tourSlug === formData.tourSlug).length} dates are unavailable for this tour.
-              </div>
-            )}
+
             <div className={cn(
               "border rounded-md p-4 flex justify-center", 
               errors.date ? "border-red-500" : "border-gray-200"
