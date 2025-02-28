@@ -1,19 +1,33 @@
 // app/components/_sanjuan/SanJuanSection2.tsx
+/* eslint-disable react/prop-types */
 //UI Component: just responsible for displaying pure html with props passed from feature component
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { sanJuansection2Type } from "~/data/data";
 import { useSanJuanSection2 } from "./SanJuanSection2.hooks";
+import { 
+  Palmtree, 
+  Sun, 
+  Waves, 
+  Umbrella, 
+  Compass, 
+  Anchor, 
+  MapPin, 
+  Mountain, 
+  Cloud 
+} from "lucide-react";
 
 // Child Props type
 type ChildProps = {
   width: number;
-  height: number;
+  height: number; // Keep in type definition for API compatibility
   SanJuanSection2Text: sanJuansection2Type;
 };
 
-const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2Text }) => {
+// Prop validation is handled by TypeScript through the ChildProps type definition
+
+const SanJuanSection2: React.FC<ChildProps> = ({ width, SanJuanSection2Text }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
   const { imageStyle } = useSanJuanSection2(SanJuanSection2Text);
@@ -28,6 +42,64 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
 
   const getResponsiveTextSize = (small: string, medium: string, large: string) => 
     `${width <= 350 ? small : width <= 450 ? medium : large}`;
+
+  // Function to render the appropriate animation based on the source
+  const renderAnimation = () => {
+    // Check if it's a Lottie animation or an icon
+    if (lottieSource === "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie") {
+      return (
+        <DotLottieReact 
+          src={lottieSource} 
+          loop 
+          autoplay 
+          className={`
+            translate-y-[50px] mb-4
+            ${width <= 450 ? "w-[300px]" : "w-[400px]"}
+          `} 
+        />
+      );
+    } else {
+      // Render the appropriate icon based on the source identifier
+      const iconSize = width <= 450 ? 100 : 150;
+      const iconClassName = "text-blue-500 translate-y-[50px] mb-4";
+      
+      switch (lottieSource) {
+        case "beach-icon":
+          return <Palmtree size={iconSize} className={iconClassName} />;
+        case "sun-icon":
+          return <Sun size={iconSize} className={iconClassName} />;
+        case "waves-icon":
+          return <Waves size={iconSize} className={iconClassName} />;
+        case "palm-icon":
+          return <Palmtree size={iconSize} className={iconClassName} />;
+        case "umbrella-icon":
+          return <Umbrella size={iconSize} className={iconClassName} />;
+        case "compass-icon":
+          return <Compass size={iconSize} className={iconClassName} />;
+        case "anchor-icon":
+          return <Anchor size={iconSize} className={iconClassName} />;
+        case "map-icon":
+          return <MapPin size={iconSize} className={iconClassName} />;
+        case "mountain-icon":
+          return <Mountain size={iconSize} className={iconClassName} />;
+        case "cloud-icon":
+          return <Cloud size={iconSize} className={iconClassName} />;
+        default:
+          // If it's not a recognized icon identifier, try to render it as a Lottie animation
+          return (
+            <DotLottieReact 
+              src={lottieSource} 
+              loop 
+              autoplay 
+              className={`
+                translate-y-[50px] mb-4
+                ${width <= 450 ? "w-[300px]" : "w-[400px]"}
+              `} 
+            />
+          );
+      }
+    }
+  };
 
   return (
     <div 
@@ -71,15 +143,7 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
               transition={{ duration: 0.5, delay: 0.3 }}
               className="w-full flex justify-center"
             >
-              <DotLottieReact 
-                src={lottieSource} 
-                loop 
-                autoplay 
-                className={`
-                  translate-y-[50px] mb-4
-                  ${width <= 450 ? "w-[300px]" : "w-[400px]"}
-                `} 
-              />
+              {renderAnimation()}
             </motion.div>
           )}
 
