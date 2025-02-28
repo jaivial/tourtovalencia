@@ -10,6 +10,7 @@ import SanJuanSection3Dynamic from "~/components/_sanjuan/SanJuanSection3Dynamic
 import { useLanguageContext } from "~/providers/LanguageContext";
 import ComingSoonCard from "~/components/_cards/ComingSoonCard";
 import FloatingButton from "~/components/ui/FloatingButton";
+import SanJuanSection5Dynamic from "~/components/_sanjuan/SanJuanSection5Dynamic";
 
 // Error boundary component
 export function ErrorBoundary() {
@@ -133,9 +134,10 @@ export default function DynamicPage() {
 
       {content.section4 && <DynamicPageContainer.Section4 width={safeWidth} SanJuanSection4Text={content.section4} />}
 
-      {content.timeline && <DynamicPageContainer.Timeline width={safeWidth} timelineData={content.timeline} />}
+      {/* Update to use the dynamic section5 component with image support */}
+      {content.section5 && <SanJuanSection5Dynamic width={safeWidth} SanJuanSection5Text={content.section5} />}
 
-      {content.section5 && <DynamicPageContainer.Section5 width={safeWidth} SanJuanSection5Text={content.section5} />}
+      {content.timeline && <DynamicPageContainer.Timeline width={safeWidth} timelineData={content.timeline} />}
 
       {content.section6 && (page.status === "upcoming" ? <ComingSoonCard width={safeWidth} /> : <DynamicPageContainer.Section6 width={safeWidth} SanJuanSection6Text={content.section6} />)}
       

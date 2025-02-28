@@ -33,6 +33,8 @@ export type PageTemplateProps = {
   onSection4Update: (field: keyof sanJuansection4Type, value: string) => void;
   section5Data?: sanJuanSection5Type;
   onSection5Update: (field: keyof sanJuanSection5Type, value: string) => void;
+  onSection5ImageUpdate?: (file: File) => void | Promise<void>;
+  onSection5ImageRemove?: () => void | Promise<void>;
   section6Data?: SanJuanSection6Type;
   onSection6Update: (field: keyof SanJuanSection6Type, value: string) => void;
   timelineData?: TimelineDataType;
@@ -43,7 +45,7 @@ export type PageTemplateProps = {
   isEditMode?: boolean;
 };
 
-const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, indexSection5Data, onIndexSection5Update, section1Data, onSection1Update, section2Data, onSection2Update, section3Data, onSection3ImageUpdate, onSection3ImageRemove, section4Data, onSection4Update, section5Data, onSection5Update, section6Data, onSection6Update, timelineData, onTimelineUpdate, pageName, price, onPriceChange, isEditMode = false }) => {
+const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, indexSection5Data, onIndexSection5Update, section1Data, onSection1Update, section2Data, onSection2Update, section3Data, onSection3ImageUpdate, onSection3ImageRemove, section4Data, onSection4Update, section5Data, onSection5Update, onSection5ImageUpdate, onSection5ImageRemove, section6Data, onSection6Update, timelineData, onTimelineUpdate, pageName, price, onPriceChange, isEditMode = false }) => {
   const size = useWindowSize();
   const { isModalOpen, closeModal } = usePublishModal();
   const { handleCreatePage, isCreating, error } = usePageCreation();
@@ -85,6 +87,34 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
       await onSection3ImageUpdate(index, file);
     } catch (error) {
       console.error(`PageTemplate: Error updating image at index ${index}:`, error);
+    }
+  };
+
+  // Add a wrapper function for section5 image update
+  const handleSection5ImageUpdate = async (file: File) => {
+    try {
+      console.log(`PageTemplate: Processing section5 image update:`, file.name, file.type, file.size);
+      
+      // Call the original onSection5ImageUpdate if provided
+      if (onSection5ImageUpdate) {
+        await onSection5ImageUpdate(file);
+      }
+    } catch (error) {
+      console.error(`PageTemplate: Error updating section5 image:`, error);
+    }
+  };
+
+  // Add a wrapper function for section5 image removal
+  const handleSection5ImageRemove = async () => {
+    try {
+      console.log(`PageTemplate: Processing section5 image removal`);
+      
+      // Call the original onSection5ImageRemove if provided
+      if (onSection5ImageRemove) {
+        await onSection5ImageRemove();
+      }
+    } catch (error) {
+      console.error(`PageTemplate: Error removing section5 image:`, error);
     }
   };
 
@@ -175,7 +205,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
 
           {section4Data && <EditableSanJuanSection4 width={width} data={section4Data} onUpdate={onSection4Update} />}
 
-          {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} />}
+          {section5Data && <EditableSanJuanSection5 width={width} data={section5Data} onUpdate={onSection5Update} onImageUpdate={handleSection5ImageUpdate} onImageRemove={handleSection5ImageRemove} />}
 
           {timelineData && onTimelineUpdate && (
             <EditableTimelineFeature 
@@ -233,7 +263,6 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
         }}
       />
 
-     
     </div>
   );
 };

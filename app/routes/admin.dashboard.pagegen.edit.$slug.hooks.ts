@@ -183,6 +183,36 @@ export const useEditPage = (initialPage: any) => {
     setSection5Data(data);
   };
 
+  const handleSection5ImageUpdate = (file: File) => {
+    console.log(`EditPage: Processing section5 image update:`, file.name, file.type, file.size);
+    
+    const reader = new FileReader();
+    
+    // Set up the onload handler before calling readAsDataURL
+    reader.onload = (e) => {
+      const base64String = e.target?.result as string;
+      console.log(`EditPage: Base64 image created, length:`, base64String.length);
+      
+      setSection5Data(prev => {
+        console.log(`EditPage: Updating section5Data with new image`);
+        return {
+          ...prev,
+          image: base64String
+        };
+      });
+    };
+    
+    // Start reading the file
+    reader.readAsDataURL(file);
+  };
+
+  const handleSection5ImageRemove = () => {
+    setSection5Data(prev => ({
+      ...prev,
+      image: "/plazareina2.jpg" // Reset to default image
+    }));
+  };
+
   const handleSection6Update = (data: SanJuanSection6Type) => {
     setSection6Data(data);
   };
@@ -319,6 +349,8 @@ export const useEditPage = (initialPage: any) => {
     handleSection3ImageRemove,
     handleSection4Update,
     handleSection5Update,
+    handleSection5ImageUpdate,
+    handleSection5ImageRemove,
     handleSection6Update,
     handleIndexSection5Update,
     handleTimelineUpdate,

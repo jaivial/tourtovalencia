@@ -61,6 +61,8 @@ export default function EditPageRoute() {
     handleSection3ImageRemove,
     handleSection4Update,
     handleSection5Update,
+    handleSection5ImageUpdate,
+    handleSection5ImageRemove,
     handleSection6Update,
     handleIndexSection5Update,
     handleTimelineUpdate,
@@ -159,6 +161,34 @@ export default function EditPageRoute() {
   const adaptSection5Update = (field: keyof sanJuanSection5Type, value: string) => {
     const updatedData = { ...section5Data, [field]: value };
     handleSection5Update(updatedData);
+  };
+
+  const adaptSection5ImageUpdate = async (file: File) => {
+    try {
+      console.log(`EditPage: Processing section5 image update:`, file.name, file.type, file.size);
+      
+      // Create a local preview immediately
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64 = e.target?.result as string;
+        console.log(`EditPage: Local preview created, length:`, base64.length);
+        
+        // No need to convert again, just pass the file to the handler
+        handleSection5ImageUpdate(file);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error(`EditPage: Error updating section5 image:`, error);
+    }
+  };
+
+  const adaptSection5ImageRemove = () => {
+    try {
+      console.log(`EditPage: Processing section5 image removal`);
+      handleSection5ImageRemove();
+    } catch (error) {
+      console.error(`EditPage: Error removing section5 image:`, error);
+    }
   };
 
   const adaptSection6Update = (field: keyof SanJuanSection6Type, value: string) => {
@@ -264,6 +294,8 @@ export default function EditPageRoute() {
             onSection4Update={adaptSection4Update}
             section5Data={section5Data}
             onSection5Update={adaptSection5Update}
+            onSection5ImageUpdate={adaptSection5ImageUpdate}
+            onSection5ImageRemove={adaptSection5ImageRemove}
             section6Data={section6Data}
             onSection6Update={adaptSection6Update}
             timelineData={timelineData}

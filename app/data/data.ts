@@ -109,6 +109,7 @@ export type sanJuanSection5Type = {
   thirdH3: string;
   fourthH3: string;
   fifthH3: string;
+  image?: string; // Add image field to store the image as base64 or URL
 };
 
 export type SanJuanSection6listType = {
@@ -525,6 +526,7 @@ export const languages: Record<string, LanguageData> = {
         thirdH3: "Private transport to La Vall d'Uixó (Castellón).",
         fourthH3: "Guided tour: 3h 30m (approx).",
         fifthH3: "Return to Valencia by private transport.",
+        image: undefined, // Add image field to store the image as base64 or URL
       },
       sanJuanSection6: {
         cardTitle: "GUIDED TOUR",
@@ -919,6 +921,7 @@ export const languages: Record<string, LanguageData> = {
         thirdH3: "Transporte privado a La Vall d'Uixó (Castellón).",
         fourthH3: "Tour guiado: 3h 30m (aprox).",
         fifthH3: "Regreso a Valencia por transporte privado.",
+        image: undefined, // Add image field to store the image as base64 or URL
       },
       sanJuanSection6: {
         cardTitle: "TOUR GUIADO",

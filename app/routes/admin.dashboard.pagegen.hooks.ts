@@ -189,6 +189,38 @@ export const usePageGenerator = () => {
     }));
   };
 
+  // Section 5 image handler
+  const handleSection5ImageUpdate = (file: File) => {
+    console.log(`PageGenerator: Processing section5 image update:`, file.name, file.type, file.size);
+    
+    const reader = new FileReader();
+    
+    // Set up the onload handler before calling readAsDataURL
+    reader.onload = (e) => {
+      const base64String = e.target?.result as string;
+      console.log(`PageGenerator: Base64 image created, length:`, base64String.length);
+      
+      setSection5Data(prev => {
+        console.log(`PageGenerator: Updating section5Data with new image`);
+        return {
+          ...prev,
+          image: base64String
+        };
+      });
+    };
+    
+    // Start reading the file
+    reader.readAsDataURL(file);
+  };
+
+  // Section 5 image remove handler
+  const handleSection5ImageRemove = () => {
+    setSection5Data(prev => ({
+      ...prev,
+      image: "/plazareina2.jpg" // Reset to default image
+    }));
+  };
+
   // Section 6 handler
   const handleSection6Update = (field: keyof SanJuanSection6Type, value: string) => {
     if (field === "list") {
@@ -286,6 +318,8 @@ export const usePageGenerator = () => {
     handleSection3ImageRemove,
     handleSection4Update,
     handleSection5Update,
+    handleSection5ImageUpdate,
+    handleSection5ImageRemove,
     handleSection6Update,
     handleIndexSection5Update,
     handleTimelineUpdate,

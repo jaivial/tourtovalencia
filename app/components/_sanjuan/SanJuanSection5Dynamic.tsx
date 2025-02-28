@@ -1,43 +1,19 @@
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { sanJuanSection5Type } from "~/data/data";
-import EditableText from "./EditableText";
-import { useEditableSanJuanSection5 } from "./EditableSanJuanSection5.hooks";
-import ImageUpload from "./ImageUpload";
+import type { sanJuanSection5Type } from "~/data/data";
 
-interface EditableSanJuanSection5Props {
+interface SanJuanSection5DynamicProps {
   width: number;
-  data?: sanJuanSection5Type;
-  onUpdate: (field: keyof sanJuanSection5Type, value: string) => void;
-  onImageUpdate?: (file: File) => void | Promise<void>;
-  onImageRemove?: () => void | Promise<void>;
+  SanJuanSection5Text: sanJuanSection5Type;
 }
 
-const DEFAULT_SECTION5_DATA: sanJuanSection5Type = {
-  firstH3: "¿Qué haremos en San Juan?",
-  secondH3: "Nos bañaremos en las aguas cristalinas de la playa de San Juan",
-  thirdH3: "Disfrutaremos de un día de playa y relax",
-  fourthH3: "Podremos practicar snorkel y ver los peces",
-  fifthH3: "Tendremos tiempo libre para explorar el pueblo",
-  image: "/plazareina2.jpg" // Default fallback image
-};
-
-const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({ 
+const SanJuanSection5Dynamic: React.FC<SanJuanSection5DynamicProps> = ({ 
   width, 
-  data = DEFAULT_SECTION5_DATA,
-  onUpdate,
-  onImageUpdate,
-  onImageRemove
+  SanJuanSection5Text 
 }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
-  const { sectionData, handleTextUpdate } = useEditableSanJuanSection5(data);
-
-  // Debug logs
-  console.log("EditableSanJuanSection5: data received:", data);
-  console.log("EditableSanJuanSection5: sectionData:", sectionData);
-  console.log("EditableSanJuanSection5: image URL:", sectionData.image || "/plazareina2.jpg");
 
   // Common text styles for h3 elements
   const commonH3Styles = `
@@ -49,44 +25,8 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
   const getResponsiveTextSize = (small: string, semismall: string, medium: string, semilarge: string, large: string) => 
     `${width <= 350 ? small : width <= 450 ? semismall : width <= 580 ? medium : width <= 768 ? semilarge : large}`;  
 
-  const handleImageChange = async (file: File) => {
-    if (onImageUpdate) {
-      try {
-        console.log("EditableSanJuanSection5: Processing image update:", file.name, file.type, file.size);
-        
-        // Create a local preview immediately
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const base64 = e.target?.result as string;
-          console.log("EditableSanJuanSection5: Local preview created:", base64.substring(0, 30) + '...');
-          
-          // Update local state for immediate preview
-          handleTextUpdate("image", base64);
-        };
-        reader.readAsDataURL(file);
-        
-        // Also call the parent handler for saving to database
-        await onImageUpdate(file);
-      } catch (error) {
-        console.error("EditableSanJuanSection5: Error updating image:", error);
-      }
-    }
-  };
-
-  const handleImageRemove = async () => {
-    if (onImageRemove) {
-      try {
-        console.log("EditableSanJuanSection5: Removing image");
-        await onImageRemove();
-      } catch (error) {
-        console.error("EditableSanJuanSection5: Error removing image:", error);
-      }
-    } else {
-      // If no remove handler is provided, just update the local state
-      handleTextUpdate("image", "/plazareina2.jpg");
-      onUpdate("image", "/plazareina2.jpg");
-    }
-  };
+  // Use the image from the database or fallback to the default
+  const imageUrl = SanJuanSection5Text.image || "/plazareina2.jpg";
 
   return (
     <div className="w-full overflow-x-hidden">
@@ -140,14 +80,7 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
               ${getResponsiveTextSize("text-[1.7rem]", "text-[2.1rem]", "text-[2.5rem]", "text-[2.9rem]", "text-[3.3rem]")}
             `}
           >
-            <EditableText
-              value={sectionData.firstH3}
-              onUpdate={(value) => {
-                handleTextUpdate("firstH3", value);
-                onUpdate("firstH3", value);
-              }}
-              className={`${commonH3Styles} text-blue-950`}
-            />
+            {SanJuanSection5Text.firstH3}
           </motion.div>
         </motion.div>
 
@@ -161,27 +94,16 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
           transition={{ duration: 0.6, delay: 0.3 }}
           className="w-full flex flex-row flex-wrap justify-center items-center p-6 gap-8 -translate-y-[40px]"
         >
-          <motion.div 
+          <motion.img 
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.3 }}
+            src={imageUrl}
+            alt="Tour experience image" 
             className="
-              rounded-2xl max-h-[350px] overflow-hidden
+              rounded-2xl max-h-[350px] object-cover 
               shadow-lg hover:shadow-xl transition-shadow duration-300
-              relative w-full h-[300px]
             "
-          >
-            {/* Debug image display */}
-            <div className="absolute top-0 left-0 z-20 bg-white/80 text-xs p-1">
-              Image URL: {sectionData.image ? (sectionData.image.length > 20 ? sectionData.image.substring(0, 20) + '...' : sectionData.image) : 'none'}
-            </div>
-            
-            <ImageUpload
-              imageUrl={sectionData.image || "/plazareina2.jpg"}
-              onImageChange={handleImageChange}
-              onImageRemove={handleImageRemove}
-              className="object-cover w-full h-full"
-            />
-          </motion.div>
+          />
           
           <motion.div 
             animate={isInView ? 
@@ -195,11 +117,11 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
             `}
           >
             {[
-              { key: "secondH3", value: sectionData.secondH3 },
-              { key: "thirdH3", value: sectionData.thirdH3 },
-              { key: "fourthH3", value: sectionData.fourthH3 },
-              { key: "fifthH3", value: sectionData.fifthH3 }
-            ].map(({ key, value }, index) => (
+              SanJuanSection5Text.secondH3,
+              SanJuanSection5Text.thirdH3,
+              SanJuanSection5Text.fourthH3,
+              SanJuanSection5Text.fifthH3
+            ].map((text, index) => (
               <motion.div 
                 key={index}
                 whileHover={{ scale: 1.02, x: 10 }}
@@ -217,14 +139,7 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
                   ${getResponsiveTextSize("text-[1rem]", "text-[1.2rem]", "text-[1.4rem]", "text-[1.6rem]", "text-[1.8rem]")}
                 `}
               >
-                <EditableText
-                  value={value}
-                  onUpdate={(newValue) => {
-                    handleTextUpdate(key as keyof sanJuanSection5Type, newValue);
-                    onUpdate(key as keyof sanJuanSection5Type, newValue);
-                  }}
-                  className={`${commonH3Styles} text-blue-950`}
-                />
+                {text}
               </motion.div>
             ))}
           </motion.div>
@@ -250,4 +165,4 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
   );
 };
 
-export default EditableSanJuanSection5;
+export default SanJuanSection5Dynamic; 
