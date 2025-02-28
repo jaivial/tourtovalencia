@@ -50,14 +50,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   return (
     <div className={`relative w-full h-full group ${className}`}>
-      {/* Debug element to show the image URL */}
-      <div className="hidden">{imageUrl}</div>
-      
-      {/* Image element instead of background */}
+      {/* Image element with styling matching SanJuanSection5.tsx */}
       <img 
-        src={imageUrl || '/olgaphoto3.jpeg'}
+        src={imageUrl || '/plazareina2.jpg'}
         alt="Section content"
-        className="absolute inset-0 w-full h-full object-cover rounded-2xl transition-transform duration-700"
+        className="w-full h-full object-cover rounded-2xl transition-transform duration-700 max-h-[350px]"
       />
       
       {/* Overlay with buttons */}

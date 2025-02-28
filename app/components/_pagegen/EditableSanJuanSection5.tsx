@@ -159,27 +159,21 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
             { opacity: 0, y: 30 }
           }
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="w-full flex flex-row flex-wrap justify-center items-center p-6 gap-8 -translate-y-[40px]"
+          className="w-full flex flex-col justify-center items-center p-6 gap-8 -translate-y-[40px]"
         >
           <motion.div 
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.3 }}
             className="
-              rounded-2xl max-h-[350px] overflow-hidden
+              rounded-2xl max-h-[350px] 
               shadow-lg hover:shadow-xl transition-shadow duration-300
-              relative w-full h-[300px]
             "
           >
-            {/* Debug image display */}
-            <div className="absolute top-0 left-0 z-20 bg-white/80 text-xs p-1">
-              Image URL: {sectionData.image ? (sectionData.image.length > 20 ? sectionData.image.substring(0, 20) + '...' : sectionData.image) : 'none'}
-            </div>
-            
             <ImageUpload
               imageUrl={sectionData.image || "/plazareina2.jpg"}
               onImageChange={handleImageChange}
               onImageRemove={handleImageRemove}
-              className="object-cover w-full h-full"
+              className="rounded-2xl max-h-[350px] object-cover w-full h-full"
             />
           </motion.div>
           
@@ -191,7 +185,7 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
             transition={{ duration: 0.6, delay: 0.5 }}
             className={`
               flex flex-col gap-3 my-auto
-              ${width <= 1280 ? "w-full" : "w-1/2"}
+              ${width <= 768 ? "w-full" : "w-1/2"}
             `}
           >
             {[
