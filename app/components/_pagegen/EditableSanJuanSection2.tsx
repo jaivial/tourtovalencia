@@ -110,6 +110,98 @@ const animationOptions = [
     src: "cloud-icon",
     preview: "icon",
     icon: Cloud
+  },
+  // GIF options
+  {
+    id: "gif-1",
+    name: "Barco GIF",
+    src: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzE1djk0bXFzb253ZjhocnRkeWIzdTJiNWN5dWtjczJ1aWFlNThzZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/Yw8LhqJYneW06RfgIf/giphy.gif",
+    preview: "gif",
+    icon: null
+  },
+  {
+    id: "gif-2",
+    name: "Playa GIF",
+    src: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXFxc3h2NnNyZGM4ZnU5eWQ3cmM2Y2loMXM5N2RsNmJscGQzZzc3aCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/7cVBRpwlPyIznC2sDq/giphy.gif",
+    preview: "gif",
+    icon: null
+  },
+  {
+    id: "gif-3",
+    name: "Palmera GIF",
+    src: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExaDRtMXJsNW5lOHhnOGlxcnA5ZWVuZXVscnhkejRscjFyODl4cG5tcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/R0qEWj33vaHTUG3WFF/giphy.gif",
+    preview: "gif",
+    icon: null
+  },
+  {
+    id: "gif-4",
+    name: "Viaje GIF",
+    src: "https://media.giphy.com/media/UVkQ14VTDTI26GyXVU/giphy.gif?cid=790b76112k2ebt9egpdhjk596fg5fbdn4hw6mf05hawd6r7q&ep=v1_stickers_search&rid=giphy.gif&ct=s",
+    preview: "gif",
+    icon: null
+  },
+  {
+    id: "gif-5",
+    name: "Maleta GIF",
+    src: "https://media.giphy.com/media/LrM4uGlpOHitZ5Ogub/giphy.gif?cid=790b76112k2ebt9egpdhjk596fg5fbdn4hw6mf05hawd6r7q&ep=v1_stickers_search&rid=giphy.gif&ct=s",
+    preview: "gif",
+    icon: null
+  },
+  {
+    id: "gif-6",
+    name: "Avión GIF",
+    src: "https://media.giphy.com/media/UQgwxFSjhbUGpoSEXL/giphy.gif?cid=ecf05e47smj5s9k5bjdzz3ta9iuw19q6w6odr4t7f9rr0lof&ep=v1_stickers_search&rid=giphy.gif&ct=s",
+    preview: "gif",
+    icon: null
+  },
+  {
+    id: "gif-7",
+    name: "Mapa GIF",
+    src: "https://media.giphy.com/media/dAu3qBzpmXstCTimDv/giphy.gif?cid=790b7611264cotuvxju8qcgxmvcuucs1z4l6vtcjgmwx57xq&ep=v1_stickers_search&rid=giphy.gif&ct=s",
+    preview: "gif",
+    icon: null
+  },
+  {
+    id: "gif-8",
+    name: "Brújula GIF",
+    src: "https://media.giphy.com/media/8p1WPEOeDWFCksfe18/giphy.gif?cid=790b7611264cotuvxju8qcgxmvcuucs1z4l6vtcjgmwx57xq&ep=v1_stickers_search&rid=giphy.gif&ct=s",
+    preview: "gif",
+    icon: null
+  },
+  {
+    id: "gif-9",
+    name: "Barco 2 GIF",
+    src: "https://media.giphy.com/media/3o7WIAwEIpiH58BQYM/giphy.gif?cid=790b76113f06s4g2xvj04rxumn2574n3wc7we8hokuprqbtw&ep=v1_stickers_search&rid=giphy.gif&ct=s",
+    preview: "gif",
+    icon: null
+  },
+  {
+    id: "gif-10",
+    name: "Playa 2 GIF",
+    src: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdm80emV4bjd6cWt2NzdjdHpxNXdnZ25mZHBndG1ucGhwemxkODVqbCZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/cnPihpbzb1KM14OU3B/giphy.gif",
+    preview: "gif",
+    icon: null
+  },
+  {
+    id: "gif-11",
+    name: "Palmera 2 GIF",
+    src: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdm80emV4bjd6cWt2NzdjdHpxNXdnZ25mZHBndG1ucGhwemxkODVqbCZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/jPBeUiexbtmTXYBvBf/giphy.gif",
+    preview: "gif",
+    icon: null
+  },
+  {
+    id: "gif-12",
+    name: "Avión 2 GIF",
+    src: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGR2ejJiYWZnaG91czhmbjBmNHVuc2FjM3ZqdWNjM2Q0Y2ZxcHVvbyZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/UsBJ28yTpIvflXiBzX/giphy.gif",
+    preview: "gif",
+    icon: null
+  },
+  {
+    id: "gif-13",
+    name: "Maleta 2 GIF",
+    src: "https://media.giphy.com/media/LI7LkDukPz467s4sOO/giphy.gif?cid=790b76110dvz2bafghous8fn0f4unsac3vjucc3d4cfqpuoo&ep=v1_stickers_search&rid=giphy.gif&ct=s",
+    preview: "gif",
+    icon: null
   }
 ];
 
@@ -324,11 +416,17 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
                                   autoplay 
                                   className="w-20 h-20" 
                                 />
-                              ) : (
+                              ) : option.preview === "icon" ? (
                                 <div className="text-blue-500">
                                   {option.icon && <option.icon size={48} />}
                                 </div>
-                              )}
+                              ) : option.preview === "gif" ? (
+                                <img 
+                                  src={option.src} 
+                                  alt={option.name} 
+                                  className="w-20 h-20 object-contain" 
+                                />
+                              ) : null}
                             </div>
                             <span className="text-xs font-medium text-gray-700">{option.name}</span>
                             
@@ -411,6 +509,16 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
                   className={`
                     -translate-y-[50px] -mb-16
                     ${width <= 450 ? "w-[300px]" : "w-[400px]"}
+                  `} 
+                />
+              ) : lottieSource.includes("giphy.gif") ? (
+                <img 
+                  src={lottieSource} 
+                  alt="Animation" 
+                  className={`
+                    -translate-y-[50px] -mb-16
+                    ${width <= 450 ? "w-[200px]" : "w-[250px]"}
+                    object-contain
                   `} 
                 />
               ) : (
