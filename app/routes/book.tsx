@@ -10,28 +10,25 @@ import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
 import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
 
-// Define a type for the Stripe session metadata
-interface StripeSessionMetadata {
-  customerName?: string;
-  customerEmail?: string;
-  date?: string;
-  time?: string;
-  partySize?: string;
-  phoneNumber?: string;
-  tourSlug?: string;
-  tourName?: string;
-  paymentMethod: string;
-  country?: string;
-  countryCode?: string;
-}
-
-// Extend the Stripe session type
-interface StripeSession {
+// PayPal order type
+interface PayPalOrder {
   id: string;
-  metadata?: StripeSessionMetadata;
-  customer_email?: string;
-  amount_total?: number;
-  payment_status?: string;
+  payer: {
+    email_address?: string;
+    name?: {
+      given_name?: string;
+      surname?: string;
+    };
+  };
+  purchase_units: Array<{
+    amount: {
+      value: string;
+      currency_code: string;
+    };
+    custom_id?: string;
+    description?: string;
+  }>;
+  status: string;
 }
 
 export const meta: MetaFunction = () => {
@@ -157,34 +154,40 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (intent === "confirm-payment") {
     try {
-      // Dynamic import of stripe service
-      const { retrieveCheckoutSession } = await import("~/services/stripe.server");
+      // Get PayPal order details
+      const { getPayPalTransactionDetails } = await import("~/utils/paypal.server");
       
-      const sessionId = formData.get("session_id") as string;
-      const session = await retrieveCheckoutSession(sessionId) as StripeSession;
+      const orderId = formData.get("order_id") as string;
+      const order = await getPayPalTransactionDetails(orderId) as PayPalOrder;
 
-      if (session.payment_status !== "paid") {
+      if (order.status !== "COMPLETED") {
         throw new Error("Payment not completed");
       }
 
+      // Parse custom data from the order
+      const customData = order.purchase_units[0]?.custom_id ? 
+        JSON.parse(order.purchase_units[0].custom_id) : {};
+      
       // Create booking in database
       const bookingData = {
-        fullName: session.metadata?.customerName || "",
-        email: session.customer_email || session.metadata?.customerEmail || "",
-        date: session.metadata?.date || "",
-        time: session.metadata?.time || "",
-        partySize: parseInt(session.metadata?.partySize || "1", 10),
-        paymentIntentId: session.id,
-        amount: session.amount_total || 0,
-        phoneNumber: session.metadata?.phoneNumber || "",
-        country: session.metadata?.country || "",
-        countryCode: session.metadata?.countryCode || "",
+        fullName: customData.customerName || 
+          `${order.payer.name?.given_name || ''} ${order.payer.name?.surname || ''}`.trim(),
+        email: customData.customerEmail || order.payer.email_address || "",
+        date: customData.date || "",
+        time: customData.time || "",
+        partySize: parseInt(customData.partySize || "1", 10),
+        paymentIntentId: order.id,
+        amount: parseFloat(order.purchase_units[0]?.amount?.value || "0"),
+        phoneNumber: customData.phoneNumber || "",
+        country: customData.country || "",
+        countryCode: customData.countryCode || "",
         status: "confirmed" as const,
-        tourSlug: session.metadata?.tourSlug || "",
-        tourName: session.metadata?.tourName || "",
+        tourSlug: customData.tourSlug || "",
+        tourName: customData.tourName || "",
+        paymentMethod: "paypal" as const
       };
 
-      const newBooking = await createBooking(bookingData, session.id);
+      const newBooking = await createBooking(bookingData, order.id);
 
       // Send confirmation emails
       await Promise.all([
@@ -192,14 +195,20 @@ export async function action({ request }: ActionFunctionArgs) {
           to: bookingData.email,
           subject: "Confirmación de Reserva - Medina Azahara",
           component: BookingConfirmationEmail({
-            booking: newBooking,
+            booking: {
+              ...newBooking,
+              paymentIntentId: order.id
+            },
           }),
         }),
         sendEmail({
           to: process.env.ADMIN_EMAIL!,
           subject: "Nueva Reserva Recibida",
           component: BookingAdminEmail({
-            booking: newBooking,
+            booking: {
+              ...newBooking,
+              paymentIntentId: order.id
+            },
           }),
         }),
       ]);
