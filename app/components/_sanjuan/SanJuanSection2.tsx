@@ -46,7 +46,8 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, SanJuanSection2Text }) =
   // Function to render the appropriate animation based on the source
   const renderAnimation = () => {
     // Check if it's a GIF animation
-    if (lottieSource.includes("giphy.gif")) {
+    if (lottieSource.includes("giphy.gif") || lottieSource.includes("giphy.com")) {
+      console.log("SanJuanSection2: Rendering GIF animation");
       return (
         <img 
           src={lottieSource} 
@@ -60,7 +61,8 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, SanJuanSection2Text }) =
       );
     }
     // Check if it's a Lottie animation or an icon
-    else if (lottieSource === "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie") {
+    else if (lottieSource.endsWith(".lottie")) {
+      console.log("SanJuanSection2: Rendering Lottie animation");
       return (
         <DotLottieReact 
           src={lottieSource} 
@@ -74,6 +76,7 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, SanJuanSection2Text }) =
       );
     } else {
       // Render the appropriate icon based on the source identifier
+      console.log("SanJuanSection2: Rendering icon or default animation");
       const iconSize = width <= 450 ? 100 : 150;
       const iconClassName = "text-blue-500 translate-y-[50px] mb-4";
       

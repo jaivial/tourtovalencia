@@ -1,8 +1,9 @@
 // app/components/IndexSection1.tsx
 //UI Component: just responsible for displaying pure html with props passed from feature component
+/* eslint-disable react/prop-types */
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { sanJuansection4Type } from "~/data/data";
 import { 
   Palmtree, 
@@ -28,6 +29,14 @@ const SanJuanSection4: React.FC<ChildProps> = ({ width, SanJuanSection4Text }) =
   const isLottieEnabled = SanJuanSection4Text.lottieAnimation?.enabled ?? true;
   const lottieSource = SanJuanSection4Text.lottieAnimation?.src || "https://lottie.host/f8570958-3acf-4c42-8ae6-2ad50fe220c7/N8q8bzQLK3.lottie";
 
+  // Debug logging
+  useEffect(() => {
+    console.log("SanJuanSection4: Animation source:", lottieSource);
+    console.log("SanJuanSection4: Animation enabled:", isLottieEnabled);
+    console.log("SanJuanSection4: Is GIF?", lottieSource.includes("giphy.gif"));
+    console.log("SanJuanSection4: Is Lottie?", lottieSource.endsWith(".lottie"));
+  }, [lottieSource, isLottieEnabled]);
+
   const commonH3Styles = `
     transition-all duration-500 ease-in-out 
     text-blue-950 font-sans text-center
@@ -40,7 +49,8 @@ const SanJuanSection4: React.FC<ChildProps> = ({ width, SanJuanSection4Text }) =
   // Function to render the appropriate animation based on the source
   const renderAnimation = () => {
     // Check if it's a GIF animation
-    if (lottieSource.includes("giphy.gif")) {
+    if (lottieSource.includes("giphy.gif") || lottieSource.includes("giphy.com")) {
+      console.log("SanJuanSection4: Rendering GIF animation");
       return (
         <img 
           src={lottieSource} 
@@ -53,7 +63,8 @@ const SanJuanSection4: React.FC<ChildProps> = ({ width, SanJuanSection4Text }) =
       );
     }
     // Check if it's a Lottie animation or an icon
-    else if (lottieSource === "https://lottie.host/f8570958-3acf-4c42-8ae6-2ad50fe220c7/N8q8bzQLK3.lottie") {
+    else if (lottieSource.endsWith(".lottie")) {
+      console.log("SanJuanSection4: Rendering Lottie animation");
       return (
         <DotLottieReact 
           src={lottieSource} 
@@ -64,6 +75,7 @@ const SanJuanSection4: React.FC<ChildProps> = ({ width, SanJuanSection4Text }) =
       );
     } else {
       // Render the appropriate icon based on the source identifier
+      console.log("SanJuanSection4: Rendering icon or default animation");
       const iconSize = width <= 450 ? 100 : 150;
       const iconClassName = "text-blue-500";
       

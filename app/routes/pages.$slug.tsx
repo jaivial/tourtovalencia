@@ -171,12 +171,16 @@ export default function DynamicPage() {
       )}
 
       {/* Update to use the dynamic section5 component with image support */}
-      {content.section5 && (
-        <SanJuanSection5Dynamic 
-          width={safeWidth} 
-          SanJuanSection5Text={castSection<sanJuanSection5Type>(content.section5)} 
-        />
-      )}
+      {content.section5 && (() => {
+        console.log("pages.$slug.tsx: Section5 data:", content.section5);
+        console.log("pages.$slug.tsx: Section5 lottieAnimation:", content.section5.lottieAnimation);
+        return (
+          <SanJuanSection5Dynamic 
+            width={safeWidth} 
+            SanJuanSection5Text={castSection<sanJuanSection5Type>(content.section5)} 
+          />
+        );
+      })()}
 
       {content.timeline && (
         <DynamicPageContainer.Timeline 

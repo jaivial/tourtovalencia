@@ -306,7 +306,7 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
       );
     }
     // Check if it's a Lottie animation or an icon
-    else if (lottieSource === "https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie") {
+    else if (lottieSource.endsWith(".lottie")) {
       return (
         <DotLottieReact 
           src={lottieSource} 

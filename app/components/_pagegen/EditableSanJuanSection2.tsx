@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { sanJuansection2Type } from "~/data/data";
@@ -10,8 +11,6 @@ import { Label } from "~/components/ui/label";
 import { Input } from "@heroui/input";
 import { Button } from "~/components/ui/button";
 import { 
-  ChevronLeft, 
-  ChevronRight, 
   Check, 
   Ship, 
   Palmtree, 
@@ -489,7 +488,7 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
               transition={{ duration: 0.5, delay: 0.3 }} 
               className="w-full flex justify-center"
             >
-              {lottieSource === "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie" ? (
+              {lottieSource.endsWith(".lottie") ? (
                 <DotLottieReact 
                   key={`lottie-${lottieSource}-${isLottieEnabled}`}
                   src={lottieSource} 
@@ -500,7 +499,7 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
                     ${width <= 450 ? "w-[300px]" : "w-[400px]"}
                   `} 
                 />
-              ) : lottieSource.includes("giphy.gif") ? (
+              ) : lottieSource.includes("giphy.gif") || lottieSource.includes("giphy.com") ? (
                 <img 
                   src={lottieSource} 
                   alt="Animation" 

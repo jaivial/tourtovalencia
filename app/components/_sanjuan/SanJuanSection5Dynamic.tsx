@@ -1,7 +1,19 @@
+/* eslint-disable react/prop-types */
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import type { sanJuanSection5Type } from "~/data/data";
+import { 
+  Palmtree, 
+  Sun, 
+  Waves, 
+  Umbrella, 
+  Compass, 
+  Anchor, 
+  MapPin, 
+  Mountain, 
+  Cloud 
+} from "lucide-react";
 
 interface SanJuanSection5DynamicProps {
   width: number;
@@ -14,6 +26,16 @@ const SanJuanSection5Dynamic: React.FC<SanJuanSection5DynamicProps> = ({
 }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
+  const isLottieEnabled = SanJuanSection5Text.lottieAnimation?.enabled ?? true;
+  const lottieSource = SanJuanSection5Text.lottieAnimation?.src || "https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie";
+
+  // Debug logging
+  useEffect(() => {
+    console.log("SanJuanSection5Dynamic: Animation source:", lottieSource);
+    console.log("SanJuanSection5Dynamic: Animation enabled:", isLottieEnabled);
+    console.log("SanJuanSection5Dynamic: Is GIF?", lottieSource.includes("giphy.gif") || lottieSource.includes("giphy.com"));
+    console.log("SanJuanSection5Dynamic: Is Lottie?", lottieSource.endsWith(".lottie"));
+  }, [lottieSource, isLottieEnabled]);
 
   // Common text styles for h3 elements
   const commonH3Styles = `
@@ -27,6 +49,71 @@ const SanJuanSection5Dynamic: React.FC<SanJuanSection5DynamicProps> = ({
 
   // Use the image from the database or fallback to the default
   const imageUrl = SanJuanSection5Text.image || "/plazareina2.jpg";
+
+  // Function to render the appropriate animation based on the source
+  const renderAnimation = () => {
+    // Check if it's a GIF animation
+    if (lottieSource.includes("giphy.gif") || lottieSource.includes("giphy.com")) {
+      console.log("SanJuanSection5Dynamic: Rendering GIF animation");
+      return (
+        <img 
+          src={lottieSource} 
+          alt="Animation" 
+          className="h-[170px] w-auto object-contain" 
+        />
+      );
+    }
+    // Check if it's a Lottie animation or an icon
+    else if (lottieSource.endsWith(".lottie")) {
+      console.log("SanJuanSection5Dynamic: Rendering Lottie animation");
+      return (
+        <DotLottieReact 
+          src={lottieSource} 
+          loop 
+          autoplay 
+          className="h-[170px] w-auto" 
+        />
+      );
+    } else {
+      // Render the appropriate icon based on the source identifier
+      console.log("SanJuanSection5Dynamic: Rendering icon or default animation");
+      const iconSize = 100;
+      const iconClassName = "text-blue-500";
+      
+      switch (lottieSource) {
+        case "beach-icon":
+          return <Palmtree size={iconSize} className={iconClassName} />;
+        case "sun-icon":
+          return <Sun size={iconSize} className={iconClassName} />;
+        case "waves-icon":
+          return <Waves size={iconSize} className={iconClassName} />;
+        case "palm-icon":
+          return <Palmtree size={iconSize} className={iconClassName} />;
+        case "umbrella-icon":
+          return <Umbrella size={iconSize} className={iconClassName} />;
+        case "compass-icon":
+          return <Compass size={iconSize} className={iconClassName} />;
+        case "anchor-icon":
+          return <Anchor size={iconSize} className={iconClassName} />;
+        case "map-icon":
+          return <MapPin size={iconSize} className={iconClassName} />;
+        case "mountain-icon":
+          return <Mountain size={iconSize} className={iconClassName} />;
+        case "cloud-icon":
+          return <Cloud size={iconSize} className={iconClassName} />;
+        default:
+          // If it's not a recognized icon identifier, try to render it as a Lottie animation
+          return (
+            <DotLottieReact 
+              src={lottieSource} 
+              loop 
+              autoplay 
+              className="h-[170px] w-auto" 
+            />
+          );
+      }
+    }
+  };
 
   return (
     <div className="w-full overflow-x-hidden">
@@ -58,12 +145,7 @@ const SanJuanSection5Dynamic: React.FC<SanJuanSection5DynamicProps> = ({
             whileHover={{ scale: 1.05, rotate: 5 }}
             transition={{ duration: 0.3 }}
           >
-            <DotLottieReact 
-              src="https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie" 
-              loop 
-              autoplay 
-              className="h-[170px] w-auto" 
-            />
+            {isLottieEnabled && renderAnimation()}
           </motion.div>
 
           <motion.div 

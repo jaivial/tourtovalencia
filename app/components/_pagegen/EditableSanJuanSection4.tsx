@@ -1,4 +1,5 @@
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+/* eslint-disable react/prop-types */
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { sanJuansection4Type } from "~/data/data";
@@ -243,7 +244,7 @@ const EditableSanJuanSection4: React.FC<EditableSanJuanSection4Props> = ({
       );
     }
     // Check if it's a Lottie animation or an icon
-    else if (lottieSource === "https://lottie.host/f8570958-3acf-4c42-8ae6-2ad50fe220c7/N8q8bzQLK3.lottie") {
+    else if (lottieSource.endsWith(".lottie")) {
       return (
         <DotLottieReact 
           src={lottieSource} 
