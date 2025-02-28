@@ -1,16 +1,20 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { sanJuansection2Type } from "~/data/data";
 import EditableText from "./EditableText";
 import ImageUpload from "./ImageUpload";
 import { useEditableSanJuanSection2 } from "./EditableSanJuanSection2.hooks";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { Switch } from "~/components/ui/switch";
+import { Label } from "~/components/ui/label";
+import { Input } from "@heroui/input";
+import { Button } from "~/components/ui/button";
 
 interface EditableSanJuanSection2Props {
   width: number;
   height: number;
   data: sanJuansection2Type;
-  onUpdate: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => void;
+  onUpdate: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => void;
 }
 
 const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({ 
@@ -21,7 +25,16 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
 }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
-  const { handleTextUpdate, handleImageChange, handleImageRemove } = useEditableSanJuanSection2(data);
+  const { handleTextUpdate, handleImageChange, handleImageRemove, handleLottieToggle, handleLottieSourceChange } = useEditableSanJuanSection2(data);
+  const [showLottieControls, setShowLottieControls] = useState(false);
+  const [lottieSource, setLottieSource] = useState(data.lottieAnimation?.src || "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie");
+  const [isLottieEnabled, setIsLottieEnabled] = useState(data.lottieAnimation?.enabled ?? true);
+
+  // Update local state when props change
+  useEffect(() => {
+    setLottieSource(data.lottieAnimation?.src || "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie");
+    setIsLottieEnabled(data.lottieAnimation?.enabled ?? true);
+  }, [data.lottieAnimation?.src, data.lottieAnimation?.enabled]);
 
   const commonH3Styles = `
     transition-all duration-500 ease-in-out 
@@ -31,6 +44,23 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
 
   const getResponsiveTextSize = (small: string, medium: string, large: string) => 
     `${width <= 350 ? small : width <= 450 ? medium : large}`;
+
+  const handleLottieToggleChange = (checked: boolean) => {
+    setIsLottieEnabled(checked);
+    handleLottieToggle(checked);
+    onUpdate('lottieAnimation', { 
+      enabled: checked, 
+      src: lottieSource 
+    });
+  };
+
+  const handleLottieSourceSubmit = () => {
+    handleLottieSourceChange(lottieSource);
+    onUpdate('lottieAnimation', { 
+      enabled: isLottieEnabled, 
+      src: lottieSource 
+    });
+  };
 
   return (
     <div ref={ref} className="w-full overflow-x-hidden">
@@ -79,23 +109,76 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
             </div>
           </motion.div>
 
-          <motion.div 
-            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }} 
-            initial={{ opacity: 0, scale: 0.9 }} 
-            transition={{ duration: 0.5, delay: 0.3 }} 
-            className="w-full flex justify-center"
-          >
-            <DotLottieReact 
-              src="https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie" 
-              loop 
-              autoplay 
-              className={`
-                -translate-y-[50px] -mb-16
-                ${width <= 450 ? "w-[300px]" : "w-[400px]"}
-              `} 
-            />
-          </motion.div>
+          {/* Lottie Animation Controls */}
+          <div className="w-full flex flex-col items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="lottie-toggle" className="text-sm font-medium text-gray-700">
+                Mostrar animación
+              </Label>
+              <Switch 
+                id="lottie-toggle" 
+                checked={isLottieEnabled} 
+                onCheckedChange={handleLottieToggleChange} 
+              />
+            </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowLottieControls(!showLottieControls)}
+              className="text-xs"
+            >
+              {showLottieControls ? "Ocultar opciones" : "Cambiar animación"}
+            </Button>
+            
+            {showLottieControls && (
+              <div className="w-full flex flex-col gap-2 mt-2">
+                <Label htmlFor="lottie-source" className="text-xs font-medium text-gray-700">
+                  URL de la animación (Lottie o GIF)
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="lottie-source"
+                    value={lottieSource}
+                    onChange={(e) => setLottieSource(e.target.value)}
+                    placeholder="URL de la animación"
+                    className="text-xs"
+                  />
+                  <Button 
+                    size="sm" 
+                    onClick={handleLottieSourceSubmit}
+                    className="text-xs"
+                  >
+                    Aplicar
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Introduce la URL de una animación Lottie o GIF para reemplazar la actual.
+                </p>
+              </div>
+            )}
+          </div>
 
+          {/* Lottie Animation Display */}
+          {isLottieEnabled && (
+            <motion.div 
+              animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }} 
+              initial={{ opacity: 0, scale: 0.9 }} 
+              transition={{ duration: 0.5, delay: 0.3 }} 
+              className="w-full flex justify-center"
+            >
+              <DotLottieReact 
+                key={`lottie-${lottieSource}-${isLottieEnabled}`}
+                src={lottieSource} 
+                loop 
+                autoplay 
+                className={`
+                  -translate-y-[50px] -mb-16
+                  ${width <= 450 ? "w-[300px]" : "w-[400px]"}
+                `} 
+              />
+            </motion.div>
+          )}
 
           {[
             { text: data.firstH3, key: "firstH3" },

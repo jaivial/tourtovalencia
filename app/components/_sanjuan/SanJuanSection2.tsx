@@ -17,6 +17,8 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
   const { imageStyle } = useSanJuanSection2(SanJuanSection2Text);
+  const isLottieEnabled = SanJuanSection2Text.lottieAnimation?.enabled ?? true;
+  const lottieSource = SanJuanSection2Text.lottieAnimation?.src || "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie";
 
   const commonH3Styles = `
     transition-all duration-500 ease-in-out 
@@ -59,25 +61,27 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, height, SanJuanSection2T
             ${width <= 1280 ? "p-4 -mt-16" : "p-6 -mt-28"} 
           `}
         >
-          <motion.div
-            animate={isInView ? 
-              { opacity: 1, scale: 1 } : 
-              { opacity: 0, scale: 0.9 }
-            }
-            initial={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="w-full flex justify-center"
-          >
-            <DotLottieReact 
-              src="https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie" 
-              loop 
-              autoplay 
-              className={`
-                translate-y-[50px] mb-4
-                ${width <= 450 ? "w-[300px]" : "w-[400px]"}
-              `} 
-            />
-          </motion.div>
+          {isLottieEnabled && (
+            <motion.div
+              animate={isInView ? 
+                { opacity: 1, scale: 1 } : 
+                { opacity: 0, scale: 0.9 }
+              }
+              initial={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="w-full flex justify-center"
+            >
+              <DotLottieReact 
+                src={lottieSource} 
+                loop 
+                autoplay 
+                className={`
+                  translate-y-[50px] mb-4
+                  ${width <= 450 ? "w-[300px]" : "w-[400px]"}
+                `} 
+              />
+            </motion.div>
+          )}
 
           {[
             SanJuanSection2Text.firstH3,

@@ -25,7 +25,7 @@ export type PageTemplateProps = {
   section1Data?: sanJuanSection1Type;
   onSection1Update: (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => void | Promise<void>;
   section2Data?: sanJuansection2Type;
-  onSection2Update: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => void | Promise<void>;
+  onSection2Update: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => void | Promise<void>;
   section3Data?: sanJuanSection3Type;
   onSection3ImageUpdate: (index: number, file: File) => void | Promise<void>;
   onSection3ImageRemove: (index: number) => void;
@@ -65,10 +65,12 @@ const PageTemplate: React.FC<PageTemplateProps> = ({ status, onStatusChange, ind
     }
   };
 
-  const handleSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string }) => {
+  const handleSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => {
     try {
       console.log(`PageTemplate: Processing section2 update for field ${String(field)}:`, 
-        typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+        typeof value === 'string' ? value : 
+        'file' in value ? `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...` :
+        `Lottie: enabled=${value.enabled}, src=${value.src.substring(0, 30)}...`);
       
       // Call the original onSection2Update
       await onSection2Update(field, value);

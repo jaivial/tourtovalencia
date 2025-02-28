@@ -95,6 +95,10 @@ export type sanJuansection2Type = {
     file?: File;
     preview: string;
   };
+  lottieAnimation?: {
+    enabled: boolean;
+    src: string;
+  };
 };
 
 export type sanJuansection4Type = {

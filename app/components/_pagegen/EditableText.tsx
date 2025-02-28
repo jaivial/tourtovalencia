@@ -11,7 +11,7 @@ type EditableTextProps = {
 const EditableText: React.FC<EditableTextProps> = ({
   value,
   onUpdate,
-  placeholder = 'Click to edit...',
+  placeholder = 'Haz click para editar...',
   className = '',
   multiline = false
 }) => {
