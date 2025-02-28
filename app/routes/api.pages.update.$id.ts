@@ -2,7 +2,7 @@ import { json } from "@remix-run/server-runtime";
 import type { ActionFunctionArgs } from "@remix-run/server-runtime";
 import { getPagesCollection, getToursCollection } from "~/utils/db.server";
 import { ObjectId } from "mongodb";
-import { processContent, translateContent, translateText } from "~/utils/page.server";
+import { processContent, translateContent, translateText, logContentSize } from "~/utils/page.server";
 import type { Page, Tour } from "~/utils/db.schema.server";
 import type { Filter } from "mongodb";
 
@@ -103,27 +103,25 @@ async function processPageUpdateInBackground(
             translatedTourName = await translateText(name);
             console.log(`Translated tour name: "${translatedTourName}"`);
           }
-          
-          // Clean up the translated name - remove any quotation marks that might have been added
-          translatedTourName = translatedTourName.replace(/^["']|["']$/g, '').replace(/\\"/g, '');
-          console.log(`Final translated tour name: "${translatedTourName}"`);
         } catch (error) {
           console.error('Error translating tour name:', error);
-          translatedTourName = name; // Fallback to Spanish name if translation fails
+          translatedTourName = name; // Fallback to Spanish title if translation fails
         }
         
-        // Update the corresponding tour in the tours collection
-        const pageIdString = objectId.toString();
-        const tourFilter: Filter<Tour> = { pageId: pageIdString };
+        // Clean up the translated name - remove any quotation marks that might have been added
+        translatedTourName = translatedTourName.replace(/^["']|["']$/g, '').replace(/\\"/g, '');
         
-        // Check if a tour exists for this page
-        const existingTour = await toursCollection.findOne(tourFilter);
+        console.log(`Final tour titles - ES: "${name}", EN: "${translatedTourName}"`);
+        
+        // Check if a tour already exists for this page
+        const pageIdString = id.toString();
+        const existingTour = await toursCollection.findOne({ pageId: pageIdString });
         
         if (existingTour) {
           // Update the existing tour
           try {
             await toursCollection.updateOne(
-              tourFilter,
+              { pageId: pageIdString },
               {
                 $set: {
                   tourName: {
@@ -132,21 +130,35 @@ async function processPageUpdateInBackground(
                   },
                   tourPrice: content.price,
                   status: status,
+                  description: {
+                    es: String((processedSpanishContent.section1 as Record<string, unknown>)?.title || ""),
+                    en: String((englishContent.section1 as Record<string, unknown>)?.title || "")
+                  },
+                  duration: {
+                    es: String((processedSpanishContent.section4 as Record<string, unknown>)?.duration || ""),
+                    en: String((englishContent.section4 as Record<string, unknown>)?.duration || "")
+                  },
+                  includes: {
+                    es: String((processedSpanishContent.section4 as Record<string, unknown>)?.includes || ""),
+                    en: String((englishContent.section4 as Record<string, unknown>)?.includes || "")
+                  },
+                  meetingPoint: {
+                    es: String((processedSpanishContent.section4 as Record<string, unknown>)?.meetingPoint || ""),
+                    en: String((englishContent.section4 as Record<string, unknown>)?.meetingPoint || "")
+                  },
                   updatedAt: new Date()
                 }
               }
             );
-            
             console.log(`Updated tour for page "${name}" with price ${content.price}€`);
-            console.log(`Tour name updated - ES: "${name}", EN: "${translatedTourName}"`);
           } catch (tourUpdateError) {
             console.error("Error updating tour:", tourUpdateError);
             // Continue with page update even if tour update fails
           }
         } else {
-          // Create a new tour if it doesn't exist
+          // Create a new tour
           try {
-            const newTour: Tour = {
+            const newTour: Omit<Tour, "_id"> = {
               slug: existingPage.slug,
               tourName: {
                 es: name,
@@ -188,8 +200,15 @@ async function processPageUpdateInBackground(
       // Update job status
       backgroundJobs.set(jobId, {
         ...backgroundJobs.get(jobId)!,
-        message: 'Updating page in database'
+        message: 'Analyzing content size and updating page in database'
       });
+      
+      // Log content size before updating
+      const contentToUpdate = {
+        es: processedSpanishContent,
+        en: englishContent
+      };
+      await logContentSize(contentToUpdate, "update");
       
       // Update the page with new Spanish content and translated English content
       const result = await pagesCollection.updateOne(
@@ -492,6 +511,14 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     
     // Update the page with new Spanish content and translated English content
     try {
+      // Log content size before updating
+      const contentToUpdate = {
+        es: processedSpanishContent,
+        en: englishContent
+      };
+      console.log("Logging content size before synchronous update...");
+      await logContentSize(contentToUpdate, "update");
+      
       const result = await pagesCollection.updateOne(
         filter,
         {
@@ -505,20 +532,20 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
           }
         }
       );
-
+      
       if (result.matchedCount === 0) {
-        return json({ error: "Page not found" }, { status: 404 });
+        return json({ error: "Page not found during update" }, { status: 404 });
       }
-
+      
       return json({ 
         success: true, 
-        message: "Page updated successfully with translations",
+        message: "Page updated successfully",
         tourUpdated
       });
     } catch (updateError) {
-      console.error("Error updating page in database:", updateError);
+      console.error("Error updating page:", updateError);
       return json(
-        { error: "Database error: " + (updateError instanceof Error ? updateError.message : "Unknown error") },
+        { error: updateError instanceof Error ? updateError.message : "Failed to update page" },
         { status: 500 }
       );
     }

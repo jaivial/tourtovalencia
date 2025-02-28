@@ -3,7 +3,7 @@ import type { Page } from "./db.schema.server";
 import axios from "axios";
 import sharp from "sharp";
 
-const MAX_IMAGE_SIZE = 500 * 1024; // 500KB limit per image
+const MAX_IMAGE_SIZE = 400 * 1024; // 400KB limit per image (reduced from 500KB)
 // Configuration for OpenRouter API
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || ""; // Use environment variable
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -22,43 +22,92 @@ export function generateSlug(name: string): string {
 }
 
 // Helper function to optimize images to WebP format
-async function optimizeImage(base64Data: string): Promise<string> {
+async function optimizeImage(base64Data: string, keyPath: string = "unknown"): Promise<string> {
   try {
     // Extract the actual base64 data (remove data:image/xxx;base64, prefix)
+    const mimeType = base64Data.split(";")[0].split(":")[1] || "unknown";
     const base64Image = base64Data.split(";base64,").pop();
     if (!base64Image) {
       throw new Error("Invalid base64 image data");
     }
 
     const buffer = Buffer.from(base64Image, "base64");
-
+    const originalSize = buffer.length;
+    
+    // Get original image dimensions
+    const metadata = await sharp(buffer).metadata();
+    const originalWidth = metadata.width || 1200;
+    const originalHeight = metadata.height || 800;
+    const aspectRatio = originalWidth / originalHeight;
+    
+    // Start with a reasonable size reduction if the image is large
+    let width = originalWidth;
+    let height = originalHeight;
+    
+    // If image is very large, reduce dimensions first
+    if (width > 1600 || height > 1600) {
+      width = Math.min(width, 1600);
+      height = Math.round(width / aspectRatio);
+    }
+    
     // Convert to WebP with progressive quality reduction until size is under limit
     let quality = 80;
     let optimizedBuffer: Buffer;
+    let currentSize = buffer.length;
 
-    do {
-      optimizedBuffer = await sharp(buffer).webp({ quality }).toBuffer();
-
-      if (optimizedBuffer.length > MAX_IMAGE_SIZE && quality > 10) {
-        quality -= 10;
-      } else {
-        break;
-      }
-    } while (quality > 0);
-
-    // If we still can't get it under MAX_IMAGE_SIZE, we'll resize the image
-    if (optimizedBuffer.length > MAX_IMAGE_SIZE) {
-      const metadata = await sharp(buffer).metadata();
-      const aspectRatio = metadata.width! / metadata.height!;
-      const width = Math.sqrt(MAX_IMAGE_SIZE * aspectRatio);
-      const height = width / aspectRatio;
-
-      optimizedBuffer = await sharp(buffer).resize(Math.floor(width), Math.floor(height)).webp({ quality: 70 }).toBuffer();
+    // First attempt: try with initial dimensions and quality
+    optimizedBuffer = await sharp(buffer)
+      .resize(width, height, { fit: 'inside' })
+      .webp({ quality })
+      .toBuffer();
+    currentSize = optimizedBuffer.length;
+    
+    // If still too large, progressively reduce quality
+    while (currentSize > MAX_IMAGE_SIZE && quality > 15) {
+      quality -= 10;
+      optimizedBuffer = await sharp(buffer)
+        .resize(width, height, { fit: 'inside' })
+        .webp({ quality })
+        .toBuffer();
+      currentSize = optimizedBuffer.length;
     }
-
+    
+    // If reducing quality wasn't enough, also reduce dimensions
+    while (currentSize > MAX_IMAGE_SIZE && (width > 400 || height > 400)) {
+      width = Math.floor(width * 0.8);
+      height = Math.floor(height * 0.8);
+      
+      optimizedBuffer = await sharp(buffer)
+        .resize(width, height, { fit: 'inside' })
+        .webp({ quality })
+        .toBuffer();
+      currentSize = optimizedBuffer.length;
+    }
+    
+    // Final fallback: extreme compression if still too large
+    if (currentSize > MAX_IMAGE_SIZE) {
+      width = Math.floor(width * 0.7);
+      height = Math.floor(height * 0.7);
+      quality = 10;
+      
+      optimizedBuffer = await sharp(buffer)
+        .resize(width, height, { fit: 'inside' })
+        .webp({ quality })
+        .toBuffer();
+      currentSize = optimizedBuffer.length;
+    }
+    
+    // Detailed logging of image optimization
+    console.log(`📸 [${keyPath}] Image optimized: 
+      Original: ${(originalSize / 1024).toFixed(2)}KB (${originalWidth}x${originalHeight}) ${mimeType}
+      Final: ${(optimizedBuffer.length / 1024).toFixed(2)}KB (${width}x${height}) webp
+      Reduction: ${((1 - optimizedBuffer.length / originalSize) * 100).toFixed(2)}%
+      Quality: ${quality}
+    `);
+    
     return `data:image/webp;base64,${optimizedBuffer.toString("base64")}`;
   } catch (error) {
-    console.error("Image optimization failed:", error);
+    console.error(`Error optimizing image at ${keyPath}:`, error);
     return base64Data; // Return original if optimization fails
   }
 }
@@ -76,12 +125,16 @@ function isBlobImageObject(value: unknown): boolean {
 }
 
 // Export the processContent function so it can be used in other files
-export async function processContent(content: Record<string, unknown>, translate: boolean = true): Promise<Record<string, unknown>> {
+export async function processContent(content: Record<string, unknown>, translate: boolean = true, path: string = ""): Promise<Record<string, unknown>> {
   if (!content) return content;
 
   // If it's an array, process each item
   if (Array.isArray(content)) {
-    const processedArray = await Promise.all(content.map((item) => processContent(item as Record<string, unknown>, translate)));
+    const processedArray = await Promise.all(
+      content.map((item, index) => 
+        processContent(item as Record<string, unknown>, translate, `${path}[${index}]`)
+      )
+    );
     return processedArray as unknown as Record<string, unknown>;
   }
 
@@ -92,6 +145,9 @@ export async function processContent(content: Record<string, unknown>, translate
     for (const [key, value] of Object.entries(content)) {
       // Skip null or undefined values
       if (value == null) continue;
+      
+      // Build the current path for logging
+      const currentPath = path ? `${path}.${key}` : key;
 
       // Special handling for lottieAnimation object
       if (key === 'lottieAnimation' && typeof value === 'object' && value !== null) {
@@ -99,6 +155,8 @@ export async function processContent(content: Record<string, unknown>, translate
         const processedLottie: Record<string, unknown> = {};
         
         for (const [lottieKey, lottieValue] of Object.entries(lottieObj)) {
+          const lottiePath = `${currentPath}.${lottieKey}`;
+          
           if (lottieKey === 'src' && typeof lottieValue === 'string') {
             // Preserve the src value without translation
             processedLottie[lottieKey] = lottieValue;
@@ -107,7 +165,7 @@ export async function processContent(content: Record<string, unknown>, translate
             processedLottie[lottieKey] = translate ? await translateText(lottieValue) : lottieValue;
           } else if (typeof lottieValue === 'object' && lottieValue !== null) {
             // Process nested objects
-            processedLottie[lottieKey] = await processContent(lottieValue as Record<string, unknown>, translate);
+            processedLottie[lottieKey] = await processContent(lottieValue as Record<string, unknown>, translate, lottiePath);
           } else {
             // Keep other values as is
             processedLottie[lottieKey] = lottieValue;
@@ -116,19 +174,19 @@ export async function processContent(content: Record<string, unknown>, translate
         
         processed[key] = processedLottie;
       }
-      // Handle base64 images
+      // Handle base64 images - always optimize regardless of size
       else if (typeof value === "string") {
         if (value.startsWith("data:image")) {
           try {
-            const size = Buffer.from(value.split(",")[1], "base64").length;
-            processed[key] = size > MAX_IMAGE_SIZE ? await optimizeImage(value) : value;
+            // Always optimize images, regardless of size
+            processed[key] = await optimizeImage(value, currentPath);
           } catch (error) {
-            console.error("Error processing image:", error);
+            console.error(`Error processing image at ${currentPath}:`, error);
             processed[key] = value; // Keep original if processing fails
           }
         } else if (value.startsWith("blob:")) {
           // Handle blob URLs directly
-          console.log("Found blob URL:", value);
+          console.log(`🔴 [${currentPath}] Found blob URL that cannot be processed: ${value.substring(0, 30)}...`);
           processed[key] = ""; // Set to empty string as fallback
         } else if (value.trim() !== "") {
           // For text content, only translate if translate flag is true
@@ -139,14 +197,23 @@ export async function processContent(content: Record<string, unknown>, translate
       } else if (isBlobImageObject(value)) {
         // Handle image objects with blob URL previews
         const imgObj = value as { preview: string; file?: unknown };
-        processed[key] = {
-          ...imgObj,
-          preview: typeof imgObj.preview === "string" && imgObj.preview.startsWith("data:") 
-            ? imgObj.preview 
-            : "" // Set to empty string as fallback for blob URLs
-        };
+        
+        if (typeof imgObj.preview === "string" && imgObj.preview.startsWith("data:")) {
+          // Process and optimize the preview image
+          const optimizedPreview = await optimizeImage(imgObj.preview, `${currentPath}.preview`);
+          processed[key] = {
+            ...imgObj,
+            preview: optimizedPreview
+          };
+        } else {
+          console.log(`🔴 [${currentPath}] Found blob image object with non-data URL: ${imgObj.preview.substring(0, 30)}...`);
+          processed[key] = {
+            ...imgObj,
+            preview: "" // Set to empty string as fallback for blob URLs
+          };
+        }
       } else if (typeof value === "object") {
-        processed[key] = await processContent(value as Record<string, unknown>, translate);
+        processed[key] = await processContent(value as Record<string, unknown>, translate, currentPath);
       } else {
         processed[key] = value;
       }
@@ -312,6 +379,106 @@ function isImageRelatedString(str: string): boolean {
          animationUrls.test(str);
 }
 
+// Add a function to log the final content size before MongoDB insertion
+export async function logContentSize(content: Record<string, unknown>, operation: string = "insert"): Promise<void> {
+  try {
+    // Count the number of images and their total size
+    let imageCount = 0;
+    let totalImageSize = 0;
+    let largestImageSize = 0;
+    let largestImagePath = "";
+    
+    // Function to recursively scan for images
+    const scanForImages = (obj: unknown, path: string = "") => {
+      if (!obj || typeof obj !== 'object') return;
+      
+      if (Array.isArray(obj)) {
+        obj.forEach((item, index) => scanForImages(item, `${path}[${index}]`));
+        return;
+      }
+      
+      // At this point, we know obj is a non-null object
+      const objEntries = Object.entries(obj as Record<string, unknown>);
+      
+      for (const [key, value] of objEntries) {
+        const currentPath = path ? `${path}.${key}` : key;
+        
+        if (typeof value === 'string' && value.startsWith('data:image')) {
+          // Extract base64 data
+          const base64Data = value.split(';base64,')[1];
+          if (base64Data) {
+            const sizeInBytes = base64Data.length * 0.75; // base64 to binary conversion factor
+            const sizeInKB = sizeInBytes / 1024;
+            
+            imageCount++;
+            totalImageSize += sizeInKB;
+            
+            if (sizeInKB > largestImageSize) {
+              largestImageSize = sizeInKB;
+              largestImagePath = currentPath;
+            }
+            
+            // Log individual image size
+            console.log(`📊 [${currentPath}] Image size: ${sizeInKB.toFixed(2)}KB`);
+          }
+        } else if (typeof value === 'object' && value !== null) {
+          // Check for image objects with preview property
+          if ('preview' in value && typeof (value as { preview: unknown }).preview === 'string' && (value as { preview: string }).preview.startsWith('data:image')) {
+            const base64Data = (value as { preview: string }).preview.split(';base64,')[1];
+            if (base64Data) {
+              const sizeInBytes = base64Data.length * 0.75;
+              const sizeInKB = sizeInBytes / 1024;
+              
+              imageCount++;
+              totalImageSize += sizeInKB;
+              
+              if (sizeInKB > largestImageSize) {
+                largestImageSize = sizeInKB;
+                largestImagePath = `${currentPath}.preview`;
+              }
+              
+              // Log individual image size
+              console.log(`📊 [${currentPath}.preview] Image size: ${sizeInKB.toFixed(2)}KB`);
+            }
+          }
+          
+          // Recursively scan nested objects
+          scanForImages(value, currentPath);
+        }
+      }
+    };
+    
+    // Scan both language versions if they exist
+    if (content.es) scanForImages(content.es, "es");
+    if (content.en) scanForImages(content.en, "en");
+    if (!content.es && !content.en) scanForImages(content);
+    
+    // Calculate total content size (approximate)
+    const contentString = JSON.stringify(content);
+    const totalSizeKB = contentString.length / 1024;
+    
+    // Log summary
+    console.log(`
+    📝 MONGODB ${operation.toUpperCase()} SUMMARY:
+    ----------------------------------------
+    Total content size: ${totalSizeKB.toFixed(2)}KB
+    Number of images: ${imageCount}
+    Total image size: ${totalImageSize.toFixed(2)}KB (${(totalImageSize / totalSizeKB * 100).toFixed(2)}% of total)
+    Largest image: ${largestImageSize.toFixed(2)}KB at ${largestImagePath}
+    ----------------------------------------
+    `);
+    
+    // Warning if content is large
+    if (totalSizeKB > 15000) {
+      console.warn(`⚠️ WARNING: Content size (${totalSizeKB.toFixed(2)}KB) is approaching MongoDB document size limit (16MB)`);
+    }
+    
+  } catch (error) {
+    console.error("Error logging content size:", error);
+  }
+}
+
+// Modify the createPage function to log content size before insertion
 export async function createPage(name: string, content: Record<string, unknown>, status: "active" | "upcoming", template: string = ""): Promise<Page> {
   const collection = await getPagesCollection();
   const slug = generateSlug(name);
@@ -350,6 +517,9 @@ export async function createPage(name: string, content: Record<string, unknown>,
     updatedAt: new Date(),
   } as Page;
 
+  // Log the final content size before insertion
+  await logContentSize(page.content, "insert");
+  
   const result = await collection.insertOne(page);
   
   // If this is a tour page, also create a tour in the tours collection
