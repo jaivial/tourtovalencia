@@ -215,7 +215,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
             <div className="flex flex-col items-center gap-6 w-full max-w-md">
               <div className="flex flex-col items-center gap-3">
                 <Label htmlFor="status" className="text-sm font-medium text-gray-700">
-                  {status === "active" ? "Activo" : "Proximamente"}
+                  {status === "active" ? "Activo" : "Próximamente"}
                 </Label>
                 <Switch id="status" checked={status === "active"} onCheckedChange={onStatusChange} />
               </div>
@@ -268,7 +268,9 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
           {cardData && onCardUpdate && (
             <div className="w-full py-12 bg-blue-50">
               <div className="w-[95%] max-w-[1280px] mx-auto">
-                <h2 className="text-2xl font-bold text-blue-900 mb-8 text-center">Tour Card Preview</h2>
+                <h2 className="text-2xl font-bold text-blue-900 mb-8 text-center">
+                  {status === "active" ? "Vista previa de la tarjeta del tour" : "Vista previa de la tarjeta de próximamente"}
+                </h2>
                 <div className="flex justify-center">
                   <div className="w-full max-w-md">
                     <EditableCard

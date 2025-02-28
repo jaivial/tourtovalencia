@@ -2,8 +2,11 @@ import { motion } from "framer-motion";
 import { Link } from "@remix-run/react";
 import EditableText from "~/components/_pagegen/EditableText";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ImageUploader } from "~/components/_pagegen/ImageUploader";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { CalendarClock } from "lucide-react";
+import { useInView } from "framer-motion";
 
 export type EditableCardDataType = {
   title: string;
@@ -42,6 +45,8 @@ const EditableCard: React.FC<EditableCardProps> = ({
   const comingSoonText = language === "en" ? "Coming Soon" : "Próximamente";
   
   const [isHovering, setIsHovering] = useState(false);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { margin: "-100px" });
 
   const handleTextUpdate = (field: keyof EditableCardDataType) => (value: string) => {
     onUpdate(field, value);
@@ -61,6 +66,120 @@ const EditableCard: React.FC<EditableCardProps> = ({
     textDecoration: 'none'
   };
 
+  // Define multilingual text for ComingSoon view
+  const comingSoonTexts = {
+    en: {
+      title: "Adventure coming soon",
+      description: "Stay tuned for updates about this exciting adventure!"
+    },
+    es: {
+      title: "Excursión disponible próximamente",
+      description: "¡Mantente atento para actualizaciones sobre esta emocionante excursión!"
+    }
+  };
+  
+  // Get text based on current language
+  const currentComingSoonText = comingSoonTexts[language as keyof typeof comingSoonTexts] || comingSoonTexts.es;
+
+  // If status is "upcoming" and not in edit mode, display as ComingSoonCard
+  if (status === "upcoming" && !isEditMode) {
+    return (
+      <div className="w-full overflow-x-hidden">
+        <motion.div 
+          ref={ref}
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? 
+            { opacity: 1, y: 0 } : 
+            { opacity: 0, y: 50 }
+          }
+          transition={{ duration: 0.8 }}
+          className="w-full flex flex-col items-center justify-center relative z-[1] mb-24"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={isInView ? 
+              { opacity: 1, scale: 1 } : 
+              { opacity: 0, scale: 0.95 }
+            }
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.5 }}
+            className="w-full"
+          >
+            <Card className="backdrop-blur-md bg-white/80 border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
+              {data.image.preview && (
+                <div className="relative h-56 w-full overflow-hidden">
+                  <div className="absolute inset-0 bg-gray-500 opacity-50 z-10"></div>
+                  <img 
+                    src={data.image.preview} 
+                    alt="Coming soon" 
+                    className="w-full h-full object-cover grayscale"
+                  />
+                </div>
+              )}
+              <CardHeader className="flex flex-col justify-center items-center space-y-6">
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={isInView ? 
+                    { opacity: 1, y: 0 } : 
+                    { opacity: 0, y: -20 }
+                  }
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="text-blue-600"
+                >
+                  <CalendarClock size={48} />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={isInView ? 
+                    { opacity: 1, y: 0 } : 
+                    { opacity: 0, y: -20 }
+                  }
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  <CardTitle className={`
+                    text-center bg-gradient-to-r from-blue-900 to-blue-600 
+                    bg-clip-text text-transparent font-bold
+                    ${width <= 350 ? "text-[1.5rem]" : "text-[2rem]"}
+                  `}>
+                    {data.title || currentComingSoonText.title}
+                  </CardTitle>
+                </motion.div>
+              </CardHeader>
+              <CardContent className="text-center pb-8">
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? 
+                    { opacity: 1, y: 0 } : 
+                    { opacity: 0, y: 20 }
+                  }
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  className="text-blue-800/80 text-lg"
+                >
+                  {data.description || currentComingSoonText.description}
+                </motion.p>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? 
+                    { opacity: 1, y: 0 } : 
+                    { opacity: 0, y: 20 }
+                  }
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                  className="mt-6"
+                >
+                  <div className="flex items-center justify-center bg-blue-50 py-3 px-4 rounded-lg">
+                    <span className="text-2xl font-bold text-blue-800">{price.toFixed(2)}€</span>
+                    <span className="text-sm text-blue-600 ml-1">{perPersonText}</span>
+                  </div>
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Regular EditableCard view for "active" status or edit mode
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -70,7 +189,7 @@ const EditableCard: React.FC<EditableCardProps> = ({
       className={`
         relative rounded-xl overflow-hidden shadow-lg bg-white h-[550px] flex flex-col
         transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2
-        ${status === "upcoming" ? "overflow-hidden" : ""}
+        ${status === "upcoming" && isEditMode ? "border-2 border-yellow-400" : ""}
       `}
     >
       {/* Tour Image */}
@@ -90,7 +209,7 @@ const EditableCard: React.FC<EditableCardProps> = ({
           <img 
             src={data.image.preview} 
             alt={data.title} 
-            className={`w-full h-full object-cover transition-transform duration-500 hover:scale-110 ${status === "upcoming" ? "grayscale" : ""}`}
+            className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
           />
         )}
       </div>
@@ -181,32 +300,26 @@ const EditableCard: React.FC<EditableCardProps> = ({
                   </Link>
                 </div>
                 
-                {status === "active" ? (
-                  <div className="w-full">
-                    <Link 
-                      to="#"
-                      className="block w-full py-3 bg-blue-600 text-white hover:text-white rounded-lg hover:bg-blue-700 transition-colors text-center font-medium"
-                      style={linkButtonStyle}
-                    >
-                      <span className="pointer-events-none text-white hover:text-white">{bookNowText}</span>
-                    </Link>
-                  </div>
-                ) : (
-                  <span className="w-full py-3 bg-gray-400 text-white rounded-lg cursor-not-allowed text-center font-medium">
-                    {comingSoonText}
-                  </span>
-                )}
+                <div className="w-full">
+                  <Link 
+                    to="#"
+                    className="block w-full py-3 bg-blue-600 text-white hover:text-white rounded-lg hover:bg-blue-700 transition-colors text-center font-medium"
+                    style={linkButtonStyle}
+                  >
+                    <span className="pointer-events-none text-white hover:text-white">{bookNowText}</span>
+                  </Link>
+                </div>
               </>
             )}
           </div>
         </div>
       </div>
 
-      {/* Overlay for upcoming tours */}
-      {status === "upcoming" && !isEditMode && (
+      {/* Visual indicator for edit mode when status is upcoming */}
+      {status === "upcoming" && isEditMode && (
         <div className="absolute top-0 right-0 m-4">
-          <div className="bg-blue-600/90 px-4 py-2 rounded-lg text-center shadow-md">
-            <p className="text-sm font-bold text-white">{comingSoonText}</p>
+          <div className="bg-yellow-400 px-4 py-2 rounded-lg text-center shadow-md">
+            <p className="text-sm font-bold text-white">{comingSoonText} (Vista previa)</p>
           </div>
         </div>
       )}
