@@ -10,6 +10,7 @@ import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
 import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
 import { useEffect, useState, useRef } from "react";
+import { getPayPalTransactionDetails } from "~/utils/paypal.server";
 
 // PayPal order type
 interface PayPalOrder {
@@ -156,8 +157,6 @@ export async function action({ request }: ActionFunctionArgs) {
   if (intent === "confirm-payment") {
     try {
       // Get PayPal order details
-      const { getPayPalTransactionDetails } = await import("~/utils/paypal.server");
-      
       const orderId = formData.get("order_id") as string;
       const order = await getPayPalTransactionDetails(orderId) as PayPalOrder;
 
