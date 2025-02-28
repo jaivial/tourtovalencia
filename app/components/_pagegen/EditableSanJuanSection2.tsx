@@ -4,6 +4,7 @@ import { sanJuansection2Type } from "~/data/data";
 import EditableText from "./EditableText";
 import ImageUpload from "./ImageUpload";
 import { useEditableSanJuanSection2 } from "./EditableSanJuanSection2.hooks";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 interface EditableSanJuanSection2Props {
   width: number;
@@ -54,13 +55,14 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
             ${width <= 1280 ? "p-4 mt-16" : "p-6 mt-28"} 
           `}
         >
+      
           <motion.div 
             animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }} 
             initial={{ opacity: 0, scale: 0.9 }} 
             transition={{ duration: 0.5, delay: 0.3 }} 
             className="w-full flex justify-center"
           >
-            <div className="w-[400px] h-[300px] relative rounded-lg overflow-hidden">
+            <div className="w-[800px] h-[300px] relative rounded-lg overflow-hidden">
               <ImageUpload 
                 imageUrl={data.sectionImage?.preview || ""} 
                 onImageChange={(file) => {
@@ -76,6 +78,24 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
               />
             </div>
           </motion.div>
+
+          <motion.div 
+            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }} 
+            initial={{ opacity: 0, scale: 0.9 }} 
+            transition={{ duration: 0.5, delay: 0.3 }} 
+            className="w-full flex justify-center"
+          >
+            <DotLottieReact 
+              src="https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie" 
+              loop 
+              autoplay 
+              className={`
+                -translate-y-[50px] -mb-16
+                ${width <= 450 ? "w-[300px]" : "w-[400px]"}
+              `} 
+            />
+          </motion.div>
+
 
           {[
             { text: data.firstH3, key: "firstH3" },
@@ -93,7 +113,7 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
               }}
               className={`
                 ${commonH3Styles}
-                font-medium w-full
+                font-medium w-full -translate-y-[100px] 
                 ${getResponsiveTextSize("text-[1.3rem]", "text-[1.4rem]", "text-[1.5rem]")}
               `}
             >
