@@ -1,7 +1,6 @@
 import { useBooking } from "~/context/BookingContext";
 import { Label } from "../ui/label";
 import { cn } from "~/lib/utils";
-import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Alert, AlertDescription } from "../ui/alert";
@@ -10,6 +9,8 @@ import { useLanguageContext } from "~/providers/LanguageContext";
 // Import HeroUI Calendar and internationalized date utilities
 import { Calendar } from "@heroui/react";
 import { CalendarDate, parseDate, getLocalTimeZone, today, DateValue } from "@internationalized/date";
+// Import our date utility functions
+import { formatLocalDate } from "~/utils/date";
 
 interface BookingDateStepProps {
   tourSelectorText: {
@@ -105,12 +106,13 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       
       // Create a date at midnight in local timezone
       jsDate = new Date(calendarDate.year, calendarDate.month - 1, calendarDate.day);
+      jsDate.setHours(0, 0, 0, 0);
       
       // Log the created JavaScript Date
       console.log("Converted to JS Date:", {
         iso: jsDate.toISOString(),
         year: jsDate.getFullYear(),
-        month: jsDate.getMonth(),
+        month: jsDate.getMonth() + 1,
         day: jsDate.getDate()
       });
     } catch (error) {
@@ -133,8 +135,8 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     // If no tour is selected, disable all dates
     if (!formData.tourSlug) return true;
     
-    // Format the date for comparison - ensure consistent format with backend
-    const dateString = format(jsDate, "yyyy-MM-dd");
+    // Format the date for comparison - use our utility function for consistent formatting
+    const dateString = formatLocalDate(jsDate);
     
     // Log the formatted date string
     console.log(`Checking if ${dateString} is unavailable for tour ${formData.tourSlug}`);
@@ -166,20 +168,21 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     
     // Convert CalendarDate to JavaScript Date
     const jsDate = new Date(date.year, date.month - 1, date.day);
+    jsDate.setHours(0, 0, 0, 0);
     
     // Log the converted JavaScript Date
     console.log("Converted to JS Date:", {
       iso: jsDate.toISOString(),
       year: jsDate.getFullYear(),
-      month: jsDate.getMonth(),
+      month: jsDate.getMonth() + 1,
       day: jsDate.getDate()
     });
     
     // Reset previous errors
     setFetchError(null);
 
-    // Format the date for form data
-    const formattedDate = format(jsDate, "yyyy-MM-dd");
+    // Format the date for form data using our utility function
+    const formattedDate = formatLocalDate(jsDate);
     console.log("Formatted date for API:", formattedDate);
 
     // Check if a tour is selected
