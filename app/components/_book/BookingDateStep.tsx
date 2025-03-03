@@ -199,9 +199,12 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     }
 
     try {
-      // Fetch available places from the API
+      // Add a timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      
+      // Fetch available places from the API with cache-busting parameter
       console.log(`Fetching available places for ${formattedDate} and tour ${formData.tourSlug}`);
-      const response = await fetch(`/api/booking-places?date=${formattedDate}&tourSlug=${formData.tourSlug}`);
+      const response = await fetch(`/api/booking-places?date=${formattedDate}&tourSlug=${formData.tourSlug}&_t=${timestamp}`);
       
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);

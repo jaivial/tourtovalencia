@@ -1,7 +1,7 @@
 // app/components/layout/nav.tsx
 import { useState, useEffect } from "react";
 import { Menu, ArrowRightToLine, ChevronDown, Settings } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "~/components/ui/select";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import { useFetcher, useLocation, useLoaderData, useNavigate } from "@remix-run/react";
 import type { RootLoaderData } from "~/root";
@@ -17,7 +17,6 @@ const Nav: React.FC<NavProps> = () => {
   const fetcher = useFetcher();
   const navLinks = state.links;
   const currentLanguage = state.currentLanguage;
-  const flag = state.flag;
   const location = useLocation();
   const navigate = useNavigate();
   const [clientWidth, setClientWidth] = useState(0);
@@ -103,6 +102,38 @@ const Nav: React.FC<NavProps> = () => {
     }
   };
 
+  // Language selector component to be reused
+  const LanguageSelector = () => {
+    // Use emoji flags instead of relying on the empty flag property
+    const getFlag = (language: string) => {
+      return language.toLowerCase() === 'en' ? '🇺🇸' : '🇪🇸';
+    };
+    
+    // Determine the current language code (en or es)
+    const currentLangCode = currentLanguage === "English" ? "en" : "es";
+    
+    return (
+      <Select onValueChange={handleChange} defaultValue={currentLangCode}>
+        <SelectTrigger className={`${clientWidth < 380 ? "w-[60px]" : clientWidth < 400 ? "w-[65px]" : clientWidth < 450 ? "w-[70px]" : clientWidth < 500 ? "w-[80px]" : "w-[90px]"} bg-blue-50 flex flex-row items-center justify-center z-[100]`}>
+          <div className="flex items-center justify-center">
+            <p className={`${clientWidth < 400 ? "text-xl" : clientWidth < 450 ? "text-2xl" : "text-3xl"} leading-none`}>{getFlag(currentLangCode)}</p>
+          </div>
+          {/* Remove the SelectValue to only show the flag */}
+        </SelectTrigger>
+        <SelectContent style={{ zIndex: 1000 }}>
+          <SelectItem value="es" className="flex flex-row items-center gap-2">
+            <span className={`${clientWidth < 400 ? "text-xl" : clientWidth < 450 ? "text-2xl" : "text-3xl"} leading-none`}>🇪🇸</span>
+            <span className="my-auto">Español</span>
+          </SelectItem>
+          <SelectItem value="en" className="flex items-center gap-2">
+            <span className={`${clientWidth < 400 ? "text-xl" : clientWidth < 450 ? "text-2xl" : "text-3xl"} leading-none`}>🇺🇸</span>
+            <span className="my-auto">English</span>
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    );
+  };
+
   return (
     <>
       {clientWidth >= 1280 ? (
@@ -122,9 +153,12 @@ const Nav: React.FC<NavProps> = () => {
             mass: 1
           }}
         >
+            <LanguageSelector />
           <div className="w-[45px]" />
           <img src="/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[20px]" : "h-[80px]"} py-2 absolute left-1/2 -translate-x-1/2 w-auto`} />
-          <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors" size={45} onClick={() => setMobileNavOpen(true)} />
+          <div className="flex items-center gap-3">
+            <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors" size={45} onClick={() => setMobileNavOpen(true)} />
+          </div>
         </motion.div>
       ) : (
         <motion.div 
@@ -143,8 +177,11 @@ const Nav: React.FC<NavProps> = () => {
             mass: 1
           }}
         >
+            <LanguageSelector />
           <img src="/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[50px]" : clientWidth < 450 ? "h-[50px]" : clientWidth < 500 ? "h-[50px]" : "h-[50px]"}`} />
-          <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors z-[990]" size={45} onClick={() => setMobileNavOpen(true)} />
+          <div className="flex items-center gap-3">
+            <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors z-[990]" size={45} onClick={() => setMobileNavOpen(true)} />
+          </div>
         </motion.div>
       )}
 
@@ -180,36 +217,24 @@ const Nav: React.FC<NavProps> = () => {
                 <div className="flex flex-col gap-6">
                   <img src="/tourtovalencialogo.png" alt="Olga Travel" className={`${clientWidth < 380 ? "h-[60px]" : "h-[80px]"} mx-auto mb-4`} />
                   
-                  <Select onValueChange={handleChange}>
-                    <SelectTrigger className={`${clientWidth < 380 ? "w-[150px]" : "w-[180px]"} bg-blue-50 flex flex-row justify-evenly`}>
-                      <p className="text-2xl">{flag}</p>
-                      <SelectValue placeholder={currentLanguage} />
-                    </SelectTrigger>
-                    <SelectContent style={{ zIndex: 1000 }}>
-                      <SelectItem value="es">Español</SelectItem>
-                      <SelectItem value="en">English</SelectItem>
-                    </SelectContent>
-                  </Select>
-
                   {/* Regular Nav Links */}
                   <div className="flex flex-col gap-4 w-full">
-                    {navLinks.map((link, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.1 * index }}
+                    {/* Regular Nav Links - Home */}
+                    <motion.div
+                      key="home-link"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <button 
+                        onClick={() => handleLinkClick(navLinks[0].path)} 
+                        className="text-white text-xl hover:text-blue-200 transition-colors text-left w-full"
                       >
-                        <button 
-                          onClick={() => handleLinkClick(link.path)} 
-                          className="text-white text-xl hover:text-blue-200 transition-colors text-left w-full"
-                        >
-                          {link.linkText}
-                        </button>
-                      </motion.div>
-                    ))}
+                        {navLinks[0].linkText}
+                      </button>
+                    </motion.div>
                     
-                    {/* Tours Dropdown - Moved below regular links */}
+                    {/* Tours Dropdown - Placed second */}
                     {activeTours.length > 0 && (
                       <div className="w-full">
                         <button onClick={() => setIsToursOpen(!isToursOpen)} className="w-full flex items-center justify-between text-blue-50 font-sans font-semibold text-xl group">
@@ -248,6 +273,28 @@ const Nav: React.FC<NavProps> = () => {
                         </motion.div>
                       </div>
                     )}
+                    
+                    {/* Remaining Nav Links - Book Now and Valencia Things to Do */}
+                    {navLinks.slice(1).map((link, index) => {
+                      // Skip the Tours link since it's already handled separately
+                      if (link.path === "/tours") return null;
+                      
+                      return (
+                        <motion.div
+                          key={index + 1}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1 * (index + 2) }}
+                        >
+                          <button 
+                            onClick={() => handleLinkClick(link.path)} 
+                            className="text-white text-xl hover:text-blue-200 transition-colors text-left w-full"
+                          >
+                            {link.linkText}
+                          </button>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
                 

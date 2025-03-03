@@ -258,7 +258,7 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="flex flex-wrap justify-center gap-8">
           {displayTours.map((tour, index) => {
             const tourImage = getTourImage(tour);
             const cardData = getCardData(tour);
@@ -274,6 +274,7 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
                   relative rounded-xl overflow-hidden shadow-lg bg-white h-[550px] flex flex-col
                   transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2
                   ${tour.status === "upcoming" ? "overflow-hidden" : ""}
+                  w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-[380px]
                 `}
               >
                 {/* Tour Image */}

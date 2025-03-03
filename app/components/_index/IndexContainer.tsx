@@ -14,6 +14,7 @@ import TravelGallery from "./TravelGallery";
 import { Tour, Page } from "~/utils/db.schema.server";
 import ArrowToTop from "./ArrowToTop";
 import PropTypes from "prop-types";
+import DynamicTourSections from "./DynamicTourSections";
 
 // Define a serializable version of the Tour type for use with JSON
 type SerializableTour = Omit<Tour, 'createdAt' | 'updatedAt'> & {
@@ -80,12 +81,13 @@ const IndexContainer: React.FC<IndexContainerProps> = ({ tours = [], pages = [] 
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn">
       <HeroSection width={clientWidth} height={clientHeight} heroSectionText={heroSectionText} />
-      <IndexSection1 width={clientWidth} height={clientHeight} indexSection1Text={indexSection1Text} />
+      <DynamicTourSections width={clientWidth} tours={processedTours} pages={processedPages} />
       <ToursSection width={clientWidth} toursText={toursText} tours={processedTours} pages={processedPages} />
-      <WhyChooseUs width={clientWidth} whyChooseUsText={whyChooseUsText} />
-      <TravelGallery width={clientWidth} galleryText={travelGalleryText} />
       <IndexFeatures width={clientWidth} indexFeatures={indexFeatures} />
-      <IndexSection3 width={clientWidth} indexSection3Text={indexSection3Text} />
+      <WhyChooseUs width={clientWidth} whyChooseUsText={whyChooseUsText} />
+      <IndexSection1 width={clientWidth} height={clientHeight} indexSection1Text={indexSection1Text} />
+      {/* <TravelGallery width={clientWidth} galleryText={travelGalleryText} /> */}
+      {/* <IndexSection3 width={clientWidth} indexSection3Text={indexSection3Text} /> */}
       <IndexSection2 width={clientWidth} height={clientHeight} indexSection2Text={indexSection2Text} carouselIndexSection2={carouselIndexSection2} /> 
       <FloatingButton text={floatingButtonText} />
       <IndexSection6 />

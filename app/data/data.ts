@@ -317,8 +317,8 @@ export const languages: Record<string, LanguageData> = {
       heroSection: {
         firstH2Orange: "MEDITERRANEAN",
         firstH2: "EXCURSIONS",
-        firstH3: "EXPLORE THE BEST",
-        secondH3: "EXPERIENCES IN VALENCIA",
+        firstH3: "DISCOVER THE MAGICAL",
+        secondH3: "CAVES OF VALENCIA",
       },
       indexSection1: {
         firstH2: "EXPLORE VALENCIA",
@@ -714,8 +714,8 @@ export const languages: Record<string, LanguageData> = {
       heroSection: {
         firstH2Orange: "EXCURSIONES",
         firstH2: "MEDITERRÁNEO",
-        firstH3: "EXPLORA LAS MEJORES",
-        secondH3: "EXPERIENCIAS DE VALENCIA",
+        firstH3: "DESCUBRE LAS MÁGICAS",
+        secondH3: "CUEVAS DE VALENCIA",
       },
       indexSection1: {
         firstH2: "EXPLORA VALENCIA",

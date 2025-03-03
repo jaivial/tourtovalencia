@@ -6,12 +6,16 @@
         "linkText": "Home"
       },
       {
-        "path": "/valencia-things-to-do",
-        "linkText": "Valencia Things to Do"
+        "path": "/tours",
+        "linkText": "Tours"
       },
       {
         "path": "/book",
         "linkText": "Book Now"
+      },
+      {
+        "path": "/valencia-things-to-do",
+        "linkText": "Valencia Things to Do"
       }
     ],
     "flag": "",
@@ -20,8 +24,8 @@
       "heroSection": {
         "firstH2Orange": "TOUR TO",
         "firstH2": "VALENCIA",
-        "firstH3": "EXPLORE THE BEST",
-        "secondH3": "EXPERIENCES IN VALENCIA"
+        "firstH3": "DISCOVER THE MAGICAL",
+        "secondH3": "CAVES OF VALENCIA"
       },
       "indexSection1": {
         "firstH2": "EXPLORE VALENCIA",
@@ -714,12 +718,16 @@
         "linkText": "Inicio"
       },
       {
-        "path": "/valencia-things-to-do",
-        "linkText": "Qué Hacer en Valencia"
+        "path": "/tours",
+        "linkText": "Tours"
       },
       {
         "path": "/book",
         "linkText": "Reservar"
+      },
+      {
+        "path": "/valencia-things-to-do",
+        "linkText": "Qué Hacer en Valencia"
       }
     ],
     "flag": "",
@@ -728,8 +736,8 @@
       "heroSection": {
         "firstH2Orange": "TOUR TO",
         "firstH2": "VALENCIA",
-        "firstH3": "EXPLORA LAS MEJORES",
-        "secondH3": "EXPERIENCIAS EN VALENCIA"
+        "firstH3": "DESCUBRE LAS CUEVAS",
+        "secondH3": "MÁGICAS DE VALENCIA"
       },
       "indexSection1": {
         "firstH2": "EXPLORA VALENCIA",

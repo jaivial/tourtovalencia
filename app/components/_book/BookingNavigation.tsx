@@ -81,8 +81,8 @@ export const BookingNavigation = ({
       <PaymentModal isOpen={isOpen} onClose={handleClose}>
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold">{bookingNavigationText.completeBooking}</h2>
-            <p className="text-muted-foreground mt-2">
+            <h2 className="text-3xl font-semibold">{bookingNavigationText.completeBooking}</h2>
+            <p className="text-muted-foreground text-xl mt-2">
               {bookingNavigationText.totalAmount} {totalPrice}€
             </p>
           </div>
