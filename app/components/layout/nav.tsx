@@ -216,23 +216,22 @@ const Nav: React.FC<NavProps> = () => {
                   
                   {/* Regular Nav Links */}
                   <div className="flex flex-col gap-4 w-full">
-                    {navLinks.map((link, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.1 * index }}
+                    {/* Regular Nav Links - Home */}
+                    <motion.div
+                      key="home-link"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <button 
+                        onClick={() => handleLinkClick(navLinks[0].path)} 
+                        className="text-white text-xl hover:text-blue-200 transition-colors text-left w-full"
                       >
-                        <button 
-                          onClick={() => handleLinkClick(link.path)} 
-                          className="text-white text-xl hover:text-blue-200 transition-colors text-left w-full"
-                        >
-                          {link.linkText}
-                        </button>
-                      </motion.div>
-                    ))}
+                        {navLinks[0].linkText}
+                      </button>
+                    </motion.div>
                     
-                    {/* Tours Dropdown - Moved below regular links */}
+                    {/* Tours Dropdown - Placed second */}
                     {activeTours.length > 0 && (
                       <div className="w-full">
                         <button onClick={() => setIsToursOpen(!isToursOpen)} className="w-full flex items-center justify-between text-blue-50 font-sans font-semibold text-xl group">
@@ -271,6 +270,28 @@ const Nav: React.FC<NavProps> = () => {
                         </motion.div>
                       </div>
                     )}
+                    
+                    {/* Remaining Nav Links - Book Now and Valencia Things to Do */}
+                    {navLinks.slice(1).map((link, index) => {
+                      // Skip the Tours link since it's already handled separately
+                      if (link.path === "/tours") return null;
+                      
+                      return (
+                        <motion.div
+                          key={index + 1}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1 * (index + 2) }}
+                        >
+                          <button 
+                            onClick={() => handleLinkClick(link.path)} 
+                            className="text-white text-xl hover:text-blue-200 transition-colors text-left w-full"
+                          >
+                            {link.linkText}
+                          </button>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
                 
