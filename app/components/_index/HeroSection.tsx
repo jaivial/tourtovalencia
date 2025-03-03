@@ -26,13 +26,13 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
           <img
             src="/valenciaadventure1.jpg"
             alt="Valencia Adventure Background"
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover object-center brightness-[0.85]"
           />
         </picture>
       </div>
 
       {/* Darker overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/10 to-black/0" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/20" />
 
       {/* Content container */}
       <motion.div 
@@ -50,8 +50,8 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
         >
           <h2 className={`
             font-bold font-sans text-center tracking-wide
-            bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent
-            drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
+            bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent
+            drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]
             ${width <= 290 ? "text-[1.8rem]" : 
               width <= 350 ? "text-[2rem]" : 
               width <= 400 ? "text-[2.25rem]" : 
@@ -68,8 +68,8 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
             {heroSectionText.firstH2Orange}
           </h2>
           <h2 className={`
-            font-bold font-sans bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent text-center
-            tracking-wide drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
+            font-bold font-sans bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent text-center
+            tracking-wide drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]
                ${width <= 290 ? "text-[1.8rem]" : 
               width <= 350 ? "text-[2rem]" : 
               width <= 400 ? "text-[2.25rem]" : 
@@ -96,7 +96,7 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
         >
           <h3 className={`
             font-bold font-sans text-white text-center
-            drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
+            drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]
             ${width <= 290 ? "text-[1rem]" : 
               width <= 350 ? "text-[1.2rem]" : 
               width <= 450 ? "text-[1.5rem]" : 
@@ -111,7 +111,7 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
           </h3>
           <h3 className={`
             font-bold font-sans text-white text-center
-            drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
+            drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]
             ${width <= 290 ? "text-[1rem]" : 
               width <= 350 ? "text-[1.2rem]" : 
               width <= 450 ? "text-[1.5rem]" : 
@@ -145,7 +145,7 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
                 width <= 640 ? "w-8 h-8" : 
                 "w-12 h-12"
               } 
-              text-white drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
+              text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]
             `}
           />
         </motion.div>
