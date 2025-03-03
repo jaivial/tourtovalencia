@@ -12,9 +12,14 @@ type ChildProps = {
 
 const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) => {
   return (
-    <div className="w-full overflow-x-hidden min-h-[100dvh] flex flex-col justify-center items-center relative" id="hero-section">
+    <div className="w-full overflow-hidden min-h-[100dvh] flex flex-col justify-center items-center relative" id="hero-section">
       {/* Background image with responsive handling */}
-      <div className="absolute inset-0 w-full h-full">
+      <motion.div
+        initial={{ scale: 1.1 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 10, ease: "easeOut" }}
+        className="absolute inset-0 z-0"
+      >
         <picture>
           {/* Mobile portrait */}
           <source
@@ -29,17 +34,17 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
             className="w-full h-full object-cover object-center brightness-[0.85]"
           />
         </picture>
-      </div>
+      </motion.div>
 
       {/* Darker overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/20" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/20 z-10" />
 
       {/* Content container */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className="w-[92%] sm:w-[95%] max-w-[1280px] min-h-[100dvh] flex flex-col justify-center items-center gap-6 sm:gap-8 md:gap-12 relative z-10 px-2 sm:px-4"
+        className="w-[92%] sm:w-[95%] max-w-[1280px] min-h-[100dvh] flex flex-col justify-center items-center gap-6 sm:gap-8 md:gap-12 relative z-20 px-2 sm:px-4"
       >
         {/* Title group */}
         <motion.div 
