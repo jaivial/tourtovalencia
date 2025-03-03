@@ -1,7 +1,7 @@
 // app/components/layout/nav.tsx
 import { useState, useEffect } from "react";
 import { Menu, ArrowRightToLine, ChevronDown, Settings } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "~/components/ui/select";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import { useFetcher, useLocation, useLoaderData, useNavigate } from "@remix-run/react";
 import type { RootLoaderData } from "~/root";
@@ -106,25 +106,28 @@ const Nav: React.FC<NavProps> = () => {
   const LanguageSelector = () => {
     // Use emoji flags instead of relying on the empty flag property
     const getFlag = (language: string) => {
-      return language === 'en' ? '🇬🇧' : '🇪🇸';
+      return language.toLowerCase() === 'en' ? '🇺🇸' : '🇪🇸';
     };
     
+    // Determine the current language code (en or es)
+    const currentLangCode = currentLanguage === "English" ? "en" : "es";
+    
     return (
-      <Select onValueChange={handleChange} defaultValue={currentLanguage}>
-        <SelectTrigger className="w-[110px] bg-blue-50 flex flex-row items-center justify-evenly z-[100]">
+      <Select onValueChange={handleChange} defaultValue={currentLangCode}>
+        <SelectTrigger className={`${clientWidth < 380 ? "w-[60px]" : clientWidth < 400 ? "w-[65px]" : clientWidth < 450 ? "w-[70px]" : clientWidth < 500 ? "w-[80px]" : "w-[90px]"} bg-blue-50 flex flex-row items-center justify-center z-[100]`}>
           <div className="flex items-center justify-center">
-            <p className="text-3xl leading-none">{getFlag(currentLanguage.toLowerCase())}</p>
+            <p className={`${clientWidth < 400 ? "text-xl" : clientWidth < 450 ? "text-2xl" : "text-3xl"} leading-none`}>{getFlag(currentLangCode)}</p>
           </div>
-          <SelectValue placeholder={currentLanguage} className="my-auto" />
+          {/* Remove the SelectValue to only show the flag */}
         </SelectTrigger>
         <SelectContent style={{ zIndex: 1000 }}>
-          <SelectItem value="es" className="flex flex-row items-center justify-center h-[300px]">
-            <span className="text-3xl leading-none">🇪🇸</span>
-            <span className="my-auto"> Español</span>
+          <SelectItem value="es" className="flex flex-row items-center gap-2">
+            <span className={`${clientWidth < 400 ? "text-xl" : clientWidth < 450 ? "text-2xl" : "text-3xl"} leading-none`}>🇪🇸</span>
+            <span className="my-auto">Español</span>
           </SelectItem>
           <SelectItem value="en" className="flex items-center gap-2">
-            <span className="text-3xl leading-none">🇬🇧</span> 
-            <span className="my-auto"> English</span>
+            <span className={`${clientWidth < 400 ? "text-xl" : clientWidth < 450 ? "text-2xl" : "text-3xl"} leading-none`}>🇺🇸</span>
+            <span className="my-auto">English</span>
           </SelectItem>
         </SelectContent>
       </Select>
@@ -150,10 +153,10 @@ const Nav: React.FC<NavProps> = () => {
             mass: 1
           }}
         >
+            <LanguageSelector />
           <div className="w-[45px]" />
           <img src="/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[20px]" : "h-[80px]"} py-2 absolute left-1/2 -translate-x-1/2 w-auto`} />
           <div className="flex items-center gap-3">
-            <LanguageSelector />
             <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors" size={45} onClick={() => setMobileNavOpen(true)} />
           </div>
         </motion.div>
@@ -174,9 +177,9 @@ const Nav: React.FC<NavProps> = () => {
             mass: 1
           }}
         >
+            <LanguageSelector />
           <img src="/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[50px]" : clientWidth < 450 ? "h-[50px]" : clientWidth < 500 ? "h-[50px]" : "h-[50px]"}`} />
           <div className="flex items-center gap-3">
-            <LanguageSelector />
             <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors z-[990]" size={45} onClick={() => setMobileNavOpen(true)} />
           </div>
         </motion.div>
