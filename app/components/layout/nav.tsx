@@ -103,6 +103,20 @@ const Nav: React.FC<NavProps> = () => {
     }
   };
 
+  // Language selector component to be reused
+  const LanguageSelector = () => (
+    <Select onValueChange={handleChange} defaultValue={currentLanguage}>
+      <SelectTrigger className="w-[100px] bg-blue-50 flex flex-row justify-evenly z-[100]">
+        <p className="text-lg">{flag}</p>
+        <SelectValue placeholder={currentLanguage} />
+      </SelectTrigger>
+      <SelectContent style={{ zIndex: 1000 }}>
+        <SelectItem value="es">Español</SelectItem>
+        <SelectItem value="en">English</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+
   return (
     <>
       {clientWidth >= 1280 ? (
@@ -124,7 +138,10 @@ const Nav: React.FC<NavProps> = () => {
         >
           <div className="w-[45px]" />
           <img src="/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[20px]" : "h-[80px]"} py-2 absolute left-1/2 -translate-x-1/2 w-auto`} />
-          <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors" size={45} onClick={() => setMobileNavOpen(true)} />
+          <div className="flex items-center gap-3">
+            <LanguageSelector />
+            <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors" size={45} onClick={() => setMobileNavOpen(true)} />
+          </div>
         </motion.div>
       ) : (
         <motion.div 
@@ -144,7 +161,10 @@ const Nav: React.FC<NavProps> = () => {
           }}
         >
           <img src="/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[50px]" : clientWidth < 450 ? "h-[50px]" : clientWidth < 500 ? "h-[50px]" : "h-[50px]"}`} />
-          <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors z-[990]" size={45} onClick={() => setMobileNavOpen(true)} />
+          <div className="flex items-center gap-3">
+            <LanguageSelector />
+            <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors z-[990]" size={45} onClick={() => setMobileNavOpen(true)} />
+          </div>
         </motion.div>
       )}
 
@@ -180,17 +200,6 @@ const Nav: React.FC<NavProps> = () => {
                 <div className="flex flex-col gap-6">
                   <img src="/tourtovalencialogo.png" alt="Olga Travel" className={`${clientWidth < 380 ? "h-[60px]" : "h-[80px]"} mx-auto mb-4`} />
                   
-                  <Select onValueChange={handleChange}>
-                    <SelectTrigger className={`${clientWidth < 380 ? "w-[150px]" : "w-[180px]"} bg-blue-50 flex flex-row justify-evenly`}>
-                      <p className="text-2xl">{flag}</p>
-                      <SelectValue placeholder={currentLanguage} />
-                    </SelectTrigger>
-                    <SelectContent style={{ zIndex: 1000 }}>
-                      <SelectItem value="es">Español</SelectItem>
-                      <SelectItem value="en">English</SelectItem>
-                    </SelectContent>
-                  </Select>
-
                   {/* Regular Nav Links */}
                   <div className="flex flex-col gap-4 w-full">
                     {navLinks.map((link, index) => (
