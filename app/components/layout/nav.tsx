@@ -17,7 +17,6 @@ const Nav: React.FC<NavProps> = () => {
   const fetcher = useFetcher();
   const navLinks = state.links;
   const currentLanguage = state.currentLanguage;
-  const flag = state.flag;
   const location = useLocation();
   const navigate = useNavigate();
   const [clientWidth, setClientWidth] = useState(0);
@@ -104,18 +103,33 @@ const Nav: React.FC<NavProps> = () => {
   };
 
   // Language selector component to be reused
-  const LanguageSelector = () => (
-    <Select onValueChange={handleChange} defaultValue={currentLanguage}>
-      <SelectTrigger className="w-[100px] bg-blue-50 flex flex-row justify-evenly z-[100]">
-        <p className="text-lg">{flag}</p>
-        <SelectValue placeholder={currentLanguage} />
-      </SelectTrigger>
-      <SelectContent style={{ zIndex: 1000 }}>
-        <SelectItem value="es">Español</SelectItem>
-        <SelectItem value="en">English</SelectItem>
-      </SelectContent>
-    </Select>
-  );
+  const LanguageSelector = () => {
+    // Use emoji flags instead of relying on the empty flag property
+    const getFlag = (language: string) => {
+      return language === 'en' ? '🇬🇧' : '🇪🇸';
+    };
+    
+    return (
+      <Select onValueChange={handleChange} defaultValue={currentLanguage}>
+        <SelectTrigger className="w-[110px] bg-blue-50 flex flex-row items-center justify-evenly z-[100]">
+          <div className="flex items-center justify-center">
+            <p className="text-3xl leading-none">{getFlag(currentLanguage.toLowerCase())}</p>
+          </div>
+          <SelectValue placeholder={currentLanguage} className="my-auto" />
+        </SelectTrigger>
+        <SelectContent style={{ zIndex: 1000 }}>
+          <SelectItem value="es" className="flex flex-row items-center justify-center h-[300px]">
+            <span className="text-3xl leading-none">🇪🇸</span>
+            <span className="my-auto"> Español</span>
+          </SelectItem>
+          <SelectItem value="en" className="flex items-center gap-2">
+            <span className="text-3xl leading-none">🇬🇧</span> 
+            <span className="my-auto"> English</span>
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    );
+  };
 
   return (
     <>
