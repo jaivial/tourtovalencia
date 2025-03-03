@@ -26,10 +26,10 @@ interface BookingLimit {
  * Resource route to get available places for a specific date and tour
  */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  // Set caching headers - cache for 5 minutes in browser and CDN
+  // Set headers to prevent caching to ensure we always get fresh data
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "Cache-Control": "public, max-age=300, s-maxage=300"
+    "Cache-Control": "no-store, max-age=0, must-revalidate"
   };
 
   // Add X-Remix- header to indicate this is a resource route

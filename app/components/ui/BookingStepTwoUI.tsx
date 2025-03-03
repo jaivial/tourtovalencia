@@ -18,6 +18,8 @@ interface BookingStepTwoUIProps {
 
 export const BookingStepTwoUI = ({ partySize, errors, availablePlaces, onPartySizeChange, bookingStepTwoText }: BookingStepTwoUIProps) => {
   // Generate options from 1 to available places
+  // The availablePlaces value already accounts for existing bookings
+  // as it's calculated as (maxBookings - totalPartySize) in the API
   const options = Array.from({ length: availablePlaces }, (_, i) => i + 1);
 
   return (
