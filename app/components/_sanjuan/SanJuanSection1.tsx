@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 import type { sanJuanSection1Type } from "~/data/data";
 import { useSanJuanSection1 } from "./SanJuanSection1.hooks";
+import { Link } from "@remix-run/react";
 
 type SanJuanSection1Props = {
   width: number;
@@ -46,10 +47,12 @@ const SanJuanSection1: React.FC<SanJuanSection1Props> = ({ width, sanJuanSection
 
           {/* CTA Button */}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5 }} viewport={{ once: true }}>
-            <Button className="bg-blue-900 hover:bg-blue-800 text-white px-8 py-6 text-xl rounded-full group transition-all duration-300 hover:shadow-lg">
-              {sanJuanSection1Text.button}
-              <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
+            <Link to="/book">
+              <Button className="bg-blue-900 hover:bg-blue-800 text-white px-8 py-6 text-xl rounded-full group transition-all duration-300 hover:shadow-lg">
+                {sanJuanSection1Text.button}
+                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
           </motion.div>
         </motion.div>
       </motion.div>
