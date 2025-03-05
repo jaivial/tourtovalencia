@@ -15,7 +15,7 @@ const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 console.log('Environment:', process.env.NODE_ENV || 'development');
 console.log('PayPal API Base:', process.env.NODE_ENV === 'production'
     ? 'https://api-m.paypal.com'
-    : 'https://api-m.sandbox.paypal.com');
+    : 'https://api-m.paypal.com');
 
 // More detailed credential checks
 console.log('\n=== Credential Details ===');
@@ -83,7 +83,7 @@ if (clientId && clientSecret) {
 
     const PAYPAL_API_BASE = process.env.NODE_ENV === 'production'
         ? 'https://api-m.paypal.com'
-        : 'https://api-m.sandbox.paypal.com';
+        : 'https://api-m.paypal.com';
 
     const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     console.log('Auth string first 10 chars:', auth.substring(0, 10) + '...');

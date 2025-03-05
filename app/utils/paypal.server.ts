@@ -6,8 +6,8 @@ dotenv.config();
 
 // PayPal API URLs
 const PAYPAL_API_BASE = process.env.NODE_ENV === 'production'
-  ? 'https://api-m.sandbox.paypal.com'
-  : 'https://api-m.sandbox.paypal.com';
+  ? 'https://api-m.paypal.com'
+  : 'https://api-m.paypal.com';
 
 // Log environment variables for debugging
 console.log('PayPal Server Initialization:');
