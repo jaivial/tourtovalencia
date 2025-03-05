@@ -1,9 +1,9 @@
 // app/components/layout/footer.tsx
 import { useLanguageContext } from "~/providers/LanguageContext";
-
-
 import { Link } from "@remix-run/react";
 
+// Import icons for social media
+import { FaFacebook, FaInstagram } from "react-icons/fa";
 
 const Footer: React.FC = () => {
   const { state } = useLanguageContext();
@@ -16,6 +16,28 @@ const Footer: React.FC = () => {
         <div className="mx-auto w-[90%] sm:w-auto transition-transform duration-300 hover:scale-105">
           <img src="/tourtovalencialogo.png" alt="Tour to Valencia" className="h-16 mb-6" />
           <p className="text-gray-300 text-base leading-relaxed max-w-[350px] mb-6">{footerText.firstp}</p>
+          
+          {/* Social Media Links */}
+          <div className="flex space-x-4 mt-4">
+            <a 
+              href="https://www.facebook.com/tour.to.valencia" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-300 hover:text-blue-400 transition-colors duration-300"
+              aria-label="Facebook"
+            >
+              <FaFacebook className="h-6 w-6" />
+            </a>
+            <a 
+              href="https://www.instagram.com/tourtovalencia" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-300 hover:text-pink-400 transition-colors duration-300"
+              aria-label="Instagram"
+            >
+              <FaInstagram className="h-6 w-6" />
+            </a>
+          </div>
         </div>
 
         {/* Section 2: Quick Links */}
