@@ -185,7 +185,7 @@ const PaymentOptions = () => {
             nonce: "nonce-" + Date.now(),
             merchantIdentifier: "merchant.com.your.identifier",
             domainName: window.location.hostname,
-            displayName: "Excursiones Mediterráneo",
+            displayName: "Tour To Valencia",
             signature: "dummy-signature-for-demo",
             validationURL: event.validationURL
           };
