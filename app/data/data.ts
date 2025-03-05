@@ -245,6 +245,12 @@ export type LanguageData = {
       caves: string;
     };
   };
+  cookieConsent: {
+    title: string;
+    description: string;
+    acceptButton: string;
+    declineButton: string;
+  };
   timeline: {
     title: string;
     subtitle: string;
@@ -301,6 +307,21 @@ export type LanguageData = {
       minParticipants: string;
       moreDetails: string;
     };
+  };
+  legal: {
+    pageTitle: string;
+    pageDescription: string;
+    tabs: {
+      termsOfUse: string;
+      legalNotice: string;
+      dataProtection: string;
+      cookies: string;
+      payments: string;
+    };
+    readCarefully: string;
+    lastUpdated: string;
+    contactUs: string;
+    contactEmail: string;
   };
   admin: AdminType;
 };
@@ -587,6 +608,12 @@ export const languages: Record<string, LanguageData> = {
         caves: "San José Caves"
       },
     },
+    cookieConsent: {
+      title: "Cookie Consent",
+      description: "We use cookies to ensure you get the best experience on our website. By continuing to use this site, you agree to the use of cookies.",
+      acceptButton: "Accept",
+      declineButton: "Decline"
+    },
     timeline: {
       title: "What to Expect",
       subtitle: "Itinerary",
@@ -661,6 +688,21 @@ export const languages: Record<string, LanguageData> = {
         minParticipants: "Experiences requiring a minimum number of participants will offer an alternative date/experience or full refund if canceled due to insufficient participants",
         moreDetails: "For more details, refer to the cancellation policy"
       }
+    },
+    legal: {
+      pageTitle: "Legal Information",
+      pageDescription: "Important information about our terms of use, data protection, cookies, and payment policies.",
+      tabs: {
+        termsOfUse: "Terms of Use",
+        legalNotice: "Legal Notice",
+        dataProtection: "Data Protection",
+        cookies: "Cookies",
+        payments: "Payments"
+      },
+      readCarefully: "Please read this information carefully.",
+      lastUpdated: "Last updated:",
+      contactUs: "If you have any questions about our legal policies, please",
+      contactEmail: "contact us"
     },
     admin: {
       login: {
@@ -983,6 +1025,12 @@ export const languages: Record<string, LanguageData> = {
         caves: "Cuevas de San José"
       },
     },
+    cookieConsent: {
+      title: "Consentimiento de Cookies",
+      description: "Utilizamos cookies para asegurar que obtienes la mejor experiencia en nuestro sitio web. Al continuar utilizando este sitio, aceptas el uso de cookies.",
+      acceptButton: "Aceptar",
+      declineButton: "Rechazar"
+    },
     timeline: {
       title: "Qué esperar",
       subtitle: "Itinerario",
@@ -1057,6 +1105,21 @@ export const languages: Record<string, LanguageData> = {
         minParticipants: "Las experiencias que requieren un número mínimo de participantes ofrecerán una fecha/experiencia alternativa o un reembolso completo si se cancelan debido a participantes insuficientes",
         moreDetails: "Para más detalles, consulte la política de cancelación"
       }
+    },
+    legal: {
+      pageTitle: "Información Legal",
+      pageDescription: "Información importante sobre nuestros términos de uso, protección de datos, cookies y políticas de pago.",
+      tabs: {
+        termsOfUse: "Condiciones de Uso",
+        legalNotice: "Aviso Legal",
+        dataProtection: "Protección de Datos",
+        cookies: "Cookies",
+        payments: "Pagos"
+      },
+      readCarefully: "Por favor, lea esta información cuidadosamente.",
+      lastUpdated: "Última actualización:",
+      contactUs: "Si tiene alguna pregunta sobre nuestras políticas legales, por favor",
+      contactEmail: "contáctenos"
     },
     admin: {
       login: {
