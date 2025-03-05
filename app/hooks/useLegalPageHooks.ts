@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { languages } from "~/data/data";
 
 // Define types for the legal page sections
 export type LegalSection = {
@@ -8,6 +9,10 @@ export type LegalSection = {
 
 // Hook to manage the legal page states
 export const useLegalPageStates = (languageCode: string) => {
+  // Get the translations based on the language code
+  const currentLanguage = languageCode === "en" ? "en" : "es";
+  const translations = languages[currentLanguage].legal;
+
   // Define the legal content based on the language
   const [legalContent] = useState<{
     termsOfUse: LegalSection;
@@ -162,5 +167,6 @@ export const useLegalPageStates = (languageCode: string) => {
 
   return {
     legalContent,
+    translations,
   };
 }; 

@@ -1,17 +1,20 @@
 import { json } from "@remix-run/server-runtime";
 import type { MetaFunction } from "@remix-run/react";
-import { useLoaderData } from "@remix-run/react";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import LegalPageContext from "~/context/LegalPageContext";
 import LegalPageFeature from "~/components/features/LegalPageFeature";
+import { languages } from "~/data/data";
 
 // Meta function for SEO
 export const meta: MetaFunction = () => {
+  // Use English translations as default for meta tags
+  const translations = languages.en.legal;
+  
   return [
-    { title: "Legal Information | Tour To Valencia" },
-    { name: "description", content: "Terms of use, legal notice, data protection, cookies, and payment information for Tour To Valencia." },
-    { property: "og:title", content: "Legal Information | Tour To Valencia" },
-    { property: "og:description", content: "Terms of use, legal notice, data protection, cookies, and payment information for Tour To Valencia." },
+    { title: `${translations.pageTitle} | Tour To Valencia` },
+    { name: "description", content: translations.pageDescription },
+    { property: "og:title", content: `${translations.pageTitle} | Tour To Valencia` },
+    { property: "og:description", content: translations.pageDescription },
     { property: "og:image", content: "/tourtovalencialogo.png" },
     { property: "og:image:width", content: "1200" },
     { property: "og:image:height", content: "630" },
@@ -30,14 +33,9 @@ export async function loader() {
 export default function LegalPage() {
   const { state } = useLanguageContext();
   
-  // Map display language to language code
-  const languageMap: Record<string, string> = {
-    Español: "es",
-    English: "en",
-  };
-
   // Get the language code from the current display language
-  const languageCode = languageMap[state.currentLanguage] || "es";
+  // Default to "es" if the current language is not English
+  const languageCode = state.currentLanguage === "English" ? "en" : "es";
   
   return (
     <LegalPageContext languageCode={languageCode}>

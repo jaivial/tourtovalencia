@@ -5,7 +5,7 @@ import LegalPageUI from "~/components/ui/LegalPageUI";
 const LegalPageFeature: React.FC = () => {
   // Get the states from the context
   const { states } = useLegalPageContext();
-  const { legalContent } = states;
+  const { legalContent, translations } = states;
 
   return (
     <LegalPageUI 
@@ -14,6 +14,7 @@ const LegalPageFeature: React.FC = () => {
       dataProtection={legalContent.dataProtection}
       cookies={legalContent.cookies}
       payments={legalContent.payments}
+      translations={translations}
     />
   );
 };

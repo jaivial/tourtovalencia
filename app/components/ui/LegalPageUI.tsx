@@ -10,6 +10,21 @@ interface LegalPageUIProps {
   dataProtection: LegalSection;
   cookies: LegalSection;
   payments: LegalSection;
+  translations: {
+    pageTitle: string;
+    pageDescription: string;
+    tabs: {
+      termsOfUse: string;
+      legalNotice: string;
+      dataProtection: string;
+      cookies: string;
+      payments: string;
+    };
+    readCarefully: string;
+    lastUpdated: string;
+    contactUs: string;
+    contactEmail: string;
+  };
 }
 
 const LegalPageUI: React.FC<LegalPageUIProps> = ({
@@ -18,6 +33,7 @@ const LegalPageUI: React.FC<LegalPageUIProps> = ({
   dataProtection,
   cookies,
   payments,
+  translations,
 }) => {
   const [activeTab, setActiveTab] = useState("terms");
 
@@ -26,10 +42,10 @@ const LegalPageUI: React.FC<LegalPageUIProps> = ({
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Legal Information
+            {translations.pageTitle}
           </h1>
           <p className="text-gray-600 max-w-3xl mx-auto">
-            Important information about our terms of use, data protection, cookies, and payment policies.
+            {translations.pageDescription}
           </p>
         </div>
 
@@ -42,52 +58,52 @@ const LegalPageUI: React.FC<LegalPageUIProps> = ({
           <div className="flex justify-center mb-8">
             <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full max-w-4xl">
               <TabsTrigger value="terms" className="text-sm md:text-base">
-                Terms of Use
+                {translations.tabs.termsOfUse}
               </TabsTrigger>
               <TabsTrigger value="legal" className="text-sm md:text-base">
-                Legal Notice
+                {translations.tabs.legalNotice}
               </TabsTrigger>
               <TabsTrigger value="data" className="text-sm md:text-base">
-                Data Protection
+                {translations.tabs.dataProtection}
               </TabsTrigger>
               <TabsTrigger value="cookies" className="text-sm md:text-base">
-                Cookies
+                {translations.tabs.cookies}
               </TabsTrigger>
               <TabsTrigger value="payments" className="text-sm md:text-base">
-                Payments
+                {translations.tabs.payments}
               </TabsTrigger>
             </TabsList>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <TabsContent value="terms" className="p-0">
-              <LegalSectionCard section={termsOfUse} />
+              <LegalSectionCard section={termsOfUse} readCarefully={translations.readCarefully} />
             </TabsContent>
 
             <TabsContent value="legal" className="p-0">
-              <LegalSectionCard section={legalNotice} />
+              <LegalSectionCard section={legalNotice} readCarefully={translations.readCarefully} />
             </TabsContent>
 
             <TabsContent value="data" className="p-0">
-              <LegalSectionCard section={dataProtection} />
+              <LegalSectionCard section={dataProtection} readCarefully={translations.readCarefully} />
             </TabsContent>
 
             <TabsContent value="cookies" className="p-0">
-              <LegalSectionCard section={cookies} />
+              <LegalSectionCard section={cookies} readCarefully={translations.readCarefully} />
             </TabsContent>
 
             <TabsContent value="payments" className="p-0">
-              <LegalSectionCard section={payments} />
+              <LegalSectionCard section={payments} readCarefully={translations.readCarefully} />
             </TabsContent>
           </div>
         </Tabs>
 
         <div className="mt-12 text-center text-gray-500 text-sm">
-          <p>Last updated: {new Date().toLocaleDateString()}</p>
+          <p>{translations.lastUpdated} {new Date().toLocaleDateString()}</p>
           <p className="mt-2">
-            If you have any questions about our legal policies, please{" "}
+            {translations.contactUs}{" "}
             <a href="mailto:tourtovalencia@gmail.com" className="text-blue-600 hover:underline">
-              contact us
+              {translations.contactEmail}
             </a>
             .
           </p>
@@ -99,15 +115,16 @@ const LegalPageUI: React.FC<LegalPageUIProps> = ({
 
 interface LegalSectionCardProps {
   section: LegalSection;
+  readCarefully: string;
 }
 
-const LegalSectionCard: React.FC<LegalSectionCardProps> = ({ section }) => {
+const LegalSectionCard: React.FC<LegalSectionCardProps> = ({ section, readCarefully }) => {
   return (
     <Card className="border-0 shadow-none">
       <CardHeader className="pb-2">
         <CardTitle className="text-2xl font-bold text-gray-900">{section.title}</CardTitle>
         <CardDescription className="text-gray-600">
-          Please read this information carefully.
+          {readCarefully}
         </CardDescription>
       </CardHeader>
       <CardContent>
