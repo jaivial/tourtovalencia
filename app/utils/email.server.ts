@@ -109,7 +109,7 @@ export const sendEmail = async ({ to, subject, component }: SendEmailProps): Pro
       .trim();
 
     const info = await emailTransporter.sendMail({
-      from: `"Excursiones Tour Tour Valencia" <tourtovalencia@gmail.com>`,
+      from: `"Tour To Valencia" <tourtovalencia@gmail.com>`,
       to,
       subject,
       html: htmlContent,

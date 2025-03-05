@@ -24,20 +24,20 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
           {/* Mobile portrait */}
           <source
             media="(max-width: 570px)"
-            srcSet="/valenciaadventure1-mobile.webp"
+            srcSet="/hero3.jpg"
           />
 
           {/* Desktop default */}
           <img
-            src="/valenciaadventure1.jpg"
+            src="/hero3.jpg"
             alt="Valencia Adventure Background"
-            className="w-full h-full object-cover object-center brightness-[0.85]"
+            className="w-full h-full object-cover brightness-[1] object-[50%_center] sm:object-center"
           />
         </picture>
       </motion.div>
 
       {/* Darker overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/20 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/12.5 to-black/5 z-10" />
 
       {/* Content container */}
       <motion.div 
