@@ -1,0 +1,5 @@
+// This is a placeholder for the Apple Pay domain verification file
+// In a real implementation, you would need to download this file from your Apple Developer account
+// and place it in the .well-known directory at the root of your domain.
+// This file is required for Apple Pay to work on your domain.
+// See: https://developer.apple.com/documentation/apple_pay_on_the_web/setting_up_your_server 
