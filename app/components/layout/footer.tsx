@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
   const navLinks = state.links;
   const footerText = state.footer;
   return (
-    <footer className="bg-gradient-to-b from-gray-900 to-gray-800 text-white py-16">
+    <footer id="site-footer" className="bg-gradient-to-b from-gray-900 to-gray-800 text-white py-16">
       <div className="container mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-12">
         {/* Section 1: Company Info */}
         <div className="mx-auto w-[90%] sm:w-auto transition-transform duration-300 hover:scale-105">
@@ -82,10 +82,10 @@ const Footer: React.FC = () => {
       <div className="border-t border-gray-700/50 mt-12 pt-8 text-center">
         <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} jaimedigitalstudio.com All rights reserved.</p>
         <div className="mt-4 space-x-6">
-          <Link to="/privacy-policy" className="text-gray-400 hover:text-blue-300 transition-colors duration-300 text-sm">
+          <Link to="/legal" className="text-gray-400 hover:text-blue-300 transition-colors duration-300 text-sm">
             {footerText.privacypolicy}
           </Link>
-          <Link to="/terms-of-service" className="text-gray-400 hover:text-blue-300 transition-colors duration-300 text-sm">
+          <Link to="/legal" className="text-gray-400 hover:text-blue-300 transition-colors duration-300 text-sm">
             {footerText.termsofservice}
           </Link>
         </div>
