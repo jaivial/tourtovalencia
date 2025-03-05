@@ -336,6 +336,12 @@
         "viewAllButton": "View All Destinations",
         "shareButton": "Share",
         "infoButton": "More Info"
+      },
+      "cookieConsent": {
+        "title": "Cookie Consent",
+        "description": "We use cookies to enhance your browsing experience, analyze site traffic, and personalize content. By clicking 'Accept', you consent to our use of cookies.",
+        "acceptButton": "Accept",
+        "declineButton": "Decline"
       }
     },
     "sanjuan": {
@@ -1048,6 +1054,12 @@
         "viewAllButton": "Ver Todos los Destinos",
         "shareButton": "Compartir",
         "infoButton": "Más Información"
+      },
+      "cookieConsent": {
+        "title": "Consentimiento de Cookies",
+        "description": "Utilizamos cookies para mejorar su experiencia de navegación, analizar el tráfico del sitio y personalizar el contenido. Al hacer clic en 'Aceptar', usted consiente nuestro uso de cookies.",
+        "acceptButton": "Aceptar",
+        "declineButton": "Rechazar"
       }
     },
     "sanjuan": {

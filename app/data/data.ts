@@ -245,6 +245,12 @@ export type LanguageData = {
       caves: string;
     };
   };
+  cookieConsent: {
+    title: string;
+    description: string;
+    acceptButton: string;
+    declineButton: string;
+  };
   timeline: {
     title: string;
     subtitle: string;
@@ -586,6 +592,12 @@ export const languages: Record<string, LanguageData> = {
       toursMenu: {
         caves: "San José Caves"
       },
+    },
+    cookieConsent: {
+      title: "Cookie Consent",
+      description: "We use cookies to ensure you get the best experience on our website. By continuing to use this site, you agree to the use of cookies.",
+      acceptButton: "Accept",
+      declineButton: "Decline"
     },
     timeline: {
       title: "What to Expect",
@@ -982,6 +994,12 @@ export const languages: Record<string, LanguageData> = {
       toursMenu: {
         caves: "Cuevas de San José"
       },
+    },
+    cookieConsent: {
+      title: "Consentimiento de Cookies",
+      description: "Utilizamos cookies para asegurar que obtienes la mejor experiencia en nuestro sitio web. Al continuar utilizando este sitio, aceptas el uso de cookies.",
+      acceptButton: "Aceptar",
+      declineButton: "Rechazar"
     },
     timeline: {
       title: "Qué esperar",
