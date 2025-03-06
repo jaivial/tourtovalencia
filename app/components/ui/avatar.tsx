@@ -1,5 +1,3 @@
-"use client"
-
 import type { GroupProps, SlotRecipeProps } from "@chakra-ui/react"
 import { Group } from "@chakra-ui/react"
 import * as React from "react"

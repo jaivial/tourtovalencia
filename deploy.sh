@@ -116,4 +116,12 @@ fi
 section "Deployment completed"
 echo -e "${GREEN}The application has been deployed successfully!${NC}"
 echo -e "You can access it at: https://$APP_NAME.jaimedigitalstudio.com"
-echo -e "To view logs: ${YELLOW}pm2 logs $APP_NAME${NC}" 
+echo -e "To view logs: ${YELLOW}pm2 logs $APP_NAME${NC}"
+
+echo "Deploying tourtovalencia.com..."
+cd /var/www/tourtovalencia
+git pull
+npm install --legacy-peer-deps
+npm run build
+pm2 restart tourtovalencia
+echo "Deployment completed successfully!" 
