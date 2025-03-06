@@ -106,7 +106,7 @@ const Nav: React.FC<NavProps> = () => {
   const LanguageSelector = () => {
     // Use emoji flags instead of relying on the empty flag property
     const getFlag = (language: string) => {
-      return language.toLowerCase() === 'en' ? '🇺🇸' : '🇪🇸';
+      return language.toLowerCase() === 'en' ? '🇬🇧' : '🇪🇸';
     };
     
     // Determine the current language code (en or es)
@@ -126,7 +126,7 @@ const Nav: React.FC<NavProps> = () => {
             <span className="my-auto">Español</span>
           </SelectItem>
           <SelectItem value="en" className="flex items-center gap-2">
-            <span className={`${clientWidth < 400 ? "text-xl" : clientWidth < 450 ? "text-2xl" : "text-3xl"} leading-none`}>🇺🇸</span>
+            <span className={`${clientWidth < 400 ? "text-xl" : clientWidth < 450 ? "text-2xl" : "text-3xl"} leading-none`}>🇬🇧</span>
             <span className="my-auto">English</span>
           </SelectItem>
         </SelectContent>

@@ -3,12 +3,17 @@ import { useLanguageContext } from "~/providers/LanguageContext";
 import { Link } from "@remix-run/react";
 
 // Import icons for social media
-import { FaFacebook, FaInstagram } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
 
 const Footer: React.FC = () => {
   const { state } = useLanguageContext();
   const navLinks = state.links;
   const footerText = state.footer;
+  
+  // WhatsApp phone number
+  const phoneNumber = "+34625291391";
+  const whatsappUrl = `https://wa.me/${phoneNumber.replace(/\+/g, '')}`;
+  
   return (
     <footer id="site-footer" className="bg-gradient-to-b from-gray-900 to-gray-800 text-white py-16">
       <div className="container mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -37,6 +42,15 @@ const Footer: React.FC = () => {
             >
               <FaInstagram className="h-6 w-6" />
             </a>
+            <a 
+              href={whatsappUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-300 hover:text-green-400 transition-colors duration-300"
+              aria-label="WhatsApp"
+            >
+              <FaWhatsapp className="h-6 w-6" />
+            </a>
           </div>
         </div>
 
@@ -64,9 +78,20 @@ const Footer: React.FC = () => {
             </li> */}
             <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
               <span className="font-semibold text-blue-200 block mb-1">{footerText.secondspan}</span>
-              <Link to="tel:+34625291391" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 block">
-                +34 625 291 391
-              </Link>
+              <div className="flex items-center space-x-3">
+                <a 
+                  href={whatsappUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-green-400 transition-colors duration-300"
+                  aria-label="Contact on WhatsApp"
+                >
+                  <FaWhatsapp className="h-5 w-5" />
+                </a>
+                <Link to="tel:+34625291391" className="text-gray-300 hover:text-blue-400 transition-colors duration-300">
+                  +34 625 291 391
+                </Link>
+              </div>
             </li>
             <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
               <span className="font-semibold text-blue-200 block mb-1">{footerText.thirdspan}</span>
