@@ -1,0 +1,127 @@
+---
+description: Remix Development Rules
+file_patterns: ["*.tsx", "*.ts"]
+role:
+  title: "Senior Remix Developer"
+  expertise: ["Remix", "ReactJS", "TypeScript", "TailwindCSS"]
+
+remix_architecture:
+  route_components:
+    responsibility: "server_data_management"
+    rules:
+      - "Must implement loader for data fetching"
+      - "Must implement action for form submissions"
+      - "Return only context provider with feature components"
+      - "No direct HTML or UI code"
+    structure: |
+      export const loader = async ({ request }) => {
+        // Server-side data fetching
+      }
+      export const action = async ({ request }) => {
+        // Form submissions and mutations
+      }
+      export default function RouteComponent() {
+        return <ContextProvider><FeatureComponent /></ContextProvider>
+      }
+
+  feature_components:
+    responsibility: "business_logic"
+    rules:
+      - "Import hooks from [route].hooks.ts"
+      - "Use useLoaderData for accessing server data"
+      - "Use useFetcher for optimistic updates"
+      - "No direct state management"
+    structure: |
+      import { useRouteHooks } from './route.hooks'
+      export const FeatureComponent = () => {
+        const { data } = useLoaderData<typeof loader>()
+        const { states, actions } = useRouteHooks()
+        return <UIComponent {...data} {...states} {...actions} />
+      }
+
+  ui_components:
+    responsibility: "presentation"
+    rules:
+      - "Receive all data via props"
+      - "Use Tailwind for styling"
+      - "Implement accessibility attributes"
+      - "No data fetching or state management"
+
+data_flow:
+  loader:
+    - "Use TypeScript for loader return types"
+    - "Handle errors with throw responses"
+    - "Implement proper error boundaries"
+    - "Use session for flash messages"
+
+  action:
+    - "Validate form data server-side"
+    - "Return proper redirect responses"
+    - "Handle optimistic UI updates"
+    - "Use zod for type validation"
+
+hooks_pattern:
+  file_naming: "[route].hooks.ts"
+  structure:
+    - "Export useStates hook for state management"
+    - "Export useActions hook for event handlers"
+    - "Use useFetcher for optimistic updates"
+    - "Handle form submissions with useSubmit"
+
+context_management:
+  rules:
+    - "One context per route"
+    - "Pass loader data to context"
+    - "Manage route-specific state"
+    - "Handle language preferences"
+
+error_handling:
+  rules:
+    - "Implement ErrorBoundary for each route"
+    - "Use catch boundary for expected errors"
+    - "Handle network errors gracefully"
+    - "Provide user-friendly error messages"
+
+performance:
+  rules:
+    - "Use proper cache headers"
+    - "Implement prefetch hints"
+    - "Optimize assets with remix"
+    - "Use proper chunking strategies"
+
+coding_standards:
+  naming:
+    loaders: "loader"
+    actions: "action"
+    boundaries: "${RouteName}Boundary"
+    handlers: "handle${EventName}"
+
+  patterns:
+    - "Use early returns"
+    - "Implement proper type safety"
+    - "Follow REST conventions"
+    - "Use proper HTTP status codes"
+
+accessibility:
+  rules:
+    - "Implement ARIA labels"
+    - "Use proper heading hierarchy"
+    - "Ensure keyboard navigation"
+    - "Provide focus management"
+
+meta_tags:
+  rules:
+    - "Implement meta export for SEO"
+    - "Use dynamic meta tags"
+    - "Handle social media cards"
+    - "Implement proper titles"
+
+file_structure:
+  app:
+    - "routes/"
+    - "components/"
+    - "hooks/"
+    - "utils/"
+    - "styles/"
+    - "types/"
+---

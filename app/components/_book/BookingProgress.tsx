@@ -1,47 +1,48 @@
-import { cn } from "~/lib/utils";
+import { Check } from "lucide-react";
 
 interface BookingProgressProps {
   currentStep: number;
+  steps: Array<{
+    number: number;
+    label: string;
+  }>;
 }
 
-export const BookingProgress = ({ currentStep }: BookingProgressProps) => {
-  const steps = [
-    { number: 1, label: "Personal Details" },
-    { number: 2, label: "Booking Details" },
-    { number: 3, label: "Summary" },
-  ];
-
+export const BookingProgress = ({ currentStep, steps }: BookingProgressProps) => {
   return (
-    <div className="mb-8">
-      <div className="flex justify-between items-center">
-        {steps.map((step, index) => (
-          <div key={step.number} className="flex items-center">
-            <div className="relative">
+    <div className="relative">
+      <div className="absolute top-5 left-14 right-[2.85rem] h-0.5 bg-muted-foreground/20">
+        <div className="absolute h-full bg-primary transition-all duration-500" style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }} />
+      </div>
+
+      <div className="relative flex justify-between">
+        {steps.map((step) => {
+          const isCompleted = currentStep > step.number;
+          const isCurrent = currentStep === step.number;
+
+          return (
+            <div key={step.number} className="flex flex-col items-center gap-2">
               <div
-                className={cn(
-                  "w-10 h-10 flex items-center justify-center rounded-full border-2",
-                  currentStep >= step.number
-                    ? "bg-primary border-primary text-white"
-                    : "border-gray-300 text-gray-500"
-                )}
+                className={`
+                  w-10 h-10 rounded-full border-2 flex items-center justify-center
+                  transition-colors duration-500
+                  ${isCompleted ? "border-primary bg-primary text-primary-foreground" : isCurrent ? "border-primary text-primary bg-white" : "border-muted-foreground/20 text-muted-foreground/40 bg-white"}
+                `}
               >
-                {step.number}
+                {isCompleted ? <Check className="w-5 h-5" /> : <span className="text-sm font-medium">{step.number}</span>}
               </div>
-              <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-sm">
+              <span
+                className={`
+                  text-sm font-medium text-center
+                  ${isCompleted || isCurrent ? "text-foreground" : "text-muted-foreground/40"}
+                `}
+              >
                 {step.label}
               </span>
             </div>
-            {index < steps.length - 1 && (
-              <div
-                className={cn(
-                  "w-24 h-0.5 mx-2",
-                  currentStep > step.number ? "bg-primary" : "bg-gray-300"
-                )}
-              />
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
-}; 
+};

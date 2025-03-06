@@ -17,6 +17,35 @@ const SanJuanSection6: React.FC<ChildProps> = ({ width, SanJuanSection6Text }) =
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
 
+  // Handle case where list might be a JSON string instead of an array
+  const getList = () => {
+    if (Array.isArray(SanJuanSection6Text.list)) {
+      return SanJuanSection6Text.list;
+    }
+    
+    // Try to parse if it's a string
+    if (typeof SanJuanSection6Text.list === 'string') {
+      try {
+        const parsed = JSON.parse(SanJuanSection6Text.list);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.error('Failed to parse list:', e);
+        return [];
+      }
+    }
+    
+    // If list is null or undefined, return empty array
+    if (SanJuanSection6Text.list === null || SanJuanSection6Text.list === undefined) {
+      return [];
+    }
+    
+    console.error('Unexpected list type:', typeof SanJuanSection6Text.list, SanJuanSection6Text.list);
+    return [];
+  };
+
+  // Get the list items
+  const listItems = getList();
+
   return (
     <div className="w-full overflow-x-hidden">
       <motion.div 
@@ -90,9 +119,9 @@ const SanJuanSection6: React.FC<ChildProps> = ({ width, SanJuanSection6Text }) =
                 width < 500 ? "ml-2 text-[0.9rem]" : 
                 "ml-6"
               }`}>
-                {SanJuanSection6Text.list.map((li, index) => (
+                {listItems.map((li, index) => (
                   <motion.li 
-                    key={li.index}
+                    key={li.index || index}
                     initial={{ opacity: 0, x: -20 }}
                     animate={isInView ? 
                       { opacity: 1, x: 0 } : 

@@ -1,106 +1,108 @@
 import { useBooking } from "~/context/BookingContext";
-import { Label } from "../ui/label";
-import { Calendar } from "../ui/calendar";
-import { Button } from "../ui/button";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import { cn } from "~/lib/utils";
+import { BookingStepTwoUI } from "../ui/BookingStepTwoUI";
+import { useLanguageContext } from "~/providers/LanguageContext";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export const BookingStepTwo = () => {
-  const { formData, setFormData, errors } = useBooking();
+  const { formData, setFormData, errors, selectedDateAvailability, setSelectedDateAvailability } = useBooking();
+  const { state } = useLanguageContext();
+  const bookingStepTwoText = state.booking.bookingStepTwo;
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Log selected date availability for debugging
+  useEffect(() => {
+    if (selectedDateAvailability) {
+      console.log("BookingStepTwo - Selected date availability:", selectedDateAvailability);
+      console.log(`Available places for ${selectedDateAvailability.date}: ${selectedDateAvailability.availablePlaces}`);
+    }
+  }, [selectedDateAvailability]);
+
+  // Refresh availability data when component mounts
+  useEffect(() => {
+    const refreshAvailabilityData = async () => {
+      if (formData.date && formData.tourSlug) {
+        try {
+          setIsRefreshing(true);
+          
+          // Add a timestamp to prevent caching
+          const timestamp = new Date().getTime();
+          
+          console.log(`Refreshing availability data for ${formData.date} and tour ${formData.tourSlug}`);
+          const response = await fetch(`/api/booking-places?date=${formData.date}&tourSlug=${formData.tourSlug}&_t=${timestamp}`);
+          
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+          }
+          
+          const availabilityData = await response.json();
+          console.log("Refreshed availability data from API:", availabilityData);
+          
+          // Update the selected date availability in context
+          setSelectedDateAvailability({
+            date: formData.date,
+            availablePlaces: availabilityData.availablePlaces,
+            isAvailable: availabilityData.isAvailable
+          });
+          
+          console.log(`Successfully refreshed availability data: ${availabilityData.availablePlaces} available places`);
+        } catch (error) {
+          console.error("Error refreshing availability data:", error);
+        } finally {
+          setIsRefreshing(false);
+        }
+      }
+    };
+    
+    refreshAvailabilityData();
+  }, [formData.date, formData.tourSlug, setSelectedDateAvailability]);
+
+  // Check if a date has been selected but availability data is not yet loaded
+  if (!selectedDateAvailability || isRefreshing) {
+    // If a date is selected but availability data is not yet loaded, show loading message
+    if (formData.date) {
+      return (
+        <div className="flex flex-col items-center justify-center space-y-4 py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="text-center text-muted-foreground">
+            Loading availability data for {formData.tourSlug ? `tour "${formData.tourSlug}"` : "all tours"}...
+          </div>
+        </div>
+      );
+    }
+    // If no date is selected, prompt user to select a date
+    return (
+      <div className="text-center text-muted-foreground py-8">
+        Please select a date first
+      </div>
+    );
+  }
+
+  // If there are no available places, show a message
+  if (selectedDateAvailability.availablePlaces <= 0) {
+    return (
+      <div className="text-center text-red-500 py-8">
+        Sorry, there are no available places for this date. Please select another date.
+      </div>
+    );
+  }
 
   const handlePartySizeChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      partySize: parseInt(value),
-    }));
+    const partySize = parseInt(value);
+    if (isNaN(partySize)) return;
+    
+    // Ensure party size doesn't exceed available places
+    // Note: selectedDateAvailability.availablePlaces already accounts for existing bookings
+    // as it's calculated as (maxBookings - totalPartySize) in the API
+    const safePartySize = Math.min(partySize, selectedDateAvailability.availablePlaces);
+    setFormData({ ...formData, partySize: safePartySize });
   };
 
-  const handleDateSelect = (date: Date | undefined) => {
-    setFormData((prev) => ({
-      ...prev,
-      bookingDate: date || null,
-    }));
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="partySize">Party Size</Label>
-        <Select
-          value={formData.partySize.toString()}
-          onValueChange={handlePartySizeChange}
-        >
-          <SelectTrigger
-            id="partySize"
-            className={cn(errors.partySize ? "border-red-500" : "")}
-          >
-            <SelectValue placeholder="Select party size" />
-          </SelectTrigger>
-          <SelectContent>
-            {Array.from({ length: 10 }, (_, i) => i + 1).map((size) => (
-              <SelectItem
-                key={size}
-                value={size.toString()}
-                className="flex items-center justify-between"
-              >
-                <span>{size} {size === 1 ? 'person' : 'people'}</span>
-
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.partySize && (
-          <p className="text-sm text-red-500">{errors.partySize.toString()}</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label>Booking Date</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !formData.bookingDate && "text-muted-foreground",
-                errors.bookingDate && "border-red-500"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {formData.bookingDate ? (
-                format(formData.bookingDate, "PPP")
-              ) : (
-                <span>Pick a date</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={formData.bookingDate || undefined}
-              onSelect={handleDateSelect}
-              disabled={(date) => date < new Date()}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-        {errors.bookingDate && (
-          <p className="text-sm text-red-500">{errors.bookingDate.toString()}</p>
-        )}
-      </div>
-    </div>
-  );
-}; 
+  return <BookingStepTwoUI 
+    partySize={formData.partySize} 
+    errors={errors} 
+    availablePlaces={selectedDateAvailability.availablePlaces} 
+    onPartySizeChange={handlePartySizeChange} 
+    bookingStepTwoText={bookingStepTwoText} 
+  />;
+};

@@ -1,28 +1,56 @@
 // app/components/layout/footer.tsx
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { useLocation } from "@remix-run/react";
-
 import { Link } from "@remix-run/react";
-import { Facebook, Instagram } from "lucide-react";
+
+// Import icons for social media
+import { FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
 
 const Footer: React.FC = () => {
   const { state } = useLanguageContext();
   const navLinks = state.links;
   const footerText = state.footer;
+  
+  // WhatsApp phone number
+  const phoneNumber = "+34625291391";
+  const whatsappUrl = `https://wa.me/${phoneNumber.replace(/\+/g, '')}`;
+  
   return (
-    <footer className="bg-gradient-to-b from-gray-900 to-gray-800 text-white py-16">
+    <footer id="site-footer" className="bg-gradient-to-b from-gray-900 to-gray-800 text-white py-16">
       <div className="container mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-12">
         {/* Section 1: Company Info */}
         <div className="mx-auto w-[90%] sm:w-auto transition-transform duration-300 hover:scale-105">
-          <img src="/logonuevoolga3.png" alt="Olga Travel" className="h-16 mb-6" />
+          <img src="/tourtovalencialogo.png" alt="Tour to Valencia" className="h-16 mb-6" />
           <p className="text-gray-300 text-base leading-relaxed max-w-[350px] mb-6">{footerText.firstp}</p>
-          <div className="mt-6 flex space-x-6">
-            <Link to="#" aria-label="Facebook" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 text-base">
-              <Facebook className="w-6 h-6" />
-            </Link>
-            <Link to="#" aria-label="Instagram" className="text-gray-300 hover:text-pink-400 transition-colors duration-300 text-base">
-              <Instagram className="w-6 h-6" />
-            </Link>
+          
+          {/* Social Media Links */}
+          <div className="flex space-x-4 mt-4">
+            <a 
+              href="https://www.facebook.com/tour.to.valencia" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-300 hover:text-blue-400 transition-colors duration-300"
+              aria-label="Facebook"
+            >
+              <FaFacebook className="h-6 w-6" />
+            </a>
+            <a 
+              href="https://www.instagram.com/tourtovalencia" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-300 hover:text-pink-400 transition-colors duration-300"
+              aria-label="Instagram"
+            >
+              <FaInstagram className="h-6 w-6" />
+            </a>
+            <a 
+              href={whatsappUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-300 hover:text-green-400 transition-colors duration-300"
+              aria-label="WhatsApp"
+            >
+              <FaWhatsapp className="h-6 w-6" />
+            </a>
           </div>
         </div>
 
@@ -44,20 +72,31 @@ const Footer: React.FC = () => {
         <div className="mx-auto w-[90%] sm:w-auto">
           <h4 className="text-xl font-bold mb-6 text-blue-300">{footerText.thirdH4}</h4>
           <ul className="text-base space-y-4">
-            <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
+            {/* <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
               <span className="font-semibold text-blue-200 block mb-1">{footerText.firstspan}</span>
               <span className="text-gray-300">{footerText.firstli}</span>
-            </li>
+            </li> */}
             <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
               <span className="font-semibold text-blue-200 block mb-1">{footerText.secondspan}</span>
-              <Link to="tel:+34123456789" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 block">
-                +34 123 456 789
-              </Link>
+              <div className="flex items-center space-x-3">
+                <a 
+                  href={whatsappUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-green-400 transition-colors duration-300"
+                  aria-label="Contact on WhatsApp"
+                >
+                  <FaWhatsapp className="h-5 w-5" />
+                </a>
+                <Link to="tel:+34625291391" className="text-gray-300 hover:text-blue-400 transition-colors duration-300">
+                  +34 625 291 391
+                </Link>
+              </div>
             </li>
             <li className="transition-all duration-300 hover:bg-gray-800/50 p-3 rounded-lg">
               <span className="font-semibold text-blue-200 block mb-1">{footerText.thirdspan}</span>
-              <Link to="mailto:info@olgatravel.com" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 block">
-                info@olgatravel.com
+              <Link to="mailto:tourtovalencia@gmail.com" className="text-gray-300 hover:text-blue-400 transition-colors duration-300 block">
+                tourtovalencia@gmail.com
               </Link>
             </li>
           </ul>
@@ -68,10 +107,10 @@ const Footer: React.FC = () => {
       <div className="border-t border-gray-700/50 mt-12 pt-8 text-center">
         <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} jaimedigitalstudio.com All rights reserved.</p>
         <div className="mt-4 space-x-6">
-          <Link to="/privacy-policy" className="text-gray-400 hover:text-blue-300 transition-colors duration-300 text-sm">
+          <Link to="/legal" className="text-gray-400 hover:text-blue-300 transition-colors duration-300 text-sm">
             {footerText.privacypolicy}
           </Link>
-          <Link to="/terms-of-service" className="text-gray-400 hover:text-blue-300 transition-colors duration-300 text-sm">
+          <Link to="/legal" className="text-gray-400 hover:text-blue-300 transition-colors duration-300 text-sm">
             {footerText.termsofservice}
           </Link>
         </div>

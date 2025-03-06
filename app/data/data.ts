@@ -47,6 +47,18 @@ export type IndexSection5Type = {
   secondH3: string;
 };
 
+export type EditableCardType = {
+  title: string;
+  duration: string;
+  description: string;
+  additionalInfo?: string;
+  quote?: string;
+  image: {
+    preview: string;
+    file?: File;
+  };
+};
+
 export type IndexFeaturesType = {
   firstSquareTitle: string;
   firstSquareDescription: string;
@@ -56,6 +68,8 @@ export type IndexFeaturesType = {
   thirdSquareDescription: string;
   fourthSquareTitle: string;
   fourthSquareDescription: string;
+  experienceTitle: string;
+  experienceDescription: string;
 };
 
 export type CardProps = {
@@ -79,31 +93,54 @@ export type sanJuanSection1Type = {
   thirdSquareH3: string;
   thirdSquareP: string;
   button: string;
+  backgroundImage?: {
+    file?: File;
+    preview: string;
+  };
 };
-
 
 export type sanJuansection2Type = {
   firstH3: string;
   secondH3: string;
   thirdH3: string;
+  sectionImage: {
+    file?: File;
+    preview: string;
+  };
+  lottieAnimation?: {
+    enabled: boolean;
+    src: string;
+  };
 };
+
 export type sanJuansection4Type = {
   firstH3: string;
   secondH3: string;
   thirdH3: string;
+  lottieAnimation?: {
+    enabled: boolean;
+    src: string;
+  };
 };
+
 export type sanJuanSection5Type = {
   firstH3: string;
   secondH3: string;
   thirdH3: string;
   fourthH3: string;
   fifthH3: string;
+  image?: string; // Add image field to store the image as base64 or URL
+  lottieAnimation?: {
+    enabled: boolean;
+    src: string;
+  };
 };
 
 export type SanJuanSection6listType = {
   li: string;
   index: number;
 };
+
 export type SanJuanSection6Type = {
   cardTitle: string;
   cardDescription: string;
@@ -132,6 +169,47 @@ export type sanJuanSection3Type = {
     source: string;
     alt: string;
   }[];
+};
+
+export type AdminType = {
+  login: {
+    title: string;
+    username: string;
+    password: string;
+    submit: string;
+  };
+  dashboard: {
+    title: string;
+    bookings: string;
+    logout: string;
+  };
+  bookings: {
+    title: string;
+    completion: string;
+    dailyLimit: string;
+    updateLimit: string;
+    currentLimit: string;
+    places: string;
+    noBookings: string;
+    loading: string;
+    tableHeaders: {
+      name: string;
+      email: string;
+      phone: string;
+      people: string;
+      status: string;
+      payment: string;
+      requests: string;
+    };
+    status: {
+      confirmed: string;
+      pending: string;
+    };
+    payment: {
+      paid: string;
+      unpaid: string;
+    };
+  };
 };
 
 export type Index = {
@@ -166,6 +244,12 @@ export type LanguageData = {
     toursMenu: {
       caves: string;
     };
+  };
+  cookieConsent: {
+    title: string;
+    description: string;
+    acceptButton: string;
+    declineButton: string;
   };
   timeline: {
     title: string;
@@ -224,6 +308,22 @@ export type LanguageData = {
       moreDetails: string;
     };
   };
+  legal: {
+    pageTitle: string;
+    pageDescription: string;
+    tabs: {
+      termsOfUse: string;
+      legalNotice: string;
+      dataProtection: string;
+      cookies: string;
+      payments: string;
+    };
+    readCarefully: string;
+    lastUpdated: string;
+    contactUs: string;
+    contactEmail: string;
+  };
+  admin: AdminType;
 };
 
 export const languages: Record<string, LanguageData> = {
@@ -232,14 +332,14 @@ export const languages: Record<string, LanguageData> = {
       { path: "/", linkText: "Home" },
       { path: "/book", linkText: "Book Now" },
     ],
-    flag: "🇺🇸",
+    flag: "",
     currentLanguage: "English",
     index: {
       heroSection: {
         firstH2Orange: "MEDITERRANEAN",
         firstH2: "EXCURSIONS",
-        firstH3: "EXPLORE THE BEST",
-        secondH3: "EXPERIENCES IN VALENCIA",
+        firstH3: "DISCOVER THE MAGICAL",
+        secondH3: "CAVES OF VALENCIA",
       },
       indexSection1: {
         firstH2: "EXPLORE VALENCIA",
@@ -339,7 +439,8 @@ export const languages: Record<string, LanguageData> = {
           country: "Spain",
           date: "June 29, 2024",
           reviewTitle: "Fantastic experience",
-          reviewText: "This experience exceeded my expectations, we had a very fun morning both on the boat inside the caves and during the car ride. Olga is definitely a girl who makes you feel comfortable, it's like traveling with a friend, she's fun and attentive. Thanks for this beautiful adventure, I highly recommend it 100% if you're looking for a different getaway.",
+          reviewText:
+            "This experience exceeded my expectations, we had a very fun morning both on the boat inside the caves and during the car ride. Olga is definitely a girl who makes you feel comfortable, it's like traveling with a friend, she's fun and attentive. Thanks for this beautiful adventure, I highly recommend it 100% if you're looking for a different getaway.",
           reviewLinkSite: "TripAdvisor",
           reviewLink: "https://www.tripadvisor.es/AttractionProductReview-g187529-d27928104-Visit_to_the_Sant_Josep_Caves-Valencia_Province_of_Valencia_Valencian_Community.html",
         },
@@ -413,6 +514,8 @@ export const languages: Record<string, LanguageData> = {
         thirdSquareDescription: "All our tours can be narrated in Spanish and English.",
         fourthSquareTitle: "Pets",
         fourthSquareDescription: "Pets are not allowed during the tour.",
+        experienceTitle: "Unique Experiences",
+        experienceDescription: "Dare to enjoy something different and special. Feel the sensation of time standing still in a very special atmosphere.",
       },
     },
     sanjuan: {
@@ -430,6 +533,10 @@ export const languages: Record<string, LanguageData> = {
         firstH3: "Enjoy a relaxing boat ride through one of the most spectacular underground rivers!",
         secondH3: "You'll travel 800 meters by boat.",
         thirdH3: "Did you know it's the longest navigable underground river in Europe?",
+        sectionImage: {
+          file: undefined,
+          preview: "",
+        },
       },
       sanJuanSection3: {
         images: [
@@ -464,6 +571,8 @@ export const languages: Record<string, LanguageData> = {
         thirdH3: "Private transport to La Vall d'Uixó (Castellón).",
         fourthH3: "Guided tour: 3h 30m (approx).",
         fifthH3: "Return to Valencia by private transport.",
+        image: undefined, // Add image field to store the image as base64 or URL
+        lottieAnimation: undefined,
       },
       sanJuanSection6: {
         cardTitle: "GUIDED TOUR",
@@ -476,7 +585,7 @@ export const languages: Record<string, LanguageData> = {
           { li: "Boat ride in the San José Caves.", index: 4 },
           { li: "All taxes and fees included.", index: 5 },
         ],
-        secondH4: "€120",
+        secondH4: "120€",
         secondH4span: "/person",
         button: "BOOK NOW",
       },
@@ -498,6 +607,12 @@ export const languages: Record<string, LanguageData> = {
       toursMenu: {
         caves: "San José Caves"
       },
+    },
+    cookieConsent: {
+      title: "Cookie Consent",
+      description: "We use cookies to ensure you get the best experience on our website. By continuing to use this site, you agree to the use of cookies.",
+      acceptButton: "Accept",
+      declineButton: "Decline"
     },
     timeline: {
       title: "What to Expect",
@@ -573,6 +688,61 @@ export const languages: Record<string, LanguageData> = {
         minParticipants: "Experiences requiring a minimum number of participants will offer an alternative date/experience or full refund if canceled due to insufficient participants",
         moreDetails: "For more details, refer to the cancellation policy"
       }
+    },
+    legal: {
+      pageTitle: "Legal Information",
+      pageDescription: "Important information about our terms of use, data protection, cookies, and payment policies.",
+      tabs: {
+        termsOfUse: "Terms of Use",
+        legalNotice: "Legal Notice",
+        dataProtection: "Data Protection",
+        cookies: "Cookies",
+        payments: "Payments"
+      },
+      readCarefully: "Please read this information carefully.",
+      lastUpdated: "Last updated:",
+      contactUs: "If you have any questions about our legal policies, please",
+      contactEmail: "contact us"
+    },
+    admin: {
+      login: {
+        title: "Admin Login",
+        username: "Username",
+        password: "Password",
+        submit: "Login"
+      },
+      dashboard: {
+        title: "Dashboard",
+        bookings: "Bookings",
+        logout: "Logout"
+      },
+      bookings: {
+        title: "Bookings Management",
+        completion: "Booking Completion",
+        dailyLimit: "Daily Places Limit",
+        updateLimit: "Update",
+        currentLimit: "Current limit:",
+        places: "places",
+        noBookings: "No bookings for this date",
+        loading: "Loading...",
+        tableHeaders: {
+          name: "Name",
+          email: "Email",
+          phone: "Phone",
+          people: "People",
+          status: "Status",
+          payment: "Payment",
+          requests: "Special Requests",
+        },
+        status: {
+          confirmed: "Confirmed",
+          pending: "Pending",
+        },
+        payment: {
+          paid: "Paid",
+          unpaid: "Unpaid",
+        },
+      },
     }
   },
   es: {
@@ -580,14 +750,14 @@ export const languages: Record<string, LanguageData> = {
       { path: "/", linkText: "Inicio" },
       { path: "/book", linkText: "Reservar" },
     ],
-    flag: "🇪🇸",
+    flag: "",
     currentLanguage: "Español",
     index: {
       heroSection: {
         firstH2Orange: "EXCURSIONES",
         firstH2: "MEDITERRÁNEO",
-        firstH3: "EXPLORA LAS MEJORES",
-        secondH3: "EXPERIENCIAS DE VALENCIA",
+        firstH3: "DESCUBRE LAS MÁGICAS",
+        secondH3: "CUEVAS DE VALENCIA",
       },
       indexSection1: {
         firstH2: "EXPLORA VALENCIA",
@@ -736,7 +906,7 @@ export const languages: Record<string, LanguageData> = {
         firstH3: "¡Excursiones Mediterráneo es fantástico!",
         firstp: "Excursiones Mediterráneo es la empresa líder en descubrir los rincones más fascinantes de Valencia.",
         secondp: "Pasión y dedicación definen cada una de nuestras experiencias. Diseñamos excursiones únicas que conectan a los viajeros con lo mejor de la ciudad: su historia, cultura, gastronomía y paisajes. Cada recorrido está pensado para adaptarse a los deseos de nuestros clientes, ofreciendo un enfoque personalizado.",
-        thirdp: "En Excursiones Mediterráneo, no solo hacemos tours, creamos momentos inolvidables para explorar Valencia como nunca antes.",
+        thirdp: "En Excursiones Mediterráneo, no solo hacemos tours; creamos momentos inolvidables para explorar Valencia como nunca antes.",
         fourthp: "¡Déjanos guiarte por los secretos mejor guardados de esta increíble ciudad!",
       },
       indexSection4: {
@@ -761,6 +931,8 @@ export const languages: Record<string, LanguageData> = {
         thirdSquareDescription: "Todos nuestros tours pueden ser narrados en español e inglés.",
         fourthSquareTitle: "Mascotas",
         fourthSquareDescription: "No se permiten mascotas durante el tour.",
+        experienceTitle: "Experiencias Únicas",
+        experienceDescription: "Atrévete a disfrutar algo diferente y especial. Siente la sensación de que el tiempo se ha parado en una atmósfera muy especial.",
       },
     },
     sanjuan: {
@@ -778,6 +950,10 @@ export const languages: Record<string, LanguageData> = {
         firstH3: "Disfruta de un relajante paseo en barca a través de uno de los ríos subterráneos más espectaculares.",
         secondH3: "Viajarás 800 metros en barca.",
         thirdH3: "¿Sabías que es el río subterráneo navegable más largo de Europa?",
+        sectionImage: {
+          file: undefined,
+          preview: "",
+        },
       },
       sanJuanSection3: {
         images: [
@@ -812,6 +988,8 @@ export const languages: Record<string, LanguageData> = {
         thirdH3: "Transporte privado a La Vall d'Uixó (Castellón).",
         fourthH3: "Tour guiado: 3h 30m (aprox).",
         fifthH3: "Regreso a Valencia por transporte privado.",
+        image: undefined, // Add image field to store the image as base64 or URL
+        lottieAnimation: undefined,
       },
       sanJuanSection6: {
         cardTitle: "TOUR GUIADO",
@@ -824,7 +1002,7 @@ export const languages: Record<string, LanguageData> = {
           { li: "Paseo en barca en las Cuevas de San José.", index: 4 },
           { li: "Todos los impuestos y gastos incluidos.", index: 5 },
         ],
-        secondH4: "€120",
+        secondH4: "120€",
         secondH4span: "/persona",
         button: "RESERVAR AHORA",
       },
@@ -846,6 +1024,12 @@ export const languages: Record<string, LanguageData> = {
       toursMenu: {
         caves: "Cuevas de San José"
       },
+    },
+    cookieConsent: {
+      title: "Consentimiento de Cookies",
+      description: "Utilizamos cookies para asegurar que obtienes la mejor experiencia en nuestro sitio web. Al continuar utilizando este sitio, aceptas el uso de cookies.",
+      acceptButton: "Aceptar",
+      declineButton: "Rechazar"
     },
     timeline: {
       title: "Qué esperar",
@@ -921,6 +1105,61 @@ export const languages: Record<string, LanguageData> = {
         minParticipants: "Las experiencias que requieren un número mínimo de participantes ofrecerán una fecha/experiencia alternativa o un reembolso completo si se cancelan debido a participantes insuficientes",
         moreDetails: "Para más detalles, consulte la política de cancelación"
       }
+    },
+    legal: {
+      pageTitle: "Información Legal",
+      pageDescription: "Información importante sobre nuestros términos de uso, protección de datos, cookies y políticas de pago.",
+      tabs: {
+        termsOfUse: "Condiciones de Uso",
+        legalNotice: "Aviso Legal",
+        dataProtection: "Protección de Datos",
+        cookies: "Cookies",
+        payments: "Pagos"
+      },
+      readCarefully: "Por favor, lea esta información cuidadosamente.",
+      lastUpdated: "Última actualización:",
+      contactUs: "Si tiene alguna pregunta sobre nuestras políticas legales, por favor",
+      contactEmail: "contáctenos"
+    },
+    admin: {
+      login: {
+        title: "Acceso Administrador",
+        username: "Usuario",
+        password: "Contraseña",
+        submit: "Iniciar Sesión"
+      },
+      dashboard: {
+        title: "Panel de Control",
+        bookings: "Reservas",
+        logout: "Cerrar Sesión"
+      },
+      bookings: {
+        title: "Gestión de Reservas",
+        completion: "Completado de Reservas",
+        dailyLimit: "Límite Diario de Plazas",
+        updateLimit: "Actualizar",
+        currentLimit: "Límite actual:",
+        places: "plazas",
+        noBookings: "No hay reservas para esta fecha",
+        loading: "Cargando...",
+        tableHeaders: {
+          name: "Nombre",
+          email: "Email",
+          phone: "Teléfono",
+          people: "Personas",
+          status: "Estado",
+          payment: "Pago",
+          requests: "Peticiones Especiales",
+        },
+        status: {
+          confirmed: "Confirmado",
+          pending: "Pendiente",
+        },
+        payment: {
+          paid: "Pagado",
+          unpaid: "No Pagado",
+        },
+      },
     }
   },
 };

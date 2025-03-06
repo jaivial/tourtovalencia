@@ -1,0 +1,13 @@
+# One-liner command to copy MongoDB database
+
+# Method 1: Using mongodump and mongorestore (recommended)
+mongodump --db olgatravel --out ./temp_backup && mongorestore --nsFrom=olgatravel.* --nsTo=demoolgatravel.* ./temp_backup/olgatravel
+
+# Method 2: Using MongoDB shell commands
+mongosh --eval "db.getSiblingDB('olgatravel').getCollectionNames().forEach(function(collection) { var docs = db.getSiblingDB('olgatravel')[collection].find().toArray(); if(docs.length > 0) db.getSiblingDB('demoolgatravel')[collection].insertMany(docs); });"
+
+# After copying, create indexes (run this separately)
+mongosh --eval "db.getSiblingDB('demoolgatravel').bookingLimits.createIndex({ date: 1 }, { unique: true }); db.getSiblingDB('demoolgatravel').tours.createIndex({ slug: 1 }, { unique: true }); db.getSiblingDB('demoolgatravel').pages.createIndex({ slug: 1 }, { unique: true }); db.getSiblingDB('demoolgatravel').translations.createIndex({ key: 1 }, { unique: true }); db.getSiblingDB('demoolgatravel').bookings.createIndex({ bookingId: 1 }, { unique: true });"
+
+# Update your .env file to use the new database
+# MONGODB_URI=mongodb://localhost:27017/demoolgatravel

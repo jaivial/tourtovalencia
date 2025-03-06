@@ -1,6 +1,7 @@
 // app/components/IndexSection1.tsx
 //UI Component: just responsible for displaying pure html with props passed from feature component
 import { IndexSection1Type } from "~/data/data";
+import { Link } from "@remix-run/react";
 
 // Child Props type
 type ChildProps = {
@@ -29,9 +30,14 @@ const IndexSection1: React.FC<ChildProps> = ({ width, height, indexSection1Text 
         <h2 className={`transition-all duration-500 ease-in-out text-blue-950 font-sans font-bold ${width <= 350 ? "text-[2.5rem]" : width <= 450 ? "text-[3rem]" : "text-[3rem]"} text-center`}>{indexSection1Text.firstH2}</h2>
         <h3 className={`transition-all duration-500 ease-in-out text-blue-950 font-sans font-medium ${width <= 350 ? "text-[1.6rem]" : width <= 450 ? "text-[2rem]" : "text-[2.5rem]"} text-center`}>{indexSection1Text.firstH3}</h3>
         <h3 className={`transition-all duration-500 ease-in-out text-blue-950 font-sans font-medium ${width <= 350 ? "text-[1.6rem]" : width <= 450 ? "text-[2rem]" : "text-[2.5rem]"} text-center`}>{indexSection1Text.secondH3}</h3>
-        <button type="button" className={`${width <= 450 ? "text-xl" : "text-2xl"} text-white bg-slate-950 rounded-xl font-sans tracking-wider font-medium px-4 py-4 md:hover:bg-blue-800 transition-colors duration-500 ease-in-out`}>
+        <Link 
+          to="/book" 
+          className={`${width <= 450 ? "text-xl" : "text-2xl"} text-white hover:text-white bg-slate-950 rounded-xl font-sans tracking-wider font-medium px-4 py-4 md:hover:bg-blue-800 transition-colors duration-500 ease-in-out no-underline hover:no-underline`}
+          aria-label="Book Now"
+          tabIndex={0}
+        >
           {indexSection1Text.button}
-        </button>
+        </Link>
       </div>
     </div>
   );

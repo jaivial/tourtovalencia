@@ -12,34 +12,39 @@ type ChildProps = {
 
 const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) => {
   return (
-    <div className="w-full overflow-x-hidden min-h-[100dvh] flex flex-col justify-center items-center relative" id="hero-section">
+    <div className="w-full overflow-hidden h-[100vh] flex flex-col justify-center items-center relative" id="hero-section">
       {/* Background image with responsive handling */}
-      <div className="absolute inset-0 w-full h-full">
+      <motion.div
+        initial={{ scale: 1.1 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 10, ease: "easeOut" }}
+        className="absolute inset-0 z-0"
+      >
         <picture>
           {/* Mobile portrait */}
           <source
             media="(max-width: 570px)"
-            srcSet="/valenciaadventure1-mobile.webp"
+            srcSet="/hero3.jpg"
           />
 
           {/* Desktop default */}
           <img
-            src="/valenciaadventure1.jpg"
+            src="/hero3.jpg"
             alt="Valencia Adventure Background"
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover brightness-[1] object-[50%_center] sm:object-center"
           />
         </picture>
-      </div>
+      </motion.div>
 
       {/* Darker overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/10 to-black/0" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/12.5 to-black/5 z-10" />
 
       {/* Content container */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className="w-[92%] sm:w-[95%] max-w-[1280px] min-h-[100dvh] flex flex-col justify-center items-center gap-6 sm:gap-8 md:gap-12 relative z-10 px-2 sm:px-4"
+        className="w-[92%] sm:w-[95%] max-w-[1280px] min-h-[100dvh] flex flex-col justify-center items-center gap-6 sm:gap-8 md:gap-12 relative z-20 px-2 sm:px-4"
       >
         {/* Title group */}
         <motion.div 
@@ -50,8 +55,8 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
         >
           <h2 className={`
             font-bold font-sans text-center tracking-wide
-            bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent
-            drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
+            bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent
+            drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]
             ${width <= 290 ? "text-[1.8rem]" : 
               width <= 350 ? "text-[2rem]" : 
               width <= 400 ? "text-[2.25rem]" : 
@@ -68,8 +73,8 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
             {heroSectionText.firstH2Orange}
           </h2>
           <h2 className={`
-            font-bold font-sans bg-gradient-to-r from-blue-300 to-blue-100 bg-clip-text text-transparent text-center
-            tracking-wide drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
+            font-bold font-sans bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent text-center
+            tracking-wide drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]
                ${width <= 290 ? "text-[1.8rem]" : 
               width <= 350 ? "text-[2rem]" : 
               width <= 400 ? "text-[2.25rem]" : 
@@ -96,7 +101,7 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
         >
           <h3 className={`
             font-bold font-sans text-white text-center
-            drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
+            drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]
             ${width <= 290 ? "text-[1rem]" : 
               width <= 350 ? "text-[1.2rem]" : 
               width <= 450 ? "text-[1.5rem]" : 
@@ -111,7 +116,7 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
           </h3>
           <h3 className={`
             font-bold font-sans text-white text-center
-            drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
+            drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]
             ${width <= 290 ? "text-[1rem]" : 
               width <= 350 ? "text-[1.2rem]" : 
               width <= 450 ? "text-[1.5rem]" : 
@@ -145,7 +150,7 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
                 width <= 640 ? "w-8 h-8" : 
                 "w-12 h-12"
               } 
-              text-white drop-shadow-[0_1.5px_10px_rgba(0,0,0,0.7)]
+              text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]
             `}
           />
         </motion.div>

@@ -1,8 +1,9 @@
 // app/components/_index/IndexFeatures.tsx
-import { Clock, Tag, Languages, Dog, Ban } from "lucide-react";
+import { Clock, Sparkles, Languages, Dog, Ban } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { IndexFeaturesType } from "~/data/data";
+import { useLanguageContext } from "~/providers/LanguageContext";
 
 type FeatureProps = {
   width: number;
@@ -27,6 +28,7 @@ const FeatureCard = ({ children, index }: { children: React.ReactNode; index: nu
 const IndexFeatures: React.FC<FeatureProps> = ({ width, indexFeatures }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
+  const { state } = useLanguageContext();
 
   return (
     <div className="w-full overflow-x-hidden">
@@ -53,16 +55,24 @@ const IndexFeatures: React.FC<FeatureProps> = ({ width, indexFeatures }) => {
             <p className="text-blue-800">{indexFeatures.firstSquareDescription}</p>
           </FeatureCard>
 
-          {/* Precios Section */}
+          {/* Experience Section (replacing Prices) */}
           <FeatureCard index={1}>
             <motion.div
-              whileHover={{ rotate: -20 }}
+              whileHover={{ scale: 1.2 }}
               transition={{ duration: 0.2 }}
+              className="relative"
             >
-              <Tag className="w-12 h-12 text-blue-950 mb-4" />
+              <Sparkles className="w-12 h-12 text-blue-950 mb-4" />
+              <motion.div 
+                initial={{ scale: 0 }}
+                whileHover={{ scale: 1 }}
+                className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+              >
+                !
+              </motion.div>
             </motion.div>
-            <h3 className="text-xl font-semibold text-blue-950 mb-3">{indexFeatures.secondSquareTitle}</h3>
-            <p className="text-blue-800">{indexFeatures.secondSquareDescription}</p>
+            <h3 className="text-xl font-semibold text-blue-950 mb-3">{indexFeatures.experienceTitle}</h3>
+            <p className="text-blue-800">{indexFeatures.experienceDescription}</p>
           </FeatureCard>
 
           {/* Idiomas Section */}
