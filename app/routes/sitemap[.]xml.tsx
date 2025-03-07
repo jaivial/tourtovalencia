@@ -1,6 +1,4 @@
-import type { LoaderFunction } from "@remix-run/node";
-
-export const loader: LoaderFunction = async () => {
+export const loader = async () => {
   // Create the XML content as a string
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -58,5 +56,3 @@ export const loader: LoaderFunction = async () => {
     }
   });
 };
-
-// No need for a default export since this is just a resource route
