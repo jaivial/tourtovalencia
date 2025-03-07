@@ -237,7 +237,14 @@ When prompted, select option 1 to reinstall the existing certificate.
 ## 17. Verify the Deployment
 
 ```bash
-curl -I https://tourtovalencia.com
+curl -I https://tourtovalencia
+
+
+
+  &
+  
+  
+%                                                                                                                                                                                                                                                                                                                           Ç mcom
 ```
 
 ## 18. Set Proper File Permissions
