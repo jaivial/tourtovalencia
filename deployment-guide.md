@@ -57,7 +57,7 @@ Add the following configuration:
 ```nginx
 server {
     listen 80;
-    server_name tourtovalencia.jaimedigitalstudio.com;
+    server_name tourtovalencia.com;
     
     location / {
         proxy_pass http://localhost:3000;

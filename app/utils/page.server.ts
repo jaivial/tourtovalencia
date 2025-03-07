@@ -2,6 +2,10 @@ import { getPagesCollection, getToursCollection } from "./db.server";
 import type { Page } from "./db.schema.server";
 import axios from "axios";
 import sharp from "sharp";
+import dotenv from "dotenv";
+
+// Initialize dotenv
+dotenv.config();
 
 const MAX_IMAGE_SIZE = 400 * 1024; // 400KB limit per image (reduced from 500KB)
 // Configuration for OpenRouter API
