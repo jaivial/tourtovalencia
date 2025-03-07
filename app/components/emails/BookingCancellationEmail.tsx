@@ -123,10 +123,10 @@ export const BookingCancellationEmail = ({
         <Container style={styles.container}>
           <Section style={styles.header}>
             <Img
-              src="https://tourtovalencia.com/tourtovalencialogo.png"
-              width="200"
+              src="cid:tourtovalencialogo"
+              width="300"
               height="80"
-              alt="Tour to Valencia"
+              alt="Tour To Valencia"
               style={styles.logo}
             />
           </Section>

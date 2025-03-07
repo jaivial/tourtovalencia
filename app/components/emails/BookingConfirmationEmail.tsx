@@ -127,10 +127,10 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
         <Container style={container}>
           <Section style={logoSection}>
             <Img
-              src="https://tourtovalencia.com/tourtovalencialogo.png"
-              width="200"
+              src="cid:tourtovalencialogo"
+              width="300"
               height="80"
-              alt="Tour to Valencia"
+              alt="Tour To Valencia"
               style={logo}
             />
           </Section>

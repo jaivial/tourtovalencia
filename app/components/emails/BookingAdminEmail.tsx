@@ -67,8 +67,8 @@ export const BookingAdminEmail = ({ booking }: BookingAdminEmailProps) => {
         <Container style={container}>
           <Section style={logoSection}>
             <Img
-              src="https://tourtovalencia.com/tourtovalencialogo.png"
-              width="200"
+              src="cid:tourtovalencialogo"
+              width="300"
               height="80"
               alt="Tour To Valencia"
               style={logo}

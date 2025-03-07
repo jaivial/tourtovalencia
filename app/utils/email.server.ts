@@ -108,6 +108,14 @@ export const sendEmail = async ({ to, subject, component }: SendEmailProps): Pro
       .replace(/\s+/g, ' ')
       .trim();
 
+    // Path to the logo image - adjust this path to where your logo is stored
+    const logoPath = path.join(process.cwd(), "public", "tourtovalencialogo.png");
+    
+    // Check if the logo file exists
+    if (!fs.existsSync(logoPath)) {
+      console.warn(`Logo file not found at ${logoPath}. Using fallback URL.`);
+    }
+
     const info = await emailTransporter.sendMail({
       from: `"Tour To Valencia" <tourtovalencia@gmail.com>`,
       to,
@@ -119,12 +127,19 @@ export const sendEmail = async ({ to, subject, component }: SendEmailProps): Pro
         'Importance': 'high',
         'X-MSMail-Priority': 'High',
       },
+      attachments: [
+        {
+          filename: 'tourtovalencialogo.png',
+          path: fs.existsSync(logoPath) ? logoPath : 'https://tourtovalencia.com/tourtovalencialogo.png',
+          cid: 'tourtovalencialogo' // Same as the src value in your email template
+        }
+      ]
     });
 
-    console.log("Reserva Confirmada con éxito:", info.messageId);
+    console.log("Email sent successfully:", info.messageId);
     return info;
   } catch (error) {
-    console.error("Fallo al enviar el correo:", error);
+    console.error("Failed to send email:", error);
     throw error;
   }
 };
