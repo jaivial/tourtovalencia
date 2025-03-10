@@ -1,4 +1,4 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useLocation } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useLocation, useMatches } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import "./styles/globals.css";
 import { json, type LoaderArgs, ActionArgs, redirect } from "@remix-run/node";
@@ -15,6 +15,12 @@ import { getAllPages } from "~/utils/page.server";
 import { ToastProvider } from "~/components/ui/toast-provider";
 import { getToursCollection } from "~/utils/db.server";
 import type { Tour } from "~/utils/db.schema.server";
+
+// Define the handle type for routes
+interface RouteHandle {
+  skipLayout?: boolean;
+  [key: string]: any;
+}
 
 export interface RootLoaderData {
   initialLanguage: typeof languageData.en;
@@ -98,9 +104,34 @@ export const links: LinksFunction = () => [
 export default function App() {
   const { initialLanguage, ENV, pages, cookieConsent } = useLoaderData<RootLoaderData>();
   const location = useLocation();
+  const matches = useMatches();
+  
+  // Check if the current route has skipLayout handle
+  const skipLayout = matches.some(match => (match.handle as RouteHandle)?.skipLayout);
+  
   const isAdminDashboard = location.pathname.includes("/admin/dashboard");
   const isAdminPage = location.pathname.includes("/admin");
 
+  // If skipLayout is true, render a minimal layout
+  if (skipLayout) {
+    return (
+      <html lang="en">
+        <head>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <Meta />
+          <Links />
+        </head>
+        <body>
+          <Outlet />
+          <ScrollRestoration />
+          <Scripts />
+        </body>
+      </html>
+    );
+  }
+
+  // Regular layout
   return (
     <html lang="en" className="h-full">
       <head>

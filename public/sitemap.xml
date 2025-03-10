@@ -1,6 +1,4 @@
-export const loader = async () => {
-  // Create the XML content as a string
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Homepage -->
   <url>
@@ -45,15 +43,4 @@ export const loader = async () => {
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
-</urlset>`;
-// Return the XML with the correct content type
-return new Response(xml, {
-    status: 200,
-    headers: {
-      "Content-Type": "application/xml",
-      "xml-version": "1.0",
-      "encoding": "UTF-8",
-      "Cache-Control": "public, max-age=3600" // Cache for 1 hour
-    }
-  });
-};
+</urlset> 
