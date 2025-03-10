@@ -56,14 +56,14 @@ export const meta: MetaFunction = () => {
     { name: "description", content: "Disfruta de excursiones, viajes y visitas guiadas en Valencia para tus vacaciones. Excursiones disponibles: viaje desde Valencia a las Cuevas de San Juan con visita guiada y paseo en barca." },
     { name: "keywords", content: "excursiones mediterráneo, viajes valencia, visitas guiadas valencia, cuevas de san juan, paseo en barca, vacaciones valencia" },
     { name: "author", content: "Tour To Valencia" },
-    { name: "robots", content: "index, follow" }, // Allows search engines to index and follow links on the page
+    { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
 
     // Open Graph (OG) tags for social media sharing (including WhatsApp)
     { property: "og:title", content: "Tour To Valencia | Viajes y Visitas Guiadas en Valencia" },
     { property: "og:description", content: "Disfruta de excursiones, viajes y visitas guiadas en Valencia para tus vacaciones. Excursiones disponibles: viaje desde Valencia a las Cuevas de San Juan con visita guiada y paseo en barca." },
     { property: "og:type", content: "website" },
     { property: "og:url", content: "https://www.tourtovalencia.com/" },
-    { property: "og:image", content: "/logonuevoolga3.png" },
+    { property: "og:image", content: "https://tourtovalencia.com/tourtovalenciablackbg.webp" },
     { property: "og:image:width", content: "1200" }, // Recommended image width for WhatsApp
     { property: "og:image:height", content: "630" }, // Recommended image height for WhatsApp
     { property: "og:image:alt", content: "Excursión a las Cuevas de San Juan, salida desde Valencia" },

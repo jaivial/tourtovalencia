@@ -69,7 +69,7 @@ export const meta: MetaFunction = ({ data }) => {
     { name: "description", content: description },
     { property: "og:title", content: `${typedData.page.name} | Tour To Valencia` },
     { property: "og:description", content: description },
-    { property: "og:image", content: "/tourtovalencialogo.png" },
+    { property: "og:image", content: "https://tourtovalencia.com/tourtovalenciablackbg.webp" },
     { property: "og:image:width", content: "1200" },
     { property: "og:image:height", content: "630" },
     { property: "og:type", content: "website" },

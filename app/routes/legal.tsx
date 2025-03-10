@@ -15,7 +15,7 @@ export const meta: MetaFunction = () => {
     { name: "description", content: translations.pageDescription },
     { property: "og:title", content: `${translations.pageTitle} | Tour To Valencia` },
     { property: "og:description", content: translations.pageDescription },
-    { property: "og:image", content: "/tourtovalencialogo.png" },
+    { property: "og:image", content: "https://tourtovalencia.com/tourtovalenciablackbg.webp" },
     { property: "og:image:width", content: "1200" },
     { property: "og:image:height", content: "630" },
     { property: "og:type", content: "website" },
