@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin: 20px 0;
+    }
+    button {
+      background: #0066ff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background: #0055dd;
+    }
+    .instructions {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Favicon Generator for Tour to Valencia</h1>
+  
+  <div class="instructions">
+    <h2>Instructions:</h2>
+    <ol>
+      <li>Click "Load Current Favicon" to load your existing favicon</li>
+      <li>The tool will create 192x192 and 512x512 versions</li>
+      <li>Click the "Download" buttons to save each size</li>
+      <li>Place the downloaded files in your public folder</li>
+    </ol>
+  </div>
+
+  <button id="loadFavicon">Load Current Favicon</button>
+  
+  <h2>192x192 Version</h2>
+  <canvas id="canvas192" width="192" height="192"></canvas>
+  <button id="download192">Download favicon-192.png</button>
+  
+  <h2>512x512 Version</h2>
+  <canvas id="canvas512" width="512" height="512"></canvas>
+  <button id="download512">Download favicon-512.png</button>
+
+  <script>
+    document.getElementById('loadFavicon').addEventListener('click', function() {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.onload = function() {
+        // Draw 192x192 version
+        const canvas192 = document.getElementById('canvas192');
+        const ctx192 = canvas192.getContext('2d');
+        ctx192.clearRect(0, 0, 192, 192);
+        ctx192.drawImage(img, 0, 0, 192, 192);
+        
+        // Draw 512x512 version
+        const canvas512 = document.getElementById('canvas512');
+        const ctx512 = canvas512.getContext('2d');
+        ctx512.clearRect(0, 0, 512, 512);
+        ctx512.drawImage(img, 0, 0, 512, 512);
+      };
+      
+      // Load the current favicon with a cache-busting parameter
+      img.src = '/favicon.png?t=' + new Date().getTime();
+    });
+    
+    document.getElementById('download192').addEventListener('click', function() {
+      const canvas = document.getElementById('canvas192');
+      const dataURL = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = 'favicon-192.png';
+      link.href = dataURL;
+      link.click();
+    });
+    
+    document.getElementById('download512').addEventListener('click', function() {
+      const canvas = document.getElementById('canvas512');
+      const dataURL = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = 'favicon-512.png';
+      link.href = dataURL;
+      link.click();
+    });
+  </script>
+</body>
+</html> 

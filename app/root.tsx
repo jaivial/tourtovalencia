@@ -1,7 +1,6 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useLocation, useMatches } from "@remix-run/react";
-import type { LinksFunction } from "@remix-run/node";
+import { type LinksFunction, type ActionFunctionArgs, type LoaderFunctionArgs, json, redirect } from "@remix-run/node";
 import "./styles/globals.css";
-import { json, type LoaderArgs, ActionArgs, redirect } from "@remix-run/node";
 import { languageCookie, cookieConsentCookie } from "~/utils/cookies";
 import languageData from "~/data/data.json";
 import Nav from "~/components/layout/nav";
@@ -19,7 +18,7 @@ import type { Tour } from "~/utils/db.schema.server";
 // Define the handle type for routes
 interface RouteHandle {
   skipLayout?: boolean;
-  [key: string]: any;
+  [key: string]: unknown; // Using unknown instead of any
 }
 
 export interface RootLoaderData {
@@ -33,7 +32,7 @@ export interface RootLoaderData {
   cookieConsent: boolean | null;
 }
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const cookieHeader = request.headers.get("Cookie");
   const cookieLanguage = (await languageCookie.parse(cookieHeader)) || "en";
   const language = cookieLanguage as keyof typeof languageData;
@@ -59,7 +58,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   });
 };
 
-export const action = async ({ request }: ActionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const consent = formData.get("consent");
   
@@ -99,6 +98,16 @@ export const links: LinksFunction = () => [
     type: "image/x-icon",
     href: "/favicon.ico",
   },
+  {
+    rel: "icon",
+    type: "image/png",
+    sizes: "32x32",
+    href: "/favicon.png",
+  },
+  {
+    rel: "manifest",
+    href: "/manifest.json",
+  },
 ];
 
 export default function App() {
@@ -137,6 +146,8 @@ export default function App() {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="google-site-verification" content="63kEgo-K5QpeD7-YtpQpviW4aSnh6NAEPEsyUMybOec" />
+        <link rel="shortcut icon" href="/favicon.ico" />
         <Meta />
         <Links />
       </head>
