@@ -9,12 +9,11 @@ Allow: /
 # Allow Bing to fully crawl and index the site
 User-agent: Bingbot
 Allow: /
-Crawl-delay: 1
 
 # Allow Yandex to fully crawl and index the site
 User-agent: Yandexbot
 Allow: /
-Crawl-delay: 1
+
 
 # Sitemap location
 Sitemap: https://tourtovalencia.com/sitemap.xml 
