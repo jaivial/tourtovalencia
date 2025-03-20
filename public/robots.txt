@@ -1,24 +1,4 @@
-# robots.txt for tourtovalencia.com
 User-agent: *
 Allow: /
-Allow: /favicon.ico
-Allow: /favicon.png
-Allow: /apple-touch-icon.png
-Allow: /manifest.json
-
-# Allow Google to fully crawl and index the site
-User-agent: Googlebot
-Allow: /
-
-# Allow Bing to fully crawl and index the site
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
-
-# Allow Yandex to fully crawl and index the site
-User-agent: Yandexbot
-Allow: /
-Crawl-delay: 1
-
-# Sitemap location
-Sitemap: https://tourtovalencia.com/sitemap.xml 
+Sitemap: https://www.tourtovalencia.com/sitemap-0.xml
+Sitemap: http://www.tourtovalencia.com/sitemap-index.xml
