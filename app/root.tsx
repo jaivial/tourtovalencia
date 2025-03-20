@@ -128,6 +128,11 @@ export default function App() {
         <head>
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+          <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+          <meta name="google-site-verification" content="63kEgo-K5QpeD7-YtpQpviW4aSnh6NAEPEsyUMybOec" />
+
+
           <Meta />
           <Links />
         </head>

@@ -47,7 +47,12 @@ export const meta: MetaFunction = ({ data }) => {
   const typedData = data as unknown as { page: Page } | undefined;
   
   if (!typedData?.page) {
-    return [{ title: "Página no encontrada | Viajes Olga" }, { name: "description", content: "La página que buscas no existe o ha sido movida." }];
+    return [
+      { title: "Página no encontrada | Viajes Olga" },
+      { name: "description", content: "La página que buscas no existe o ha sido movida." },
+      { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      { name: "google-site-verification", content: "AuMlxg6HJG3Rwtp1H81O3OmPVW4WaI5jrk1X4Onm0hU" }
+    ];
   }
 
   // Get the first few words from section1 or section4 for description
@@ -74,7 +79,9 @@ export const meta: MetaFunction = ({ data }) => {
     { property: "og:image:height", content: "630" },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
-    { name: "twitter:image", content: "https://tourtovalencia.com/tourtovalenciablackbg.webp" }
+    { name: "twitter:image", content: "https://tourtovalencia.com/tourtovalenciablackbg.webp" },
+    { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+    { name: "google-site-verification", content: "63kEgo-K5QpeD7-YtpQpviW4aSnh6NAEPEsyUMybOec" }
   ];
 };
 
