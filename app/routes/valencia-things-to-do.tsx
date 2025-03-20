@@ -17,7 +17,7 @@ export const meta: MetaFunction = () => {
     { name: "description", content: description },
     { name: "keywords", content: "valencia tourism, things to do in valencia, valencia tours, valencia activities, valencia attractions, valencia travel guide, valencia spain" },
     { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
-    { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+    { rel: "icon", type: "image/x-icon", href: "https://tourtovalencia.com/favicon.ico" },
     { name: "google-site-verification", content: "63kEgo-K5QpeD7-YtpQpviW4aSnh6NAEPEsyUMybOec" },
     
     // Open Graph / Facebook

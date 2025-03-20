@@ -58,7 +58,7 @@ export const meta: MetaFunction = () => {
     { name: "author", content: "Tour To Valencia" },
     { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
     // Add favicon
-    { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+    { rel: "icon", type: "image/x-icon", href: "https://tourtovalencia.com/favicon.ico" },
     // Add Google site verification
     { name: "google-site-verification", content: "63kEgo-K5QpeD7-YtpQpviW4aSnh6NAEPEsyUMybOec" },
 

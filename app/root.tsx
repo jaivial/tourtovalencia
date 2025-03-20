@@ -96,7 +96,7 @@ export const links: LinksFunction = () => [
   {
     rel: "icon",
     type: "image/x-icon",
-    href: "/favicon.ico",
+    href: "https://tourtovalencia.com/favicon.ico",
   },
   {
     rel: "icon",
@@ -129,7 +129,7 @@ export default function App() {
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-          <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+          <link rel="icon" type="image/x-icon" href="https://tourtovalencia.com/favicon.ico" />
           <meta name="google-site-verification" content="63kEgo-K5QpeD7-YtpQpviW4aSnh6NAEPEsyUMybOec" />
 
 
