@@ -34,6 +34,49 @@ The application follows a well-organized component structure:
 - **Context Providers**: Manage application state and language preferences
 - **Custom Hooks**: Encapsulate functionality and state management
 
+#### Directory Structure
+```
+viajesolga/
+├── app/                    # Main application code
+│   ├── components/         # React components
+│   │   ├── _book/          # Booking-related components
+│   │   ├── _cards/         # Card UI components
+│   │   ├── _index/         # Homepage components
+│   │   ├── _pagegen/       # Page generation components
+│   │   ├── _pages/         # Page-specific components
+│   │   ├── _sanjuan/       # San Juan tour components
+│   │   ├── emails/         # Email templates
+│   │   ├── features/       # Feature components
+│   │   ├── layout/         # Layout components (header, footer)
+│   │   ├── ui/             # Reusable UI components
+│   │   └── valencia-things-to-do/ # Valencia activities components
+│   ├── context/            # React context providers
+│   ├── data/               # Application data and translations
+│   ├── db/                 # Database connection and models
+│   ├── hooks/              # Custom React hooks
+│   ├── lib/                # Utility libraries
+│   ├── middleware/         # Express middleware
+│   ├── models/             # Data models
+│   ├── providers/          # Context providers
+│   ├── reducers/           # State reducers
+│   ├── routes/             # Remix routes
+│   ├── services/           # Service layer
+│   ├── styles/             # Global styles
+│   ├── types/              # TypeScript type definitions
+│   ├── utils/              # Utility functions
+│   ├── entry.client.tsx    # Client entry point
+│   ├── entry.server.tsx    # Server entry point
+│   └── root.tsx            # Root component
+├── public/                 # Static assets
+├── scripts/                # Utility scripts
+├── types/                  # Global TypeScript types
+├── .env                    # Environment variables (not in repo)
+├── package.json            # Dependencies and scripts
+├── tailwind.config.js      # Tailwind CSS configuration
+├── tsconfig.json           # TypeScript configuration
+└── vite.config.ts          # Vite configuration
+```
+
 ### Getting Started
 
 #### Prerequisites
@@ -114,6 +157,49 @@ La aplicación sigue una estructura de componentes bien organizada:
 - **Componentes UI**: Reciben props y renderizan elementos de interfaz de usuario
 - **Proveedores de Contexto**: Gestionan el estado de la aplicación y las preferencias de idioma
 - **Hooks Personalizados**: Encapsulan funcionalidad y gestión de estado
+
+#### Estructura de Directorios
+```
+viajesolga/
+├── app/                    # Código principal de la aplicación
+│   ├── components/         # Componentes React
+│   │   ├── _book/          # Componentes relacionados con reservas
+│   │   ├── _cards/         # Componentes de tarjetas UI
+│   │   ├── _index/         # Componentes de la página principal
+│   │   ├── _pagegen/       # Componentes de generación de páginas
+│   │   ├── _pages/         # Componentes específicos de páginas
+│   │   ├── _sanjuan/       # Componentes del tour de San Juan
+│   │   ├── emails/         # Plantillas de correo electrónico
+│   │   ├── features/       # Componentes de características
+│   │   ├── layout/         # Componentes de diseño (encabezado, pie de página)
+│   │   ├── ui/             # Componentes UI reutilizables
+│   │   └── valencia-things-to-do/ # Componentes de actividades en Valencia
+│   ├── context/            # Proveedores de contexto React
+│   ├── data/               # Datos de la aplicación y traducciones
+│   ├── db/                 # Conexión a base de datos y modelos
+│   ├── hooks/              # Hooks personalizados de React
+│   ├── lib/                # Bibliotecas de utilidades
+│   ├── middleware/         # Middleware de Express
+│   ├── models/             # Modelos de datos
+│   ├── providers/          # Proveedores de contexto
+│   ├── reducers/           # Reductores de estado
+│   ├── routes/             # Rutas de Remix
+│   ├── services/           # Capa de servicios
+│   ├── styles/             # Estilos globales
+│   ├── types/              # Definiciones de tipos TypeScript
+│   ├── utils/              # Funciones de utilidad
+│   ├── entry.client.tsx    # Punto de entrada del cliente
+│   ├── entry.server.tsx    # Punto de entrada del servidor
+│   └── root.tsx            # Componente raíz
+├── public/                 # Activos estáticos
+├── scripts/                # Scripts de utilidad
+├── types/                  # Tipos globales de TypeScript
+├── .env                    # Variables de entorno (no en repositorio)
+├── package.json            # Dependencias y scripts
+├── tailwind.config.js      # Configuración de Tailwind CSS
+├── tsconfig.json           # Configuración de TypeScript
+└── vite.config.ts          # Configuración de Vite
+```
 
 ### Primeros Pasos
 
