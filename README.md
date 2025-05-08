@@ -1,80 +1,161 @@
-You are a Senior Front-End Developer and an Expert in ReactJS, NextJS, JavaScript, TypeScript, HTML, CSS, and modern UI/UX frameworks (e.g., TailwindCSS). You are thoughtful, give nuanced answers, and are brilliant at reasoning. You carefully provide accurate, factual, thoughtful answers, and are a genius at reasoning.
-You use Shadcn for the UI components.
+# Viajes Olga - Tour To Valencia
 
-- Follow the user’s requirements carefully & to the letter.
-- First think step-by-step - describe your plan for what to build in pseudocode, written out in great detail.
-- Confirm, then write code!
-- Always write correct, best practice, DRY principle (Don't Repeat Yourself), bug-free, fully functional, and working code also it should be aligned to listed rules down below at Code Implementation Guidelines.
-- Focus on easy and readable code, over being performant.
-- Fully implement all requested functionality.
-- Leave NO todo’s, placeholders or missing pieces.
-- Ensure code is complete! Verify thoroughly finalised.
-- Include all required imports, and ensure proper naming of key components.
-- Be concise. Minimize any other prose.
-- If you think there might not be a correct answer, you say so.
-- If you do not know the answer, say so, instead of guessing.
+## English
 
-### Coding Environment
-The user asks questions about the following coding languages:
-- ReactJS
-- Remix
-- JavaScript
-- TypeScript
-- TailwindCSS
-- HTML
-- CSS
+### Overview
+Tour To Valencia is a modern, multilingual (English/Spanish) web application built with Remix and React that allows users to discover, explore, and book tours and experiences in Valencia, Spain. The platform offers a seamless booking experience with integrated payment processing through PayPal and Stripe, email confirmations, and a comprehensive admin dashboard for managing bookings and tour content.
 
-### Code Implementation Guidelines
-Follow these rules when you write code:
-- Use early returns whenever possible to make the code more readable.
-- Always use Tailwind classes for styling HTML elements; avoid using CSS or tags.
-- Use “class:” instead of the tertiary operator in class tags whenever possible.
-- Use descriptive variable and function/const names. Also, event functions should be named with a “handle” prefix, like “handleClick” for onClick and “handleKeyDown” for onKeyDown.
-- Implement accessibility features on elements. For example, a tag should have a tabindex=“0”, aria-label, on:click, and on:keydown, and similar attributes.
-- Use consts instead of functions, for example, “const toggle = () =>”. Also, define a type if possible.
+### Features
+- **Multilingual Support**: Full English and Spanish language support throughout the application
+- **Tour Discovery**: Browse various tours and experiences available in Valencia
+- **Dynamic Content Management**: Admin dashboard for creating and managing tour pages
+- **Booking System**: Complete booking flow with date selection, availability checking, and party size options
+- **Payment Processing**: Integrated PayPal and Stripe payment gateways
+- **Email Notifications**: Automated confirmation emails for both customers and administrators
+- **Responsive Design**: Fully responsive UI built with TailwindCSS
+- **Admin Dashboard**: Comprehensive management interface for bookings, tour content, and availability settings
 
-### Coding Rules and Patterns
-#### Component Organization:
-**Route Components (Remix Routes)**
-- Are responsible for fetching data on the server side using `loader` functions, containing the context provider, and returning feature components.
-- Route components just return the context provider with feature components inside, nothing else, no HTML code.
-- Route components handle data loading via Remix's `loader` function and pass the data as props to the context provider.
+### Technology Stack
+- **Frontend**: React, TypeScript, TailwindCSS
+- **Framework**: Remix
+- **Database**: MongoDB
+- **Payment Processing**: PayPal, Stripe
+- **Email**: Nodemailer
+- **Styling**: TailwindCSS, Shadcn UI components
+- **Animation**: Framer Motion
+- **Deployment**: PM2, Nginx
 
-**Feature Components**
-- Responsible for importing and calling context variables and custom hooks from `[route].hooks.ts`.
-- Feature components always call functions or `useEffect` functionalities from custom hooks and use variables from context.
-- No function, `useState`, variable, constant, or `useEffect` can be declared in a Feature component.
-- Feature components return only UI Components. They can return some HTML to wrap UI Components and give better styling, but keep that minimal.
+### Project Structure
+The application follows a well-organized component structure:
 
-**UI Components**
-- Responsible only for receiving variables as props and returning UI elements.
-- UI components receive everything they need as props from their Parent Feature component.
-- On the UI component, it only returns HTML. No `useEffect`, no function, no `useState`, no variable, no handle action, nothing can be declared there.
+- **Route Components**: Handle data loading via Remix's `loader` function
+- **Feature Components**: Import and use context variables and custom hooks
+- **UI Components**: Receive props and render UI elements
+- **Context Providers**: Manage application state and language preferences
+- **Custom Hooks**: Encapsulate functionality and state management
 
-#### Context Usage:
-- Each route has its own context provider.
-- The context receives server-side props passed from the `loader` function in Remix.
-- The context calls a custom hook `useStates` as `const states`, which is defined in `[route].hooks.ts`. This hook stores all `useState` variables, constants, and non-function logic.
+### Getting Started
 
-#### Custom Hooks:
-- All functions and state management are encapsulated in custom hooks, which are declared and called from a unique file named `[route].hooks.ts`.
-- Some custom hooks may need to pass as parameters some variables coming from custom hooks of the context states.
+#### Prerequisites
+- Node.js (v20.0.0 or higher)
+- MongoDB
 
-#### UseMemo and UseCallback
-- Whenever it is possible use useMemo and useCallback to improve the performance of the app.
+#### Installation
+1. Clone the repository
+```bash
+git clone https://github.com/jaivial/tourtovalencia.git
+cd viajesolga
+```
 
-#### Localization and String Management:
-- All strings used in the application are stored in two languages in the file `app/data/data.ts` @data.ts.
-- Every new string or text that needs to be implemented will first be added to the object for both languages in `data.ts` @data.ts.
-- Strings are then called from the context states, ensuring that the correct language is displayed based on the user's preferences or application settings.
+2. Install dependencies
+```bash
+npm install
+```
 
-### Remix-Specific Guidelines:
-- **Data Loading**: Use Remix's `loader` function to fetch data on the server side. Data fetched in the `loader` will be passed as props to the route component.
-- **Actions**: Use Remix's `action` function for handling form submissions or other actions that modify data on the server.
-- **Error Handling**: Use Remix's `ErrorBoundary` to handle errors gracefully within routes.
-- **Meta Tags**: Use Remix's `meta` function to dynamically set meta tags for SEO purposes.
-- **Links and Navigation**: Use Remix's `<Link>` component for client-side navigation between routes, ensuring optimal performance and avoiding full-page reloads.
+3. Create a `.env` file in the root directory with the following variables:
+```
+MONGODB_URI=your_mongodb_connection_string
+STRIPE_SECRET_KEY=your_stripe_secret_key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+PAYPAL_CLIENT_ID=your_paypal_client_id
+PAYPAL_CLIENT_SECRET=your_paypal_client_secret
+EMAIL_USER=your_email_address
+EMAIL_PASS=your_email_password
+EMAIL_HOST=your_email_host
+EMAIL_PORT=your_email_port
+ADMIN_USERNAME=your_admin_username
+ADMIN_PASSWORD=your_admin_password
+```
 
+4. Start the development server
+```bash
+npm run dev
+```
 
-### Learning and writing new rules on README.md
-- Whenever a new problem is being solved, write the solution as a prompt of these coding rules, so in the future is can be avoided or treated on time.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+### Deployment
+For deployment instructions, please refer to the deployment guides in the repository:
+- `DEPLOYMENT_GUIDE_TOURTOVALENCIA.md`
+- `deployment-guide.md`
+
+---
+
+## Español
+
+### Descripción General
+Tour To Valencia es una aplicación web moderna y multilingüe (inglés/español) construida con Remix y React que permite a los usuarios descubrir, explorar y reservar tours y experiencias en Valencia, España. La plataforma ofrece una experiencia de reserva fluida con procesamiento de pagos integrado a través de PayPal y Stripe, confirmaciones por correo electrónico y un completo panel de administración para gestionar reservas y contenido de tours.
+
+### Características
+- **Soporte Multilingüe**: Soporte completo en inglés y español en toda la aplicación
+- **Descubrimiento de Tours**: Explora varios tours y experiencias disponibles en Valencia
+- **Gestión de Contenido Dinámico**: Panel de administración para crear y gestionar páginas de tours
+- **Sistema de Reservas**: Flujo completo de reservas con selección de fecha, verificación de disponibilidad y opciones de tamaño de grupo
+- **Procesamiento de Pagos**: Pasarelas de pago integradas de PayPal y Stripe
+- **Notificaciones por Correo Electrónico**: Correos electrónicos de confirmación automáticos para clientes y administradores
+- **Diseño Responsivo**: Interfaz de usuario completamente responsiva construida con TailwindCSS
+- **Panel de Administración**: Interfaz de gestión integral para reservas, contenido de tours y configuración de disponibilidad
+
+### Stack Tecnológico
+- **Frontend**: React, TypeScript, TailwindCSS
+- **Framework**: Remix
+- **Base de Datos**: MongoDB
+- **Procesamiento de Pagos**: PayPal, Stripe
+- **Correo Electrónico**: Nodemailer
+- **Estilos**: TailwindCSS, componentes UI de Shadcn
+- **Animación**: Framer Motion
+- **Despliegue**: PM2, Nginx
+
+### Estructura del Proyecto
+La aplicación sigue una estructura de componentes bien organizada:
+
+- **Componentes de Ruta**: Manejan la carga de datos mediante la función `loader` de Remix
+- **Componentes de Características**: Importan y utilizan variables de contexto y hooks personalizados
+- **Componentes UI**: Reciben props y renderizan elementos de interfaz de usuario
+- **Proveedores de Contexto**: Gestionan el estado de la aplicación y las preferencias de idioma
+- **Hooks Personalizados**: Encapsulan funcionalidad y gestión de estado
+
+### Primeros Pasos
+
+#### Requisitos Previos
+- Node.js (v20.0.0 o superior)
+- MongoDB
+
+#### Instalación
+1. Clonar el repositorio
+```bash
+git clone https://github.com/jaivial/tourtovalencia.git
+cd viajesolga
+```
+
+2. Instalar dependencias
+```bash
+npm install
+```
+
+3. Crear un archivo `.env` en el directorio raíz con las siguientes variables:
+```
+MONGODB_URI=tu_cadena_de_conexion_mongodb
+STRIPE_SECRET_KEY=tu_clave_secreta_stripe
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=tu_clave_publicable_stripe
+PAYPAL_CLIENT_ID=tu_client_id_paypal
+PAYPAL_CLIENT_SECRET=tu_client_secret_paypal
+EMAIL_USER=tu_direccion_de_correo
+EMAIL_PASS=tu_contraseña_de_correo
+EMAIL_HOST=tu_host_de_correo
+EMAIL_PORT=tu_puerto_de_correo
+ADMIN_USERNAME=tu_nombre_de_usuario_admin
+ADMIN_PASSWORD=tu_contraseña_admin
+```
+
+4. Iniciar el servidor de desarrollo
+```bash
+npm run dev
+```
+
+5. Abrir [http://localhost:3000](http://localhost:3000) en tu navegador
+
+### Despliegue
+Para instrucciones de despliegue, consulta las guías de despliegue en el repositorio:
+- `DEPLOYMENT_GUIDE_TOURTOVALENCIA.md`
+- `deployment-guide.md`
