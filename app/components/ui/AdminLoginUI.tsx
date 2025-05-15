@@ -3,7 +3,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
 
 type AdminLoginUIProps = {
   onLogin: (username: string, password: string) => Promise<boolean>;
@@ -21,12 +21,17 @@ type AdminLoginUIProps = {
 export const AdminLoginUI = ({ onLogin, isLoading, loginError, strings }: AdminLoginUIProps) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading) return;
 
     await onLogin(username, password);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -43,7 +48,12 @@ export const AdminLoginUI = ({ onLogin, isLoading, loginError, strings }: AdminL
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{strings.password}</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={loginError ? "border-red-500" : ""} disabled={isLoading} required />
+              <div className="relative">
+                <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className={loginError ? "border-red-500 pr-10" : "pr-10"} disabled={isLoading} required />
+                <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none" onClick={togglePasswordVisibility} tabIndex={-1}>
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             {loginError && (
               <div className="flex items-center space-x-2 text-red-600 text-sm">
