@@ -4,41 +4,49 @@ import type { MetaFunction } from "@remix-run/react";
 import IndexContainer from "~/components/_index/IndexContainer";
 import { getDb } from "~/utils/db.server";
 import type { Tour, Page } from "~/utils/db.schema.server";
+import { useState, useEffect } from "react";
+import { IndexLoadingScreen } from "~/components/ui/IndexLoadingScreen";
 
 // Define a serializable version of the Tour type for use with JSON
-type SerializableTour = Omit<Tour, 'createdAt' | 'updatedAt'> & {
+type SerializableTour = Omit<Tour, "createdAt" | "updatedAt"> & {
   createdAt: string;
   updatedAt: string;
 };
 
 // Define a serializable version of the Page type for use with JSON
-type SerializablePage = Omit<Page, 'createdAt' | 'updatedAt'> & {
+type SerializablePage = Omit<Page, "createdAt" | "updatedAt"> & {
   createdAt: string;
   updatedAt: string;
+};
+
+// Define the loader return type
+type LoaderData = {
+  tours: SerializableTour[];
+  pages: SerializablePage[];
 };
 
 export const loader = async () => {
   const db = await getDb();
   let tours: SerializableTour[] = [];
   let pages: SerializablePage[] = [];
-  
+
   try {
     // Fetch tours from the database
     const tourDocs = await db.collection("tours").find({}).toArray();
-    tours = tourDocs.map(doc => ({
+    tours = tourDocs.map((doc) => ({
       ...doc,
       _id: doc._id?.toString(),
       createdAt: doc.createdAt?.toISOString() || new Date().toISOString(),
-      updatedAt: doc.updatedAt?.toISOString() || new Date().toISOString()
+      updatedAt: doc.updatedAt?.toISOString() || new Date().toISOString(),
     })) as SerializableTour[];
 
     // Fetch pages from the database
     const pageDocs = await db.collection("pages").find({}).toArray();
-    pages = pageDocs.map(doc => ({
+    pages = pageDocs.map((doc) => ({
       ...doc,
       _id: doc._id?.toString(),
       createdAt: doc.createdAt?.toISOString() || new Date().toISOString(),
-      updatedAt: doc.updatedAt?.toISOString() || new Date().toISOString()
+      updatedAt: doc.updatedAt?.toISOString() || new Date().toISOString(),
     })) as SerializablePage[];
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -46,7 +54,7 @@ export const loader = async () => {
     tours = [];
     pages = [];
   }
-  
+
   return { tours, pages };
 };
 
@@ -85,6 +93,35 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const { tours, pages } = useLoaderData<{ tours: SerializableTour[], pages: SerializablePage[] }>();
-  return <IndexContainer tours={tours} pages={pages} />;
+  const { tours, pages } = useLoaderData<LoaderData>();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if all assets are loaded
+    const handleLoad = () => {
+      if (document.readyState === "complete") {
+        // Add a small delay to ensure smooth transition
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
+      }
+    };
+
+    // Check if document is already loaded
+    if (document.readyState === "complete") {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+    } else {
+      window.addEventListener("load", handleLoad);
+      return () => window.removeEventListener("load", handleLoad);
+    }
+  }, []);
+
+  return (
+    <>
+      <IndexLoadingScreen isLoading={isLoading} message="Cargando Tour To Valencia..." />
+      <IndexContainer tours={tours} pages={pages} />
+    </>
+  );
 }
