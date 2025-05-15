@@ -177,6 +177,8 @@ export type AdminType = {
     username: string;
     password: string;
     submit: string;
+    pageTitle: string;
+    description: string;
   };
   dashboard: {
     title: string;
@@ -736,10 +738,12 @@ export const languages: Record<string, LanguageData> = {
         title: "Admin Login",
         username: "Username",
         password: "Password",
-        submit: "Login"
+        submit: "Login",
+        pageTitle: "Tour To Valencia Admin",
+        description: "Enter your credentials to access the administration panel"
       },
       dashboard: {
-        title: "Dashboard",
+        title: "Tour To Valencia Admin",
         bookings: "Bookings",
         logout: "Logout"
       },
@@ -1180,10 +1184,12 @@ export const languages: Record<string, LanguageData> = {
         title: "Inicio de Sesión Admin",
         username: "Usuario",
         password: "Contraseña",
-        submit: "Iniciar Sesión"
+        submit: "Iniciar Sesión",
+        pageTitle: "Tour To Valencia Admin",
+        description: "Ingresa tus credenciales para acceder al panel de administración"
       },
       dashboard: {
-        title: "Panel de Control",
+        title: "Tour To Valencia Admin",
         bookings: "Reservas",
         logout: "Cerrar Sesión"
       },

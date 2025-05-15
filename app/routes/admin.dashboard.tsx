@@ -2,6 +2,7 @@ import { json } from "@remix-run/server-runtime";
 import { useLoaderData } from "@remix-run/react";
 import { AuthProvider } from "~/context/auth.context";
 import { AdminDashboardLayout } from "~/components/ui/AdminDashboardLayout";
+import { languages } from "~/data/data";
 
 export const loader = async () => {
   return json({
@@ -9,28 +10,41 @@ export const loader = async () => {
       id: "1",
       name: "Administrador",
     },
+    strings: {
+      en: {
+        title: languages.en.admin.dashboard.title,
+        username: "",
+        password: "",
+        submit: "",
+        invalidCredentials: "",
+        bookings: languages.en.admin.dashboard.bookings,
+        logout: languages.en.admin.dashboard.logout,
+        pageGenerator: "Page Generator",
+        home: "Home",
+        account: "Account",
+      },
+      es: {
+        title: languages.es.admin.dashboard.title,
+        username: "",
+        password: "",
+        submit: "",
+        invalidCredentials: "",
+        bookings: languages.es.admin.dashboard.bookings,
+        logout: languages.es.admin.dashboard.logout,
+        pageGenerator: "Generador de páginas",
+        home: "Inicio",
+        account: "Cuenta",
+      },
+    },
   });
 };
 
 export default function AdminDashboardRoute() {
   const data = useLoaderData<typeof loader>();
 
-  const handleLogout = () => {
-    // Implementar lógica de cierre de sesión
-  };
-
-  const strings = {
-    title: "Olga Travel Admin",
-    bookings: "Reservas",
-    logout: "Cerrar Sesión",
-    pageGenerator: "Generador de páginas",
-    home: "Inicio",
-    account: "Cuenta",
-  };
-
   return (
     <AuthProvider {...data}>
-      <AdminDashboardLayout onLogout={handleLogout} strings={strings} />
+      <AdminDashboardLayout strings={data.strings.es} />
     </AuthProvider>
   );
 }

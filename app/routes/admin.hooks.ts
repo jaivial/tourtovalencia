@@ -4,7 +4,6 @@ import { json } from "@remix-run/server-runtime";
 
 // Importaciones del servidor solo se usan en el loader/action
 import {
-  verifyAdminCredentials,
   initializeDefaultAdminUser
 } from "~/models/adminUser.server";
 
@@ -17,6 +16,7 @@ interface UseStatesProps {
       password: string;
       submit: string;
       invalidCredentials: string;
+      [key: string]: string;
     };
     es: {
       title: string;
@@ -24,6 +24,7 @@ interface UseStatesProps {
       password: string;
       submit: string;
       invalidCredentials: string;
+      [key: string]: string;
     };
   };
   [key: string]: unknown;
@@ -83,11 +84,13 @@ export const useStates = (props: UseStatesProps) => {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
+    // Limpiar el estado de autenticación
     setIsAuthenticated(false);
     localStorage.removeItem("isAuthenticated");
-    await Promise.resolve();
-    navigate("/");
+    
+    // Redirigir al usuario a la página de login
+    navigate("/admin");
   };
 
   return {

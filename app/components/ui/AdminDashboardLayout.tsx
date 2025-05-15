@@ -3,9 +3,9 @@ import { Button } from "~/components/ui/button";
 import { LogOut, Home, Calendar, FileText, User } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { MobileNav } from "./MobileNav";
+import { useAuth } from "~/context/auth.context";
 
 export type AdminDashboardLayoutProps = {
-  onLogout: () => void;
   strings: {
     title: string;
     bookings: string;
@@ -16,8 +16,9 @@ export type AdminDashboardLayoutProps = {
   };
 };
 
-export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayoutProps) {
+export function AdminDashboardLayout({ strings }: AdminDashboardLayoutProps) {
   const location = useLocation();
+  const { handleLogout } = useAuth();
   const isBookingsActive = location.pathname === "/admin/dashboard/bookings";
   const isPageGenActive = location.pathname === "/admin/dashboard/pagegen";
   const isAccountActive = location.pathname === "/admin/dashboard/account";
@@ -49,7 +50,7 @@ export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayout
             </Link>
           </nav>
           <div className="p-4 border-t">
-            <Button onClick={onLogout} variant="ghost" className="w-full flex items-center justify-center space-x-2 text-gray-700 hover:bg-gray-100">
+            <Button onClick={handleLogout} variant="ghost" className="w-full flex items-center justify-center space-x-2 text-gray-700 hover:bg-gray-100">
               <LogOut className="h-5 w-5" />
               <span>{strings.logout}</span>
             </Button>
@@ -82,7 +83,7 @@ export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayout
             </Link>
           </nav>
           <div className="p-4 border-t">
-            <Button onClick={onLogout} variant="ghost" className="w-full flex items-center justify-center space-x-2 text-gray-700 hover:bg-gray-100">
+            <Button onClick={handleLogout} variant="ghost" className="w-full flex items-center justify-center space-x-2 text-gray-700 hover:bg-gray-100">
               <LogOut className="h-5 w-5" />
               <span>{strings.logout}</span>
             </Button>
