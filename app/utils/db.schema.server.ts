@@ -98,6 +98,15 @@ export interface Tour {
   updatedAt: Date;
 }
 
+// Admin user interface for MongoDB
+export interface AdminUser {
+  _id?: string;
+  username: string;
+  password: string; // Hashed password
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export async function ensureDbIndexes() {
   const db = await getDb();
   
@@ -145,5 +154,13 @@ export async function ensureDbIndexes() {
     { key: { createdAt: -1 } },
     // Index for finding tours by pageId
     { key: { pageId: 1 }, unique: true }
+  ]);
+
+  // Create indexes for adminuser collection
+  await db.collection("adminuser").createIndexes([
+    // Unique index for username
+    { key: { username: 1 }, unique: true },
+    // Index for sorting by creation date
+    { key: { createdAt: -1 } }
   ]);
 }

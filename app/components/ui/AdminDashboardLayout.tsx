@@ -1,6 +1,6 @@
 import { Link, useLocation, Outlet } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
-import { LogOut, Home, Calendar, FileText } from "lucide-react";
+import { LogOut, Home, Calendar, FileText, User } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { MobileNav } from "./MobileNav";
 
@@ -12,6 +12,7 @@ export type AdminDashboardLayoutProps = {
     logout: string;
     pageGenerator: string;
     home: string;
+    account: string;
   };
 };
 
@@ -19,6 +20,7 @@ export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayout
   const location = useLocation();
   const isBookingsActive = location.pathname === "/admin/dashboard/bookings";
   const isPageGenActive = location.pathname === "/admin/dashboard/pagegen";
+  const isAccountActive = location.pathname === "/admin/dashboard/account";
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -33,27 +35,17 @@ export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayout
               <Home className="h-5 w-5" />
               <span>{strings.home}</span>
             </Link>
-            <Link 
-              to="/admin/dashboard/bookings" 
-              className={cn(
-                "flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", 
-                isBookingsActive ? "bg-primary text-white hover:bg-primary/90" : ""
-              )}
-              prefetch="intent"
-            >
+            <Link to="/admin/dashboard/bookings" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isBookingsActive ? "bg-primary text-white hover:bg-primary/90" : "")} prefetch="intent">
               <Calendar className="h-5 w-5" />
               <span>{strings.bookings}</span>
             </Link>
-            <Link 
-              to="/admin/dashboard/pagegen" 
-              className={cn(
-                "flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", 
-                isPageGenActive ? "bg-primary text-white hover:bg-primary/90" : ""
-              )}
-              prefetch="intent"
-            >
+            <Link to="/admin/dashboard/pagegen" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isPageGenActive ? "bg-primary text-white hover:bg-primary/90" : "")} prefetch="intent">
               <FileText className="h-5 w-5" />
               <span>{strings.pageGenerator}</span>
+            </Link>
+            <Link to="/admin/dashboard/account" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isAccountActive ? "bg-primary text-white hover:bg-primary/90" : "")} prefetch="intent">
+              <User className="h-5 w-5" />
+              <span>{strings.account}</span>
             </Link>
           </nav>
           <div className="p-4 border-t">
@@ -76,27 +68,17 @@ export function AdminDashboardLayout({ onLogout, strings }: AdminDashboardLayout
               <Home className="h-5 w-5" />
               <span>{strings.home}</span>
             </Link>
-            <Link 
-              to="/admin/dashboard/bookings" 
-              className={cn(
-                "flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", 
-                isBookingsActive ? "bg-primary text-white hover:bg-primary/90" : ""
-              )}
-              prefetch="intent"
-            >
+            <Link to="/admin/dashboard/bookings" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isBookingsActive ? "bg-primary text-white hover:bg-primary/90" : "")} prefetch="intent">
               <Calendar className="h-5 w-5" />
               <span>{strings.bookings}</span>
             </Link>
-            <Link 
-              to="/admin/dashboard/pagegen" 
-              className={cn(
-                "flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", 
-                isPageGenActive ? "bg-primary text-white hover:bg-primary/90" : ""
-              )}
-              prefetch="intent"
-            >
+            <Link to="/admin/dashboard/pagegen" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isPageGenActive ? "bg-primary text-white hover:bg-primary/90" : "")} prefetch="intent">
               <FileText className="h-5 w-5" />
               <span>{strings.pageGenerator}</span>
+            </Link>
+            <Link to="/admin/dashboard/account" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isAccountActive ? "bg-primary text-white hover:bg-primary/90" : "")} prefetch="intent">
+              <User className="h-5 w-5" />
+              <span>{strings.account}</span>
             </Link>
           </nav>
           <div className="p-4 border-t">

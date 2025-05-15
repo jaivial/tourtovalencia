@@ -3,28 +3,30 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { AlertCircle } from "lucide-react";
 
 type AdminLoginUIProps = {
-  onLogin: (username: string, password: string) => boolean;
+  onLogin: (username: string, password: string) => Promise<boolean>;
+  isLoading: boolean;
+  loginError: string | null;
   strings: {
     title: string;
     username: string;
     password: string;
     submit: string;
+    invalidCredentials: string;
   };
 };
 
-export const AdminLoginUI = ({ onLogin, strings }: AdminLoginUIProps) => {
+export const AdminLoginUI = ({ onLogin, isLoading, loginError, strings }: AdminLoginUIProps) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = onLogin(username, password);
-    if (!success) {
-      setError(true);
-    }
+    if (isLoading) return;
+
+    await onLogin(username, password);
   };
 
   return (
@@ -37,33 +39,20 @@ export const AdminLoginUI = ({ onLogin, strings }: AdminLoginUIProps) => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">{strings.username}</Label>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className={error ? "border-red-500" : ""}
-                required
-              />
+              <Input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} className={loginError ? "border-red-500" : ""} disabled={isLoading} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{strings.password}</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={error ? "border-red-500" : ""}
-                required
-              />
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={loginError ? "border-red-500" : ""} disabled={isLoading} required />
             </div>
-            {error && (
-              <p className="text-sm text-red-500">
-                Invalid username or password
-              </p>
+            {loginError && (
+              <div className="flex items-center space-x-2 text-red-600 text-sm">
+                <AlertCircle className="h-4 w-4" />
+                <span>{strings.invalidCredentials || loginError}</span>
+              </div>
             )}
-            <Button type="submit" className="w-full">
-              {strings.submit}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Verificando..." : strings.submit}
             </Button>
           </form>
         </CardContent>

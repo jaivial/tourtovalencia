@@ -210,6 +210,33 @@ export type AdminType = {
       unpaid: string;
     };
   };
+  account: {
+    title: string;
+    currentUsername: string;
+    newUsername: string;
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+    updateUsername: string;
+    updatePassword: string;
+    usernameTab: string;
+    passwordTab: string;
+    usernameUpdated: string;
+    passwordUpdated: string;
+    usernamePlaceholder: string;
+    currentPasswordPlaceholder: string;
+    newPasswordPlaceholder: string;
+    confirmPasswordPlaceholder: string;
+    error: {
+      usernameRequired: string;
+      usernameMin: string;
+      currentPasswordRequired: string;
+      newPasswordRequired: string;
+      passwordsDoNotMatch: string;
+      passwordMin: string;
+      updateFailed: string;
+    };
+  };
 };
 
 export type Index = {
@@ -743,6 +770,33 @@ export const languages: Record<string, LanguageData> = {
           unpaid: "Unpaid",
         },
       },
+      account: {
+        title: "Account Settings",
+        currentUsername: "Current Username",
+        newUsername: "New Username",
+        currentPassword: "Current Password",
+        newPassword: "New Password",
+        confirmPassword: "Confirm Password",
+        updateUsername: "Update Username",
+        updatePassword: "Update Password",
+        usernameTab: "Username",
+        passwordTab: "Password",
+        usernameUpdated: "Username updated successfully",
+        passwordUpdated: "Password updated successfully",
+        usernamePlaceholder: "Enter new username",
+        currentPasswordPlaceholder: "Enter current password",
+        newPasswordPlaceholder: "Enter new password",
+        confirmPasswordPlaceholder: "Confirm new password",
+        error: {
+          usernameRequired: "Username is required",
+          usernameMin: "Username must be at least 3 characters",
+          currentPasswordRequired: "Current password is required",
+          newPasswordRequired: "New password is required",
+          passwordsDoNotMatch: "Passwords do not match",
+          passwordMin: "Password must be at least 4 characters",
+          updateFailed: "Update failed. Please try again."
+        }
+      }
     }
   },
   es: {
@@ -1123,7 +1177,7 @@ export const languages: Record<string, LanguageData> = {
     },
     admin: {
       login: {
-        title: "Acceso Administrador",
+        title: "Inicio de Sesión Admin",
         username: "Usuario",
         password: "Contraseña",
         submit: "Iniciar Sesión"
@@ -1160,6 +1214,33 @@ export const languages: Record<string, LanguageData> = {
           unpaid: "No Pagado",
         },
       },
+      account: {
+        title: "Configuración de Cuenta",
+        currentUsername: "Usuario Actual",
+        newUsername: "Nuevo Usuario",
+        currentPassword: "Contraseña Actual",
+        newPassword: "Nueva Contraseña",
+        confirmPassword: "Confirmar Contraseña",
+        updateUsername: "Actualizar Usuario",
+        updatePassword: "Actualizar Contraseña",
+        usernameTab: "Usuario",
+        passwordTab: "Contraseña",
+        usernameUpdated: "Usuario actualizado correctamente",
+        passwordUpdated: "Contraseña actualizada correctamente",
+        usernamePlaceholder: "Ingrese nuevo nombre de usuario",
+        currentPasswordPlaceholder: "Ingrese contraseña actual",
+        newPasswordPlaceholder: "Ingrese nueva contraseña",
+        confirmPasswordPlaceholder: "Confirme nueva contraseña",
+        error: {
+          usernameRequired: "El nombre de usuario es requerido",
+          usernameMin: "El nombre de usuario debe tener al menos 3 caracteres",
+          currentPasswordRequired: "La contraseña actual es requerida",
+          newPasswordRequired: "La nueva contraseña es requerida",
+          passwordsDoNotMatch: "Las contraseñas no coinciden",
+          passwordMin: "La contraseña debe tener al menos 4 caracteres",
+          updateFailed: "La actualización falló. Intente nuevamente."
+        }
+      }
     }
   },
 };

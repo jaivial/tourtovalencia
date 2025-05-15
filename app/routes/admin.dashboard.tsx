@@ -25,6 +25,7 @@ export default function AdminDashboardRoute() {
     logout: "Cerrar Sesión",
     pageGenerator: "Generador de páginas",
     home: "Inicio",
+    account: "Cuenta",
   };
 
   return (
