@@ -8,7 +8,7 @@ set -e
 
 # Configuration
 APP_NAME="tourtovalenciamaster"
-APP_DIR="/var/www/tourtovalencia"
+APP_DIR="/var/www/tourtovalencia.com"
 BRANCH="master"
 
 # Colors for output

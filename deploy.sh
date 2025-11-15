@@ -1,16 +1,54 @@
 #!/bin/bash
 
-# Deployment script for tourtovalencia.jaimedigitalstudio.com
-# This script should be run on the VPS after initial setup
+# Deploy script for Tour to Valencia
+# Commits and pushes local changes, then connects to server and deploys
 
-# Exit on error
-set -e
+echo "🚀 Starting deployment process for tourtovalencia.com..."
 
+# Check if there are any changes to commit
+if [ -n "$(git status --porcelain)" ]; then
+    echo "📝 Committing local changes..."
+
+    # Get current timestamp for commit message
+    TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+
+    # Add all changes
+    git add .
+
+    # Create commit with timestamp
+    git commit -m "Auto-deployment commit - $TIMESTAMP
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+    if [ $? -eq 0 ]; then
+        echo "✅ Changes committed successfully"
+    else
+        echo "❌ Failed to commit changes"
+        exit 1
+    fi
+else
+    echo "ℹ️  No local changes to commit"
+fi
+
+# Push to origin
+echo "📤 Pushing to remote repository..."
+git push origin master
+
+if [ $? -eq 0 ]; then
+    echo "✅ Pushed to remote successfully"
+else
+    echo "❌ Failed to push to remote"
+    exit 1
+fi
+
+echo "🔗 Connecting to server and deploying latest changes..."
+
+ssh root@178.16.130.178 << 'EOF'
 # Configuration
-APP_NAME="tourtovalencia"
+APP_NAME="tourtovalencia.com"
 APP_DIR="/var/www/$APP_NAME"
-REPO_URL="<your-repository-url>"
-BRANCH="dev"
 DB_NAME="demoolgatravel"
 
 # Colors for output
@@ -24,54 +62,30 @@ section() {
   echo -e "\n${YELLOW}==== $1 ====${NC}\n"
 }
 
-# Check if running as root
-if [ "$(id -u)" -eq 0 ]; then
-  echo -e "${RED}This script should not be run as root${NC}"
-  exit 1
-fi
-
-# Update the repository
 section "Updating repository"
-if [ -d "$APP_DIR" ]; then
-  echo "Repository exists, pulling latest changes"
-  cd "$APP_DIR"
-  git fetch
-  git checkout "$BRANCH"
-  git pull
-else
-  echo "Cloning repository"
-  sudo mkdir -p "$(dirname "$APP_DIR")"
-  sudo chown "$(whoami):$(whoami)" "$(dirname "$APP_DIR")"
-  git clone "$REPO_URL" "$APP_DIR"
-  cd "$APP_DIR"
-  git checkout "$BRANCH"
-fi
+cd "$APP_DIR"
+echo "Current directory: $(pwd)"
 
-# Install dependencies
+echo "🔄 Updating code from remote repository..."
+git clean -fd
+git reset --hard HEAD
+git fetch origin
+git reset --hard origin/master
+
 section "Installing dependencies"
-npm ci
+npm install --legacy-peer-deps
 
-# Build the application
 section "Building application"
 npm run build
 
-# Check if .env file exists, create if not
 section "Checking environment configuration"
 if [ ! -f "$APP_DIR/.env" ]; then
-  echo "Creating .env file"
-  cat > "$APP_DIR/.env" << EOF
-# MongoDB Connection
-MONGODB_URI=mongodb://localhost:27017/$DB_NAME
-
-# Add other environment variables as needed
-EOF
-  echo -e "${YELLOW}Please edit the .env file to add any missing environment variables${NC}"
+  echo -e "${YELLOW}Warning: .env file does not exist${NC}"
 else
   echo ".env file exists"
 fi
 
-# Start or restart the application with PM2
-section "Starting application with PM2"
+section "Restarting application with PM2"
 if pm2 list | grep -q "$APP_NAME"; then
   echo "Restarting application"
   pm2 restart "$APP_NAME"
@@ -81,17 +95,12 @@ else
   pm2 save
 fi
 
-# Check if MongoDB is running
 section "Checking MongoDB"
 if systemctl is-active --quiet mongod; then
   echo "MongoDB is running"
-  
-  # Check MongoDB version
-  MONGO_VERSION=$(mongod --version | grep "db version" | awk '{print $3}')
-  echo "MongoDB version: $MONGO_VERSION"
-  
+
   # Check if demoolgatravel database exists
-  if mongosh --quiet --eval "db.getMongo().getDBNames().indexOf('$DB_NAME') !== -1" | grep -q "true"; then
+  if mongosh --quiet --eval "db.getMongo().getDBNames().indexOf('$DB_NAME') !== -1" 2>/dev/null | grep -q "true"; then
     echo "Database $DB_NAME exists"
   else
     echo -e "${YELLOW}Database $DB_NAME does not exist. You may need to create it manually or run the migration script.${NC}"
@@ -102,7 +111,6 @@ else
   sudo systemctl enable mongod
 fi
 
-# Check if Nginx is running
 section "Checking Nginx"
 if systemctl is-active --quiet nginx; then
   echo "Nginx is running"
@@ -112,16 +120,12 @@ else
   sudo systemctl enable nginx
 fi
 
-# Final message
 section "Deployment completed"
 echo -e "${GREEN}The application has been deployed successfully!${NC}"
-echo -e "You can access it at: https://$APP_NAME.jaimedigitalstudio.com"
+echo -e "You can access it at: https://tourtovalencia.jaimedigitalstudio.com"
 echo -e "To view logs: ${YELLOW}pm2 logs $APP_NAME${NC}"
 
-echo "Deploying tourtovalencia.com..."
-cd /var/www/tourtovalencia
-git pull
-npm install --legacy-peer-deps
-npm run build
-pm2 restart tourtovalencia
-echo "Deployment completed successfully!" 
+git status
+EOF
+
+echo "✅ Deploy script finished successfully!"
