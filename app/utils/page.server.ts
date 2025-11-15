@@ -238,6 +238,9 @@ export async function translateText(text: string, retryCount = 0): Promise<strin
   // Skip translation for "Gallery image" text
   if (text.toLowerCase() === "gallery image") return text;
 
+  // Add a small delay before each API call to avoid rate limiting (500ms)
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
   try {
     console.log("Translating text:", text);
     const response = await axios.post(
@@ -287,9 +290,12 @@ export async function translateText(text: string, retryCount = 0): Promise<strin
       stack: err.stack,
     });
 
-    if (err.response?.status === 429 && retryCount < 3) {
-      console.log(`Rate limit hit, retrying in ${retryCount + 1} seconds...`);
-      await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1)));
+    // Retry logic with exponential backoff - retry up to 5 times
+    if (err.response?.status === 429 && retryCount < 5) {
+      // Exponential backoff: 2, 4, 8, 16, 32 seconds
+      const waitTime = Math.pow(2, retryCount + 1) * 1000;
+      console.log(`Rate limit hit, retrying in ${waitTime / 1000} seconds... (attempt ${retryCount + 1}/5)`);
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
       return translateText(text, retryCount + 1);
     }
 
@@ -310,16 +316,18 @@ export async function translateContent(content: Record<string, unknown>): Promis
 
     try {
       if (Array.isArray(value)) {
-        translated[key] = await Promise.all(
-          value.map(async (item) => {
-            if (typeof item === "object" && item !== null) {
-              return await translateContent(item as Record<string, unknown>);
-            } else if (typeof item === "string") {
-              return isImageRelatedString(item) ? item : await translateText(item);
-            }
-            return item;
-          })
-        );
+        // Process array items sequentially to avoid overwhelming the API
+        const translatedArray = [];
+        for (const item of value) {
+          if (typeof item === "object" && item !== null) {
+            translatedArray.push(await translateContent(item as Record<string, unknown>));
+          } else if (typeof item === "string") {
+            translatedArray.push(isImageRelatedString(item) ? item : await translateText(item));
+          } else {
+            translatedArray.push(item);
+          }
+        }
+        translated[key] = translatedArray;
       } else if (typeof value === "object") {
         // Special handling for lottieAnimation object
         if (key === 'lottieAnimation' && typeof value === 'object' && value !== null) {
