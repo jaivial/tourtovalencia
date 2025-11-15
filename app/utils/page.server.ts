@@ -8,12 +8,13 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const MAX_IMAGE_SIZE = 400 * 1024; // 400KB limit per image (reduced from 500KB)
-// Configuration for OpenRouter API
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || ""; // Use environment variable
-const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+// Configuration for Google AI Studio API
+const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
+const GOOGLE_AI_MODEL = "gemini-2.0-flash-exp";
+const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GOOGLE_AI_MODEL}:generateContent`;
 
-if (!OPENROUTER_API_KEY) {
-  throw new Error("OpenRouter API key is not configured");
+if (!GOOGLE_AI_API_KEY) {
+  throw new Error("Google AI Studio API key is not configured. Please set GOOGLE_AI_API_KEY in your .env file");
 }
 
 export function generateSlug(name: string): string {
@@ -229,7 +230,7 @@ export async function processContent(content: Record<string, unknown>, translate
   return { _value: content } as unknown as Record<string, unknown>;
 }
 
-// Helper function to translate text using OpenRouter API with a free model
+// Helper function to translate text using Google AI Studio API
 export async function translateText(text: string, retryCount = 0): Promise<string> {
   // Skip translation for empty strings or image paths
   if (!text.trim() || text.startsWith("/")) return text;
@@ -240,28 +241,25 @@ export async function translateText(text: string, retryCount = 0): Promise<strin
   try {
     console.log("Translating text:", text);
     const response = await axios.post(
-      OPENROUTER_API_URL,
+      `${GOOGLE_AI_API_URL}?key=${GOOGLE_AI_API_KEY}`,
       {
-        model: "google/gemini-2.0-flash-001",
-        messages: [
+        contents: [
           {
-            role: "system",
-            content: "You are a translator. Translate the following Spanish text to English. Respond only with the English translation, no additional text, no quotation marks.",
-          },
-          {
-            role: "user",
-            content: `Translate to English: ${text}`,
+            parts: [
+              {
+                text: `You are a translator. Translate the following Spanish text to English. Respond only with the English translation, no additional text, no quotation marks.\n\nTranslate to English: ${text}`,
+              },
+            ],
           },
         ],
-        temperature: 0.1,
-        max_tokens: 150,
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 150,
+        },
       },
       {
         headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": `${process.env.SITE_URL || "http://localhost:3000"}`,
-          "X-Title": "Viajes Olga Translator",
         },
       }
     );
@@ -269,9 +267,9 @@ export async function translateText(text: string, retryCount = 0): Promise<strin
     // Add detailed logging for debugging
     console.log("API Response:", JSON.stringify(response.data, null, 2));
 
-    // Safely access the response data
-    if (response.data?.choices?.[0]?.message?.content) {
-      const translation = response.data.choices[0].message.content.trim();
+    // Safely access the response data (Google AI Studio format)
+    if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      const translation = response.data.candidates[0].content.parts[0].text.trim();
       // Clean up any quotation marks that might have been added
       const cleanedTranslation = translation.replace(/^["']|["']$/g, '').replace(/\\"/g, '');
       console.log("Translated text:", cleanedTranslation);

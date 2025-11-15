@@ -190,8 +190,8 @@ SMTP_PORT=587
 SMTP_USER=your_smtp_user
 SMTP_PASS=your_smtp_password
 
-# OpenRouter API Key (if applicable)
-OPENROUTER_API_KEY=your_openrouter_api_key
+# Google AI Studio API Key (for translations)
+GOOGLE_AI_API_KEY=AIzaSyB7Nlk1JY0yLPcpJ9vXCsv1g_KTIVuSSM4
 ```
 
 ### Start the application with PM2
