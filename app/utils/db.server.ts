@@ -8,8 +8,9 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 let db: MongoClient | null = null;
+let dbPromise: Promise<MongoClient> | null = null;
 
-// Define the global type for the database connection
+// Define global type for database connection
 declare global {
   // eslint-disable-next-line no-var
   var __db: MongoClient | undefined;
@@ -29,20 +30,24 @@ function getDatabaseNameFromUri(uri: string): string {
 
 async function connect() {
   if (db) return db;
+  
+  // Return existing connection promise if already connecting
+  if (dbPromise) return await dbPromise;
 
-  // Log the MongoDB URI for debugging
+  // Log MongoDB connection only once
   const mongoUri = process.env.MONGODB_URI || '';
   console.log("Connecting to MongoDB with URI:", mongoUri);
 
-  if (process.env.NODE_ENV === "production") {
-    db = await MongoClient.connect(mongoUri);
-  } else {
-    // In development, use a global variable to preserve the value across module reloads
-    if (!global.__db) {
-      global.__db = await MongoClient.connect(mongoUri);
-    }
-    db = global.__db;
-  }
+  dbPromise = process.env.NODE_ENV === "production" 
+    ? MongoClient.connect(mongoUri)
+    : (async () => {
+        if (!global.__db) {
+          global.__db = await MongoClient.connect(mongoUri);
+        }
+        return global.__db;
+      })();
+
+  db = await dbPromise;
 
   // Ensure database indexes are set up correctly
   await ensureDbIndexes();
@@ -55,7 +60,10 @@ export async function getDb() {
   if (!client) throw new Error("Failed to connect to MongoDB");
   
   const dbName = getDatabaseNameFromUri(process.env.MONGODB_URI || "");
-  console.log("Using database:", dbName);
+  // Log only in non-production or if needed for debugging
+  if (process.env.NODE_ENV !== "production") {
+    console.log("Using database:", dbName);
+  }
   return client.db(dbName);
 }
 
