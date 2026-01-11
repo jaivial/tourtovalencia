@@ -1,8 +1,7 @@
-import { json } from "@remix-run/node";
-import type { ActionFunction } from "@remix-run/node";
+import { json } from "@remix-run/server-runtime";
 import { getDb } from "~/utils/db.server";
 
-export const action: ActionFunction = async ({ request }) => {
+export const action = async ({ request }: { request: Request }) => {
   if (request.method !== "POST") {
     return json({ error: "Method not allowed" }, { status: 405 });
   }

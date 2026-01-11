@@ -135,14 +135,12 @@ export async function initializeDefaultAdminUser(): Promise<boolean> {
     const existingAdmin = await adminUsers.findOne({});
     
     if (existingAdmin) {
-      // Ya existe un admin, no hacer nada
       return false;
     }
     
-    // Crear admin por defecto
-    await createAdminUser("olga", "olga");
-    console.log("Usuario administrador inicializado con valores por defecto");
-    return true;
+    console.log("No admin user exists. Manual creation required for security.");
+    console.log("Create admin manually or set up proper authentication system.");
+    return false;
   } catch (error) {
     console.error("Error initializing default admin user:", error);
     return false;

@@ -1,34 +1,45 @@
-import * as React from "react"
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
-import { Check } from "lucide-react"
+import * as React from "react";
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
+import { Check } from "lucide-react";
+import { cn } from "~/lib/utils";
 
-import { cn } from "~/lib/utils"
-
-export interface CheckboxProps extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> {
-  icon?: React.ReactNode
-  inputProps?: React.InputHTMLAttributes<HTMLInputElement>
-  rootRef?: React.Ref<HTMLLabelElement>
+/**
+ * STRICT interface for checkbox component props
+ */
+export interface CheckboxProps extends React.ComponentProps<typeof CheckboxPrimitive.Root> {
+  checked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+  label?: string;
+  icon?: React.ReactNode;
 }
 
-export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  function Checkbox(props, ref) {
-    const { icon, children, inputProps, rootRef, ...rest } = props
+/**
+ * Checkbox component using Radix UI
+ */
+export const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
+  function Checkbox({ checked, onCheckedChange, label, children, icon, ...rest }, ref) {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      onCheckedChange?.(e.target.checked);
+    };
+
     return (
-      <CheckboxPrimitive.Root ref={rootRef} {...rest}>
-        <CheckboxPrimitive.HiddenInput ref={ref} {...inputProps} />
-        <CheckboxPrimitive.Control>
-          {icon || (
-            <CheckboxPrimitive.Indicator
-              className={cn("flex items-center justify-center text-current")}
-            >
-              <Check className="h-4 w-4" />
-            </CheckboxPrimitive.Indicator>
-          )}
-        </CheckboxPrimitive.Control>
-        {children != null && (
-          <CheckboxPrimitive.Label>{children}</CheckboxPrimitive.Label>
-        )}
-      </CheckboxPrimitive.Root>
-    )
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <CheckboxPrimitive.Root
+          ref={ref}
+          checked={checked}
+          onCheckedChange={onCheckedChange}
+          {...rest}
+          className="flex items-center space-x-2 cursor-pointer"
+        >
+          <CheckboxPrimitive.Indicator className="flex items-center justify-center">
+            {icon || <Check className="h-4 w-4" />}
+          </CheckboxPrimitive.Indicator>
+        </CheckboxPrimitive.Root>
+        {label && <span className="text-sm ml-2">{label}</span>}
+        {children}
+      </label>
+    );
   },
-)
+);
+
+Checkbox.displayName = "Checkbox";

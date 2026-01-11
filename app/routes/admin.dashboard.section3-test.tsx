@@ -25,14 +25,23 @@ export default function SanJuanSection3TestRoute() {
   const handleImageUpdate = (index: number, base64: string) => {
     console.log(`Section3Test: Updating image at index ${index}`);
     console.log(`Section3Test: Base64 starts with: ${base64.substring(0, 30)}...`);
-    
+
     setData(prevData => {
       const newImages = [...prevData.images];
       newImages[index] = { ...newImages[index], source: base64 };
       return { ...prevData, images: newImages };
     });
-    
+
     setLastUpdatedImage({ index, base64 });
+  };
+
+  const handleImageUpdateWithFile = (index: number, file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target?.result as string;
+      handleImageUpdate(index, base64);
+    };
+    reader.readAsDataURL(file);
   };
 
   // Handle image removal
@@ -73,7 +82,7 @@ export default function SanJuanSection3TestRoute() {
         <EditableSanJuanSection3
           width={width}
           data={data}
-          onUpdate={handleImageUpdate}
+          onUpdate={handleImageUpdateWithFile}
           onRemove={handleImageRemove}
         />
       </div>

@@ -5,6 +5,7 @@ import { format, parseISO } from "date-fns";
 import type { BookingFormData } from "~/hooks/book.hooks";
 import type { DateAvailability } from "~/models/bookingAvailability.server";
 import { CalendarDate, parseDate, getLocalTimeZone, today } from "@internationalized/date";
+import type { DateValue } from "@internationalized/date";
 
 interface BookingDateUIProps {
   formData: BookingFormData;
@@ -20,23 +21,21 @@ export const BookingDateUI = ({ formData, errors, availableDates = [], isLoading
 
   const selectedDate = formData.date ? parseDate(format(typeof formData.date === "string" ? parseISO(formData.date) : new Date(formData.date), "yyyy-MM-dd")) : null;
 
-  const isDateUnavailable = (date: CalendarDate) => {
-    const jsDate = new Date(date.year, date.month - 1, date.day);
+  const isDateUnavailableForCalendar = (date: DateValue) => {
+    const jsDate = 'year' in date ? new Date(date.year, date.month - 1, date.day) : date as any;
+    return isDateUnavailable(jsDate as DateValue);
+  };
+
+  const isDateUnavailable = (date: DateValue) => {
+    const jsDate = 'year' in date ? new Date(date.year, date.month - 1, date.day) : date as any;
     const formattedDate = format(jsDate, "yyyy-MM-dd");
     const dateInfo = (availableDates || []).find((d) => format(new Date(d.date), "yyyy-MM-dd") === formattedDate);
     // Date is unavailable if it's in our list and has no available places
     return dateInfo ? !dateInfo.isAvailable : false;
   };
 
-  const getDateUnavailableStyle = (date: CalendarDate) => {
-    const jsDate = new Date(date.year, date.month - 1, date.day);
-    const formattedDate = format(jsDate, "yyyy-MM-dd");
-    const dateInfo = (availableDates || []).find((d) => format(new Date(d.date), "yyyy-MM-dd") === formattedDate);
-    return dateInfo && !dateInfo.isAvailable ? "bg-red-50 text-red-500" : "";
-  };
-
-  const handleDateSelect = (date: CalendarDate | null) => {
-    if (date) {
+  const handleDateSelect = (date: DateValue | null) => {
+    if (date && 'year' in date && 'month' in date && 'day' in date) {
       const jsDate = new Date(date.year, date.month - 1, date.day);
       onDateSelect(jsDate);
     } else {
@@ -52,18 +51,16 @@ export const BookingDateUI = ({ formData, errors, availableDates = [], isLoading
           <Calendar
             value={selectedDate}
             onChange={handleDateSelect}
-            isDateUnavailable={isDateUnavailable}
+            isDateUnavailable={(date: DateValue): boolean => {
+              const jsDate = 'year' in date ? new Date(date.year, date.month - 1, date.day) : date as any;
+              return isDateUnavailable(jsDate as DateValue);
+            }}
             weekdayStyle="short"
             showMonthAndYearPickers
             color="primary"
             calendarWidth="100%"
             showShadow
             minValue={todayDate}
-            renderDay={(date) => {
-              const dayNumber = date.day;
-              const unavailableStyle = getDateUnavailableStyle(date);
-              return <div className={cn("w-full h-full flex items-center justify-center", unavailableStyle)}>{dayNumber}</div>;
-            }}
             classNames={{
               base: "w-fit",
               cell: "text-center",

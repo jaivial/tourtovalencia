@@ -31,8 +31,8 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
   // Get the language code from the current display language
   const languageCode = languageMap[state.currentLanguage] || "es";
 
-  // Get content based on current language, fallback to Spanish
-  const content = page.content[languageCode] || page.content.es;
+   // Get content based on current language, fallback to Spanish
+   const content = (page.content[languageCode as keyof typeof page.content] || page.content.es) as any;
 
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
@@ -42,7 +42,7 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
 
       {content.section2 && <SanJuanSection2 width={width} height={height} SanJuanSection2Text={content.section2} />}
 
-      {content.section3 && <SanJuanSection3 width={width} images={content.section3.images} />}
+      {content.section3 && <SanJuanSection3 width={width} />}
 
       {content.section4 && <SanJuanSection4 width={width} SanJuanSection4Text={content.section4} />}
 

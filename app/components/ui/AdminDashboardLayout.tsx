@@ -6,14 +6,7 @@ import { MobileNav } from "./MobileNav";
 import { useAuth } from "~/context/auth.context";
 
 export type AdminDashboardLayoutProps = {
-  strings: {
-    title: string;
-    bookings: string;
-    logout: string;
-    pageGenerator: string;
-    home: string;
-    account: string;
-  };
+  strings: Record<string, string>;
 };
 
 export function AdminDashboardLayout({ strings }: AdminDashboardLayoutProps) {

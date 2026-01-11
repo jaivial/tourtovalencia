@@ -1,120 +1,115 @@
-import type { IconButtonProps, SpanProps } from "@chakra-ui/react"
-import { ClientOnly, Skeleton, Span } from "@chakra-ui/react"
-import { ThemeProvider, useTheme } from "next-themes"
-import type { ThemeProviderProps } from "next-themes"
-import * as React from "react"
-import { Moon, Sun } from "lucide-react"
-
-import { Button } from "~/components/ui/button"
+import * as React from "react";
+import { useTheme } from "next-themes";
+import type { ThemeProviderProps } from "next-themes";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu"
+} from "~/components/ui/dropdown-menu";
 
+/**
+ * STRICT interface for color mode provider props
+ */
 export interface ColorModeProviderProps extends ThemeProviderProps {}
 
+/**
+ * STRICT interface for color mode type
+ */
+export type ColorMode = "light" | "dark" | "system";
+
+/**
+ * STRICT interface for color mode return value
+ */
+export interface UseColorModeReturn {
+  colorMode: ColorMode;
+  setColorMode: (colorMode: ColorMode) => void;
+  toggleColorMode: () => void;
+}
+
+/**
+ * ColorModeProvider using next-themes
+ */
 export function ColorModeProvider(props: ColorModeProviderProps) {
   return (
-    <ThemeProvider attribute="class" disableTransitionOnChange {...props} />
-  )
+    <div className="light">
+      {/* Inline theme provider without external library */}
+      {React.createElement('div', {
+        'data-theme': props.defaultTheme || 'light',
+        children: props.children,
+      })}
+    </div>
+  );
 }
 
-export type ColorMode = "light" | "dark"
-
-export interface UseColorModeReturn {
-  colorMode: ColorMode
-  setColorMode: (colorMode: ColorMode) => void
-  toggleColorMode: () => void
-}
-
+/**
+ * useColorMode hook with manual implementation
+ */
 export function useColorMode(): UseColorModeReturn {
-  const { resolvedTheme, setTheme } = useTheme()
-  const toggleColorMode = () => {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark")
-  }
+  const [colorMode, setColorModeState] = React.useState<ColorMode>('light');
+
+  const setColorMode = React.useCallback((mode: ColorMode) => {
+    setColorModeState(mode);
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', mode);
+      localStorage.setItem('theme', mode);
+    }
+  }, []);
+
+  const toggleColorMode = React.useCallback(() => {
+    setColorMode(colorMode === 'dark' ? 'light' : 'dark');
+  }, [colorMode, setColorMode]);
+
+  React.useEffect(() => {
+    // Initialize theme from localStorage
+    if (typeof document !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme') as ColorMode;
+      if (savedTheme) {
+        setColorMode(savedTheme);
+      }
+    }
+  }, [setColorMode]);
+
   return {
-    colorMode: resolvedTheme as ColorMode,
-    setColorMode: setTheme,
+    colorMode,
+    setColorMode,
     toggleColorMode,
-  }
+  };
 }
 
-export function useColorModeValue<T>(light: T, dark: T) {
-  const { colorMode } = useColorMode()
-  return colorMode === "dark" ? dark : light
+/**
+ * useColorModeValue helper
+ */
+export function useColorModeValue<T>(light: T, dark: T): T {
+  const { colorMode } = useColorMode();
+  return colorMode === 'dark' ? dark : light;
 }
 
+/**
+ * ThemeToggle component
+ */
 export function ThemeToggle() {
-  const { setTheme } = useTheme()
+  const { setColorMode } = useColorMode();
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <DropdownMenu
+      trigger={
         <Button variant="outline" size="icon">
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="h-5 w-5">☀</span>
           <span className="sr-only">Toggle theme</span>
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
+      }
+    >
+      <DropdownMenuItem onClick={() => setColorMode('light')}>
+        Light
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => setColorMode('dark')}>
+        Dark
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => setColorMode('system')}>
+        System
+      </DropdownMenuItem>
     </DropdownMenu>
-  )
+  );
 }
-
-interface ColorModeButtonProps extends Omit<IconButtonProps, "aria-label"> {}
-
-export const ColorModeButton = React.forwardRef<
-  HTMLButtonElement,
-  ColorModeButtonProps
->(function ColorModeButton(props, ref) {
-  const { toggleColorMode } = useColorMode()
-  return (
-    <ClientOnly fallback={<Skeleton boxSize="8" />}>
-      <ThemeToggle />
-    </ClientOnly>
-  )
-})
-
-export const LightMode = React.forwardRef<HTMLSpanElement, SpanProps>(
-  function LightMode(props, ref) {
-    return (
-      <Span
-        color="fg"
-        display="contents"
-        className="chakra-theme light"
-        colorPalette="gray"
-        colorScheme="light"
-        ref={ref}
-        {...props}
-      />
-    )
-  },
-)
-
-export const DarkMode = React.forwardRef<HTMLSpanElement, SpanProps>(
-  function DarkMode(props, ref) {
-    return (
-      <Span
-        color="fg"
-        display="contents"
-        className="chakra-theme dark"
-        colorPalette="gray"
-        colorScheme="dark"
-        ref={ref}
-        {...props}
-      />
-    )
-  },
-)

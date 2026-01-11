@@ -1,82 +1,100 @@
-import { Slider as ChakraSlider, For, HStack } from "@chakra-ui/react"
-import * as React from "react"
+import * as React from "react";
+import { cn } from "~/lib/utils";
 
-export interface SliderProps extends ChakraSlider.RootProps {
-  marks?: Array<number | { value: number; label: React.ReactNode }>
-  label?: React.ReactNode
-  showValue?: boolean
+/**
+ * STRICT interface for slider mark
+ */
+export interface SliderMark {
+  value: number;
+  label?: string;
 }
 
-export const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
-  function Slider(props, ref) {
-    const { marks: marksProp, label, showValue, ...rest } = props
-    const value = props.defaultValue ?? props.value
+/**
+ * STRICT interface for slider props
+ */
+export interface SliderProps {
+  min?: number;
+  max?: number;
+  step?: number;
+  defaultValue?: number;
+  value?: number;
+  onValueChange?: (value: number) => void;
+  marks?: SliderMark[];
+  label?: string;
+  showValue?: boolean;
+  className?: string;
+}
 
-    const marks = marksProp?.map((mark) => {
-      if (typeof mark === "number") return { value: mark, label: undefined }
-      return mark
-    })
+/**
+ * Slider component using HTML input
+ */
+export const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
+  function Slider(
+    { min = 0, max = 100, step = 1, defaultValue, value, onValueChange, marks, label, showValue, className, ...rest },
+    ref
+  ) {
+    const [internalValue, setInternalValue] = React.useState(defaultValue ?? min);
 
-    const hasMarkLabel = !!marks?.some((mark) => mark.label)
+    const handleChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = Number(event.target.value);
+      setInternalValue(newValue);
+      onValueChange?.(newValue);
+    }, [onValueChange]);
+
+    React.useEffect(() => {
+      if (value !== undefined) {
+        setInternalValue(value);
+      }
+    }, [value]);
+
+    const markPositions = marks?.map((mark) => ({
+      ...mark,
+      position: ((mark.value - min) / (max - min)) * 100,
+    }));
 
     return (
-      <ChakraSlider.Root ref={ref} thumbAlignment="center" {...rest}>
-        {label && !showValue && (
-          <ChakraSlider.Label>{label}</ChakraSlider.Label>
+      <div className={cn("space-y-4", className)}>
+        {label && (
+          <div className="flex justify-between mb-2">
+            <label className="text-sm font-medium">{label}</label>
+            {showValue && <span className="text-sm text-gray-600">{internalValue}</span>}
+          </div>
         )}
-        {label && showValue && (
-          <HStack justify="space-between">
-            <ChakraSlider.Label>{label}</ChakraSlider.Label>
-            <ChakraSlider.ValueText />
-          </HStack>
+        <div className="relative w-full h-6">
+          <input
+            ref={ref}
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={internalValue}
+            onChange={handleChange}
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            {...rest}
+          />
+          {markPositions && (
+            <div className="absolute top-0 left-0 w-full h-2 pointer-events-none">
+              {markPositions.map((mark) => (
+                <div
+                  key={mark.value}
+                  className="absolute w-2 h-2 bg-blue-600 rounded-full transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto"
+                  style={{ left: `${mark.position}%` }}
+                  title={mark.label}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+        {marks && (
+          <div className="flex justify-between mt-2">
+            {marks.map((mark: SliderMark, index: number) => (
+              <div key={index} className="text-sm text-gray-500">
+                {mark.label || mark.value}
+              </div>
+            ))}
+          </div>
         )}
-        <ChakraSlider.Control data-has-mark-label={hasMarkLabel || undefined}>
-          <ChakraSlider.Track>
-            <ChakraSlider.Range />
-          </ChakraSlider.Track>
-          <SliderThumbs value={value} />
-          <SliderMarks marks={marks} />
-        </ChakraSlider.Control>
-      </ChakraSlider.Root>
-    )
+      </div>
+    );
   },
-)
-
-function SliderThumbs(props: { value?: number[] }) {
-  const { value } = props
-  return (
-    <For each={value}>
-      {(_, index) => (
-        <ChakraSlider.Thumb key={index} index={index}>
-          <ChakraSlider.HiddenInput />
-        </ChakraSlider.Thumb>
-      )}
-    </For>
-  )
-}
-
-interface SliderMarksProps {
-  marks?: Array<number | { value: number; label: React.ReactNode }>
-}
-
-const SliderMarks = React.forwardRef<HTMLDivElement, SliderMarksProps>(
-  function SliderMarks(props, ref) {
-    const { marks } = props
-    if (!marks?.length) return null
-
-    return (
-      <ChakraSlider.MarkerGroup ref={ref}>
-        {marks.map((mark, index) => {
-          const value = typeof mark === "number" ? mark : mark.value
-          const label = typeof mark === "number" ? undefined : mark.label
-          return (
-            <ChakraSlider.Marker key={index} value={value}>
-              <ChakraSlider.MarkerIndicator />
-              {label}
-            </ChakraSlider.Marker>
-          )
-        })}
-      </ChakraSlider.MarkerGroup>
-    )
-  },
-)
+);

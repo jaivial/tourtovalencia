@@ -178,12 +178,12 @@ export default function EditPageRoute() {
     }
   };
 
-  const adaptSection4Update = (field: keyof sanJuansection4Type, value: string) => {
+  const adaptSection4Update = (field: keyof sanJuansection4Type, value: string | { enabled: boolean; src: string }) => {
     const updatedData = { ...section4Data, [field]: value };
     handleSection4Update(updatedData);
   };
 
-  const adaptSection5Update = (field: keyof sanJuanSection5Type, value: string) => {
+  const adaptSection5Update = (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string }) => {
     const updatedData = { ...section5Data, [field]: value };
     handleSection5Update(updatedData);
   };

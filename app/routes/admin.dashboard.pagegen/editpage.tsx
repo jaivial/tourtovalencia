@@ -4,7 +4,7 @@ import { ArrowLeftIcon, PencilIcon, TrashIcon, EyeIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { getAllPages } from "~/utils/page.server";
 import type { Page } from "~/utils/db.schema.server";
-import { useEditPageList } from "./admin.dashboard.pagegen.editpage.hooks";
+import { useEditPageList } from "./editpage.hooks";
 import { motion } from "framer-motion";
 
 export const loader = async () => {
@@ -85,7 +85,7 @@ export default function EditPageRoute() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {pages.map((page: Page) => (
+                    {pages.map((page: any) => (
                       <tr key={page._id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">{page.name}</div>

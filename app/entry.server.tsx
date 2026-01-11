@@ -8,31 +8,79 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { PassThrough } from "stream";
-import type { EntryContext } from "@remix-run/node";
-import { createReadableStreamFromReadable } from "@remix-run/node";
+import { PassThrough } from "node:stream";
 import { RemixServer } from "@remix-run/react";
 import { renderToPipeableStream } from "react-dom/server";
 
 const ABORT_DELAY = 5000;
 
-export default function handleRequest(request: Request, responseStatusCode: number, responseHeaders: Headers, remixContext: EntryContext) {
-  return new Promise((resolve, reject) => {
-    let didError = false;
+export default function handleRequest(request: Request, responseStatusCode: number, responseHeaders: Headers, remixContext: any) {
+  const url = new URL(request.url);
+  const isHttps = url.protocol === "https:";
+  
+  responseHeaders.set("X-Content-Type-Options", "nosniff");
+  responseHeaders.set("X-Frame-Options", "DENY");
+  responseHeaders.set("X-XSS-Protection", "1; mode=block");
+  responseHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  responseHeaders.set("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+  
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.paypal.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "img-src 'self' data: https: blob:",
+    "font-src 'self' https://fonts.gstatic.com",
+    "connect-src 'self' https://api.stripe.com https://api.paypal.com https://js.stripe.com https://www.paypal.com",
+    "frame-src 'self' https://js.stripe.com https://www.paypal.com",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+  ].join("; ");
+  
+  responseHeaders.set("Content-Security-Policy", csp);
+  
+  if (isHttps) {
+    responseHeaders.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  }
+  
+  const origin = request.headers.get("Origin");
+  const allowedOrigins = [
+    "https://tourtovalencia.com",
+    "https://www.tourtovalencia.com",
+    process.env.NODE_ENV === "development" ? "http://localhost:3000" : null,
+  ].filter(Boolean) as string[];
+  
+  if (origin && allowedOrigins.includes(origin)) {
+    responseHeaders.set("Access-Control-Allow-Origin", origin);
+    responseHeaders.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    responseHeaders.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    responseHeaders.set("Access-Control-Allow-Credentials", "true");
+    responseHeaders.set("Access-Control-Max-Age", "86400");
+  }
+  
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: responseHeaders,
+    });
+  }
 
+  return new Promise((resolve, reject) => {
+    let didError = false; 
+    
     const { pipe, abort } = renderToPipeableStream(<RemixServer context={remixContext} url={request.url} />, {
       onShellReady() {
         const body = new PassThrough();
-
+        
         responseHeaders.set("Content-Type", "text/html");
-
+        
         resolve(
-          new globalThis.Response(createReadableStreamFromReadable(body), {
+          new Response(body as any, {
             headers: responseHeaders,
             status: didError ? 500 : responseStatusCode,
           })
         );
-
+        
         pipe(body);
       },
       onShellError(err: unknown) {
@@ -40,10 +88,9 @@ export default function handleRequest(request: Request, responseStatusCode: numb
       },
       onError(error: unknown) {
         didError = true;
-        console.error(error);
       },
     });
-
+    
     setTimeout(abort, ABORT_DELAY);
   });
 }

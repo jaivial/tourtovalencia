@@ -178,7 +178,7 @@ export const usePageGenerator = () => {
   };
 
   // Section 4 handler
-  const handleSection4Update = (field: keyof sanJuansection4Type, value: string) => {
+  const handleSection4Update = (field: keyof sanJuansection4Type, value: string | { enabled: boolean; src: string }) => {
     setSection4Data(prev => ({
       ...prev,
       [field]: value
@@ -186,7 +186,7 @@ export const usePageGenerator = () => {
   };
 
   // Section 5 handler
-  const handleSection5Update = (field: keyof sanJuanSection5Type, value: string) => {
+  const handleSection5Update = (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string }) => {
     setSection5Data(prev => ({
       ...prev,
       [field]: value

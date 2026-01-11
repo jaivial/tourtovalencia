@@ -156,11 +156,11 @@ const IndexSection2: React.FC<ChildProps> = ({ width, indexSection2Text, carouse
 
                 {/* Rating */}
                 <div className="my-2">
-                  <Rate 
-                    defaultValue={5} 
-                    readOnly 
-                    size={width <= 350 ? "md" : "lg"} 
-                    color="rgb(29, 78, 216)" 
+                  <Rate
+                    defaultValue={5}
+                    readOnly
+                    size={width <= 350 ? "md" : "lg"}
+                    color={"#1d4ed8" as any}
                   />
                 </div>
 

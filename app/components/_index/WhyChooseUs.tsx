@@ -3,23 +3,26 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { Users, MapPin, Sparkles, Leaf } from "lucide-react";
 import { Link } from "@remix-run/react";
-import { useLanguageContext } from "~/providers/LanguageContext";
 import PropTypes from "prop-types";
+import { useLanguageContext } from "~/providers/LanguageContext";
 
+/**
+ * STRICT interface for WhyChooseUs component props
+ */
 type WhyChooseUsProps = {
   width: number;
   whyChooseUsText: {
     title: string;
     subtitle: string;
-    reasons: {
+    reasons: Array<{
       title: string;
       description: string;
       icon: string;
-    }[];
+    }>;
   };
 };
 
-const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ width, whyChooseUsText }) => {
+export default function WhyChooseUs({ width, whyChooseUsText }: WhyChooseUsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -35,7 +38,7 @@ const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ width, whyChooseUsText }) => 
   const exploreText = language === "en" ? "Explore Valencia with Us" : "Explora Valencia con Nosotros";
   const bookText = language === "en" ? "Book Your Experience" : "Reserva Tu Experiencia";
 
-  // Function to render the appropriate icon based on the icon name
+  // Function to render appropriate icon based on icon name
   const renderIcon = (iconName: string) => {
     switch (iconName) {
       case "users":
@@ -53,7 +56,7 @@ const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ width, whyChooseUsText }) => 
 
   return (
     <div className="w-full py-20 bg-blue-50 overflow-hidden">
-      <motion.div 
+      <motion.div
         ref={containerRef}
         style={{ opacity, scale }}
         className="w-[95%] max-w-[1280px] mx-auto"
@@ -65,17 +68,21 @@ const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ width, whyChooseUsText }) => 
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
           className="text-center mb-16"
-        >
-          <h2 className={`
-            font-bold bg-gradient-to-r from-blue-900 to-blue-600 bg-clip-text text-transparent mb-4
-            ${width <= 640 ? "text-3xl" : "text-4xl"}
-          `}>
+          >
+          <h2
+            className={`
+              font-bold bg-gradient-to-r from-blue-900 to-blue-600 bg-clip-text text-transparent mb-4
+              ${width <= 640 ? "text-3xl" : "text-4xl"}
+            `}
+          >
             {whyChooseUsText.title}
           </h2>
-          <p className={`
-            text-blue-700 max-w-2xl mx-auto
-            ${width <= 640 ? "text-base" : "text-lg"}
-          `}>
+          <p
+            className={`
+              text-blue-700 max-w-2xl mx-auto
+              ${width <= 640 ? "text-base" : "text-lg"}
+            `}
+          >
             {whyChooseUsText.subtitle}
           </p>
         </motion.div>
@@ -89,16 +96,17 @@ const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ width, whyChooseUsText }) => 
             viewport={{ once: true }}
             className="w-full h-[500px] md:h-[600px] rounded-2xl overflow-hidden"
           >
-            <img 
-              src="https://images.unsplash.com/photo-1624396372026-dac58b4fb3b8?q=80&w=3157&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
-              alt="Torres de Serranos, Valencia" 
+            <img
+              src="https://images.unsplash.com/photo-1624396372016-dac58b4fb3b8?q=80&w=3157&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Torres de Serranos, Valencia"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-blue-900/70 to-transparent"></div>
           </motion.div>
           
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
+          {/* Call to Action */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
             viewport={{ once: true }}
@@ -143,8 +151,8 @@ const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ width, whyChooseUsText }) => 
           viewport={{ once: true }}
           className="mt-16 text-center"
         >
-          <Link 
-            to="/book" 
+          <Link
+            to="/book"
             className="inline-block px-8 py-4 bg-blue-600 text-white font-bold rounded-lg shadow-lg hover:bg-blue-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 no-underline hover:text-white"
           >
             {bookText}
@@ -169,5 +177,3 @@ WhyChooseUs.propTypes = {
     ).isRequired
   }).isRequired
 };
-
-export default WhyChooseUs; 

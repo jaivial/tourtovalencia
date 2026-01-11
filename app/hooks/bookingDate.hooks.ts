@@ -12,7 +12,7 @@ export const useBookingDateActions = (states: BookingContextState) => {
       states.setFormData({
         ...states.formData,
         date: "",
-        partySize: "",
+        partySize: 1,
       });
       states.setSelectedDateAvailability(undefined);
       return;
@@ -27,7 +27,7 @@ export const useBookingDateActions = (states: BookingContextState) => {
     states.setFormData({
       ...states.formData,
       date: dateString,
-      partySize: "1",
+      partySize: 1,
     });
 
     // Then fetch availability for the selected date

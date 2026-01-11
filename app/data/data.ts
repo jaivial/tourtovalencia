@@ -103,7 +103,7 @@ export type sanJuansection2Type = {
   firstH3: string;
   secondH3: string;
   thirdH3: string;
-  sectionImage: {
+  sectionImage?: {
     file?: File;
     preview: string;
   };

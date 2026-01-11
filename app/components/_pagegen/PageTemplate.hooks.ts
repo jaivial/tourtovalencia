@@ -25,6 +25,15 @@ export const usePublishModal = () => {
   };
 };
 
+/**
+ * STRICT interface for page data
+ */
+export interface PageData {
+  name: string;
+  content: Record<string, any>;
+  status: 'active' | 'upcoming';
+}
+
 export const usePageCreation = () => {
   const fetcher = useFetcher();
   const navigate = useNavigate();
@@ -32,11 +41,7 @@ export const usePageCreation = () => {
   const [error, setError] = useState<string | null>(null);
   const { processImages } = useImageProcessing();
 
-  const handleCreatePage = async (pageData: {
-    name: string;
-    content: Record<string, any>;
-    status: 'active' | 'upcoming';
-  }) => {
+  const handleCreatePage = async (pageData: PageData) => {
     setIsCreating(true);
     setError(null);
     
@@ -72,9 +77,13 @@ export const usePageCreation = () => {
   };
 
   useEffect(() => {
-    if (fetcher.data?.page?.slug && !fetcher.state.submitting) {
+    const data = fetcher.data as { page?: { slug: string } } | undefined;
+    if (data?.page?.slug && fetcher.state !== "submitting") {
       // Navigate to the newly created page
-      navigate(`/pages/${fetcher.data.page.slug}`);
+      const data = fetcher.data as { page?: { slug: string } } | undefined;
+      if (data?.page?.slug) {
+        navigate(`/pages/${data.page.slug}`);
+      }
     }
   }, [fetcher.data, fetcher.state, navigate]);
 

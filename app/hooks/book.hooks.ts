@@ -4,6 +4,9 @@ import type { DateAvailability } from "~/models/bookingAvailability.server";
 import type { BookingContextState } from "~/context/BookingContext";
 import type { ActionData } from "~/routes/book";
 
+/**
+ * STRICT interface for booking form data
+ */
 export interface BookingFormData {
   date: string;
   time: string;
@@ -16,6 +19,25 @@ export interface BookingFormData {
   language?: string;
   country?: string;
   countryCode?: string;
+}
+
+/**
+ * STRICT interface for fetcher data
+ */
+export interface FetcherData {
+  redirectUrl?: string;
+  error?: string;
+  success?: boolean;
+}
+
+/**
+ * STRICT interface for email configuration
+ */
+export interface EmailConfig {
+  template?: string;
+  subject?: string;
+  from?: string;
+  [key: string]: unknown;
 }
 
 export type BookingStates = Omit<BookingContextState, "setCurrentStep" | "setFormData" | "setErrors" | "setSelectedDateAvailability" | "setIsSubmitting" | "setIsSuccess" | "setPaymentClientSecret" | "setPaymentIntentId" | "setServerError">;
@@ -33,6 +55,9 @@ export interface BookingActions {
       isAvailable: boolean;
     }>
   ) => void;
+  isLoading?: boolean;
+  error?: string;
+  success?: boolean;
 }
 
 export function useBookingStates(initialState?: {
@@ -82,8 +107,7 @@ export function useBookingStates(initialState?: {
   const [isSuccess, setIsSuccess] = useState(false);
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
-  const [emailConfig, setEmailConfig] = useState({});
-
+  const [emailConfig, setEmailConfig] = useState<EmailConfig>({});
   return {
     currentStep,
     formData,
@@ -114,11 +138,12 @@ export function useBookingActions(context: BookingContextState): BookingActions 
   const fetcher = useFetcher();
 
   useEffect(() => {
-    if (fetcher.data?.redirectUrl) {
-      window.location.href = fetcher.data.redirectUrl;
+    const data = fetcher.data as FetcherData | undefined;
+    if (data?.redirectUrl) {
+      window.location.href = data.redirectUrl;
     }
-    if (fetcher.data?.error) {
-      context.setServerError(fetcher.data.error);
+    if (data?.error) {
+      context.setServerError(data.error);
       context.setIsSubmitting(false);
     }
   }, [fetcher.data, context]);
@@ -238,6 +263,8 @@ export function useBookingActions(context: BookingContextState): BookingActions 
     // This would be implemented if we need to update available dates
   };
 
+  const data = fetcher.data as FetcherData | undefined;
+
   return {
     handleNextStep,
     handlePreviousStep,
@@ -246,7 +273,7 @@ export function useBookingActions(context: BookingContextState): BookingActions 
     handlePaymentError,
     setAvailableDates,
     isLoading: fetcher.state === "submitting",
-    error: fetcher.data?.error,
-    success: fetcher.data?.success,
+    error: data?.error,
+    success: data?.success,
   };
 };

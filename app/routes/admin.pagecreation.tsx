@@ -71,7 +71,7 @@ export default function PageCreationRoute() {
   };
   
   // Placeholder handlers for other required props
-  const handleSection5Update = (field: keyof sanJuanSection5Type, value: string) => {
+  const handleSection5Update = (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string }) => {
     setSection5Data(prev => ({
       ...prev,
       [field]: value

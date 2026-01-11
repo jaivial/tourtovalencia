@@ -13,22 +13,23 @@ export async function translateToEnglish(text: string): Promise<string> {
   }
 
   const textLower = text.toLowerCase().trim();
+  const commonTranslations = translations.common as Record<string, string>;
 
   // Check if we have an exact match in our translations
-  if (translations.common[textLower]) {
+  if (commonTranslations[textLower]) {
     // Preserve the original casing if the first letter was uppercase
     if (text[0] === text[0].toUpperCase()) {
-      return translations.common[textLower].charAt(0).toUpperCase() + 
-             translations.common[textLower].slice(1);
+      return commonTranslations[textLower].charAt(0).toUpperCase() + 
+             commonTranslations[textLower].slice(1);
     }
-    return translations.common[textLower];
+    return commonTranslations[textLower];
   }
 
   // Try to translate individual words if no exact match found
   const words = textLower.split(' ');
   if (words.length > 1) {
     const translatedWords = words.map(word => 
-      translations.common[word] || word
+      commonTranslations[word] || word
     );
     const translated = translatedWords.join(' ');
     

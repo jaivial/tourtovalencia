@@ -30,14 +30,14 @@ const DynamicTourSections: React.FC<DynamicTourSectionsProps> = ({ width, tours 
         // Get the section1 data from the page content
         const section1Data = page.content[language]?.section1 || page.content.es?.section1;
 
-        if (!section1Data) return null;
+        if (!section1Data?.h1) return null;
 
         return {
           tour,
           section1Data,
         };
       })
-      .filter(Boolean); // Remove null entries
+      .filter((item): item is NonNullable<typeof item> => item !== null); // Type-safe null removal
   }, [tours, pages, language]);
 
   if (!tourSections.length) return null;
@@ -60,7 +60,9 @@ const DynamicTourSections: React.FC<DynamicTourSectionsProps> = ({ width, tours 
         <div className="space-y-16">
           {tourSections.map((section, index) => (
             <motion.div key={section.tour._id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: index * 0.2 }} viewport={{ once: true }}>
-              <SanJuanSection1 width={width} sanJuanSection1Text={section.section1Data as sanJuanSection1Type} />
+              {section?.section1Data && (
+                <SanJuanSection1 width={width} sanJuanSection1Text={section.section1Data as sanJuanSection1Type} />
+              )}
             </motion.div>
           ))}
         </div>

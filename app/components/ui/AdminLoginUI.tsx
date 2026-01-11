@@ -9,15 +9,7 @@ type AdminLoginUIProps = {
   onLogin: (username: string, password: string) => Promise<boolean>;
   isLoading: boolean;
   loginError: string | null;
-  strings: {
-    title: string;
-    username: string;
-    password: string;
-    submit: string;
-    invalidCredentials: string;
-    pageTitle?: string;
-    description?: string;
-  };
+  strings: Record<string, string>;
 };
 
 export const AdminLoginUI = ({ onLogin, isLoading, loginError, strings }: AdminLoginUIProps) => {

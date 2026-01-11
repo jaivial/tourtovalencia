@@ -1,9 +1,10 @@
 // app/routes/set-language.tsx
 
-import { ActionFunction, json } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
 import { languageCookie } from "~/utils/cookies";
 
-export const action: ActionFunction = async ({ request }) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const language = formData.get("language") || "en";
 

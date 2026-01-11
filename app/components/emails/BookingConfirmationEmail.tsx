@@ -144,7 +144,9 @@ export const BookingConfirmationEmail = ({ booking }: BookingConfirmationEmailPr
               {texts.greeting}
             </Text>
             
-            <Text style={text} dangerouslySetInnerHTML={{ __html: texts.thankYouMessage }} />
+            <Text style={text}>
+              {texts.thankYouMessage}
+            </Text>
 
             <Section style={detailsSection}>
               <Heading as="h2" style={detailsHeading}>{texts.detailsHeading}</Heading>

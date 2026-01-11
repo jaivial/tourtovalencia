@@ -25,7 +25,7 @@ const ImageGalleryModal: React.FC<ImageGalleryModalProps> = ({
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "ArrowLeft") handlePrevious();
     if (e.key === "ArrowRight") handleNext();
     if (e.key === "Escape") onClose();

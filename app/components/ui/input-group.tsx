@@ -1,53 +1,47 @@
-import type { BoxProps, InputElementProps } from "@chakra-ui/react"
-import { Group, InputElement } from "@chakra-ui/react"
-import * as React from "react"
+import * as React from "react";
+import { cn } from "~/lib/utils";
 
-export interface InputGroupProps extends BoxProps {
-  startElementProps?: InputElementProps
-  endElementProps?: InputElementProps
-  startElement?: React.ReactNode
-  endElement?: React.ReactNode
-  children: React.ReactElement<InputElementProps>
-  startOffset?: InputElementProps["paddingStart"]
-  endOffset?: InputElementProps["paddingEnd"]
+/**
+ * STRICT interface for input group props
+ */
+export interface InputGroupProps {
+  leftAddon?: React.ReactNode;
+  rightAddon?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
 }
 
+/**
+ * InputGroup component
+ */
 export const InputGroup = React.forwardRef<HTMLDivElement, InputGroupProps>(
-  function InputGroup(props, ref) {
-    const {
-      startElement,
-      startElementProps,
-      endElement,
-      endElementProps,
-      children,
-      startOffset = "6px",
-      endOffset = "6px",
-      ...rest
-    } = props
-
-    const child =
-      React.Children.only<React.ReactElement<InputElementProps>>(children)
-
+  function InputGroup({ leftAddon, rightAddon, children, className, ...rest }, ref) {
     return (
-      <Group ref={ref} {...rest}>
-        {startElement && (
-          <InputElement pointerEvents="none" {...startElementProps}>
-            {startElement}
-          </InputElement>
+      <div
+        ref={ref}
+        className={cn("relative flex items-center", className)}
+        {...rest}
+      >
+        {leftAddon && (
+          <div className="absolute left-2 z-10 flex items-center justify-center text-gray-500">
+            {leftAddon}
+          </div>
         )}
-        {React.cloneElement(child, {
-          ...(startElement && {
-            ps: `calc(var(--input-height) - ${startOffset})`,
-          }),
-          ...(endElement && { pe: `calc(var(--input-height) - ${endOffset})` }),
-          ...children.props,
-        })}
-        {endElement && (
-          <InputElement placement="end" {...endElementProps}>
-            {endElement}
-          </InputElement>
+        <div
+          className={cn(
+            "flex-1",
+            leftAddon ? "pl-10" : "",
+            rightAddon ? "pr-10" : ""
+          )}
+        >
+          {children}
+        </div>
+        {rightAddon && (
+          <div className="absolute right-2 z-10 flex items-center justify-center text-gray-500">
+            {rightAddon}
+          </div>
         )}
-      </Group>
-    )
+      </div>
+    );
   },
-)
+);

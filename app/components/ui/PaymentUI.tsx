@@ -31,6 +31,7 @@ interface PaymentUIProps {
       initError: string;
     };
   };
+  clientSecret: string | null;
 }
 
 // Simplified PayPal types
@@ -42,7 +43,6 @@ interface PayPalNamespace {
 
 declare global {
   interface Window {
-    paypal?: PayPalNamespace;
     ENV: {
       PAYPAL_CLIENT_ID: string;
     };
@@ -56,7 +56,8 @@ export const PaymentUI = ({
   tourPrice = 120, 
   tourName = "Tour",
   customerData,
-  paymentText 
+  paymentText,
+  clientSecret 
 }: PaymentUIProps) => {
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [paypalButtonsRendered, setPaypalButtonsRendered] = useState(false);

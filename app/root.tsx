@@ -1,5 +1,5 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useLocation, useMatches } from "@remix-run/react";
-import { type LinksFunction, type ActionFunctionArgs, type LoaderFunctionArgs, json, redirect } from "@remix-run/node";
+import { json, redirect } from "@remix-run/server-runtime";
 import "./styles/globals.css";
 import { languageCookie, cookieConsentCookie } from "~/utils/cookies";
 import languageData from "~/data/data.json";
@@ -32,16 +32,16 @@ export interface RootLoaderData {
   cookieConsent: boolean | null;
 }
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request }: { request: Request }) => {
   const cookieHeader = request.headers.get("Cookie");
   const cookieLanguage = (await languageCookie.parse(cookieHeader)) || "en";
   const language = cookieLanguage as keyof typeof languageData;
-  
+
   // Get cookie consent status
   const cookieConsent = await cookieConsentCookie.parse(cookieHeader);
 
   const pages = await getAllPages();
-  
+
   // Fetch active tours
   const toursCollection = await getToursCollection();
   const tours = await toursCollection.find({ status: 'active' }).toArray();
@@ -58,15 +58,38 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   });
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+const ALLOWED_REDIRECTS = [
+  '/',
+  '/book',
+  '/sanjuan',
+  '/valencia-things-to-do',
+  '/pages',
+];
+
+function isValidRedirect(url: string, origin: string): boolean {
+  try {
+    const parsed = new URL(url);
+    if (parsed.origin !== origin) {
+      return false;
+    }
+    return ALLOWED_REDIRECTS.includes(parsed.pathname);
+  } catch {
+    return false;
+  }
+}
+
+export const action = async ({ request }: { request: Request }) => {
   const formData = await request.formData();
   const consent = formData.get("consent");
   
-  // Get the current URL to redirect back to
   const url = new URL(request.url);
-  const redirectTo = formData.get("redirectTo") || url.pathname;
+  const origin = url.origin;
+  let redirectTo = formData.get("redirectTo") || url.pathname;
   
-  // Set the cookie based on the consent value
+  if (!isValidRedirect(redirectTo as string, origin)) {
+    redirectTo = "/";
+  }
+  
   return redirect(redirectTo as string, {
     headers: {
       "Set-Cookie": await cookieConsentCookie.serialize(consent === "true"),
@@ -74,7 +97,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   });
 };
 
-export const links: LinksFunction = () => [
+export const links = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",

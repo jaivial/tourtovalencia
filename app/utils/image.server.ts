@@ -20,17 +20,17 @@ export function processImageData(content: Record<string, any>): Promise<Record<s
 
     for (const [key, value] of Object.entries(obj)) {
       if (value && typeof value === 'object') {
-        if ('preview' in value && value.preview?.startsWith('blob:')) {
+        if ('preview' in value && typeof value.preview === 'string' && value.preview.startsWith('blob:')) {
           // Convert blob URL to base64
           result[key] = {
             ...value,
             preview: await convertBlobUrlToBase64(value.preview)
           };
-        } else if (Array.isArray(value) && value.some(item => item?.source?.startsWith('blob:'))) {
+        } else if (Array.isArray(value) && value.some((item: any) => item?.source && typeof item.source === 'string' && item.source.startsWith('blob:'))) {
           // Handle array of images (like in section3)
           result[key] = await Promise.all(
-            value.map(async (item) => {
-              if (item?.source?.startsWith('blob:')) {
+            value.map(async (item: any) => {
+              if (item?.source && typeof item.source === 'string' && item.source.startsWith('blob:')) {
                 return {
                   ...item,
                   source: await convertBlobUrlToBase64(item.source)
