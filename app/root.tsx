@@ -98,15 +98,54 @@ export const action = async ({ request }: { request: Request }) => {
 };
 
 export const links = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
+    rel: "preload",
+    as: "font",
+    type: "font/woff2",
+    href: "/assets/fonts/inter-regular.woff2",
     crossOrigin: "anonymous",
   },
   {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    rel: "preload",
+    as: "font",
+    type: "font/woff2",
+    href: "/assets/fonts/inter-500.woff2",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "preload",
+    as: "font",
+    type: "font/woff2",
+    href: "/assets/fonts/inter-600.woff2",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "preload",
+    as: "font",
+    type: "font/woff2",
+    href: "/assets/fonts/inter-700.woff2",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "preload",
+    as: "font",
+    type: "font/woff2",
+    href: "/assets/fonts/inter-500.woff2",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "preload",
+    as: "font",
+    type: "font/woff2",
+    href: "/assets/fonts/inter-600.woff2",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "preload",
+    as: "font",
+    type: "font/woff2",
+    href: "/assets/fonts/inter-700.woff2",
+    crossOrigin: "anonymous",
   },
   {
     rel: "apple-touch-icon",
