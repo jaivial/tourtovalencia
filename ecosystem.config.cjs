@@ -1,9 +1,13 @@
 module.exports = {
     apps: [{
         name: "tourtovalencia",
-        script: "remix-serve",
-        args: "./build/server/index.js",
+        script: "npx",
+        args: "remix-serve ./build/server/index.js",
         env: {
+            NODE_ENV: "production",
+            PORT: "3001"
+        },
+        env_production: {
             NODE_ENV: "production",
             PORT: "3001"
         },
