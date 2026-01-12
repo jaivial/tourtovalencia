@@ -155,7 +155,7 @@ const Nav: React.FC<NavProps> = () => {
         >
             <LanguageSelector />
           <div className="w-[45px]" />
-          <img src="/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[20px]" : "h-[80px]"} py-2 absolute left-1/2 -translate-x-1/2 w-auto`} />
+           <img src="/tourtovalencialogo.png" alt="Olga Travel" loading="eager" className={` ${clientWidth < 380 ? "h-[20px]" : "h-[80px]"} py-2 absolute left-1/2 -translate-x-1/2 w-auto`} />
           <div className="flex items-center gap-3">
             <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors" size={45} onClick={() => setMobileNavOpen(true)} />
           </div>
@@ -215,7 +215,7 @@ const Nav: React.FC<NavProps> = () => {
             >
               <div className="flex flex-col w-full min-h-full justify-between py-4">
                 <div className="flex flex-col gap-6">
-                  <img src="/tourtovalencialogo.png" alt="Olga Travel" className={`${clientWidth < 380 ? "h-[60px]" : "h-[80px]"} mx-auto mb-4`} />
+                   <img src="/tourtovalencialogo.png" alt="Olga Travel" loading="lazy" className={`${clientWidth < 380 ? "h-[60px]" : "h-[80px]"} mx-auto mb-4`} />
                   
                   {/* Regular Nav Links */}
                   <div className="flex flex-col gap-4 w-full">

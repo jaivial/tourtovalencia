@@ -13,7 +13,9 @@ import CookieConsent from "~/components/ui/CookieConsent";
 import { getAllPages } from "~/utils/page.server";
 import { ToastProvider } from "~/components/ui/toast-provider";
 import { getToursCollection } from "~/utils/db.server";
+import LoadingScreen from "~/components/ui/LoadingScreen";
 import type { Tour } from "~/utils/db.schema.server";
+import { useState, useEffect } from "react";
 
 // Define the handle type for routes
 interface RouteHandle {
@@ -123,6 +125,26 @@ export default function App() {
   const { initialLanguage, ENV, pages, cookieConsent } = useLoaderData<RootLoaderData>();
   const location = useLocation();
   const matches = useMatches();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingProgress, setLoadingProgress] = useState<number>(0);
+  
+  const [hasLoaded, setHasLoaded] = useState(false);
+  
+  useEffect(() => {
+    if (!hasLoaded) {
+      setIsLoading(true);
+      const interval = setInterval(() => {
+        setLoadingProgress(prev => Math.min(prev + 10, 100));
+      }, 100);
+      
+      setTimeout(() => {
+        clearInterval(interval);
+        setIsLoading(false);
+        setLoadingProgress(100);
+        setHasLoaded(true);
+      }, 2000);
+    }
+  }, [hasLoaded]);
   
   // Check if the current route has skipLayout handle
   const skipLayout = matches.some(match => (match.handle as RouteHandle)?.skipLayout);
@@ -169,12 +191,17 @@ export default function App() {
          <MotionProvider>
            <LanguageContextProvider initialState={initialLanguage}>
              <CookieConsentProvider initialConsent={cookieConsent}>
-               <ArrowToTop />
-               <Nav pages={pages} />
-               <Outlet />
-               {!isAdminDashboard && <Footer />}
-               {!isAdminPage && <CookieConsent />}
-               <ToastProvider />
+               <LoadingScreen progress={loadingProgress} />
+               {!isLoading && (
+                 <>
+                   <ArrowToTop />
+                   <Nav pages={pages} />
+                   <Outlet />
+                   {!isAdminDashboard && <Footer />}
+                   {!isAdminPage && <CookieConsent />}
+                   <ToastProvider />
+                 </>
+               )}
              </CookieConsentProvider>
            </LanguageContextProvider>
          </MotionProvider>

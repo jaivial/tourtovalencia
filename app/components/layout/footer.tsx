@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-12">
         {/* Section 1: Company Info */}
         <div className="mx-auto w-[90%] sm:w-auto transition-transform duration-300 hover:scale-105">
-          <img src="/tourtovalencialogo.png" alt="Tour to Valencia" className="h-16 mb-6" />
+           <img src="/tourtovalencialogo.png" alt="Tour to Valencia" loading="lazy" className="h-16 mb-6" />
           <p className="text-gray-300 text-base leading-relaxed max-w-[350px] mb-6">{footerText.firstp}</p>
           
           {/* Social Media Links */}
