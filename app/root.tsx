@@ -99,61 +99,8 @@ export const action = async ({ request }: { request: Request }) => {
 
 export const links = () => [
   {
-    rel: "preload",
-    as: "font",
-    type: "font/woff2",
-    href: "/assets/fonts/inter-regular.woff2",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "preload",
-    as: "font",
-    type: "font/woff2",
-    href: "/assets/fonts/inter-500.woff2",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "preload",
-    as: "font",
-    type: "font/woff2",
-    href: "/assets/fonts/inter-600.woff2",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "preload",
-    as: "font",
-    type: "font/woff2",
-    href: "/assets/fonts/inter-700.woff2",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "preload",
-    as: "font",
-    type: "font/woff2",
-    href: "/assets/fonts/inter-500.woff2",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "preload",
-    as: "font",
-    type: "font/woff2",
-    href: "/assets/fonts/inter-600.woff2",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "preload",
-    as: "font",
-    type: "font/woff2",
-    href: "/assets/fonts/inter-700.woff2",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "apple-touch-icon",
-    href: "/apple-touch-icon.png",
-  },
-  {
-    rel: "apple-touch-icon-precomposed",
-    href: "/apple-touch-icon-precomposed.png",
+    rel: "shortcut icon",
+    href: "/favicon.ico",
   },
   {
     rel: "icon",

@@ -30,9 +30,30 @@ export default defineConfig(({ mode }) => {
       }),
       tsconfigPaths(),
     ],
-    // Expose .env as process.env instead of import.meta.env
     define: {
       'process.env': env
     },
+     build: {
+       rollupOptions: {
+         output: {
+           manualChunks: {
+             vendor: ['react', 'react-dom'],
+             remix: ['@remix-run/react', '@remix-run/node'],
+             thirdparty: ['framer-motion', 'lucide-react', '@heroui/react'],
+             routes: [
+               './app/routes/_index.tsx',
+               './app/routes/book._index.tsx',
+               './app/routes/legal.tsx',
+               './app/routes/tours.tsx',
+               './app/routes/valencia-things-to-do.tsx',
+               './app/routes/pages._slug.tsx',
+             ],
+             admin: [
+               './app/routes/admin/*',
+             ],
+           },
+         },
+       },
+     },
   };
 });
