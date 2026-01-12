@@ -1,26 +1,17 @@
 module.exports = {
     apps: [{
         name: "tourtovalencia",
-        script: "npx",
-        args: "remix-serve ./build/server/index.js",
+        script: "npm",
+        args: "start",
         env: {
             NODE_ENV: "production",
             PORT: "3001"
         },
-        env_production: {
-            NODE_ENV: "production",
-            PORT: "3001"
-        },
+        wait_ready: false,
         watch: false,
-        max_memory_restart: "2G",
         exec_mode: "fork",
         instances: 1,
-        autorestart: true,
-        max_restarts: 10,
-        min_uptime: "10s",
-        kill_timeout: 5000,
-        wait_ready: true,
-        listen_timeout: 10000,
-        shutdown_with_message: true
+        max_memory_restart: "2G",
+        autorestart: true
     }]
 }; 
