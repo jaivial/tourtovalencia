@@ -33,5 +33,23 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env': env
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom')) {
+                return 'vendor';
+              }
+              if (id.includes('@remix-run')) {
+                return 'remix';
+              }
+              return 'vendor';
+            }
+            return 'app';
+          },
+        },
+      },
+    },
   };
 });

@@ -166,18 +166,18 @@ export default function App() {
         <Links />
       </head>
       <body className="h-full bg-background text-foreground">
-        <MotionProvider>
-          <LanguageContextProvider initialState={initialLanguage}>
-            <CookieConsentProvider initialConsent={cookieConsent}>
-              <ArrowToTop />
-              <Nav pages={pages} />
-              <Outlet />
-              {!isAdminDashboard && <Footer />}
-              {!isAdminPage && <CookieConsent />}
-              <ToastProvider />
-            </CookieConsentProvider>
-          </LanguageContextProvider>
-        </MotionProvider>
+         <MotionProvider>
+           <LanguageContextProvider initialState={initialLanguage}>
+             <CookieConsentProvider initialConsent={cookieConsent}>
+               <ArrowToTop />
+               <Nav pages={pages} />
+               <Outlet />
+               {!isAdminDashboard && <Footer />}
+               {!isAdminPage && <CookieConsent />}
+               <ToastProvider />
+             </CookieConsentProvider>
+           </LanguageContextProvider>
+         </MotionProvider>
         <ScrollRestoration />
         <script
           dangerouslySetInnerHTML={{
