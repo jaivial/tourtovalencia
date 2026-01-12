@@ -13,9 +13,21 @@ import CookieConsent from "~/components/ui/CookieConsent";
 import { getAllPages } from "~/utils/page.server";
 import { ToastProvider } from "~/components/ui/toast-provider";
 import { getToursCollection } from "~/utils/db.server";
-import LoadingScreen from "~/components/ui/LoadingScreen";
 import type { Tour } from "~/utils/db.schema.server";
-import { useState, useEffect } from "react";
+
+// Global error handler
+if (typeof window !== 'undefined') {
+  window.onerror = (message, source, lineno, colno, error) => {
+    console.error('[GLOBAL ERROR]', message, error);
+    // Force hide loading on error
+    setTimeout(() => {
+      const loadingElement = document.querySelector('[class*="bg-gray-900"]');
+      if (loadingElement) {
+        loadingElement.style.display = 'none';
+      }
+    }, 100);
+  };
+}
 
 // Define the handle type for routes
 interface RouteHandle {
@@ -35,6 +47,9 @@ export interface RootLoaderData {
 }
 
 export const loader = async ({ request }: { request: Request }) => {
+  const loaderStartTime = Date.now();
+  console.log(`[ROOT LOADER] Starting loader for root - ${new Date(loaderStartTime).toISOString()}`);
+  
   const cookieHeader = request.headers.get("Cookie");
   const cookieLanguage = (await languageCookie.parse(cookieHeader)) || "en";
   const language = cookieLanguage as keyof typeof languageData;
@@ -42,11 +57,17 @@ export const loader = async ({ request }: { request: Request }) => {
   // Get cookie consent status
   const cookieConsent = await cookieConsentCookie.parse(cookieHeader);
 
+  const pagesStart = Date.now();
   const pages = await getAllPages();
+  console.log(`[ROOT LOADER] Fetched pages in ${Date.now() - pagesStart}ms`);
 
   // Fetch active tours
+  const toursStart = Date.now();
   const toursCollection = await getToursCollection();
   const tours = await toursCollection.find({ status: 'active' }).toArray();
+  console.log(`[ROOT LOADER] Fetched ${tours.length} tours in ${Date.now() - toursStart}ms`);
+  
+  console.log(`[ROOT LOADER] Total loader time: ${Date.now() - loaderStartTime}ms`);
 
   return json<RootLoaderData>({
     initialLanguage: languageData[language] || languageData.en,
@@ -125,27 +146,7 @@ export default function App() {
   const { initialLanguage, ENV, pages, cookieConsent } = useLoaderData<RootLoaderData>();
   const location = useLocation();
   const matches = useMatches();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [loadingProgress, setLoadingProgress] = useState<number>(0);
-  
-  const [hasLoaded, setHasLoaded] = useState(false);
-  
-  useEffect(() => {
-    if (!hasLoaded) {
-      setIsLoading(true);
-      const interval = setInterval(() => {
-        setLoadingProgress(prev => Math.min(prev + 10, 100));
-      }, 100);
-      
-      setTimeout(() => {
-        clearInterval(interval);
-        setIsLoading(false);
-        setLoadingProgress(100);
-        setHasLoaded(true);
-      }, 2000);
-    }
-  }, [hasLoaded]);
-  
+
   // Check if the current route has skipLayout handle
   const skipLayout = matches.some(match => (match.handle as RouteHandle)?.skipLayout);
   
@@ -187,32 +188,27 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="h-full bg-background text-foreground">
-         <MotionProvider>
-           <LanguageContextProvider initialState={initialLanguage}>
-             <CookieConsentProvider initialConsent={cookieConsent}>
-               <LoadingScreen progress={loadingProgress} />
-               {!isLoading && (
-                 <>
-                   <ArrowToTop />
-                   <Nav pages={pages} />
-                   <Outlet />
-                   {!isAdminDashboard && <Footer />}
-                   {!isAdminPage && <CookieConsent />}
-                   <ToastProvider />
-                 </>
-               )}
-             </CookieConsentProvider>
-           </LanguageContextProvider>
-         </MotionProvider>
-        <ScrollRestoration />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.ENV = ${JSON.stringify(ENV)}`,
-          }}
-        />
-        <Scripts />
-      </body>
+         <body className="h-full bg-background text-foreground">
+            <MotionProvider>
+             <LanguageContextProvider initialState={initialLanguage}>
+               <CookieConsentProvider initialConsent={cookieConsent}>
+                 <ArrowToTop />
+                 <Nav pages={pages} />
+                 <Outlet />
+                 {!isAdminDashboard && <Footer />}
+                 {!isAdminPage && <CookieConsent />}
+                 <ToastProvider />
+               </CookieConsentProvider>
+             </LanguageContextProvider>
+           </MotionProvider>
+         <ScrollRestoration />
+         <script
+           dangerouslySetInnerHTML={{
+             __html: `window.ENV = ${JSON.stringify(ENV)};`,
+           }}
+         />
+         <Scripts />
+       </body>
     </html>
   );
 }

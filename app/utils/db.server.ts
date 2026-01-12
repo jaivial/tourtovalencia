@@ -35,8 +35,9 @@ async function connect() {
   if (dbPromise) return await dbPromise;
 
   // Log MongoDB connection only once
+  const connectStartTime = Date.now();
   const mongoUri = process.env.MONGODB_URI || '';
-  console.log("Connecting to MongoDB with URI:", mongoUri);
+  console.log("[DB] Connecting to MongoDB...", new Date(connectStartTime).toISOString());
 
   const mongoClientOptions: MongoClientOptions = {
     maxPoolSize: 100,
@@ -60,9 +61,14 @@ async function connect() {
       })();
 
   db = await dbPromise;
+  
+  const connectTime = Date.now() - connectStartTime;
+  console.log(`[DB] MongoDB connection established in ${connectTime}ms`);
 
   // Ensure database indexes are set up correctly
+  const indexesStart = Date.now();
   await ensureDbIndexes();
+  console.log(`[DB] Database indexes verified in ${Date.now() - indexesStart}ms`);
 
   return db;
 }

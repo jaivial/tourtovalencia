@@ -28,20 +28,31 @@ type LoaderData = {
 };
 
 export const loader = async () => {
+  const loaderStartTime = Date.now();
+  console.log(`[INDEX LOADER] Starting loader for index page - ${new Date(loaderStartTime).toISOString()}`);
+  
   // Initialize i18n (loads translations from JSON files, not MongoDB)
+  const i18nStart = Date.now();
   await i18n.initialize();
+  console.log(`[INDEX LOADER] i18n initialized in ${Date.now() - i18nStart}ms`);
 
   // Get cached translations from memory (no DB query!)
+  const translationsStart = Date.now();
   const translations = await getTranslations('es');
+  console.log(`[INDEX LOADER] Loaded ${Object.keys(translations).length} translations in ${Date.now() - translationsStart}ms`);
 
   let tours: SerializableTour[] = [];
   let pages: SerializablePage[] = [];
 
   try {
+    const dbStart = Date.now();
     const db = await getDb();
+    console.log(`[INDEX LOADER] DB connection established in ${Date.now() - dbStart}ms`);
 
     // Fetch tours - only essential fields for homepage
+    const toursStart = Date.now();
     const tourDocs = await db.collection("tours").find({}).toArray();
+    console.log(`[INDEX LOADER] Fetched ${tourDocs.length} tours in ${Date.now() - toursStart}ms`);
     tours = tourDocs.map((doc) => ({
       _id: doc._id?.toString(),
       slug: doc.slug || '',
@@ -57,7 +68,9 @@ export const loader = async () => {
     })) as SerializableTour[];
 
     // Fetch pages - only essential fields
+    const pagesStart = Date.now();
     const pageDocs = await db.collection("pages").find({}).toArray();
+    console.log(`[INDEX LOADER] Fetched ${pageDocs.length} pages in ${Date.now() - pagesStart}ms`);
     pages = pageDocs.map((doc) => ({
       _id: doc._id?.toString(),
       slug: doc.slug || '',
@@ -74,6 +87,8 @@ export const loader = async () => {
     pages = [];
   }
 
+  const totalTime = Date.now() - loaderStartTime;
+  console.log(`[INDEX LOADER] Total loader time: ${totalTime}ms`);
   return { tours, pages, translations };
 };
 

@@ -13,7 +13,7 @@ declare module "@remix-run/node" {
 }
 
 export default defineConfig(({ mode }) => {
-  // Load env file based on `mode` in the current directory.
+  // Load env file based on `mode` in current directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), '');
   
@@ -34,40 +34,29 @@ export default defineConfig(({ mode }) => {
       'process.env': env
     },
     build: {
+      chunkSizeWarningLimit: 1000,
       rollupOptions: {
         output: {
           manualChunks(id) {
+            // Put everything in node_modules into one vendor chunk to prevent React duplication
             if (id.includes('node_modules')) {
-              if (id.includes('react') && id.includes('react-dom')) {
-                return 'react-core';
-              }
-              if (id.includes('framer-motion')) {
-                return 'motion';
-              }
-              if (id.includes('@heroui') || id.includes('@radix-ui')) {
-                return 'ui';
-              }
-              if (id.includes('lucide-react')) {
-                return 'icons';
-              }
-              if (id.includes('@remix-run/react')) {
-                return 'remix-core';
-              }
               return 'vendor';
             }
-            if (id.includes('app/components') || id.includes('app/routes')) {
+            // App code chunks
+            if (id.includes('app/components')) {
               const componentName = id.split('/').pop()?.replace(/\.(tsx|ts)$/, '');
-              if (['IndexContainer', 'PageTemplate', 'SanJuanSection3', 'LegalPage', 'AdminDashboard', 'BookingStep', 'TourCard'].some(c => componentName?.includes(c))) {
-                return componentName || 'app';
+              if (componentName && 
+                  ['IndexContainer', 'PageTemplate', 'SanJuanSection3', 'LegalPage', 'AdminDashboard', 'BookingStep'].some(c => componentName.includes(c))) {
+                return componentName;
               }
             }
-            if (id.includes('_index') || id.includes('book._index') || id.includes('legal') || id.includes('sanjuan') || id.includes('valencia-things-to-do') || id.includes('pages.')) {
-              return 'routes-public';
+            if (id.includes('app/routes')) {
+              const routeName = id.split('/').pop()?.replace(/\.(tsx|ts)$/, '');
+              if (routeName) {
+                return 'route-' + routeName;
+              }
             }
-            if (id.includes('admin')) {
-              return 'routes-admin';
-            }
-            return 'app';
+            return undefined;
           },
           chunkFileNames: 'assets/[name]-[hash].js',
         },

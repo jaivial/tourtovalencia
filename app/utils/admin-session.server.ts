@@ -1,4 +1,7 @@
 import { createCookieFactory, redirect } from "@remix-run/server-runtime";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const sessionSecret = process.env.SESSION_SECRET;
 
@@ -30,7 +33,7 @@ export async function requireAdminSession(request: Request): Promise<AdminSessio
     maxAge: 60 * 60 * 8,
     path: "/",
     sameSite: "lax",
-    secrets: [sessionSecret],
+    secrets: [sessionSecret!],
     secure: process.env.NODE_ENV === "production",
   });
   
@@ -71,7 +74,7 @@ export async function createAdminSession(
     maxAge: 60 * 60 * 8,
     path: "/",
     sameSite: "lax",
-    secrets: [sessionSecret],
+    secrets: [sessionSecret!],
     secure: process.env.NODE_ENV === "production",
   });
   
@@ -92,10 +95,10 @@ export async function destroyAdminSession(
 ): Promise<{ headers: Headers }> {
   const adminSessionCookie = createCookie("admin-session", {
     httpOnly: true,
-    maxAge: 0,
+    maxAge: 60 * 60 * 8,
     path: "/",
     sameSite: "lax",
-    secrets: [sessionSecret],
+    secrets: [sessionSecret!],
     secure: process.env.NODE_ENV === "production",
   });
   
@@ -120,7 +123,7 @@ export async function getAdminSession(
     maxAge: 60 * 60 * 8,
     path: "/",
     sameSite: "lax",
-    secrets: [sessionSecret],
+    secrets: [sessionSecret!],
     secure: process.env.NODE_ENV === "production",
   });
   

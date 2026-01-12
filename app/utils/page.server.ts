@@ -670,6 +670,9 @@ export async function getPageBySlug(slug: string) {
 }
 
 export async function getAllPages(): Promise<Page[]> {
+  const startTime = Date.now();
   const pagesCollection = await getPagesCollection();
-  return pagesCollection.find().sort({ createdAt: -1 }).toArray();
+  const pages = await pagesCollection.find().sort({ createdAt: -1 }).toArray();
+  console.log(`[PAGE SERVER] Fetched ${pages.length} pages in ${Date.now() - startTime}ms`);
+  return pages;
 }

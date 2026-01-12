@@ -53,14 +53,12 @@ const FeaturedTourSection: React.FC<FeaturedTourSectionProps> = ({ width, featur
             viewport={{ once: true }}
             className="rounded-xl overflow-hidden shadow-lg h-[400px]"
           >
-            <img 
-              src="/featured-tour.jpg" 
-              alt={featuredTourText.tourName}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src = "/tour-placeholder.jpg";
-              }}
-            />
+             {/* Show gray placeholder for featured tour - images should come from database */}
+             <div className="absolute inset-0 bg-gray-300 flex items-center justify-center text-gray-500">
+               <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+               </svg>
+             </div>
           </motion.div>
 
           {/* Featured Tour Details */}

@@ -3,15 +3,21 @@ import { getDb } from "~/utils/db.server";
 import { ObjectId } from "mongodb";
 
 export async function loader({ request }: { request: Request }) {
+  const startTime = Date.now();
+  console.log(`[API:BOOKINGS] Request started - ${new Date(startTime).toISOString()}`);
+  
   const url = new URL(request.url);
   const date = url.searchParams.get("date");
 
   if (!date) {
+    console.log(`[API:BOOKINGS] Error: Date parameter is required`);
     return json({ error: "Date parameter is required" }, { status: 400 });
   }
 
   try {
+    const dbStart = Date.now();
     const db = await getDb();
+    console.log(`[API:BOOKINGS] DB connection in ${Date.now() - dbStart}ms`);
     
     // Create date objects for the start and end of the selected day in local timezone
     const startDate = new Date(date);
@@ -93,12 +99,15 @@ export async function loader({ request }: { request: Request }) {
       paid: payments.some(payment => payment.bookingId?.equals?.(booking._id))
     }));
 
+    const totalTime = Date.now() - startTime;
+    console.log(`[API:BOOKINGS] Request completed in ${totalTime}ms - Found ${bookings.length} bookings`);
+    
     return json({
       bookings: bookingsWithPayments,
       limit: bookingLimit || { maxBookings: 20, currentBookings: bookings.length }
     });
   } catch (error) {
-    console.error("Error fetching bookings:", error);
+    console.error(`[API:BOOKINGS] Error after ${Date.now() - startTime}ms:`, error);
     return json({ 
       error: "Failed to fetch bookings",
       details: error instanceof Error ? error.message : String(error)

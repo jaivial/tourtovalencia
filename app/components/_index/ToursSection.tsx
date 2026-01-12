@@ -274,24 +274,39 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
                   w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-[380px]
                 `}
               >
-                {/* Tour Image */}
-                <div className="h-56 overflow-hidden">
-                  {tourImage ? (
-                    <img src={tourImage} alt={cardData.title} className={`w-full h-full object-cover transition-transform duration-500 hover:scale-110 ${tour.status === "upcoming" ? "grayscale" : ""}`} />
-                  ) : (
-                    <img
-                      src={`/tour-${index + 1}.jpg`}
-                      alt={cardData.title}
-                      className={`w-full h-full object-cover transition-transform duration-500 hover:scale-110 ${tour.status === "upcoming" ? "grayscale" : ""}`}
-                      onError={(e) => {
-                        e.currentTarget.src = "/tour-placeholder.jpg";
-                      }}
-                    />
-                  )}
-
-                  {/* Gray overlay for upcoming tours */}
-                  {tour.status === "upcoming" && <div className="absolute inset-0 bg-gray-500 opacity-50 z-10"></div>}
-                </div>
+                 {/* Tour Image */}
+                 <div className="h-56 overflow-hidden">
+                   {tourImage ? (
+                     <>
+                       <img 
+                         src={tourImage} 
+                         alt={cardData.title} 
+                         className={`w-full h-full object-cover transition-transform duration-500 hover:scale-110 ${tour.status === "upcoming" ? "grayscale" : ""}`}
+                         loading="lazy"
+                         onError={(e) => {
+                           const target = e.currentTarget;
+                           target.style.display = 'none';
+                           const placeholder = target.nextElementSibling as HTMLDivElement;
+                           if (placeholder) {
+                             placeholder.style.display = 'flex';
+                           }
+                         }}
+                       />
+                       {/* Fallback gray background placeholder */}
+                       <div className="absolute inset-0 bg-gray-300 flex items-center justify-center text-gray-500 hidden">
+                         <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                         </svg>
+                       </div>
+                     </>
+                   ) : (
+                     <div className="absolute inset-0 bg-gray-300 flex items-center justify-center text-gray-500">
+                       <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                       </svg>
+                     </div>
+                   )}
+                 </div>
 
                 {/* Tour Content */}
                 <div className="p-6 flex flex-col flex-grow">

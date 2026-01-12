@@ -17,6 +17,8 @@ const ABORT_DELAY = 5000;
 export default function handleRequest(request: Request, responseStatusCode: number, responseHeaders: Headers, remixContext: any) {
   const url = new URL(request.url);
   const isHttps = url.protocol === "https:";
+  const requestStartTime = Date.now();
+  console.log(`[SERVER] Request started: ${request.method} ${url.pathname} - ${new Date(requestStartTime).toISOString()}`);
   
   responseHeaders.set("X-Content-Type-Options", "nosniff");
   responseHeaders.set("X-Frame-Options", "DENY");
@@ -74,6 +76,9 @@ export default function handleRequest(request: Request, responseStatusCode: numb
         
         responseHeaders.set("Content-Type", "text/html");
         
+        const requestDuration = Date.now() - requestStartTime;
+        console.log(`[SERVER] Shell ready: ${url.pathname} - Time: ${requestDuration}ms`);
+        
         resolve(
           new Response(body as any, {
             headers: responseHeaders,
@@ -84,10 +89,12 @@ export default function handleRequest(request: Request, responseStatusCode: numb
         pipe(body);
       },
       onShellError(err: unknown) {
+        console.error(`[SERVER] Shell error for ${url.pathname}:`, err);
         reject(err);
       },
       onError(error: unknown) {
         didError = true;
+        console.error(`[SERVER] Rendering error for ${url.pathname}:`, error);
       },
     });
     
