@@ -38,13 +38,31 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('react-dom')) {
-                return 'vendor';
+              if (id.includes('react') && id.includes('react-dom')) {
+                return 'react-vendor';
               }
-              if (id.includes('@remix-run')) {
-                return 'remix';
+              if (id.includes('@remix-run/react')) {
+                return 'remix-core';
               }
-              return 'vendor';
+              if (id.includes('framer-motion')) {
+                return 'motion-vendor';
+              }
+              if (id.includes('lucide-react') || id.includes('@heroui/react') || id.includes('@radix-ui')) {
+                return 'ui-vendor';
+              }
+              return 'other-vendor';
+            }
+            if (id.includes('react')) {
+              return 'react';
+            }
+            if (id.includes('_index') || id.includes('book._index')) {
+              return 'home';
+            }
+            if (id.includes('pages._slug') || id.includes('legal') || id.includes('valencia-things-to-do') || id.includes('sanjuan')) {
+              return 'routes';
+            }
+            if (id.includes('admin')) {
+              return 'admin';
             }
             return 'app';
           },
