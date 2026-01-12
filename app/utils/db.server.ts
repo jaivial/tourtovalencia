@@ -1,4 +1,4 @@
-import { MongoClient, Document } from "mongodb";
+import { MongoClient, Document, MongoClientOptions } from "mongodb";
 import { ensureDbIndexes } from "./db.schema.server";
 import type { Translation, Page, Tour } from "./db.schema.server";
 // Import dotenv to ensure environment variables are loaded
@@ -38,11 +38,23 @@ async function connect() {
   const mongoUri = process.env.MONGODB_URI || '';
   console.log("Connecting to MongoDB with URI:", mongoUri);
 
+  const mongoClientOptions: MongoClientOptions = {
+    maxPoolSize: 100,
+    minPoolSize: 10,
+    maxIdleTimeMS: 30000,
+    connectTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
+    serverSelectionTimeoutMS: 5000,
+    retryWrites: true,
+    retryReads: true,
+    monitorCommands: process.env.NODE_ENV !== "production"
+  };
+
   dbPromise = process.env.NODE_ENV === "production" 
-    ? MongoClient.connect(mongoUri)
+    ? MongoClient.connect(mongoUri, mongoClientOptions)
     : (async () => {
         if (!global.__db) {
-          global.__db = await MongoClient.connect(mongoUri);
+          global.__db = await MongoClient.connect(mongoUri, mongoClientOptions);
         }
         return global.__db;
       })();
