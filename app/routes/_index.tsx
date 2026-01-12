@@ -4,6 +4,7 @@ import type { MetaFunction } from "@remix-run/react";
 import IndexContainer from "~/components/_index/IndexContainer";
 import { getDb } from "~/utils/db.server";
 import type { Tour, Page } from "~/utils/db.schema.server";
+import { i18n, getTranslations } from "~/utils/i18n.server";
 import { useState, useEffect } from "react";
 import { IndexLoadingScreen } from "~/components/ui/IndexLoadingScreen";
 
@@ -23,39 +24,57 @@ type SerializablePage = Omit<Page, "createdAt" | "updatedAt"> & {
 type LoaderData = {
   tours: SerializableTour[];
   pages: SerializablePage[];
+  translations: Record<string, string>;
 };
 
 export const loader = async () => {
-  const db = await getDb();
+  // Initialize i18n (loads translations from JSON files, not MongoDB)
+  await i18n.initialize();
+
+  // Get cached translations from memory (no DB query!)
+  const translations = await getTranslations('es');
+
   let tours: SerializableTour[] = [];
   let pages: SerializablePage[] = [];
 
   try {
-    // Fetch tours from the database
+    const db = await getDb();
+
+    // Fetch tours - only essential fields for homepage
     const tourDocs = await db.collection("tours").find({}).toArray();
     tours = tourDocs.map((doc) => ({
-      ...doc,
       _id: doc._id?.toString(),
+      slug: doc.slug || '',
+      tourName: doc.tourName || { en: '', es: '' },
+      tourPrice: doc.tourPrice || 0,
+      status: doc.status || 'upcoming',
+      description: doc.description || { en: '', es: '' },
+      duration: doc.duration || { en: '', es: '' },
+      includes: doc.includes || { en: '', es: '' },
+      meetingPoint: doc.meetingPoint || { en: '', es: '' },
       createdAt: doc.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: doc.updatedAt?.toISOString() || new Date().toISOString(),
     })) as SerializableTour[];
 
-    // Fetch pages from the database
+    // Fetch pages - only essential fields
     const pageDocs = await db.collection("pages").find({}).toArray();
     pages = pageDocs.map((doc) => ({
-      ...doc,
       _id: doc._id?.toString(),
+      slug: doc.slug || '',
+      name: doc.name || '',
+      template: doc.template || '',
+      status: doc.status || 'upcoming',
+      content: {}, // Empty content - translations now in JSON files
       createdAt: doc.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: doc.updatedAt?.toISOString() || new Date().toISOString(),
     })) as SerializablePage[];
   } catch (error) {
     console.error("Error fetching data:", error);
-    // Return empty arrays if there's an error
     tours = [];
     pages = [];
   }
 
-  return { tours, pages };
+  return { tours, pages, translations };
 };
 
 export const meta: MetaFunction = () => {
@@ -93,7 +112,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const { tours, pages } = useLoaderData<LoaderData>();
+  const { tours, pages, translations } = useLoaderData<LoaderData>();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -120,7 +139,7 @@ export default function Index() {
 
   return (
     <>
-      <IndexLoadingScreen isLoading={isLoading} message="Cargando Tour To Valencia..." />
+      <IndexLoadingScreen isLoading={isLoading} message={translations["loading.tourToValencia"] || "Cargando Tour To Valencia..."} />
       <IndexContainer tours={tours} pages={pages} />
     </>
   );
