@@ -1,0 +1,50 @@
+{
+  "section1": {
+    "firstH3": "Viaje en barca en las Cuevas de San José",
+    "firstSquareH3": "3.5 horas",
+    "firstSquareP": "Duración del tour",
+    "secondSquareH3": "Viaje en barca",
+    "secondSquareP": "Navega por el río subterráneo más largo de Europa",
+    "thirdSquareH3": "Guías Expertos",
+    "thirdSquareP": "Irás acompañado de guías locales expertos en la zona",
+    "button": "RESERVAR YA"
+  },
+  "section2": {
+    "firstH3": "Disfruta de un relajante paseo en barca a través de uno de los ríos subterráneos más espectaculares.",
+    "secondH3": "Viajarás 800 metros en barca.",
+    "thirdH3": "¿Sabías que es el río subterráneo navegable más largo de Europa?"
+  },
+  "section4": {
+    "firstH3": "TOUR GUIADO EXCLUSIVO",
+    "secondH3": "(Grupos reducidos de máximo 10 personas)",
+    "thirdH3": "La experiencia se desarrolla en la provincia de Castellón, una región que conocemos a la perfección y donde ofrecemos las mejores rutas turísticas."
+  },
+  "section5": {
+    "firstH3": "SALIDA DESDE VALENCIA",
+    "secondH3": "Salida desde la Plaza de La Reina en Valencia, esquina Calle del Mar.",
+    "thirdH3": "Transporte privado a La Vall d'Uixó (Castellón)",
+    "fourthH3": "Tour guiado: 3h 30m (aprox)",
+    "fifthH3": "Regreso a Valencia por transporte privado"
+  },
+  "section6": {
+    "cardTitle": "TOUR GUIADO",
+    "cardDescription": "Paquete de viaje a las Cuevas de San José",
+    "firstH4": "Qué incluye",
+    "secondH4": "120",
+    "secondH4span": "Precio por persona",
+    "button": "RESERVAR AHORA"
+  },
+  "indexSection5": {
+    "firstH3": "Cuevas de San José",
+    "secondH3": "Explora las cuevas mágicas de San José y disfruta de un inolvidable paseo en barca"
+  },
+  "timeline": {
+    "title": "¿Qué esperar?",
+    "subtitle": "Itinerario"
+  },
+  "card": {
+    "title": "Cuevas de San José",
+    "duration": "3.5 horas",
+    "description": "Descubre las Cuevas de San José en un mágico paseo en barca por el río subterráneo más largo de Europa. ¡Una experiencia única desde Valencia!"
+  }
+}

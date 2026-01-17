@@ -1,0 +1,50 @@
+{
+  "section1": {
+    "firstH3": "Boat trip in the San José Caves",
+    "firstSquareH3": "3.5 hours",
+    "firstSquareP": "Tour duration",
+    "secondSquareH3": "Boat trip",
+    "secondSquareP": "Navigate the longest underground river in Europe",
+    "thirdSquareH3": "Expert Guides",
+    "thirdSquareP": "You will be accompanied by local guides who are experts in the area.",
+    "button": "Book now"
+  },
+  "section2": {
+    "firstH3": "Enjoy a relaxing boat ride through one of the most spectacular underground rivers.",
+    "secondH3": "You will travel 800 meters by boat.",
+    "thirdH3": "Did you know that it is the longest navigable underground river in Europe?"
+  },
+  "section4": {
+    "firstH3": "EXCLUSIVE GUIDED TOUR",
+    "secondH3": "Small groups of maximum 10 people",
+    "thirdH3": "The experience takes place in the province of Castellón, a region we know perfectly and where we offer the best tourist routes."
+  },
+  "section5": {
+    "firstH3": "DEPARTURE FROM VALENCIA",
+    "secondH3": "Departure from Plaza de la Reina in Valencia, corner of Calle del Mar.",
+    "thirdH3": "Private transportation to La Vall d'Uixó (Castellón)",
+    "fourthH3": "Guided tour: 3h 30m (approx.)",
+    "fifthH3": "Returning to Valencia by private transport"
+  },
+  "section6": {
+    "cardTitle": "GUIDED TOUR",
+    "cardDescription": "San Jose Caves Travel Package",
+    "firstH4": "What's included",
+    "secondH4": "120",
+    "secondH4span": "Price per person",
+    "button": "Book now"
+  },
+  "indexSection5": {
+    "firstH3": "Saint Joseph Caves",
+    "secondH3": "Explore the magical caves of San José and enjoy an unforgettable boat trip."
+  },
+  "timeline": {
+    "title": "What to expect?",
+    "subtitle": "Itinerary"
+  },
+  "card": {
+    "title": "Caves of San José",
+    "duration": "3.5 hours",
+    "description": "Discover the San José Caves on a magical boat trip through Europe's longest subterranean river. A unique experience from Valencia!"
+  }
+}

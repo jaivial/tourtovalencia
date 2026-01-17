@@ -52,15 +52,33 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     const { username, password } = validationResult.data;
+    console.log("[API-ADMIN-LOGIN] Login attempt for:", username);
     logger.info("Admin login attempt", { username, ip });
     
-      const isValid = await verifyAdminCredentials(username, password);
+    let isValid;
+    try {
+      isValid = await verifyAdminCredentials(username, password);
+    } catch (e) {
+      console.log("[API-ADMIN-LOGIN] Error in verifyAdminCredentials:", e.message);
+      throw e;
+    }
+    console.log("[API-ADMIN-LOGIN] Credentials valid:", isValid);
+    
+    if (isValid) {
+      console.log("[API-ADMIN-LOGIN] Login successful, creating session...");
+      logger.info("Admin login successful", { username, ip });
       
-      if (isValid) {
-        logger.info("Admin login successful", { username, ip });
-        const { headers } = await createAdminSession(request, username);
-        return json({ success: true }, { headers });
+      let result;
+      try {
+        result = await createAdminSession(request, username);
+      } catch (e) {
+        console.log("[API-ADMIN-LOGIN] Error in createAdminSession:", e.message);
+        throw e;
+      }
+      console.log("[API-ADMIN-LOGIN] Session created, headers:", result.headers ? "headers set" : "no headers");
+      return json({ success: true }, result);
     } else {
+      console.log("[API-ADMIN-LOGIN] Login failed - invalid credentials");
       logger.warn("Admin login failed - invalid credentials", { username, ip });
       return json(
         { success: false, error: "Usuario o contraseña incorrectos" },
@@ -68,6 +86,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       );
     }
   } catch (error) {
+    console.log("[API-ADMIN-LOGIN] Error caught:", error);
+    console.log("[API-ADMIN-LOGIN] Error name:", error?.name);
+    console.log("[API-ADMIN-LOGIN] Error message:", error?.message);
+    console.log("[API-ADMIN-LOGIN] Error stack:", error?.stack);
     logger.error("Error en la autenticación", error, { ip });
     return json(
       { success: false, error: "Error al procesar la solicitud" },

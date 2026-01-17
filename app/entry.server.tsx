@@ -32,11 +32,12 @@ export default function handleRequest(request: Request, responseStatusCode: numb
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https: blob:",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://api.stripe.com https://api.paypal.com https://js.stripe.com https://www.paypal.com",
+    "connect-src 'self' https://api.stripe.com https://api.paypal.com https://js.stripe.com https://www.paypal.com https://cdn.jsdelivr.net https://unpkg.com https://*.lottiefiles.com https://lottie.host",
     "frame-src 'self' https://js.stripe.com https://www.paypal.com",
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
+    "worker-src 'self' blob:",
   ].join("; ");
   
   responseHeaders.set("Content-Security-Policy", csp);

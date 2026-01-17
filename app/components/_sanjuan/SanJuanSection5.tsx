@@ -3,7 +3,7 @@
 /* eslint-disable react/prop-types */
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useInView } from "framer-motion";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { sanJuanSection5Type } from "~/data/data";
 import { 
   Palmtree, 
@@ -28,6 +28,7 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
   const isInView = useInView(ref, { margin: "-100px" });
   const isLottieEnabled = SanJuanSection5Text.lottieAnimation?.enabled ?? true;
   const lottieSource = SanJuanSection5Text.lottieAnimation?.src || "https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie";
+  const [lottieError, setLottieError] = useState(false);
 
   // Debug logging
   useEffect(() => {
@@ -36,6 +37,11 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
     console.log("SanJuanSection5: Is GIF?", lottieSource.includes("giphy.gif"));
     console.log("SanJuanSection5: Is Lottie?", lottieSource.endsWith(".lottie"));
   }, [lottieSource, isLottieEnabled]);
+
+  // Reset error when source changes
+  useEffect(() => {
+    setLottieError(false);
+  }, [lottieSource]);
 
   // Common text styles for h3 elements
   const commonH3Styles = `
@@ -63,12 +69,20 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
     // Check if it's a Lottie animation or an icon
     else if (lottieSource.endsWith(".lottie")) {
       console.log("SanJuanSection5: Rendering Lottie animation");
+      if (lottieError) {
+        console.log("SanJuanSection5: Lottie error detected, showing fallback");
+        return <Umbrella size={100} className="text-blue-500" />;
+      }
       return (
         <DotLottieReact 
           src={lottieSource} 
           loop 
           autoplay 
-          className="h-[170px] w-auto" 
+          className="h-[170px] w-auto"
+          onError={(error) => {
+            console.error("SanJuanSection5: Lottie error:", error);
+            setLottieError(true);
+          }}
         />
       );
     } else {
@@ -232,12 +246,22 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.5, delay: 0.7 }}
         >
-          <DotLottieReact 
-            src="https://lottie.host/88bf0f6a-04a0-48ea-a36c-f5e082079f9f/gymc6ImWs9.lottie" 
-            loop 
-            autoplay 
-            className="w-[90%] max-w-[500px] -translate-y-[40px]" 
-          />
+          {lottieError ? (
+            <div className="w-[90%] max-w-[500px] -translate-y-[40px] flex items-center justify-center">
+              <Umbrella size={120} className="text-blue-500" />
+            </div>
+          ) : (
+            <DotLottieReact 
+              src="https://lottie.host/88bf0f6a-04a0-48ea-a36c-f5e082079f9f/gymc6ImWs9.lottie" 
+              loop 
+              autoplay 
+              className="w-[90%] max-w-[500px] -translate-y-[40px]"
+              onError={(error) => {
+                console.error("SanJuanSection5: Second Lottie error:", error);
+                setLottieError(true);
+              }}
+            />
+          )}
         </motion.div>
       </motion.div>
     </div>

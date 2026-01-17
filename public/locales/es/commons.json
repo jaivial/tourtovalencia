@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "book": "Reservar",
+    "tours": "Excursiones",
+    "about": "Sobre Nosotros",
+    "contact": "Contacto"
+  },
+  "layout": {
+    "loading": "Cargando...",
+    "error": "Ha ocurrido un error",
+    "footer": {
+      "contact": "Contáctanos",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos del Servicio"
+    }
+  },
+  "booking": {
+    "selectDate": "Selecciona una fecha",
+    "people": "Número de personas",
+    "submit": "Confirmar reserva",
+    "cancel": "Cancelar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "success": "¡Reserva confirmada!",
+    "error": "Error en la reserva. Por favor, inténtelo de nuevo."
+  },
+  "errors": {
+    "required": "Este campo es obligatorio",
+    "network": "Error de red. Por favor, inténtelo de nuevo.",
+    "notFound": "Página no encontrada",
+    "server": "Error del servidor. Por favor, inténtelo más tarde."
+  },
+  "accessibility": {
+    "wheelchair": "No es accesible para sillas de ruedas",
+    "babies": "La edad mínima para un pasajero es de más de 2 años"
+  }
+}

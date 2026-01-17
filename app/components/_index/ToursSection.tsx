@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 // UI Component: just responsible for displaying pure html with props passed from feature component
 import { motion } from "framer-motion";
 import { Link } from "@remix-run/react";
@@ -149,39 +150,57 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
     return 0;
   });
 
-  // Function to get the base64 image for a tour
+  // Function to get the base64 image for a tour - completely defensive
   const getTourImage = (tour: any) => {
+    // Return null immediately if no pages provided
     if (!pages || pages.length === 0) return null;
 
     // Find the page that corresponds to this tour
     const page = pages.find((p) => p._id === tour.pageId || p.slug === tour.slug);
+    
+    if (!page?.content) return null;
 
-    if (page && page.content) {
-      // First try to get the card image if it exists
-      if (page.content[language]?.card?.image?.preview) {
-        return page.content[language].card.image.preview;
-      } else if (page.content.es?.card?.image?.preview) {
-        return page.content.es.card.image.preview;
-      }
+    const content = page.content as Record<string, unknown>;
+    const esData = content?.es as Record<string, unknown> | undefined;
+    const langData = (content as Record<string, unknown>)?.[language] as Record<string, unknown> | undefined;
+    
+    // First try to get the card image if it exists - safe access with type assertions
+    const langCardImage = (langData as Record<string, unknown> | undefined)?.card as Record<string, unknown> | undefined;
+    const esCardImage = (esData as Record<string, unknown> | undefined)?.card as Record<string, unknown> | undefined;
+    
+    const langCardImgObj = langCardImage?.image as Record<string, unknown> | undefined;
+    const esCardImgObj = esCardImage?.image as Record<string, unknown> | undefined;
+    
+    if (langCardImgObj?.preview) {
+      return String(langCardImgObj.preview);
+    } else if (esCardImgObj?.preview) {
+      return String(esCardImgObj.preview);
+    }
 
-      // Fallback to section1 background image
-      if (page.content[language]?.section1?.backgroundImage?.preview) {
-        return page.content[language].section1.backgroundImage.preview;
-      } else if (page.content.es?.section1?.backgroundImage?.preview) {
-        return page.content.es.section1.backgroundImage.preview;
-      }
+    // Fallback to section1 background image
+    const langSection1 = (langData as Record<string, unknown> | undefined)?.section1 as Record<string, unknown> | undefined;
+    const esSection1 = (esData as Record<string, unknown> | undefined)?.section1 as Record<string, unknown> | undefined;
+    
+    const langBgImage = langSection1?.backgroundImage as Record<string, unknown> | undefined;
+    const esBgImage = esSection1?.backgroundImage as Record<string, unknown> | undefined;
+
+    if (langBgImage?.preview) {
+      return String(langBgImage.preview);
+    } else if (esBgImage?.preview) {
+      return String(esBgImage.preview);
     }
 
     return null;
   };
 
-  // Function to get card data from the page
+  // Function to get card data from the page - completely defensive
   const getCardData = (tour: any) => {
+    // Return mock data immediately if no pages provided
     if (!pages || pages.length === 0) {
       return {
-        title: tour.tourName[language],
-        duration: tour.duration[language],
-        description: tour.description[language],
+        title: tour.tourName?.[language] || tour.tourName?.es || '',
+        duration: tour.duration?.[language] || tour.duration?.es || '',
+        description: tour.description?.[language] || tour.description?.es || '',
         quote: null,
         additionalInfo: null,
       };
@@ -191,38 +210,42 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
     const page = pages.find((p) => p._id === tour.pageId || p.slug === tour.slug);
 
     const result = {
-      title: tour.tourName[language],
-      duration: tour.duration[language],
-      description: tour.description[language],
+      title: tour.tourName?.[language] || tour.tourName?.es || '',
+      duration: tour.duration?.[language] || tour.duration?.es || '',
+      description: tour.description?.[language] || tour.description?.es || '',
       quote: null as string | null,
       additionalInfo: null as string | null,
     };
 
-    if (page && page.content) {
-      // Try to get card data if it exists
-      const cardData = page.content[language]?.card || page.content.es?.card;
+    // Ultra-safe access to page content
+    if (!page?.content) return result;
+    
+    const content = page.content as Record<string, Record<string, unknown>>;
+    const esData = content?.es || {};
+    const langData = content?.[language] || {};
 
-      if (cardData) {
-        if (cardData.title) result.title = cardData.title;
-        if (cardData.duration) result.duration = cardData.duration;
-        if (cardData.description) result.description = cardData.description;
-        if (cardData.quote) result.quote = cardData.quote;
-        if (cardData.additionalInfo) result.additionalInfo = cardData.additionalInfo;
-      } else {
-        // Fallback to section2.firstH3 for quote
-        if (page.content[language]?.section2?.firstH3) {
-          result.quote = page.content[language].section2.firstH3;
-        } else if (page.content.es?.section2?.firstH3) {
-          result.quote = page.content.es.section2.firstH3;
-        }
+    // Try to get card data if it exists
+    const cardData = (langData as Record<string, unknown>)?.card || (esData as Record<string, unknown>)?.card;
 
-        // Fallback to indexSection5.secondH3 for additional info
-        if (page.content[language]?.indexSection5?.secondH3) {
-          result.additionalInfo = page.content[language].indexSection5.secondH3;
-        } else if (page.content.es?.indexSection5?.secondH3) {
-          result.additionalInfo = page.content.es.indexSection5.secondH3;
-        }
-      }
+    if (cardData && typeof cardData === 'object') {
+      const card = cardData as Record<string, unknown>;
+      if (card.title) result.title = String(card.title);
+      if (card.duration) result.duration = String(card.duration);
+      if (card.description) result.description = String(card.description);
+      if (card.quote) result.quote = String(card.quote);
+      if (card.additionalInfo) result.additionalInfo = String(card.additionalInfo);
+    } else {
+      // Fallback to section2.firstH3 for quote
+      const esSection2 = (esData as Record<string, unknown>)?.section2 as Record<string, unknown> | undefined;
+      const langSection2 = (langData as Record<string, unknown>)?.section2 as Record<string, unknown> | undefined;
+      const quoteText = langSection2?.firstH3 || esSection2?.firstH3;
+      if (quoteText) result.quote = String(quoteText);
+
+      // Fallback to indexSection5.secondH3 for additional info
+      const esIndexSection5 = (esData as Record<string, unknown>)?.indexSection5 as Record<string, unknown> | undefined;
+      const langIndexSection5 = (langData as Record<string, unknown>)?.indexSection5 as Record<string, unknown> | undefined;
+      const additionalInfoText = langIndexSection5?.secondH3 || esIndexSection5?.secondH3;
+      if (additionalInfoText) result.additionalInfo = String(additionalInfoText);
     }
 
     return result;

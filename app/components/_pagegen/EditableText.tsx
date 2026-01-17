@@ -16,7 +16,7 @@ const EditableText: React.FC<EditableTextProps> = ({
   multiline = false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const inputRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -49,17 +49,17 @@ const EditableText: React.FC<EditableTextProps> = ({
   };
 
   return (
-    <div
+    <span
       ref={inputRef}
       contentEditable={true}
       onFocus={() => setIsEditing(true)}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
-      className={`outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 min-h-[1.5em] ${className}`}
+      className={`outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 min-h-[1.5em] inline-block ${className}`}
       suppressContentEditableWarning={true}
     >
       {value || placeholder}
-    </div>
+    </span>
   );
 };
 

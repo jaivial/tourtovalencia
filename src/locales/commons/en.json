@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "home": "Home",
+    "book": "Book Now",
+    "tours": "Tours",
+    "about": "About Us",
+    "contact": "Contact"
+  },
+  "layout": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "footer": {
+      "contact": "Contact Us",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    }
+  },
+  "booking": {
+    "selectDate": "Select a date",
+    "people": "Number of people",
+    "submit": "Confirm booking",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "success": "Booking confirmed!",
+    "error": "Booking failed. Please try again."
+  },
+  "errors": {
+    "required": "This field is required",
+    "network": "Network error. Please try again.",
+    "notFound": "Page not found",
+    "server": "Server error. Please try again later."
+  },
+  "accessibility": {
+    "wheelchair": "Not wheelchair accessible",
+    "babies": "The minimum age for a passenger is more than 2 years"
+  }
+}

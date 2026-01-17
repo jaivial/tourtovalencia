@@ -22,8 +22,6 @@ interface IndexContainerProps {
 const IndexContainer: React.FC<IndexContainerProps> = ({ tours = [], pages = [] }) => {
   const [clientWidth, setClientWidth] = useState(0);
   const [clientHeight, setClientHeight] = useState(0);
-  const [isMounted, setIsMounted] = useState(false);
-  const [fadeIn, setFadeIn] = useState(false);
   const { state } = useLanguageContext();
   const heroSectionText = state.index.heroSection;
   const indexSection1Text = state.index.indexSection1;
@@ -49,7 +47,6 @@ const IndexContainer: React.FC<IndexContainerProps> = ({ tours = [], pages = [] 
   }));
 
   useEffect(() => {
-    setIsMounted(true);
     const updateSize = () => {
       setClientWidth(window.innerWidth);
       setClientHeight(window.innerHeight);
@@ -57,23 +54,13 @@ const IndexContainer: React.FC<IndexContainerProps> = ({ tours = [], pages = [] 
     updateSize();
     window.addEventListener("resize", updateSize);
 
-    // Add fade-in effect after a short delay
-    const timer = setTimeout(() => {
-      setFadeIn(true);
-    }, 200);
-
     return () => {
       window.removeEventListener("resize", updateSize);
-      clearTimeout(timer);
     };
   }, []);
 
-  if (!isMounted) {
-    return null;
-  }
-
   return (
-    <div className={`w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden transition-opacity duration-1000 ease-in-out ${fadeIn ? "opacity-100" : "opacity-0"}`}>
+    <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden">
       <HeroSection width={clientWidth} height={clientHeight} heroSectionText={heroSectionText} />
       <DynamicTourSections width={clientWidth} tours={processedTours} pages={processedPages} />
       <ToursSection width={clientWidth} toursText={toursText} tours={processedTours} pages={processedPages} />

@@ -3,6 +3,7 @@ import type { Page } from "./db.schema.server";
 import axios from "axios";
 import sharp from "sharp";
 import dotenv from "dotenv";
+import { generateTranslationFiles } from "./i18n/file-generator";
 
 // Initialize dotenv
 dotenv.config();
@@ -10,11 +11,215 @@ dotenv.config();
 const MAX_IMAGE_SIZE = 400 * 1024; // 400KB limit per image (reduced from 500KB)
 // Configuration for Google AI Studio API
 const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
-const GOOGLE_AI_MODEL = "gemini-2.0-flash-exp";
-const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GOOGLE_AI_MODEL}:generateContent`;
+// Using gemini-2.0-flash-lite for better rate limits
+const GOOGLE_AI_MODEL = "gemini-2.0-flash-lite";
+// Use v1 API version for gemini-2.0-flash-lite
+const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/v1/models/${GOOGLE_AI_MODEL}:generateContent`;
 
 if (!GOOGLE_AI_API_KEY) {
   throw new Error("Google AI Studio API key is not configured. Please set GOOGLE_AI_API_KEY in your .env file");
+}
+
+// Helper function to check if a string should NOT be translated
+function shouldSkipTranslation(value: string): boolean {
+  if (!value.trim() || value.startsWith("/")) return true;
+  if (value.toLowerCase() === "gallery image") return true;
+  
+  // Check for image extensions
+  const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i;
+  if (imageExtensions.test(value)) return true;
+  
+  // Check for image/animation keywords
+  const skipPatterns = /(image|photo|picture|preview|thumbnail|icon|animation|lottie|animate|dotlottie|motion)/i;
+  if (skipPatterns.test(value)) return true;
+  
+  // Check for data URLs
+  if (value.startsWith("data:image") || value.startsWith("blob:")) return true;
+  
+  return false;
+}
+
+// Helper function to extract all translatable strings from content
+interface StringWithPath {
+  path: string;
+  value: string;
+}
+
+function extractTranslatableStrings(content: unknown, prefix = ""): StringWithPath[] {
+  const results: StringWithPath[] = [];
+  
+  if (!content || typeof content !== "object") return results;
+  
+  if (Array.isArray(content)) {
+    content.forEach((item, index) => {
+      results.push(...extractTranslatableStrings(item, `${prefix}[${index}]`));
+    });
+    return results;
+  }
+  
+  const obj = content as Record<string, unknown>;
+  for (const [key, value] of Object.entries(obj)) {
+    const currentPath = prefix ? `${prefix}.${key}` : key;
+    
+    if (value == null) continue;
+    
+    if (typeof value === "string") {
+      if (!shouldSkipTranslation(value)) {
+        results.push({ path: currentPath, value });
+      }
+    } else if (typeof value === "object") {
+      // Special case: lottieAnimation should not translate 'src'
+      if (key === 'lottieAnimation' && value && typeof value === "object") {
+        const lottieObj = value as Record<string, unknown>;
+        for (const [lottieKey, lottieValue] of Object.entries(lottieObj)) {
+          if (lottieKey !== 'src' && typeof lottieValue === "string" && !shouldSkipTranslation(lottieValue)) {
+            results.push({ path: `${currentPath}.${lottieKey}`, value: lottieValue });
+          }
+        }
+      } else {
+        results.push(...extractTranslatableStrings(value, currentPath));
+      }
+    }
+  }
+  
+  return results;
+}
+
+// Helper function to rebuild content with translated strings
+function rebuildContentWithTranslations(
+  content: unknown, 
+  translations: Map<string, string>,
+  prefix = ""
+): unknown {
+  if (!content || typeof content !== "object") return content;
+  
+  if (Array.isArray(content)) {
+    return content.map((item, index) => 
+      rebuildContentWithTranslations(item, translations, `${prefix}[${index}]`)
+    );
+  }
+  
+  const obj = { ...content as object };
+  const result = obj as Record<string, unknown>;
+  
+  for (const [key, value] of Object.entries(obj)) {
+    const currentPath = prefix ? `${prefix}.${key}` : key;
+    
+    if (value == null) {
+      result[key] = value;
+    } else if (typeof value === "string") {
+      if (shouldSkipTranslation(value)) {
+        result[key] = value;
+      } else if (translations.has(currentPath)) {
+        result[key] = translations.get(currentPath) || value;
+      } else {
+        result[key] = value;
+      }
+    } else if (typeof value === "object") {
+      // Special case: lottieAnimation preserve 'src'
+      if (key === 'lottieAnimation' && value && typeof value === "object") {
+        const lottieObj = value as Record<string, unknown>;
+        const translatedLottie: Record<string, unknown> = {};
+        for (const [lottieKey, lottieValue] of Object.entries(lottieObj)) {
+          if (lottieKey === 'src' && typeof lottieValue === "string") {
+            translatedLottie[lottieKey] = lottieValue;
+          } else if (typeof lottieValue === "string") {
+            const lottiePath = `${currentPath}.${lottieKey}`;
+            translatedLottie[lottieKey] = translations.get(lottiePath) || lottieValue;
+          } else if (typeof lottieValue === "object") {
+            translatedLottie[lottieKey] = rebuildContentWithTranslations(lottieValue, translations, lottiePath);
+          } else {
+            translatedLottie[lottieKey] = lottieValue;
+          }
+        }
+        result[key] = translatedLottie;
+      } else {
+        result[key] = rebuildContentWithTranslations(value, translations, currentPath);
+      }
+    } else {
+      result[key] = value;
+    }
+  }
+  
+  return result;
+}
+
+// NEW: Bulk translation function - translates entire JSON in ONE API call
+export async function translateContentBulk(content: Record<string, unknown>): Promise<Record<string, unknown>> {
+  // Extract all translatable strings
+  const stringsToTranslate = extractTranslatableStrings(content);
+  
+  if (stringsToTranslate.length === 0) {
+    console.log("No strings to translate");
+    return content;
+  }
+  
+  console.log(`Found ${stringsToTranslate.length} strings to translate in bulk`);
+  
+  // Create a structured prompt
+  const stringsList = stringsToTranslate.map((s, i) => `${i + 1}. [PATH:${s.path}] ${s.value}`).join("\n");
+  
+  const prompt = `You are a professional translator. Translate the following Spanish text to English.
+
+The texts are numbered and each has a path identifier in brackets. Translate each one and return ONLY a JSON object with the paths as keys and translations as values.
+
+${stringsList}
+
+Respond with ONLY valid JSON in this format:
+{
+  "PATH:key.subkey[0].field": "translated text",
+  "PATH:another.path": "another translation"
+}`;
+
+  try {
+    const response = await axios.post(
+      `${GOOGLE_AI_API_URL}?key=${GOOGLE_AI_API_KEY}`,
+      {
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 8192,
+        },
+      },
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    // Parse the response
+    const responseText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    console.log("Bulk translation response received");
+    
+    // Clean up the response (remove markdown code blocks if present)
+    const cleanedResponse = responseText.replace(/```json\n?|\n?```/g, '').trim();
+    
+    const translationMap = JSON.parse(cleanedResponse) as Record<string, string>;
+    
+    // Convert to Map for efficient lookup (strip PATH: prefix from keys)
+    const translations = new Map<string, string>();
+    for (const [key, value] of Object.entries(translationMap)) {
+      // Strip the PATH: prefix that was added in the prompt
+      const normalizedKey = key.replace(/^PATH:/, '');
+      translations.set(normalizedKey, value);
+    }
+    
+    console.log(`Parsed ${translations.size} translations`);
+    
+    // Rebuild content with translations
+    return rebuildContentWithTranslations(content, translations) as Record<string, unknown>;
+    
+  } catch (error) {
+    console.error("Bulk translation failed:", error);
+    // Fallback to individual translations
+    console.log("Falling back to individual translations...");
+    return translateContent(content);
+  }
 }
 
 export function generateSlug(name: string): string {
@@ -500,9 +705,9 @@ export async function createPage(name: string, content: Record<string, unknown>,
   console.log("Processing Spanish content...");
   const processedSpanishContent = await processContent(content, false);
 
-  // Create English content by translating a copy of the Spanish content
-  console.log("Translating content to English...");
-  const englishContent = await translateContent({ ...processedSpanishContent });
+  // Create English content by translating a copy of the Spanish content (BULK translation - 1 request instead of many)
+  console.log("Translating content to English in bulk (single API call)...");
+  const englishContent = await translateContentBulk({ ...processedSpanishContent });
 
   // Verify we have different content for each language
   console.log("Verifying translations...");
@@ -531,6 +736,15 @@ export async function createPage(name: string, content: Record<string, unknown>,
   await logContentSize(page.content, "insert");
   
   const result = await collection.insertOne(page);
+  
+  // Generate translation files for i18n
+  console.log(`[i18n] Generating translation files for slug: ${slug}`);
+  try {
+    await generateTranslationFiles(slug, processedSpanishContent, englishContent);
+  } catch (error) {
+    console.error(`[i18n] Error generating translation files:`, error);
+    // Continue with page creation even if file generation fails
+  }
   
   // If this is a tour page, also create a tour in the tours collection
   if (template === 'tour') {

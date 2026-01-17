@@ -1,0 +1,35 @@
+{
+  "dashboard": {
+    "title": "Admin Dashboard",
+    "bookings": "Bookings",
+    "tours": "Tours Management",
+    "logout": "Logout"
+  },
+  "pagegen": {
+    "create": "Create New Tour",
+    "edit": "Edit Tour",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "success": "Tour saved successfully",
+    "error": "Error saving tour",
+    "back": "Back",
+    "next": "Next"
+  },
+  "form": {
+    "name": "Tour Name",
+    "namePlaceholder": "Enter the tour name...",
+    "price": "Price",
+    "status": "Status",
+    "active": "Active",
+    "upcoming": "Upcoming"
+  },
+  "sections": {
+    "section1": "Section 1: Hero",
+    "section2": "Section 2: Description",
+    "section3": "Section 3: Gallery",
+    "section4": "Section 4: Details",
+    "section5": "Section 5: Schedule",
+    "section6": "Section 6: Info Card",
+    "timeline": "Timeline"
+  }
+}

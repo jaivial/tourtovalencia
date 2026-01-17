@@ -1,0 +1,35 @@
+{
+  "dashboard": {
+    "title": "Panel de Administración",
+    "bookings": "Reservas",
+    "tours": "Gestión de Excursiones",
+    "logout": "Cerrar Sesión"
+  },
+  "pagegen": {
+    "create": "Crear Nueva Excursión",
+    "edit": "Editar Excursión",
+    "save": "Guardar Cambios",
+    "saving": "Guardando...",
+    "success": "¡Excursión guardada correctamente!",
+    "error": "Error al guardar la excursión",
+    "back": "Atrás",
+    "next": "Siguiente"
+  },
+  "form": {
+    "name": "Nombre de la Excursión",
+    "namePlaceholder": "Introduzca el nombre de la excursión...",
+    "price": "Precio",
+    "status": "Estado",
+    "active": "Activo",
+    "upcoming": "Próximamente"
+  },
+  "sections": {
+    "section1": "Sección 1: Hero",
+    "section2": "Sección 2: Descripción",
+    "section3": "Sección 3: Galería",
+    "section4": "Sección 4: Detalles",
+    "section5": "Sección 5: Horario",
+    "section6": "Sección 6: Tarjeta de Información",
+    "timeline": "Cronología"
+  }
+}

@@ -2,7 +2,8 @@ import { json } from "@remix-run/server-runtime";
 import type { ActionFunctionArgs } from "@remix-run/server-runtime";
 import { getPagesCollection, getToursCollection } from "~/utils/db.server";
 import { ObjectId } from "mongodb";
-import { processContent, translateContent, translateText, logContentSize } from "~/utils/page.server";
+import { processContent, translateContent, translateContentBulk, translateText, logContentSize } from "~/utils/page.server";
+import { generateTranslationFiles } from "~/utils/i18n/file-generator";
 import type { Page, Tour } from "~/utils/db.schema.server";
 import type { Filter } from "mongodb";
 
@@ -51,9 +52,9 @@ async function processPageUpdateInBackground(
         message: 'Translating content to English'
       });
       
-      // Create English content by translating the processed Spanish content
-      console.log("Translating content to English in background...");
-      const englishContent = await translateContent({ ...processedSpanishContent });
+      // Create English content by translating the processed Spanish content (BULK translation - 1 request instead of many)
+      console.log("Translating content to English in bulk (single API call)...");
+      const englishContent = await translateContentBulk({ ...processedSpanishContent });
       
       // Get the pages collection
       const pagesCollection = await getPagesCollection();
@@ -228,6 +229,15 @@ async function processPageUpdateInBackground(
       if (result.matchedCount === 0) {
         throw new Error("Page not found during final update");
       }
+
+      // Generate translation files for i18n (delete and recreate for edits)
+      console.log(`[i18n] Regenerating translation files for slug: ${existingPage.slug}`);
+      try {
+        await generateTranslationFiles(existingPage.slug, processedSpanishContent, englishContent);
+      } catch (error) {
+        console.error(`[i18n] Error generating translation files:`, error);
+        // Don't fail the job, translations can be regenerated manually
+      }
       
       // Update job status to completed
       backgroundJobs.set(jobId, {
@@ -363,11 +373,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       }, { status: 500 });
     }
 
-    // Create English content by translating the processed Spanish content
-    console.log("Translating content to English...");
+    // Create English content by translating the processed Spanish content (BULK translation - 1 request instead of many)
+    console.log("Translating content to English in bulk (single API call)...");
     let englishContent;
     try {
-      englishContent = await translateContent({ ...processedSpanishContent });
+      englishContent = await translateContentBulk({ ...processedSpanishContent });
     } catch (translateError) {
       console.error("Error translating content:", translateError);
       return json({ 
@@ -535,6 +545,15 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       
       if (result.matchedCount === 0) {
         return json({ error: "Page not found during update" }, { status: 404 });
+      }
+
+      // Generate translation files for i18n (delete and recreate for edits)
+      console.log(`[i18n] Regenerating translation files for slug: ${existingPage.slug}`);
+      try {
+        await generateTranslationFiles(existingPage.slug, processedSpanishContent, englishContent);
+      } catch (error) {
+        console.error(`[i18n] Error generating translation files:`, error);
+        // Don't fail the request, translations can be regenerated manually
       }
       
       return json({ 

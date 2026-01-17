@@ -211,11 +211,13 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [lottieSource, setLottieSource] = useState(data.lottieAnimation?.src || "https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie");
   const [isLottieEnabled, setIsLottieEnabled] = useState(data.lottieAnimation?.enabled ?? true);
+  const [lottieError, setLottieError] = useState(false);
 
   // Update local state when props change
   useEffect(() => {
     setLottieSource(data.lottieAnimation?.src || "https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie");
     setIsLottieEnabled(data.lottieAnimation?.enabled ?? true);
+    setLottieError(false);
   }, [data.lottieAnimation?.src, data.lottieAnimation?.enabled]);
 
   // Debug logs
@@ -271,12 +273,19 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
     }
     // Check if it's a Lottie animation or an icon
     else if (lottieSource.endsWith(".lottie")) {
+      if (lottieError) {
+        return <Umbrella size={100} className="text-blue-500" />;
+      }
       return (
         <DotLottieReact 
           src={lottieSource} 
           loop 
           autoplay 
-          className="h-[170px] w-auto" 
+          className="h-[170px] w-auto"
+          onError={(error) => {
+            console.error("EditableSanJuanSection5: Lottie error:", error);
+            setLottieError(true);
+          }}
         />
       );
     } else {
@@ -307,12 +316,16 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
           return <Cloud size={iconSize} className={iconClassName} />;
         default:
           // If it's not a recognized icon identifier, try to render it as a Lottie animation
+          if (lottieError) {
+            return <Umbrella size={100} className="text-blue-500" />;
+          }
           return (
             <DotLottieReact 
               src={lottieSource} 
               loop 
               autoplay 
-              className="h-[170px] w-auto" 
+              className="h-[170px] w-auto"
+              onError={() => setLottieError(true)}
             />
           );
       }
@@ -330,7 +343,8 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
           src={currentOption.src} 
           loop 
           autoplay 
-          className="w-12 h-12" 
+          className="w-12 h-12"
+          onError={() => {}}
         />
       );
     } else if (currentOption.preview === "icon" && currentOption.icon) {
@@ -471,7 +485,8 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
                               src={option.src} 
                               loop 
                               autoplay 
-                              className="w-full h-full max-w-[60px] max-h-[60px]" 
+                              className="w-full h-full max-w-[60px] max-h-[60px]"
+                              onError={() => {}}
                             />
                           ) : option.preview === "icon" ? (
                             <div className="text-blue-500">
@@ -651,12 +666,22 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.5, delay: 0.7 }}
         >
-          <DotLottieReact 
-            src="https://lottie.host/88bf0f6a-04a0-48ea-a36c-f5e082079f9f/gymc6ImWs9.lottie" 
-            loop 
-            autoplay 
-            className="w-[90%] max-w-[500px] -translate-y-[40px]" 
-          />
+          {lottieError ? (
+            <div className="w-[90%] max-w-[500px] -translate-y-[40px] flex items-center justify-center">
+              <Umbrella size={120} className="text-blue-500" />
+            </div>
+          ) : (
+            <DotLottieReact 
+              src="https://lottie.host/88bf0f6a-04a0-48ea-a36c-f5e082079f9f/gymc6ImWs9.lottie" 
+              loop 
+              autoplay 
+              className="w-[90%] max-w-[500px] -translate-y-[40px]"
+              onError={(error) => {
+                console.error("EditableSanJuanSection5: Bottom Lottie error:", error);
+                setLottieError(true);
+              }}
+            />
+          )}
         </motion.div>
       </motion.div>
     </div>

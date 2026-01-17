@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 // UI Component: just responsible for displaying pure html with props passed from feature component
 import { motion } from "framer-motion";
 import { Heart, Users, Globe, Award } from "lucide-react";

@@ -7,13 +7,21 @@ import { getAdminSession } from "~/utils/admin-session.server";
 import { logger } from "~/utils/logger.server";
 
 export const loader = async ({ request }: { request: Request }) => {
+  console.log("[ADMIN-DASHBOARD] Loader called, URL:", request.url);
+  console.log("[ADMIN-DASHBOARD] Cookie header:", request.headers.get("Cookie") ? "present" : "missing");
+  
   const session = await getAdminSession(request);
   
+  console.log("[ADMIN-DASHBOARD] Session from getAdminSession:", session);
+  
   if (!session) {
+    console.log("[ADMIN-DASHBOARD] No session found, redirecting to /admin");
     logger.warn("Unauthorized access attempt to admin dashboard");
     throw redirect("/admin");
   }
     
+  console.log("[ADMIN-DASHBOARD] Session found, rendering dashboard for:", session.username);
+  
   return json({
     data: {
       user: {

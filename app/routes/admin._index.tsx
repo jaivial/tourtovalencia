@@ -8,6 +8,8 @@ import { getAdminSession } from "~/utils/admin-session.server";
 import { logger } from "~/utils/logger.server";
 
 export const loader = async ({ request }: { request: Request }) => {
+  console.log("[ADMIN-INDEX] Loader called, URL:", request.url);
+  
   try {
     await initializeDefaultAdminUser();
   } catch (error) {
@@ -16,7 +18,10 @@ export const loader = async ({ request }: { request: Request }) => {
   
   const session = await getAdminSession(request);
   
+  console.log("[ADMIN-INDEX] Session from getAdminSession:", session);
+  
   if (session && session.isAuthenticated) {
+    console.log("[ADMIN-INDEX] Authenticated! Redirecting to dashboard, username:", session.username);
     logger.info("Admin already authenticated, redirecting to dashboard", { username: session.username });
     return json({
       data: {
@@ -27,6 +32,7 @@ export const loader = async ({ request }: { request: Request }) => {
     });
   }
 
+  console.log("[ADMIN-INDEX] Not authenticated, showing login form");
   return json({
     data: {
       isAuthenticated: false,

@@ -18,6 +18,10 @@ type SerializableTour = Omit<Tour, "createdAt" | "updatedAt"> & {
 type SerializablePage = Omit<Page, "createdAt" | "updatedAt"> & {
   createdAt: string;
   updatedAt: string;
+  content?: {
+    es: Record<string, unknown>;
+    en: Record<string, unknown>;
+  };
 };
 
 // Define the loader return type
@@ -75,7 +79,7 @@ export const loader = async () => {
       .limit(5)
       .toArray();
     console.log(`[INDEX LOADER] Fetched ${tourDocs.length} tours in ${Date.now() - toursStart}ms`);
-    tours = tourDocs.map((doc) => ({
+    tours = (tourDocs.map((doc) => ({
       _id: doc._id?.toString(),
       slug: doc.slug || '',
       tourName: doc.tourName || { en: '', es: '' },
@@ -84,9 +88,9 @@ export const loader = async () => {
       duration: doc.duration || { en: '', es: '' },
       heroImage: doc.heroImage,
       pageId: doc.pageId,
-    })) as SerializableTour[];
+    }))) as unknown as SerializableTour[];
 
-    // Fetch pages - ONLY essential fields (OPTIMIZED)
+    // Fetch pages - including content for tour cards (OPTIMIZED)
     const pagesStart = Date.now();
     const pageDocs = await db.collection("pages")
       .find({ status: { $ne: 'inactive' } })
@@ -97,18 +101,20 @@ export const loader = async () => {
         template: 1,
         status: 1,
         pageType: 1,
+        content: 1,
       })
       .limit(10)
       .toArray();
     console.log(`[INDEX LOADER] Fetched ${pageDocs.length} pages in ${Date.now() - pagesStart}ms`);
-    pages = pageDocs.map((doc) => ({
+    pages = (pageDocs.map((doc) => ({
       _id: doc._id?.toString(),
       slug: doc.slug || '',
       name: doc.name || '',
       template: doc.template || '',
       status: doc.status || 'upcoming',
       pageType: doc.pageType,
-    })) as SerializablePage[];
+      content: doc.content,
+    }))) as unknown as SerializablePage[];
   } catch (error) {
     console.error("Error fetching data:", error);
     tours = [];

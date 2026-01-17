@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 // Feature component: responsible for displaying SanJuanSection1 for each tour
 import { useMemo } from "react";
 import { useLanguageContext } from "~/providers/LanguageContext";
@@ -15,7 +16,7 @@ const DynamicTourSections: React.FC<DynamicTourSectionsProps> = ({ width, tours 
   const { state } = useLanguageContext();
   const language = state.currentLanguage === "English" ? "en" : "es";
 
-  // Get tour sections data
+  // Get tour sections data - completely defensive
   const tourSections = useMemo(() => {
     if (!tours.length || !pages.length) return [];
 
@@ -25,10 +26,12 @@ const DynamicTourSections: React.FC<DynamicTourSectionsProps> = ({ width, tours 
         // Find the corresponding page for this tour
         const page = pages.find((p) => p._id === tour.pageId || p.slug === tour.slug);
 
-        if (!page || !page.content) return null;
+        if (!page?.content) return null;
 
-        // Get the section1 data from the page content
-        const section1Data = page.content[language]?.section1 || page.content.es?.section1;
+        const content = page.content as Record<string, unknown>;
+        const esData = content?.es as Record<string, unknown> | undefined;
+        const langData = (content as Record<string, unknown>)?.[language] as Record<string, unknown> | undefined;
+        const section1Data = (langData as Record<string, unknown> | undefined)?.section1 || (esData as Record<string, unknown> | undefined)?.section1;
 
         if (!section1Data?.h1) return null;
 

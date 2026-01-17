@@ -24,6 +24,7 @@ export const useStates = (props: UseStatesProps) => {
   }, []);
   
   const handleLogin = async (username: string, password: string) => {
+    console.log("[ADMIN-HOOKS] handleLogin called for:", username);
     setIsLoading(true);
     setLoginError(null);
     
@@ -32,24 +33,31 @@ export const useStates = (props: UseStatesProps) => {
       formData.append("username", username);
       formData.append("password", password);
       
+      console.log("[ADMIN-HOOKS] Calling /api/admin/login...");
       const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "same-origin",
         body: JSON.stringify({ username, password }),
       });
       
+      console.log("[ADMIN-HOOKS] Response status:", response.status);
       const data = await response.json();
+      console.log("[ADMIN-HOOKS] Response data:", data);
       
       if (data.success) {
+        console.log("[ADMIN-HOOKS] Login successful, navigating to /admin/dashboard");
         navigate("/admin/dashboard");
         return true;
       } else {
+        console.log("[ADMIN-HOOKS] Login failed:", data.error);
         setLoginError(data.error || "Usuario o contraseña incorrectos");
         return false;
       }
     } catch (error) {
+      console.log("[ADMIN-HOOKS] Login error:", error);
       setLoginError("Error al verificar credenciales. Intente nuevamente.");
       return false;
     } finally {

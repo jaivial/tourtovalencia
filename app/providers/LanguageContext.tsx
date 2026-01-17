@@ -1,6 +1,9 @@
 // app/providers/LanguageContext
-import { createContext, useContext, useReducer } from "react";
+import { createContext, useContext, useReducer, useEffect } from "react";
 import { State, Action, languageReducer } from "~/reducers/LanguageReducer";
+import { I18nextProvider } from "react-i18next";
+import i18n from "~/utils/i18n/config";
+import { useLanguage } from "~/hooks/useTranslation";
 
 // Define the type of the context props
 type LanguageContextType = {
@@ -17,10 +20,25 @@ type LanguageContextProviderProps = {
   initialState: State;
 };
 
-// Creat the provider
+// Create the provider
 export const LanguageContextProvider: React.FC<LanguageContextProviderProps> = ({ children, initialState }) => {
   const [state, dispatch] = useReducer(languageReducer, initialState);
-  return <LanguageContext.Provider value={{ state, dispatch }}>{children}</LanguageContext.Provider>;
+  const { currentLang, setLanguage } = useLanguage();
+
+  // Sync i18n with language context
+  useEffect(() => {
+    if (currentLang !== i18n.language) {
+      i18n.changeLanguage(currentLang);
+    }
+  }, [currentLang]);
+
+  return (
+    <I18nextProvider i18n={i18n}>
+      <LanguageContext.Provider value={{ state, dispatch }}>
+        {children}
+      </LanguageContext.Provider>
+    </I18nextProvider>
+  );
 };
 
 // Custom hook to ease the consumption

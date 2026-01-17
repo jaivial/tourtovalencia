@@ -3,6 +3,14 @@ import { initReactI18next } from 'react-i18next';
 import HttpBackend from 'i18next-http-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
+export const NS = {
+  COMMONS: 'commons',
+  ADMIN: 'admin',
+} as const;
+
+export type Namespace = typeof NS[keyof typeof NS];
+
+// Initialize i18next only on client side
 if (typeof window !== 'undefined') {
   i18n
     .use(HttpBackend)
@@ -11,7 +19,8 @@ if (typeof window !== 'undefined') {
     .init({
       supportedLngs: ['es', 'en'],
       fallbackLng: 'es',
-      defaultNS: 'translation',
+      defaultNS: NS.COMMONS,
+      ns: [NS.COMMONS, NS.ADMIN], // Only load these namespaces, not 'translation'
       debug: process.env.NODE_ENV === 'development',
       interpolation: {
         escapeValue: false,
@@ -24,7 +33,7 @@ if (typeof window !== 'undefined') {
         caches: ['localStorage', 'cookie'],
       },
       react: {
-        useSuspense: true,
+        useSuspense: false,
       },
     });
 }

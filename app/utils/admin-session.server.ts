@@ -1,7 +1,4 @@
-import { createCookieFactory, redirect } from "@remix-run/server-runtime";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { createCookieSessionStorage, redirect } from "@remix-run/node";
 
 const sessionSecret = process.env.SESSION_SECRET;
 
@@ -12,12 +9,17 @@ if (!sessionSecret || sessionSecret.length < 32) {
   );
 }
 
-const createCookie = createCookieFactory({ 
-  sign: async () => {
-    if (!sessionSecret) throw new Error("SESSION_SECRET is not set");
-    return "";
-  }, 
-  unsign: async () => "" 
+// Create session storage using Remix's built-in createCookieSessionStorage
+const adminSessionStorage = createCookieSessionStorage({
+  cookie: {
+    name: "admin-session",
+    httpOnly: true,
+    maxAge: 60 * 60 * 8, // 8 hours
+    path: "/",
+    sameSite: "lax",
+    secrets: [sessionSecret!],
+    secure: process.env.NODE_ENV === "production",
+  },
 });
 
 export interface AdminSessionData {
@@ -26,125 +28,62 @@ export interface AdminSessionData {
   loginTime?: number;
 }
 
-export async function requireAdminSession(request: Request): Promise<AdminSessionData> {
-  const cookieHeader = request.headers.get("Cookie");
-  const adminSessionCookie = createCookie("admin-session", {
-    httpOnly: true,
-    maxAge: 60 * 60 * 8,
-    path: "/",
-    sameSite: "lax",
-    secrets: [sessionSecret!],
-    secure: process.env.NODE_ENV === "production",
-  });
+export async function requireAdminSession(request) {
+  const session = await adminSessionStorage.getSession(request.headers.get("Cookie"));
+  const sessionData = session.get("adminSession");
   
-  const sessionString = await adminSessionCookie.parse(cookieHeader);
-  if (!sessionString) {
+  if (!sessionData || !sessionData.isAuthenticated) {
     throw redirect("/admin");
   }
   
-  try {
-    const sessionData = JSON.parse(sessionString) as AdminSessionData;
-    
-    if (!sessionData.isAuthenticated) {
-      throw redirect("/admin");
-    }
-    
-    return {
-      isAuthenticated: sessionData.isAuthenticated || false,
-      username: sessionData.username,
-      loginTime: sessionData.loginTime,
-    };
-  } catch {
-    throw redirect("/admin");
-  }
+  return sessionData;
 }
 
-export async function createAdminSession(
-  request: Request,
-  username: string
-): Promise<{ headers: Headers }> {
-  const sessionData: AdminSessionData = {
+export async function createAdminSession(request, username) {
+  const session = await adminSessionStorage.getSession(request.headers.get("Cookie"));
+  console.log("[ADMIN-SESSION] createAdminSession called for:", username);
+  
+  const sessionData = {
     isAuthenticated: true,
     username,
     loginTime: Date.now(),
   };
   
-  const adminSessionCookie = createCookie("admin-session", {
-    httpOnly: true,
-    maxAge: 60 * 60 * 8,
-    path: "/",
-    sameSite: "lax",
-    secrets: [sessionSecret!],
-    secure: process.env.NODE_ENV === "production",
-  });
+  session.set("adminSession", sessionData);
+  console.log("[ADMIN-SESSION] Session data set:", JSON.stringify(sessionData));
   
-  const serialized = await adminSessionCookie.serialize(JSON.stringify(sessionData));
-  if (typeof serialized !== "string") {
-    throw new Error("Failed to serialize session cookie");
-  }
+  // commitSession devuelve el valor de la cookie como string
+  const cookieValue = await adminSessionStorage.commitSession(session);
+  console.log("[ADMIN-SESSION] Cookie created successfully");
+  
+  // Crear headers con el valor de la cookie
+  const headers = new Headers();
+  headers.append("Set-Cookie", cookieValue);
+  
+  return { headers };
+}
+
+export async function destroyAdminSession(request) {
+  const session = await adminSessionStorage.getSession(request.headers.get("Cookie"));
   
   return {
-    headers: new Headers({
-      "Set-Cookie": serialized,
-    }),
+    headers: adminSessionStorage.destroySession(session),
   };
 }
 
-export async function destroyAdminSession(
-  request: Request
-): Promise<{ headers: Headers }> {
-  const adminSessionCookie = createCookie("admin-session", {
-    httpOnly: true,
-    maxAge: 60 * 60 * 8,
-    path: "/",
-    sameSite: "lax",
-    secrets: [sessionSecret!],
-    secure: process.env.NODE_ENV === "production",
-  });
-  
-  const serialized = await adminSessionCookie.serialize("");
-  if (typeof serialized !== "string") {
-    throw new Error("Failed to destroy session cookie");
-  }
-  
-  return {
-    headers: new Headers({
-      "Set-Cookie": serialized,
-    }),
-  };
-}
-
-export async function getAdminSession(
-  request: Request
-): Promise<AdminSessionData | null> {
+export async function getAdminSession(request) {
   const cookieHeader = request.headers.get("Cookie");
-  const adminSessionCookie = createCookie("admin-session", {
-    httpOnly: true,
-    maxAge: 60 * 60 * 8,
-    path: "/",
-    sameSite: "lax",
-    secrets: [sessionSecret!],
-    secure: process.env.NODE_ENV === "production",
-  });
+  console.log("[ADMIN-SESSION] getAdminSession called");
+  console.log("[ADMIN-SESSION] Cookie header present:", !!cookieHeader);
   
-  const sessionString = await adminSessionCookie.parse(cookieHeader);
-  if (!sessionString) {
+  const session = await adminSessionStorage.getSession(request.headers.get("Cookie"));
+  const sessionData = session.get("adminSession");
+  
+  console.log("[ADMIN-SESSION] Session data found:", sessionData ? JSON.stringify(sessionData) : "null");
+  
+  if (!sessionData || !sessionData.isAuthenticated) {
     return null;
   }
   
-  try {
-    const sessionData = JSON.parse(sessionString) as AdminSessionData;
-    
-    if (!sessionData.isAuthenticated) {
-      return null;
-    }
-    
-    return {
-      isAuthenticated: sessionData.isAuthenticated || false,
-      username: sessionData.username,
-      loginTime: sessionData.loginTime,
-    };
-  } catch {
-    return null;
-  }
+  return sessionData;
 }

@@ -37,7 +37,8 @@ export const BookingFeature = () => {
     
     // Update the form data with the current language
     context.setFormData({ ...context.formData, language: languageCode });
-  }, [state.currentLanguage, context.setFormData, context.formData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.currentLanguage]);
 
   if (context.isSuccess) {
     return <BookingSuccess />;
