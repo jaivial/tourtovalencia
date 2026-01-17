@@ -1,0 +1,52 @@
+{
+  "fase": 3,
+  "paso": 3,
+  "titulo": "Actualizar Loaders de Rutas",
+  "descripcion": "Modificar los loaders de rutas para que ya no incluyan traducciones completas en el initialState",
+  "archivos_objetivo": [
+    "/var/www/tourtovalencia/app/root.tsx",
+    "/var/www/tourtovalencia/app/routes/index.tsx"
+  ],
+  "cambios_especificos": {
+    "root.tsx": {
+      "linea_73": {
+        "antes": "initialLanguage: languageData[language] || languageData.en,",
+        "despues": "initialLanguage: { currentLanguage: language, supportedLanguages: ['es', 'en'] },"
+      },
+      "linea_5": {
+        "antes": "import languageData from '~/data/data.json';",
+        "despues": "// Eliminar este import"
+      }
+    },
+    "reducers/LanguageReducer.tsx": {
+      "cambios": [
+        "Simplificar reducer para solo manejar cambio de idioma",
+        "Eliminar dependencias de languageData"
+      ]
+    }
+  },
+  "tareas": [
+    {
+      "orden": 1,
+      "accion": "Modificar root.tsx para eliminar languageData embebido",
+      "archivo_editado": "/var/www/tourtovalencia/app/root.tsx",
+      "cambio": "Cambiar initialLanguage para que solo contenga estructura mínima"
+    },
+    {
+      "orden": 2,
+      "accion": "Simplificar LanguageReducer",
+      "archivo_editado": "/var/www/tourtovalencia/app/reducers/LanguageReducer.tsx",
+      "cambio": "Reducir complejidad del reducer"
+    },
+    {
+      "orden": 3,
+      "accion": "Verificar que no hay errores de compilación",
+      "comando": "cd /var/www/tourtovalencia && npm run build 2>&1 | head -50",
+      "esperado": "Build exitoso"
+    }
+  ],
+  "entregable": "Loaders modificados sin traducciones embebidas",
+  "tiempo_estimado": "1 hora",
+  "riesgo": "alto",
+  "nota": "Este cambio reduce el HTML de 3.4MB a ~100-200KB"
+}

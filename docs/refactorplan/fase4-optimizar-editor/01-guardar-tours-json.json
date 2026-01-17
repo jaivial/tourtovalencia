@@ -1,0 +1,36 @@
+{
+  "fase": 4,
+  "paso": 1,
+  "titulo": "Guardar Traducciones de Tours a JSON",
+  "descripcion": "Modificar el sistema del editor de tours para que al guardar, escriba las traducciones a archivos JSON locales en lugar de solo MongoDB",
+  "archivos_objetivo": [
+    "/var/www/tourtovalencia/app/utils/db.server.ts",
+    "/var/www/tourtovalencia/app/routes/api.tours.save.ts (si existe)"
+  ],
+  "nueva_funcion": "saveTourTranslationsToJson(tourSlug: string, translations: { es: TourTranslations; en: TourTranslations })",
+  "tareas": [
+    {
+      "orden": 1,
+      "accion": "Crear función para escribir traducciones de tours a JSON",
+      "archivo": "/var/www/tourtovalencia/app/utils/translations/tour-translations.ts",
+      "contenido": "import fs from 'fs';\nimport path from 'path';\n\nconst TRANSLATIONS_DIR = path.join(process.cwd(), 'public/locales');\n\ninterface TourTranslations {\n  tourName?: string;\n  description?: string;\n  duration?: string;\n  includes?: string;\n  meetingPoint?: string;\n}\n\nexport async function saveTourTranslationsToJson(\n  tourSlug: string,\n  translations: { es: TourTranslations; en: TourTranslations }\n): Promise<void> {\n  for (const lang of ['es', 'en'] as const) {\n    const langDir = path.join(TRANSLATIONS_DIR, lang);\n    const filePath = path.join(langDir, 'tours.json');\n    \n    // Cargar archivo existente o crear nuevo\n    let existingTranslations = {};\n    if (fs.existsSync(filePath)) {\n      try {\n        existingTranslations = JSON.parse(fs.readFileSync(filePath, 'utf-8'));\n      } catch (e) {\n        existingTranslations = {};\n      }\n    }\n    \n    // Actualizar solo las claves del tour\n    for (const [key, value] of Object.entries(translations[lang] || {})) {\n      if (value) {\n        existingTranslations[`tours.${tourSlug}.${key}`] = value;\n      }\n    }\n    \n    // Escribir archivo\n    fs.writeFileSync(filePath, JSON.stringify(existingTranslations, null, 2));\n  }\n  \n  console.log(`[i18n] Guardadas traducciones para tour: ${tourSlug}`);\n}\n\nexport async function deleteTourTranslationsFromJson(tourSlug: string): Promise<void> {\n  for (const lang of ['es', 'en'] as const) {\n    const filePath = path.join(TRANSLATIONS_DIR, lang, 'tours.json');\n    \n    if (fs.existsSync(filePath)) {\n      const translations = JSON.parse(fs.readFileSync(filePath, 'utf-8'));\n      \n      // Eliminar claves del tour\n      for (const key of Object.keys(translations)) {\n        if (key.startsWith(`tours.${tourSlug}.`)) {\n          delete translations[key];\n        }\n      }\n      \n      fs.writeFileSync(filePath, JSON.stringify(translations, null, 2));\n    }\n  }\n}",
+      "esperado": "Función para escribir traducciones a JSON"
+    },
+    {
+      "orden": 2,
+      "accion": "Modificar función de guardado en el editor de tours",
+      "archivo_objetivo": "app/routes/admin.dashboard.tours.tsx (o similar)",
+      "cambio": "Llamar saveTourTranslationsToJson después de guardar en MongoDB"
+    },
+    {
+      "orden": 3,
+      "accion": "Verificar que el archivo se escribe correctamente",
+      "comando": "cd /var/www/tourtovalencia && node -e \"const { saveTourTranslationsToJson } = require('./app/utils/translations/tour-translations'); saveTourTranslationsToJson('test-tour', { es: { tourName: 'Tour Test' }, en: { tourName: 'Test Tour' } }).then(() => console.log('OK'))\"",
+      "esperado": "Archivo tours.json actualizado"
+    }
+  ],
+  "entregable": "Sistema de guardado de traducciones de tours a JSON",
+  "tiempo_estimado": "1.5 horas",
+  "dependencias": ["Fase 3 - Paso 1"],
+  "nota": "Mantener MongoDB como backup durante la transición"
+}

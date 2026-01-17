@@ -1,0 +1,31 @@
+{
+  "fase": 3,
+  "paso": 1,
+  "titulo": "Extraer Traducciones de MongoDB",
+  "descripcion": "Crear script para extraer todas las traducciones almacenadas en MongoDB y escribirlas a archivos JSON locales",
+  "script_objetivo": "/var/www/tourtovalencia/scripts/migrate-translations-from-mongo.js",
+  "tareas": [
+    {
+      "orden": 1,
+      "accion": "Crear directorio scripts si no existe",
+      "comando": "mkdir -p /var/www/tourtovalencia/scripts",
+      "esperado": "Directorio scripts creado"
+    },
+    {
+      "orden": 2,
+      "accion": "Escribir script de migración",
+      "archivo": "/var/www/tourtovalencia/scripts/migrate-translations-from-mongo.js",
+      "contenido_script": "const { MongoClient } = require('mongodb');\nconst fs = require('fs');\nconst path = require('path');\n\nconst MONGO_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tourtovalencia';\nconst OUTPUT_DIR = path.join(__dirname, '../public/locales');\n\nasync function migrateTranslations() {\n  const client = new MongoClient(MONGO_URI);\n  \n  try {\n    await client.connect();\n    const db = client.db('tourtovalencia');\n    \n    console.log('Extrayendo traducciones de tours...');\n    const tours = await db.collection('tours').find({}).toArray();\n    \n    const toursTranslations = {\n      es: {},\n      en: {}\n    };\n    \n    for (const tour of tours) {\n      const slug = tour.slug || tour._id.toString();\n      \n      const translationFields = ['tourName', 'description', 'duration', 'includes', 'meetingPoint'];\n      \n      for (const field of translationFields) {\n        if (tour[field]) {\n          if (tour[field].es) {\n            toursTranslations.es[`tours.${slug}.${field}`] = tour[field].es;\n          }\n          if (tour[field].en) {\n            toursTranslations.en[`tours.${slug}.${field}`] = tour[field].en;\n          }\n        }\n      }\n    }\n    \n    console.log('Extrayendo traducciones de páginas...');\n    const pages = await db.collection('pages').find({}).toArray();\n    \n    const pagesTranslations = {\n      es: {},\n      en: {}\n    };\n    \n    for (const page of pages) {\n      const slug = page.slug;\n      \n      if (page.content) {\n        ['es', 'en'].forEach(lang => {\n          if (page.content[lang]) {\n            const content = page.content[lang];\n            pagesTranslations[lang][`pages.${slug}.content`] = JSON.stringify(content);\n          }\n        });\n      }\n    }\n    \n    const localesDir = path.join(OUTPUT_DIR);\n    \n    fs.writeFileSync(\n      path.join(localesDir, 'es/tours.json'),\n      JSON.stringify(toursTranslations.es, null, 2)\n    );\n    fs.writeFileSync(\n      path.join(localesDir, 'en/tours.json'),\n      JSON.stringify(toursTranslations.en, null, 2)\n    );\n    \n    fs.writeFileSync(\n      path.join(localesDir, 'es/pages-content.json'),\n      JSON.stringify(pagesTranslations.es, null, 2)\n    );\n    fs.writeFileSync(\n      path.join(localesDir, 'en/pages-content.json'),\n      JSON.stringify(pagesTranslations.en, null, 2)\n    );\n    \n    console.log('Traducciones exportadas a:', OUTPUT_DIR);\n    console.log('Archivos creados:');\n    console.log('  - es/tours.json');\n    console.log('  - en/tours.json');\n    console.log('  - es/pages-content.json');\n    console.log('  - en/pages-content.json');\n    \n  } finally {\n    await client.close();\n  }\n}\n\nmigrateTranslations().catch(console.error);",
+      "esperado": "Script funcional"
+    },
+    {
+      "orden": 3,
+      "accion": "Ejecutar script de migración",
+      "comando": "cd /var/www/tourtovalencia && node scripts/migrate-translations-from-mongo.js",
+      "esperado": "Archivos JSON generados en /public/locales/"
+    }
+  ],
+  "entregable": "Traducciones de MongoDB exportadas a JSON",
+  "tiempo_estimado": "1 hora",
+  "nota": "Este script puede ejecutarse múltiples veces durante la transición"
+}

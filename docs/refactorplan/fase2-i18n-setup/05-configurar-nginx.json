@@ -1,0 +1,45 @@
+{
+  "fase": 2,
+  "paso": 5,
+  "titulo": "Configurar Nginx para servir archivos de traducciones",
+  "descripcion": "Añadir configuración en Nginx para servir los archivos JSON de traducciones con cacheo apropiado",
+  "archivo_objetivo": "/etc/nginx/sites-available/tourtovalencia.com",
+  "configuracion_adicional": {
+    "location /locales": {
+      "alias": "/var/www/tourtovalencia/public/locales/",
+      "expires": "1y",
+      "add_header": "Cache-Control public max-age=31536000 immutable"
+    }
+  },
+  "tareas": [
+    {
+      "orden": 1,
+      "accion": "Verificar estructura actual de configuración Nginx",
+      "comando": "cat /etc/nginx/sites-available/tourtovalencia.com",
+      "esperado": "Ver configuración actual"
+    },
+    {
+      "orden": 2,
+      "accion": "Añadir bloque location para /locales",
+      "archivo_editado": "/etc/nginx/sites-available/tourtovalencia.com",
+      "insertar_despues_de": "# Serve manifest, robots, sitemap directly",
+      "contenido": "\n    # Serve i18n translation files with long-term caching\n    location /locales/ {\n        alias /var/www/tourtovalencia/public/locales/;\n        expires 1y;\n        add_header Cache-Control \"public, max-age=31536000, immutable\";\n        add_header Vary Accept-Encoding;\n        access_log off;\n    }"
+    },
+    {
+      "orden": 3,
+      "accion": "Recargar Nginx",
+      "comando": "nginx -t && systemctl reload nginx",
+      "esperado": "Nginx recargado sin errores"
+    },
+    {
+      "orden": 4,
+      "accion": "Verificar acceso a archivo de traducciones",
+      "comando": "curl -I http://tourtovalencia.com/locales/es/translation.json",
+      "esperado": "HTTP 200 con headers de cache"
+    }
+  ],
+  "entregable": "Nginx configurado para servir traducciones",
+  "tiempo_estimado": "30 minutos",
+  "riesgo": "medio",
+  "rollback": "Eliminar bloque location y recargar Nginx"
+}

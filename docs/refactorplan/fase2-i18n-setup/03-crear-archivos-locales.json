@@ -1,0 +1,40 @@
+{
+  "fase": 2,
+  "paso": 3,
+  "titulo": "Crear Archivos de Traducción Iniciales",
+  "descripcion": "Convertir los archivos JSON existentes al formato requerido por i18next-http-backend",
+  "archivos_origen": [
+    "/var/www/tourtovalencia/app/data/data.json",
+    "/var/www/tourtovalencia/app/data/translations/es.json",
+    "/var/www/tourtovalencia/app/data/translations/en.json"
+  ],
+  "archivos_destino": [
+    "/var/www/tourtovalencia/public/locales/es/translation.json",
+    "/var/www/tourtovalencia/public/locales/en/translation.json",
+    "/var/www/tourtovalencia/public/locales/es/pages.json",
+    "/var/www/tourtovalencia/public/locales/en/pages.json"
+  ],
+  "tareas": [
+    {
+      "orden": 1,
+      "accion": "Extraer traducciones generales de data.json (solo strings, sin objetos anidados complejos)",
+      "script": "node -e \"\nconst data = require('./app/data/data.json');\nconst es = {};\nconst en = {};\n\n// Función para aplanar objetos anidados\nfunction flatten(obj, prefix = '', result = {}) {\n  for (const key in obj) {\n    if (typeof obj[key] === 'object' && obj[key] !== null) {\n      flatten(obj[key], prefix + key + '.', result);\n    } else {\n      result[prefix + key] = obj[key];\n    }\n  }\n  return result;\n}\n\n// Procesar cada idioma\nes['common'] = flatten(data.es);\nen['common'] = flatten(data.en);\n\n// Guardar archivos\nrequire('fs').writeFileSync('./public/locales/es/translation.json', JSON.stringify(es, null, 2));\nrequire('fs').writeFileSync('./public/locales/en/translation.json', JSON.stringify(en, null, 2));\nconsole.log('Archivos de traducción creados');\n\"",
+      "esperado": "Archivos translation.json con traducciones aplanadas"
+    },
+    {
+      "orden": 2,
+      "accion": "Copiar traducciones de páginas existentes",
+      "comando": "cp /var/www/tourtovalencia/app/data/translations/es.json /var/www/tourtovalencia/public/locales/es/pages.json && cp /var/www/tourtovalencia/app/data/translations/en.json /var/www/tourtovalencia/public/locales/en/pages.json",
+      "esperado": "Archivos pages.json copiados"
+    },
+    {
+      "orden": 3,
+      "accion": "Validar formato JSON",
+      "comando": "jq . /var/www/tourtovalencia/public/locales/es/translation.json > /dev/null && echo \"Valid\"",
+      "esperado": "JSON válido"
+    }
+  ],
+  "entregable": "Archivos de traducción en /public/locales/",
+  "tiempo_estimado": "30 minutos",
+  "nota": "Las claves usarán el formato 'pages.cuevas-de-san-jose.section1.firstH3' automáticamente"
+}

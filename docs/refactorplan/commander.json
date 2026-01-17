@@ -1,0 +1,222 @@
+{
+  "proyecto": "tourtovalencia",
+  "descripcion": "Plan de refactorización del sistema de traducciones de tourtovalencia.com",
+  "version": "1.0.0",
+  "fecha_creacion": "2026-01-12",
+  "autor": "opencode",
+  "objetivo_principal": "Migrar de sistema de traducciones embebido a i18next con lazy loading, eliminando archivos JSON del initialState",
+  "metricas_baseline": {
+    "html_size_bytes": 3526174,
+    "remix_context_bytes": 3514226,
+    "base64_images_count": 19,
+    "ttfb_seconds": 30
+  },
+  "metricas_objetivo": {
+    "html_size_bytes": 200000,
+    "remix_context_bytes": 500,
+    "base64_images_count": 0,
+    "ttfb_seconds": 3
+  },
+  "fases": [
+    {
+      "id": "fase1-analisis",
+      "orden": 1,
+      "titulo": "Análisis y Auditoría",
+      "descripcion": "Analizar el estado actual del sistema de traducciones",
+      "duracion_estimada": "3 horas",
+      "pasos": [
+        {
+          "archivo": "fase1-analisis/01-inventario-archivos.json",
+          "orden": 1,
+          "titulo": "Inventario de Archivos de Traducciones",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase1-analisis/02-mapeo-componentes.json",
+          "orden": 2,
+          "titulo": "Mapeo de Componentes",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase1-analisis/03-analisis-rendimiento.json",
+          "orden": 3,
+          "titulo": "Análisis de Rendimiento",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase1-analisis/04-audit-mongodb.json",
+          "orden": 4,
+          "titulo": "Auditoría MongoDB",
+          "completado": false,
+          "bloqueante": false
+        }
+      ],
+      "entregable": "Reporte completo del estado actual"
+    },
+    {
+      "id": "fase2-i18n-setup",
+      "orden": 2,
+      "titulo": "Implementación i18next",
+      "descripcion": "Instalar y configurar sistema profesional de traducciones con i18next",
+      "duracion_estimada": "3 horas",
+      "pasos": [
+        {
+          "archivo": "fase2-i18n-setup/01-instalar-dependencias.json",
+          "orden": 1,
+          "titulo": "Instalar Dependencias",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase2-i18n-setup/02-configurar-i18n.json",
+          "orden": 2,
+          "titulo": "Configurar i18next",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase2-i18n-setup/03-crear-archivos-locales.json",
+          "orden": 3,
+          "titulo": "Crear Archivos de Traducción",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase2-i18n-setup/04-actualizar-provider.json",
+          "orden": 4,
+          "titulo": "Actualizar Provider",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase2-i18n-setup/05-configurar-nginx.json",
+          "orden": 5,
+          "titulo": "Configurar Nginx",
+          "completado": false,
+          "bloqueante": false
+        }
+      ],
+      "entregable": "Sistema i18next funcional",
+      "dependencias": ["fase1-analisis"]
+    },
+    {
+      "id": "fase3-migrar-content",
+      "orden": 3,
+      "titulo": "Migración de Contenido",
+      "descripcion": "Extraer y migrar contenido de MongoDB a archivos JSON locales",
+      "duracion_estimada": "3 horas",
+      "pasos": [
+        {
+          "archivo": "fase3-migrar-content/01-extraer-mongodb.json",
+          "orden": 1,
+          "titulo": "Extraer de MongoDB",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase3-migrar-content/02-unificar-archivos.json",
+          "orden": 2,
+          "titulo": "Unificar Archivos",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase3-migrar-content/03-actualizar-loaders.json",
+          "orden": 3,
+          "titulo": "Actualizar Loaders",
+          "completado": false,
+          "bloqueante": false
+        }
+      ],
+      "entregable": "Contenido migrado a JSON",
+      "dependencias": ["fase2-i18n-setup"]
+    },
+    {
+      "id": "fase4-optimizar-editor",
+      "orden": 4,
+      "titulo": "Optimizar Editor",
+      "descripcion": "Modificar el editor para guardar traducciones a archivos JSON en lugar de MongoDB",
+      "duracion_estimada": "5 horas",
+      "pasos": [
+        {
+          "archivo": "fase4-optimizar-editor/01-guardar-tours-json.json",
+          "orden": 1,
+          "titulo": "Guardar Tours a JSON",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase4-optimizar-editor/02-guardar-paginas-json.json",
+          "orden": 2,
+          "titulo": "Guardar Páginas a JSON",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase4-optimizar-editor/03-sincronizacion-mongo.json",
+          "orden": 3,
+          "titulo": "Sincronización MongoDB",
+          "completado": false,
+          "bloqueante": false
+        }
+      ],
+      "entregable": "Editor funcional guardando a JSON",
+      "dependencias": ["fase3-migrar-content"]
+    },
+    {
+      "id": "fase5-eliminar-embebidos",
+      "orden": 5,
+      "titulo": "Optimización Final",
+      "descripcion": "Eliminar datos embebidos y optimizar bundle final",
+      "duracion_estimada": "4 horas",
+      "pasos": [
+        {
+          "archivo": "fase5-eliminar-embebidos/01-eliminar-data-json.json",
+          "orden": 1,
+          "titulo": "Eliminar data.json",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase5-eliminar-embebidos/02-optimizar-bundle.json",
+          "orden": 2,
+          "titulo": "Optimizar Bundle",
+          "completado": false,
+          "bloqueante": false
+        },
+        {
+          "archivo": "fase5-eliminar-embebidos/03-testing-final.json",
+          "orden": 3,
+          "titulo": "Testing Final",
+          "completado": false,
+          "bloqueante": false
+        }
+      ],
+      "entregable": "Aplicación optimizada y testeada",
+      "dependencias": ["fase4-optimizar-editor"]
+    }
+  ],
+  "resumen_ejecutivo": {
+    "total_fases": 5,
+    "total_pasos": 18,
+    "duracion_total_estimada": "18 horas",
+    "riesgo_general": "medio-alto",
+    "beneficios_esperados": [
+      "HTML inicial: 3.4MB → < 200KB (95% reducción)",
+      "Tiempo de carga: 30s → < 3 segundos",
+      "Traducciones cargadas bajo demanda (lazy loading)",
+      "Sistema profesional y escalable",
+      "Editor guarda directamente a archivos JSON"
+    ]
+  },
+  "notas_importantes": [
+    "Hacer backup completo antes de iniciar",
+    "Ejecutar fases en orden",
+    "Cada paso debe completarse antes de avanzar",
+    "Realizar testing después de cada fase",
+    "Mantener MongoDB como backup durante transición"
+  ]
+}

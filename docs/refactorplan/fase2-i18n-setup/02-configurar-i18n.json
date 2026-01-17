@@ -1,0 +1,48 @@
+{
+  "fase": 2,
+  "paso": 2,
+  "titulo": "Crear Configuración de i18next",
+  "descripcion": "Crear el archivo de configuración centralizado para i18next con lazy loading y backend HTTP",
+  "archivo_objetivo": "/var/www/tourtovalencia/app/utils/i18n/config.ts",
+  "estructura_configuracion": {
+    "supportedLngs": ["es", "en"],
+    "fallbackLng": "es",
+    "defaultNS": "translation",
+    "backend": {
+      "loadPath": "/locales/{{lng}}/{{ns}}.json",
+      "parse": "application/json"
+    },
+    "detection": {
+      "order": ["querystring", "cookie", "localStorage", "navigator", "htmlTag"],
+      "caches": ["localStorage", "cookie"]
+    },
+    "react": {
+      "useSuspense": true,
+      "bindI18n": "languageChanged added"
+    }
+  },
+  "tareas": [
+    {
+      "orden": 1,
+      "accion": "Crear directorio para configuración",
+      "comando": "mkdir -p /var/www/tourtovalencia/app/utils/i18n",
+      "esperado": "Directorio creado"
+    },
+    {
+      "orden": 2,
+      "accion": "Escribir archivo config.ts",
+      "archivo": "/var/www/tourtovalencia/app/utils/i18n/config.ts",
+      "contenido": "import i18n from 'i18next';\nimport { initReactI18next } from 'react-i18next';\nimport HttpBackend from 'i18next-http-backend';\nimport LanguageDetector from 'i18next-browser-languagedetector';\n\nif (typeof window !== 'undefined') {\n  i18n\n    .use(HttpBackend)\n    .use(LanguageDetector)\n    .use(initReactI18next)\n    .init({\n      supportedLngs: ['es', 'en'],\n      fallbackLng: 'es',\n      defaultNS: 'translation',\n      debug: process.env.NODE_ENV === 'development',\n      interpolation: {\n        escapeValue: false,\n      },\n      backend: {\n        loadPath: '/locales/{{lng}}/{{ns}}.json',\n      },\n      detection: {\n        order: ['querystring', 'cookie', 'localStorage', 'navigator'],\n        caches: ['localStorage', 'cookie'],\n      },\n      react: {\n        useSuspense: true,\n      },\n    });\n}\n\nexport default i18n;",
+      "esperado": "Archivo config.ts creado"
+    },
+    {
+      "orden": 3,
+      "accion": "Crear directorio para locales",
+      "comando": "mkdir -p /var/www/tourtovalencia/public/locales/{es,en}",
+      "esperado": "Directorios de idiomas creados"
+    }
+  ],
+  "entregable": "Configuración i18next funcional",
+  "tiempo_estimado": "30 minutos",
+  "dependencias": ["Fase 2 - Paso 1"]
+}

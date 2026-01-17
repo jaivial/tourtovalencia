@@ -1,0 +1,43 @@
+{
+  "fase": 3,
+  "paso": 2,
+  "titulo": "Unificar Archivos de Traducción",
+  "descripcion": "Combinar los archivos de traducción existentes con los extraídos de MongoDB, evitando duplicados y conflictos",
+  "archivos_origen": [
+    "/var/www/tourtovalencia/public/locales/es/translation.json",
+    "/var/www/tourtovalencia/public/locales/en/translation.json",
+    "/var/www/tourtovalencia/public/locales/es/pages.json",
+    "/var/www/tourtovalencia/public/locales/en/pages.json",
+    "/var/www/tourtovalencia/public/locales/es/tours.json",
+    "/var/www/tourtovalencia/public/locales/en/tours.json"
+  ],
+  "archivo_salida": [
+    "/var/www/tourtovalencia/public/locales/es/translation-full.json",
+    "/var/www/tourtovalencia/public/locales/en/translation-full.json"
+  ],
+  "script_objetivo": "/var/www/tourtovalencia/scripts/merge-translations.js",
+  "tareas": [
+    {
+      "orden": 1,
+      "accion": "Escribir script de unificación",
+      "archivo": "/var/www/tourtovalencia/scripts/merge-translations.js",
+      "contenido_script": "const fs = require('fs');\nconst path = require('path');\n\nconst LANGUAGES = ['es', 'en'];\n\nfunction deepMerge(obj1, obj2) {\n  const result = { ...obj1 };\n  \n  for (const key in obj2) {\n    if (obj2[key] && typeof obj2[key] === 'object' && !Array.isArray(obj2[key])) {\n      result[key] = deepMerge(result[key] || {}, obj2[key]);\n    } else {\n      result[key] = obj2[key];\n    }\n  }\n  \n  return result;\n}\n\nfunction mergeLanguageFiles(lang) {\n  const baseDir = path.join(__dirname, '../public/locales', lang);\n  \n  // Cargar archivos existentes\n  const files = [\n    'translation.json',\n    'pages.json',\n    'tours.json',\n    'pages-content.json'\n  ];\n  \n  let merged = {};\n  \n  for (const file of files) {\n    const filePath = path.join(baseDir, file);\n    if (fs.existsSync(filePath)) {\n      try {\n        const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));\n        merged = deepMerge(merged, content);\n        console.log(`Cargado: ${file}`);\n      } catch (e) {\n        console.warn(`Error cargando ${file}: ${e.message}`);\n      }\n    }\n  }\n  \n  // Guardar archivo unificado\n  const outputPath = path.join(baseDir, 'translation-full.json');\n  fs.writeFileSync(outputPath, JSON.stringify(merged, null, 2));\n  console.log(`Guardado: translation-full.json (${Object.keys(merged).length} claves)`);\n  \n  return merged;\n}\n\n// Ejecutar para cada idioma\nfor (const lang of LANGUAGES) {\n  console.log(`\\nProcesando idioma: ${lang}`);\n  mergeLanguageFiles(lang);\n}\n\nconsole.log('\\nUnificación completada');",
+      "esperado": "Script funcional"
+    },
+    {
+      "orden": 2,
+      "accion": "Ejecutar script de unificación",
+      "comando": "cd /var/www/tourtovalencia && node scripts/merge-translations.js",
+      "esperado": "Archivos translation-full.json creados"
+    },
+    {
+      "orden": 3,
+      "accion": "Verificar que no hay claves duplicadas o冲突",
+      "comando": "jq 'keys | length' /var/www/tourtovalencia/public/locales/es/translation-full.json",
+      "esperado": "Número de claves válidas"
+    }
+  ],
+  "entregable": "Archivos de traducción unificados y completos",
+  "tiempo_estimado": "30 minutos",
+  "nota": "translation-full.json será el archivo principal usado por i18next"
+}

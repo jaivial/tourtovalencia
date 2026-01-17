@@ -1,0 +1,46 @@
+{
+  "fase": 5,
+  "paso": 2,
+  "titulo": "Optimizar Bundle Final",
+  "descripcion": "Verificar que el bundle está optimizado y que las traducciones se cargan de forma lazy",
+  "metricas_objetivo": {
+    "html_inicial": "< 200 KB",
+    "tiempo_carga_pagina": "< 3 segundos",
+    "traducciones_cargadas": "lazy bajo demanda"
+  },
+  "verificaciones": [
+    {
+      "orden": 1,
+      "accion": "Medir tamaño del HTML inicial",
+      "comando": "curl -s http://localhost:3001 | wc -c",
+      "esperado": "< 200000 bytes"
+    },
+    {
+      "orden": 2,
+      "accion": "Verificar que no hay window.__remixContext con datos grandes",
+      "comando": "curl -s http://localhost:3001 | grep -o 'window.__remixContext.*</script>' | wc -c",
+      "esperado": "< 500 bytes (solo configuración, sin datos)"
+    },
+    {
+      "orden": 3,
+      "accion": "Verificar que i18next-http-backend carga traducciones bajo demanda",
+      "comando": "curl -I http://localhost:3001/locales/es/translation.json | head -10",
+      "esperado": "200 OK con headers de cache"
+    },
+    {
+      "orden": 4,
+      "accion": "Medir tiempo de respuesta",
+      "comando": "curl -w \"Total: %{time_total}s\\n\" -o /dev/null -s http://localhost:3001",
+      "esperado": "< 1 segundo"
+    },
+    {
+      "orden": 5,
+      "accion": "Verificar que las traducciones se cargan via fetch",
+      "comando": "curl -s \"http://localhost:3001/api/translations?lang=es\" | wc -c",
+      "esperado": "> 0 (API funcionando)"
+    }
+  ],
+  "entregable": "Bundle optimizado con métricas mejoradas",
+  "tiempo_estimado": "1 hora",
+  "nota": "Si las métricas no mejoran, revisar que no quedan referencias a languageData"
+}

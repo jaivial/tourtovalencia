@@ -1,0 +1,47 @@
+{
+  "fase": 1,
+  "paso": 3,
+  "titulo": "Análisis de Impacto en Rendimiento",
+  "descripcion": "Medir el impacto actual del sistema de traducciones en el tamaño del HTML y tiempo de carga",
+  "fecha_ejecucion": "2026-01-12",
+  "resultados": {
+    "baseline_actual": {
+      "html_size_bytes": 3525921,
+      "html_size_mb": 3.36,
+      "remix_context_bytes": 3512439,
+      "remix_context_mb": 3.35,
+      "base64_images": 19,
+      "ttfb_seconds": 0.142
+    },
+    "desglose_html": {
+      "total": 3525921,
+      "remix_context": 3512439,
+      "porcentaje_remix_context": 99.6,
+      "otros_elementos": 13482
+    },
+    "composicion_remix_context": {
+      "languageData_embebido": "3.35 MB",
+      "contenido_paginas": "Incluido en languageData",
+      "datos_tours": "Incluido en languageData",
+      "traducciones_completas": "63 claves x 2 idiomas"
+    },
+    "metricas_servidor": {
+      "ttfb_seconds": 0.142,
+      "ttfb_ms": 142,
+      "interpretacion": "El servidor responde rápido, el problema es el tamaño de la respuesta"
+    }
+  },
+  "problema_principal": {
+    "identificado": "window.__remixContext contiene 3.35MB de datos embebidos",
+    "causa_raiz": "languageData completo se serializa en el HTML inicial",
+    "impacto": "3.4MB de HTML que deben descargarse antes de renderizar"
+  },
+  "metricas_objetivo": {
+    "html_size_bytes": 200000,
+    "html_size_mb": 0.2,
+    "reduccion_esperada": 94.3,
+    "ttfb_seconds": 0.1
+  },
+  "completado": true,
+  "timestamp": "2026-01-12T21:00:00Z"
+}

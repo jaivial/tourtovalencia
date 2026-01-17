@@ -36,10 +36,19 @@ export const loader = async () => {
   await i18n.initialize();
   console.log(`[INDEX LOADER] i18n initialized in ${Date.now() - i18nStart}ms`);
 
-  // Get cached translations from memory (no DB query!)
+  // Get ONLY critical translations for initial render (lazy load rest)
   const translationsStart = Date.now();
-  const translations = await getTranslations('es');
-  console.log(`[INDEX LOADER] Loaded ${Object.keys(translations).length} translations in ${Date.now() - translationsStart}ms`);
+  const criticalTranslations = {
+    "loading.tourToValencia": "Cargando Tour To Valencia...",
+    "bookNow": "Reservar Ahora",
+    "exploreTours": "Explora Nuestras Experiencias",
+    "discoverExperiences": "Descubre las experiencias únicas",
+    "viewDetails": "Ver Detalles",
+    "duration": "Duración",
+    "priceFrom": "Desde",
+    "loading": "Cargando...",
+  };
+  console.log(`[INDEX LOADER] Loaded ${Object.keys(criticalTranslations).length} critical translations in ${Date.now() - translationsStart}ms`);
 
   let tours: SerializableTour[] = [];
   let pages: SerializablePage[] = [];
@@ -49,9 +58,22 @@ export const loader = async () => {
     const db = await getDb();
     console.log(`[INDEX LOADER] DB connection established in ${Date.now() - dbStart}ms`);
 
-    // Fetch tours - only essential fields for homepage
+    // Fetch tours - ONLY essential fields for homepage (OPTIMIZED)
     const toursStart = Date.now();
-    const tourDocs = await db.collection("tours").find({}).toArray();
+    const tourDocs = await db.collection("tours")
+      .find({ status: { $ne: 'inactive' } })
+      .project({
+        _id: 1,
+        slug: 1,
+        tourName: 1,
+        tourPrice: 1,
+        status: 1,
+        duration: 1,
+        heroImage: 1,
+        pageId: 1,
+      })
+      .limit(5)
+      .toArray();
     console.log(`[INDEX LOADER] Fetched ${tourDocs.length} tours in ${Date.now() - toursStart}ms`);
     tours = tourDocs.map((doc) => ({
       _id: doc._id?.toString(),
@@ -59,17 +81,25 @@ export const loader = async () => {
       tourName: doc.tourName || { en: '', es: '' },
       tourPrice: doc.tourPrice || 0,
       status: doc.status || 'upcoming',
-      description: doc.description || { en: '', es: '' },
       duration: doc.duration || { en: '', es: '' },
-      includes: doc.includes || { en: '', es: '' },
-      meetingPoint: doc.meetingPoint || { en: '', es: '' },
-      createdAt: doc.createdAt?.toISOString() || new Date().toISOString(),
-      updatedAt: doc.updatedAt?.toISOString() || new Date().toISOString(),
+      heroImage: doc.heroImage,
+      pageId: doc.pageId,
     })) as SerializableTour[];
 
-    // Fetch pages - only essential fields
+    // Fetch pages - ONLY essential fields (OPTIMIZED)
     const pagesStart = Date.now();
-    const pageDocs = await db.collection("pages").find({}).toArray();
+    const pageDocs = await db.collection("pages")
+      .find({ status: { $ne: 'inactive' } })
+      .project({
+        _id: 1,
+        slug: 1,
+        name: 1,
+        template: 1,
+        status: 1,
+        pageType: 1,
+      })
+      .limit(10)
+      .toArray();
     console.log(`[INDEX LOADER] Fetched ${pageDocs.length} pages in ${Date.now() - pagesStart}ms`);
     pages = pageDocs.map((doc) => ({
       _id: doc._id?.toString(),
@@ -77,9 +107,7 @@ export const loader = async () => {
       name: doc.name || '',
       template: doc.template || '',
       status: doc.status || 'upcoming',
-      content: {}, // Empty content - translations now in JSON files
-      createdAt: doc.createdAt?.toISOString() || new Date().toISOString(),
-      updatedAt: doc.updatedAt?.toISOString() || new Date().toISOString(),
+      pageType: doc.pageType,
     })) as SerializablePage[];
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -89,7 +117,7 @@ export const loader = async () => {
 
   const totalTime = Date.now() - loaderStartTime;
   console.log(`[INDEX LOADER] Total loader time: ${totalTime}ms`);
-  return { tours, pages, translations };
+  return { tours, pages, translations: criticalTranslations };
 };
 
 export const meta: MetaFunction = () => {

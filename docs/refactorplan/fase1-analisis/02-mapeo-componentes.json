@@ -1,0 +1,89 @@
+{
+  "fase": 1,
+  "paso": 2,
+  "titulo": "Mapeo de Componentes que Usan Traducciones",
+  "descripcion": "Identificar todos los archivos que importan o usan languageData, getTranslations, o el sistema de traducciones actual",
+  "fecha_ejecucion": "2026-01-12",
+  "resultados": {
+    "languageData_dependientes": {
+      "cantidad": 3,
+      "archivos": [
+        "/var/www/tourtovalencia/app/routes/index.tsx",
+        "/var/www/tourtovalencia/app/reducers/LanguageReducer.tsx",
+        "/var/www/tourtovalencia/app/root.tsx"
+      ],
+      "categoria": "core"
+    },
+    "useLanguageContext_consumidores": {
+      "cantidad": 29,
+      "archivos": [
+        "/var/www/tourtovalencia/app/routes/legal.tsx",
+        "/var/www/tourtovalencia/app/routes/valencia-things-to-do.tsx",
+        "/var/www/tourtovalencia/app/routes/pages.$slug.tsx",
+        "/var/www/tourtovalencia/app/providers/LanguageContext.tsx",
+        "/var/www/tourtovalencia/app/components/_pages/DynamicPageContainer.tsx",
+        "/var/www/tourtovalencia/app/components/_index/DynamicTourSections.tsx",
+        "/var/www/tourtovalencia/app/components/_index/TimelineFeature.tsx",
+        "/var/www/tourtovalencia/app/components/_index/IndexContainer.tsx",
+        "/var/www/tourtovalencia/app/components/_index/WhyChooseUs.tsx",
+        "/var/www/tourtovalencia/app/components/_index/TravelGallery.tsx",
+        "/var/www/tourtovalencia/app/components/_index/IndexFeatures.tsx",
+        "/var/www/tourtovalencia/app/components/_index/IndexSection6.tsx",
+        "/var/www/tourtovalencia/app/components/_index/ToursSection.tsx",
+        "/var/www/tourtovalencia/app/components/features/PaymentFeature.tsx",
+        "/var/www/tourtovalencia/app/components/features/BookingDateFeature.tsx",
+        "/var/www/tourtovalencia/app/components/layout/DynamicNavLinks.tsx",
+        "/var/www/tourtovalencia/app/components/layout/nav.tsx",
+        "/var/www/tourtovalencia/app/components/layout/footer.tsx",
+        "/var/www/tourtovalencia/app/components/_sanjuan/SanJuanSection3.tsx",
+        "/var/www/tourtovalencia/app/components/_sanjuan/SanJuanContainer.tsx",
+        "/var/www/tourtovalencia/app/components/ui/CookieConsent.tsx",
+        "/var/www/tourtovalencia/app/components/ui/TourSelectorUI.tsx",
+        "/var/www/tourtovalencia/app/components/ui/paypalpaymentoptions.tsx",
+        "/var/www/tourtovalencia/app/components/_book/BookingStepTwo.tsx",
+        "/var/www/tourtovalencia/app/components/_book/BookingDateStep.tsx",
+        "/var/www/tourtovalencia/app/components/_book/BookingStepOne.tsx",
+        "/var/www/tourtovalencia/app/components/_book/BookingFeature.tsx",
+        "/var/www/tourtovalencia/app/components/_book/BookingStepThree.tsx",
+        "/var/www/tourtovalencia/app/components/_cards/ComingSoonCard.tsx",
+        "/var/www/tourtovalencia/app/components/_cards/EditableCard.tsx"
+      ],
+      "categorias": {
+        "routes": 3,
+        "components": 18,
+        "ui": 3,
+        "layout": 2,
+        "sanjuan": 2,
+        "book": 5,
+        "cards": 2
+      }
+    },
+    "getTranslations_usuarios": {
+      "cantidad": 4,
+      "archivos": [
+        "/var/www/tourtovalencia/app/routes/api.translations.ts",
+        "/var/www/tourtovalencia/app/routes/_index.tsx",
+        "/var/www/tourtovalencia/app/utils/i18n.server.ts",
+        "/var/www/tourtovalencia/app/utils/db.server.ts"
+      ]
+    }
+  },
+  "archivos_a_modificar": {
+    "criticos": [
+      "/var/www/tourtovalencia/app/root.tsx",
+      "/var/www/tourtovalencia/app/reducers/LanguageReducer.tsx",
+      "/var/www/tourtovalencia/app/providers/LanguageContext.tsx"
+    ],
+    "secundarios": [
+      "29 componentes que usan useLanguageContext"
+    ]
+  },
+  "estrategia_migracion": {
+    "approach": "Compatibilidad hacia atrás",
+    "descripcion": "Mantener useLanguageContext pero implementar con react-i18next internamente",
+    "archivos_criticos": 3,
+    "archivos_totales_a_considerar": 32
+  },
+  "completado": true,
+  "timestamp": "2026-01-12T20:59:00Z"
+}

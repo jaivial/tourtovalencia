@@ -1,0 +1,58 @@
+{
+  "fase": 5,
+  "paso": 1,
+  "titulo": "Eliminar Dependencia de data.json",
+  "descripcion": "Eliminar completamente el archivo data.json del bundle y del código, reemplazando todas las referencias por traducciones de i18next",
+  "archivos_a_modificar": [
+    "/var/www/tourtovalencia/app/root.tsx",
+    "/var/www/tourtovalencia/app/reducers/LanguageReducer.tsx",
+    "/var/www/tourtovalencia/app/routes/index.tsx"
+  ],
+  "archivos_a_eliminar": [
+    "/var/www/tourtovalencia/app/data/data.json",
+    "/var/www/tourtovalencia/app/data/translations/es.json (reemplazado)",
+    "/var/www/tourtovalencia/app/data/translations/en.json (reemplazado)"
+  ],
+  "tareas": [
+    {
+      "orden": 1,
+      "accion": "Verificar que todos los componentes usan useTranslation() de react-i18next",
+      "comando": "grep -r \"useTranslation\" /var/www/tourtovalencia/app --include=\"*.tsx\" | grep -v node_modules",
+      "esperado": "Todos los componentes migrados"
+    },
+    {
+      "orden": 2,
+      "accion": "Eliminar import de languageData en root.tsx",
+      "archivo_editado": "/var/www/tourtovalencia/app/root.tsx",
+      "cambio_eliminar": "import languageData from '~/data/data.json';"
+    },
+    {
+      "orden": 3,
+      "accion": "Simplificar initialLanguage a estructura mínima",
+      "archivo_editado": "/var/www/tourtovalencia/app/root.tsx",
+      "cambio": "initialLanguage: { currentLanguage: language }"
+    },
+    {
+      "orden": 4,
+      "accion": "Actualizar LanguageReducer",
+      "archivo_editado": "/var/www/tourtovalencia/app/reducers/LanguageReducer.tsx",
+      "cambio_eliminar": "import languageData from '~/data/data.json';"
+    },
+    {
+      "orden": 5,
+      "accion": "Verificar que la aplicación funciona",
+      "comando": "npm run build && pm2 restart tourtovalencia",
+      "esperado": "Build exitoso y aplicación funcionando"
+    },
+    {
+      "orden": 6,
+      "accion": "Eliminar archivos obsoletos",
+      "comando": "rm /var/www/tourtovalencia/app/data/data.json",
+      "esperado": "Archivo eliminado"
+    }
+  ],
+  "entregable": "Dependencia de data.json eliminada",
+  "tiempo_estimado": "1 hora",
+  "riesgo": "alto",
+  "rollback": "Restaurar data.json desde git"
+}

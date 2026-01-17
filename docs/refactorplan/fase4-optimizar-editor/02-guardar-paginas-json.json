@@ -1,0 +1,37 @@
+{
+  "fase": 4,
+  "paso": 2,
+  "titulo": "Guardar Traducciones de Páginas a JSON",
+  "descripcion": "Modificar el editor de páginas para que las traducciones se guarden en archivos JSON locales en lugar de BSON en MongoDB",
+  "archivos_objetivo": [
+    "/var/www/tourtovalencia/app/routes/api.pages.update.$id.ts",
+    "/var/www/tourtovalencia/app/utils/page.server.ts"
+  ],
+  "funcion_existente": "savePageTranslations() en i18n.server.ts",
+  "nueva_funcion": "savePageTranslationsToJson(slug: string, content: PageContent)",
+  "tareas": [
+    {
+      "orden": 1,
+      "accion": "Crear función para escribir contenido de páginas a JSON",
+      "archivo": "/var/www/tourtovalencia/app/utils/translations/page-translations.ts",
+      "contenido": "import fs from 'fs';\nimport path from 'path';\n\nconst TRANSLATIONS_DIR = path.join(process.cwd(), 'public/locales');\n\ninterface PageContent {\n  es: Record<string, unknown>;\n  en: Record<string, unknown>;\n}\n\ninterface SectionContent {\n  firstH3?: string;\n  secondH3?: string;\n  [key: string]: unknown;\n}\n\ninterface FullPageContent {\n  section1?: SectionContent;\n  section2?: SectionContent;\n  section3?: SectionContent;\n  section4?: SectionContent;\n  section5?: SectionContent;\n  section6?: SectionContent;\n  [key: string]: unknown;\n}\n\nfunction flattenContent(content: FullPageContent, prefix = ''): Record<string, string> {\n  const result: Record<string, string> = {};\n  \n  for (const [key, value] of Object.entries(content)) {\n    const newPrefix = prefix ? `${prefix}.${key}` : key;\n    \n    if (typeof value === 'string') {\n      result[newPrefix] = value;\n    } else if (typeof value === 'object' && value !== null) {\n      const flattened = flattenContent(value as FullPageContent, newPrefix);\n      Object.assign(result, flattened);\n    }\n  }\n  \n  return result;\n}\n\nexport async function savePageTranslationsToJson(\n  slug: string,\n  content: PageContent\n): Promise<void> {\n  for (const lang of ['es', 'en'] as const) {\n    const langDir = path.join(TRANSLATIONS_DIR, lang);\n    const filePath = path.join(langDir, 'pages.json');\n    \n    // Cargar archivo existente o crear nuevo\n    let existingTranslations: Record<string, string> = {};\n    if (fs.existsSync(filePath)) {\n      try {\n        existingTranslations = JSON.parse(fs.readFileSync(filePath, 'utf-8'));\n      } catch (e) {\n        existingTranslations = {};\n      }\n    }\n    \n    // Aplanar contenido y guardar con prefijo pages.{slug}\n    if (content[lang]) {\n      const flattened = flattenContent(content[lang] as FullPageContent, `pages.${slug}`);\n      \n      // Eliminar entradas anteriores del mismo slug\n      for (const key of Object.keys(existingTranslations)) {\n        if (key.startsWith(`pages.${slug}.`)) {\n          delete existingTranslations[key];\n        }\n      }\n      \n      // Agregar nuevas entradas\n      Object.assign(existingTranslations, flattened);\n    }\n    \n    // Escribir archivo\n    fs.writeFileSync(filePath, JSON.stringify(existingTranslations, null, 2));\n  }\n  \n  console.log(`[i18n] Guardadas traducciones para página: ${slug}`);\n}\n\nexport async function deletePageTranslationsFromJson(slug: string): Promise<void> {\n  for (const lang of ['es', 'en'] as const) {\n    const filePath = path.join(TRANSLATIONS_DIR, lang, 'pages.json');\n    \n    if (fs.existsSync(filePath)) {\n      const translations = JSON.parse(fs.readFileSync(filePath, 'utf-8'));\n      \n      // Eliminar claves de la página\n      for (const key of Object.keys(translations)) {\n        if (key.startsWith(`pages.${slug}.`)) {\n          delete translations[key];\n        }\n      }\n      \n      fs.writeFileSync(filePath, JSON.stringify(translations, null, 2));\n    }\n  }\n}",
+      "esperado": "Función para escribir contenido de páginas"
+    },
+    {
+      "orden": 2,
+      "accion": "Actualizar api.pages.update.\\$id.ts para llamar a la nueva función",
+      "archivo_editado": "/var/www/tourtovalencia/app/routes/api.pages.update.$id.ts",
+      "cambio": "Después de actualizar MongoDB, llamar savePageTranslationsToJson()"
+    },
+    {
+      "orden": 3,
+      "accion": "Verificar funcionamiento",
+      "comando": "curl -X POST http://localhost:3001/api/pages/update/ID -d '{\"content\":{\"es\":{\"section1\":{\"firstH3\":\"Hola\"}},\"en\":{\"section1\":{\"firstH3\":\"Hello\"}}}}'",
+      "esperado": "Archivo pages.json actualizado"
+    }
+  ],
+  "entregable": "Sistema de guardado de traducciones de páginas a JSON",
+  "tiempo_estimado": "2 horas",
+  "riesgo": "alto",
+  "nota": "Este cambio es crítico - el contenido de páginas puede ser extenso"
+}

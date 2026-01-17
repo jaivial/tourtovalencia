@@ -1,0 +1,33 @@
+{
+  "fase": 2,
+  "paso": 4,
+  "titulo": "Actualizar LanguageContextProvider",
+  "descripcion": "Reemplazar el LanguageContext actual por react-i18next, eliminando la carga de languageData embebido",
+  "archivo_objetivo": "/var/www/tourtovalencia/app/providers/LanguageContext.tsx",
+  "cambios_necesarios": [
+    "Eliminar import de languageData",
+    "Usar I18nextProvider en lugar de LanguageContextProvider",
+    "Eliminar reducer personalizado para idioma",
+    "Mantener setLanguage() para preferencia del usuario"
+  ],
+  "tareas": [
+    {
+      "orden": 1,
+      "accion": "Crear nuevo archivo I18nProvider.tsx",
+      "archivo": "/var/www/tourtovalencia/app/providers/I18nProvider.tsx",
+      "contenido": "import { I18nextProvider } from 'react-i18next';\nimport { useTranslation } from 'react-i18next';\nimport { useEffect, useState } from 'react';\nimport i18n from '~/utils/i18n/config';\n\ninterface I18nProviderProps {\n  children: React.ReactNode;\n}\n\n// Componente interno para inicializar i18next en el cliente\nfunction I18nInitializer({ children }: I18nProviderProps) {\n  const { i18n: i18nInstance } = useTranslation();\n  const [isInitialized, setIsInitialized] = useState(false);\n\n  useEffect(() => {\n    // i18next ya está inicializado desde config.ts\n    setIsInitialized(true);\n  }, [i18nInstance.language]);\n\n  if (!isInitialized) {\n    return <>{children}</>;\n  }\n\n  return <>{children}</>;\n}\n\nexport function I18nProvider({ children }: I18nProviderProps) {\n  return (\n    <I18nextProvider i18n={i18n}>\n      <I18nInitializer>{children}</I18nInitializer>\n    </I18nextProvider>\n  );\n}\n\nexport function useI18n() {\n  const { t, i18n } = require('react-i18next').useTranslation();\n  return { t, i18n };\n}",
+      "esperado": "Proveedor i18next funcional"
+    },
+    {
+      "orden": 2,
+      "accion": "Mantener backwards compatibility con useLanguageContext",
+      "archivo": "/var/www/tourtovalencia/app/providers/LanguageContext.tsx",
+      "contenido_modificado": "// Compatibilidad hacia atrás\nexport const useLanguageContext = () => {\n  const { t, i18n } = require('react-i18next').useTranslation();\n  \n  // Mantener estructura similar al contexto anterior\n  return {\n    state: {\n      currentLanguage: i18n.language as 'es' | 'en',\n      translations: {},\n    },\n    dispatch: (action: { type: string; payload: string }) => {\n      if (action.type === 'SET_LANGUAGE') {\n        i18n.changeLanguage(action.payload);\n      }\n    },\n    t,\n    i18n,\n  };\n};\n\nexport const LanguageContextProvider = I18nProvider;",
+      "esperado": "API compatible con código existente"
+    }
+  ],
+  "entregable": "Proveedor i18next integrado",
+  "tiempo_estimado": "1 hora",
+  "riesgo": "medio",
+  "nota": "Este es un paso crítico - requiere testing exhaustivo"
+}

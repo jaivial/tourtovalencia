@@ -1,0 +1,46 @@
+{
+  "fase": 2,
+  "paso": 1,
+  "titulo": "Instalar Dependencias de i18next",
+  "descripcion": "Instalar las dependencias necesarias para implementar el sistema profesional de traducciones con i18next y react-i18next",
+  "fecha_ejecucion": "2026-01-12",
+  "dependencias_nuevas": [
+    "i18next",
+    "react-i18next",
+    "i18next-http-backend",
+    "i18next-browser-languagedetector"
+  ],
+  "comando_instalacion": "npm install i18next react-i18next i18next-http-backend i18next-browser-languagedetector",
+  "ubicacion_archivos": {
+    "config_i18n": "/var/www/tourtovalencia/app/utils/i18n/config.ts",
+    "recursos": "/var/www/tourtovalencia/public/locales/{lang}/translation.json",
+    "backend": "/var/www/tourtovalencia/public/locales/{ns}/{lang}.json"
+  },
+  "estado": "pendiente_manual",
+  "nota": "La instalación automatizada tuvo timeout. Ejecutar manualmente: cd /var/www/tourtovalencia && npm install i18next react-i18next i18next-http-backend i18next-browser-languagedetector",
+  "tareas": [
+    {
+      "orden": 1,
+      "accion": "Ejecutar npm install para nuevas dependencias",
+      "comando": "cd /var/www/tourtovalencia && npm install i18next react-i18next i18next-http-backend i18next-browser-languagedetector",
+      "esperado": "Paquetes instalados en node_modules"
+    },
+    {
+      "orden": 2,
+      "accion": "Verificar instalación",
+      "comando": "ls /var/www/tourtovalencia/node_modules/i18next/",
+      "esperado": "Archivos del paquete instalados"
+    },
+    {
+      "orden": 3,
+      "accion": "Agregar a package.json (verificar)",
+      "comando": "cat /var/www/tourtovalencia/package.json | grep i18next",
+      "esperado": "Nuevas dependencias en package.json"
+    }
+  ],
+  "entregable": "Dependencias instaladas y verificadas",
+  "tiempo_estimado": "15 minutos",
+  "riesgo": "bajo",
+  "rollback": "npm uninstall i18next react-i18next i18next-http-backend i18next-browser-languagedetector",
+  "completado": false
+}

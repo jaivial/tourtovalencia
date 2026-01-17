@@ -1,0 +1,49 @@
+{
+  "fase": 4,
+  "paso": 3,
+  "titulo": "Mantener Sincronización MongoDB-Archivos",
+  "descripcion": "Crear sistema para mantener sincronizado MongoDB (solo metadatos) con archivos JSON (contenido)",
+  "archivos_objetivo": [
+    "/var/www/tourtovalencia/app/utils/db.server.ts",
+    "/var/www/tourtovalencia/app/models/tour.server.ts",
+    "/var/www/tourtovalencia/app/models/page.server.ts"
+  ],
+  "cambio_estrategico": {
+    "antes": "MongoDB almacena contenido completo (BSON)",
+    "despues": "MongoDB almacena solo metadatos (slug, status, id), contenido en archivos JSON"
+  },
+  "tareas": [
+    {
+      "orden": 1,
+      "accion": "Crear modelo simplificado para MongoDB",
+      "archivo": "/var/www/tourtovalencia/app/models/tour-metadata.ts",
+      "contenido": "import { z } from 'zod';\n\nexport const TourMetadataSchema = z.object({\n  _id: z.string().optional(),\n  slug: z.string(),\n  status: z.enum(['upcoming', 'active', 'inactive']).default('upcoming'),\n  tourPrice: z.number(),\n  heroImage: z.string().optional(),\n  pageId: z.string().optional(),\n  createdAt: z.date().optional(),\n  updatedAt: z.date().optional(),\n});\n\nexport type TourMetadata = z.infer<typeof TourMetadataSchema>;\n\n// Nota: tourName, description, duration, includes, meetingPoint\n// ahora se almacenan en archivos JSON, no en MongoDB",
+      "esperado": "Schema reducido para metadatos"
+    },
+    {
+      "orden": 2,
+      "accion": "Crear modelo simplificado para páginas",
+      "archivo": "/var/www/tourtovalencia/app/models/page-metadata.ts",
+      "contenido": "import { z } from 'zod';\n\nexport const PageMetadataSchema = z.object({\n  _id: z.string().optional(),\n  slug: z.string(),\n  name: z.string(),\n  template: z.string(),\n  status: z.enum(['upcoming', 'active', 'inactive']).default('upcoming'),\n  pageType: z.string().optional(),\n  createdAt: z.date().optional(),\n  updatedAt: z.date().optional(),\n});\n\nexport type PageMetadata = z.infer<typeof PageMetadataSchema>;\n\n// Nota: content ahora se almacena en archivos JSON (pages.json),\n// no en MongoDB",
+      "esperado": "Schema reducido para metadatos de página"
+    },
+    {
+      "orden": 3,
+      "accion": "Crear función de migración de MongoDB",
+      "archivo": "/var/www/tourtovalencia/scripts/migrate-content-to-json.js",
+      "contenido": "// Script para migrar contenido de MongoDB a archivos JSON\n// y dejar solo metadatos en MongoDB\n\nconst { MongoClient } = require('mongodb');\nconst fs = require('fs');\nconst path = require('path');\n\nconst MONGO_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tourtovalencia';\n\nasync function migrateMongoDBContent() {\n  const client = new MongoClient(MONGO_URI);\n  \n  try {\n    await client.connect();\n    const db = client.db('tourtovalencia');\n    \n    console.log('Migrando contenido de tours...');\n    const tours = await db.collection('tours').find({}).toArray();\n    \n    for (const tour of tours) {\n      // Extraer contenido traducible\n      const translations = {\n        es: {},\n        en: {}\n      };\n      \n      const fields = ['tourName', 'description', 'duration', 'includes', 'meetingPoint'];\n      for (const field of fields) {\n        if (tour[field]) {\n          if (tour[field].es) translations.es[field] = tour[field].es;\n          if (tour[field].en) translations.en[field] = tour[field].en;\n        }\n      }\n      \n      // Escribir a archivo JSON\n      // (llamar a saveTourTranslationsToJson)\n      \n      // Actualizar documento en MongoDB para eliminar campos\n      await db.collection('tours').updateOne(\n        { _id: tour._id },\n        {\n          $unset: {\n            tourName: \"\",\n            description: \"\",\n            duration: \"\",\n            includes: \"\",\n            meetingPoint: \"\"\n          }\n        }\n      );\n      \n      console.log(`Tour ${tour.slug} migrado`);\n    }\n    \n    console.log('\\nMigración completada');\n    \n  } finally {\n    await client.close();\n  }\n}\n\nmigrateMongoDBContent().catch(console.error);",
+      "esperado": "Script de migración funcional"
+    },
+    {
+      "orden": 4,
+      "accion": "Ejecutar script de migración (UNA SOLA VEZ)",
+      "comando": "cd /var/www/tourtovalencia && node scripts/migrate-content-to-json.js",
+      "esperado": "Contenido movido a JSON, MongoDB con solo metadatos"
+    }
+  ],
+  "entregable": "MongoDB con solo metadatos, contenido en archivos JSON",
+  "tiempo_estimado": "2 horas",
+  "riesgo": "muy alto",
+  "advertencia": "Hacer BACKUP antes de ejecutar",
+  "nota": "Este es irreversible - verificar funcionamiento primero"
+}

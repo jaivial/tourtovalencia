@@ -1,0 +1,80 @@
+{
+  "fase": 1,
+  "paso": 4,
+  "titulo": "Auditoría de Traducciones en MongoDB",
+  "descripcion": "Analizar cómo están almacenadas las traducciones actualmente en MongoDB y planificar la migración",
+  "fecha_ejecucion": "2026-01-12",
+  "resultados": {
+    "colecciones_encontradas": [
+      "payments",
+      "bookingLimits",
+      "bookings",
+      "adminuser",
+      "translations",
+      "pages",
+      "tours"
+    ],
+    "colecciones_con_traducciones": ["tours", "pages"],
+    "estructura_tours": {
+      "campos_multilenguaje": {
+        "tourName": "{ es: string, en: string }",
+        "description": "{ es: string, en: string }",
+        "duration": "{ es: string, en: string }",
+        "includes": "{ es: string, en: string }",
+        "meetingPoint": "{ es: string, en: string }"
+      },
+      "ejemplo_documento": {
+        "_id": "ObjectId",
+        "tourName": { "es": "Cuevas de San José", "en": "Caves of San José" },
+        "description": { "es": "", "en": "" },
+        "duration": { "es": "", "en": "" }
+      }
+    },
+    "estructura_pages": {
+      "campos_multilenguaje": {
+        "content": {
+          "es": {
+            "section1": {
+              "firstH3": "string",
+              "firstSquareH3": "string",
+              "firstSquareP": "string",
+              "secondSquareH3": "string",
+              "secondSquareP": "string",
+              "thirdSquareH3": "string",
+              "thirdSquareP": "string",
+              "button": "string",
+              "backgroundImage": { "preview": "data:image/webp;base64..." }
+            },
+            "section2": {
+              "firstH3": "string",
+              "secondH3": "string",
+              "thirdH3": "string",
+              "sectionImage": { "preview": "data:image/webp;base64..." }
+            },
+            "section3": {
+              "images": [{ "source": "data:image/webp;base64...", "alt": "string" }]
+            }
+          },
+          "en": { ... estructura similar ... }
+        }
+      }
+    },
+    "problema_identificado": {
+      "descripcion": "Imágenes base64 almacenadas en MongoDB",
+      "impacto": "Documentos MongoDB muy grandes (>100KB por página con imágenes)",
+      "ubicacion": "pages.content.es.section1.backgroundImage.preview",
+      "ejemplo": "section1.backgroundImage.preview contiene ~70KB de base64"
+    },
+    "numero_tours": 2,
+    "numero_paginas": 2
+  },
+  "plan_migracion": {
+    "extraccion_traducciones": "Crear scripts para exportar a JSON",
+    "separar_imagenes": "No almacenar imágenes en MongoDB",
+    "mantener_metadata": "Solo ID, slug, status en MongoDB",
+    "contenido_json": "guardar en /public/locales/"
+  },
+  "entregable": "Reporte de estructura MongoDB con plan de migración",
+  "completado": true,
+  "timestamp": "2026-01-12T21:01:00Z"
+}

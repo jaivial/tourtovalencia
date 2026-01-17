@@ -1,0 +1,84 @@
+{
+  "fase": 5,
+  "paso": 3,
+  "titulo": "Testing y Validación Final",
+  "descripcion": "Realizar testing completo de la aplicación después de la migración",
+  "checklist_pruebas": {
+    "funcionalidad_basica": [
+      {
+        "nombre": "Página principal carga",
+        "url": "http://localhost:3001",
+        "esperado": "200 OK en menos de 3 segundos"
+      },
+      {
+        "nombre": "Traducciones cambian al cambiar idioma",
+        "url": "http://localhost:3001?lang=en",
+        "esperado": "Interfaz en inglés"
+      },
+      {
+        "nombre": "Navegación entre páginas funciona",
+        "url": "http://localhost:3001/book",
+        "esperado": "200 OK"
+      }
+    ],
+    "editor_admin": [
+      {
+        "nombre": "Acceso al panel de administración",
+        "url": "http://localhost:3001/admin",
+        "esperado": "Login funcional"
+      },
+      {
+        "nombre": "Edición de tours",
+        "url": "http://localhost:3001/admin/dashboard/tours",
+        "esperado": "Formulario editable"
+      },
+      {
+        "nombre": "Guardar traducciones de tour",
+        "accion": "Editar tour y guardar",
+        "esperado": "Archivo JSON actualizado"
+      },
+      {
+        "nombre": "Edición de páginas",
+        "url": "http://localhost:3001/admin/dashboard/pagegen",
+        "esperado": "Editor de páginas funcional"
+      },
+      {
+        "nombre": "Guardar traducciones de página",
+        "accion": "Editar página y guardar",
+        "esperado": "Archivo pages.json actualizado"
+      }
+    ],
+    "rendimiento": [
+      {
+        "nombre": "TTFB",
+        "medicion": "curl -w \"%{time_starttransfer}\" -o /dev/null -s http://localhost:3001",
+        "esperado": "< 100ms"
+      },
+      {
+        "nombre": "Tamaño HTML",
+        "medicion": "curl -s http://localhost:3001 | wc -c",
+        "esperado": "< 200 KB"
+      },
+      {
+        "nombre": "Carga de traducciones",
+        "medicion": "Revisar network tab",
+        "esperado": "Carga bajo demanda"
+      }
+    ],
+    "seo": [
+      {
+        "nombre": "Meta tags presentes",
+        "comando": "curl -s http://localhost:3001 | grep -o '<title>.*</title>'",
+        "esperado": "Title correcto"
+      },
+      {
+        "nombre": "Open Graph tags",
+        "comando": "curl -s http://localhost:3001 | grep -o 'property=\"og:.*\"'",
+        "esperado": "Tags OG presentes"
+      }
+    ]
+  },
+  "entregable": "Reporte de testing con todos los checks completados",
+  "tiempo_estimado": "2 horas",
+  "nota": "Documentar cualquier issue encontrado"
+}

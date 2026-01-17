@@ -1,0 +1,57 @@
+{
+  "fase": 1,
+  "paso": 1,
+  "titulo": "Inventario de Archivos de Traducciones Existentes",
+  "descripcion": "Documentar todos los archivos de traducciones actuales y su estructura para entender el punto de partida",
+  "fecha_ejecucion": "2026-01-12",
+  "resultados": {
+    "archivos_encontrados": [
+      "/var/www/tourtovalencia/app/data/data.json",
+      "/var/www/tourtovalencia/app/data/translations/en.json",
+      "/var/www/tourtovalencia/app/data/translations/es.json",
+      "/var/www/tourtovalencia/app/data/translations/pages/experiencia-de-vinos.json",
+      "/var/www/tourtovalencia/app/data/translations/pages/cuevas-de-san-jose.json"
+    ],
+    "tamano_total_directorio": "40K",
+    "metricas_archivos": {
+      "data.json": {
+        "ruta": "/var/www/tourtovalencia/app/data/data.json",
+        "tamano_bytes": 50853,
+        "tamano_kb": 49.7,
+        "idiomas": ["en", "es"],
+        "claves_por_idioma": null
+      },
+      "es.json": {
+        "ruta": "/var/www/tourtovalencia/app/data/translations/es.json",
+        "tamano_bytes": null,
+        "tamano_kb": null,
+        "idiomas": ["es"],
+        "claves": 63
+      },
+      "en.json": {
+        "ruta": "/var/www/tourtovalencia/app/data/translations/en.json",
+        "tamano_bytes": null,
+        "tamano_kb": null,
+        "idiomas": ["en"],
+        "claves": 63
+      },
+      "pages": {
+        "cantidad_archivos": 2,
+        "archivos": [
+          "experiencia-de-vinos.json",
+          "cuevas-de-san-jose.json"
+        ]
+      }
+    },
+    "total_archivos_json": 5,
+    "total_claves_traduccion": 126,
+    "total_idiomas": 2
+  },
+  "problema_identificado": {
+    "descripcion": "data.json de 50KB se embebe completamente en el initialState de Remix",
+    "impacto": "HTML inicial de 3.4MB contiene todas las traducciones embebidas",
+    "ubicacion_carga": "window.__remixContext -> loaderData -> root -> initialLanguage"
+  },
+  "completado": true,
+  "timestamp": "2026-01-12T20:58:00Z"
+}
