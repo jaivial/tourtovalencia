@@ -15,14 +15,30 @@ import { ToastProvider } from "~/components/ui/toast-provider";
 import { getToursCollection } from "~/utils/db.server";
 import type { Tour } from "~/utils/db.schema.server";
 
-// Global error handler
+// Global error handler - supresses SSR hydration errors from heroui/theme
 if (typeof window !== 'undefined') {
+  // Add shims for CJS modules that might be loaded
+  if (!window.module) {
+    (window as any).module = { exports: {}, require: () => (window as any).module?.exports || {} };
+  }
+  if (!window.require) {
+    (window as any).require = () => (window as any).module?.exports || {};
+  }
+
+  const originalOnerror = window.onerror;
   window.onerror = (message, source, lineno, colno, error) => {
+    // Ignore require/module errors from CJS compatibility issues
+    if (typeof message === 'string' && (message.includes('require is not defined') || message.includes('module is not defined'))) {
+      return true; // Suppress the error
+    }
+    if (originalOnerror) {
+      return originalOnerror(message, source, lineno, colno, error);
+    }
     console.error('[GLOBAL ERROR]', message, error);
     // Force hide loading on error
     setTimeout(() => {
       const loadingElement = document.querySelector('[class*="bg-gray-900"]');
-      if (loadingElement) {
+      if (loadingElement && loadingElement instanceof HTMLElement) {
         loadingElement.style.display = 'none';
       }
     }, 100);
@@ -134,7 +150,7 @@ export const links = () => [
     rel: "icon",
     type: "image/png",
     sizes: "32x32",
-    href: "/favicon.png",
+    href: "https://cdn.tourtovalencia.com/public/favicon.png",
   },
   {
     rel: "manifest",

@@ -1,15 +1,36 @@
 import { json } from "@remix-run/server-runtime";
 import { useLoaderData } from "@remix-run/react";
 import { BookingProvider } from "~/context/BookingContext";
-import { BookingFeature } from "~/components/_book/BookingFeature";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { addMonths } from "date-fns";
 import type { Booking } from "~/types/booking";
-import { useEffect, useRef } from "react";
-import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { useRef } from "react";
 import { ObjectId } from "mongodb";
 import { getToursCollection, getCollection } from "~/utils/db.server";
 import type { Tour } from "./book";
 import { localDateToUTCMidnight } from "~/utils/date";
+
+// ClientOnly component to avoid SSR hydration issues with heroui/theme
+function ClientOnly({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  return mounted ? <>{children}</> : <>{fallback}</>;
+}
+
+function BookingLoading() {
+  return (
+    <div className="container mx-auto px-4 py-8 mt-24">
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    </div>
+  );
+}
+
+// Lazy load BookingFeature to defer heroui/theme loading
+const BookingFeature = lazy(() => import("~/components/_book/BookingFeature").then(module => ({ default: module.BookingFeature })));
 
 // Define types for booking documents
 interface BookingDocument {
@@ -386,18 +407,54 @@ export default function BookIndex() {
     >
       <div className="container mx-auto px-4 py-8">
         <div className="mt-8 flex justify-center">
-          <PayPalScriptProvider
-            options={{
-              clientId: paypalClientId || "",
-              currency: "EUR",
-              intent: "capture",
-              components: "buttons,funding-eligibility",
-            }}
-          >
-            <BookingFeature />
-          </PayPalScriptProvider>
+          <ClientOnly fallback={<BookingLoading />}>
+            <PayPalWrapper
+              clientId={paypalClientId || ""}
+              fallback={<BookingLoading />}
+            />
+          </ClientOnly>
         </div>
       </div>
     </BookingProvider>
+  );
+}
+
+// PayPalWrapper - loads PayPalScriptProvider only on client
+function PayPalWrapper({ clientId, fallback }: { clientId: string; fallback: React.ReactNode }) {
+  const [PayPalComp, setPayPalComp] = useState<React.ComponentType<any> | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    import("@paypal/react-paypal-js")
+      .then((module) => {
+        setPayPalComp(() => module.PayPalScriptProvider);
+      })
+      .catch((err) => {
+        console.error("Failed to load PayPal:", err);
+        setError("Failed to load payment system");
+      });
+  }, []);
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
+
+  if (!PayPalComp) {
+    return <>{fallback}</>;
+  }
+
+  return (
+    <PayPalComp
+      options={{
+        clientId,
+        currency: "EUR",
+        intent: "capture",
+        components: "buttons,funding-eligibility",
+      }}
+    >
+      <Suspense fallback={<BookingLoading />}>
+        <BookingFeature />
+      </Suspense>
+    </PayPalComp>
   );
 }
