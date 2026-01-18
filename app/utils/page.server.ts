@@ -12,11 +12,16 @@ dotenv.config();
 // Bunny CDN Configuration
 const BUNNY_CONFIG = {
   host: process.env.BUNNY_STORAGE_HOST || "storage.bunnycdn.com",
-  user: process.env.BUNNY_STORAGE_USER || "tourtovalencia",
-  password: process.env.BUNNY_STORAGE_PASSWORD || "6c94d8d9-908a-42fc-bace94bb92ce-2a83-4033",
+  user: process.env.BUNNY_STORAGE_USER,
+  password: process.env.BUNNY_STORAGE_PASSWORD,
   basePath: process.env.BUNNY_STORAGE_BASE_PATH || "/public/uploads",
   cdnBaseUrl: process.env.BUNNY_CDN_BASE_URL || "https://cdn.tourtovalencia.com/public/uploads"
 };
+
+// Validate Bunny configuration
+if (!BUNNY_CONFIG.password || !BUNNY_CONFIG.user) {
+  console.warn("[BUNNY_CONFIG] WARNING: BUNNY_STORAGE_PASSWORD and BUNNY_STORAGE_USER must be set in environment variables");
+}
 
 // FTP client singleton
 let ftpClient: FtpClientModule | null = null;
