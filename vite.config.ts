@@ -116,6 +116,9 @@ export default defineConfig(({ mode }) => {
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), '');
 
+  // Bunny CDN configuration (custom domain)
+  const CDN_URL = 'https://cdn.tourtovalencia.com';
+
   return {
     plugins: [
       remix({
@@ -168,10 +171,14 @@ export default defineConfig(({ mode }) => {
       external: ['color'],
     },
     define: {
-      'process.env': env
+      'process.env': env,
+      // Make CDN URL available to the app
+      'process.env.VITE_ASSET_BASE_URL': JSON.stringify(CDN_URL),
     },
     build: {
       chunkSizeWarningLimit: 150,
+      // Use CDN base URL for all assets
+      base: CDN_URL + '/',
       rollupOptions: {
         output: {
           manualChunks(id) {

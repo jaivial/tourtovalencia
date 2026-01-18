@@ -107,6 +107,7 @@ export const loader = async () => {
         template: 1,
         status: 1,
         pageType: 1,
+        content: 1,  // Needed for tour card images and descriptions
       })
       .limit(10)
       .toArray();
@@ -118,7 +119,10 @@ export const loader = async () => {
       template: doc.template || '',
       status: doc.status || 'upcoming',
       pageType: doc.pageType,
-    })) as SerializablePage[];
+      content: doc.content,
+      createdAt: doc.createdAt?.toISOString() || new Date().toISOString(),
+      updatedAt: doc.updatedAt?.toISOString() || new Date().toISOString(),
+    }));
   } catch (error) {
     console.error("Error fetching data:", error);
     tours = [];

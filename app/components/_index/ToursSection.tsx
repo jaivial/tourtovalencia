@@ -299,36 +299,27 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
               >
                  {/* Tour Image */}
                  <div className="h-56 overflow-hidden">
-                   {tourImage ? (
-                     <>
-                       <img 
-                         src={tourImage} 
-                         alt={cardData.title} 
-                         className={`w-full h-full object-cover transition-transform duration-500 hover:scale-110 ${tour.status === "upcoming" ? "grayscale" : ""}`}
-                         loading="lazy"
-                         onError={(e) => {
-                           const target = e.currentTarget;
-                           target.style.display = 'none';
-                           const placeholder = target.nextElementSibling as HTMLDivElement;
-                           if (placeholder) {
-                             placeholder.style.display = 'flex';
-                           }
-                         }}
-                       />
-                       {/* Fallback gray background placeholder */}
-                       <div className="absolute inset-0 bg-gray-300 flex items-center justify-center text-gray-500 hidden">
-                         <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                         </svg>
-                       </div>
-                     </>
-                   ) : (
-                     <div className="absolute inset-0 bg-gray-300 flex items-center justify-center text-gray-500">
-                       <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                       </svg>
-                     </div>
-                   )}
+                   {/* Default fallback image for tours */}
+                   {(() => {
+                     const defaultImage = "https://images.unsplash.com/photo-1583265101492-bfe6ef35cef8?q=80&w=1000&auto=format&fit=crop";
+                     return (
+                       <>
+                         <img
+                           src={tourImage || defaultImage}
+                           alt={cardData.title}
+                           className={`w-full h-full object-cover transition-transform duration-500 hover:scale-110 ${tour.status === "upcoming" ? "grayscale" : ""}`}
+                           loading="lazy"
+                           onError={(e) => {
+                             const target = e.currentTarget as HTMLImageElement;
+                             // Try fallback image if primary fails
+                             if (target.src !== defaultImage) {
+                               target.src = defaultImage;
+                             }
+                           }}
+                         />
+                       </>
+                     );
+                   })()}
                  </div>
 
                 {/* Tour Content */}
