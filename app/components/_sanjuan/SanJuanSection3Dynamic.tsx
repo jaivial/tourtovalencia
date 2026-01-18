@@ -10,8 +10,6 @@ import ImageGalleryModal from "../ui/ImageGalleryModal";
 type ImageType = {
   source: string;
   alt: string;
-  preview?: string;
-  cod64?: string;
 };
 
 type ChildProps = {
@@ -19,7 +17,7 @@ type ChildProps = {
   images?: ImageType[];
 };
 
-const FALLBACK_IMAGE = '/hero1.webp';
+const FALLBACK_IMAGE = 'https://cdn.tourtovalencia.com/public/hero1.webp';
 
 const SanJuanSection3Dynamic: React.FC<ChildProps> = ({ width, images = [] }) => {
   const plugin = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
@@ -28,10 +26,10 @@ const SanJuanSection3Dynamic: React.FC<ChildProps> = ({ width, images = [] }) =>
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
 
-  // Process images to handle cod64 and fallbacks
+  // Process images - use source directly, fallback only if missing
   const processedImages = React.useMemo(() => {
     const result = images.map(img => ({
-      source: img.cod64 || img.preview || img.source || FALLBACK_IMAGE,
+      source: img.source || FALLBACK_IMAGE,
       alt: img.alt || "Tour image"
     }));
 

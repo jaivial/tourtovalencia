@@ -31,17 +31,17 @@ const TravelGallery: React.FC<TravelGalleryProps> = ({ width, galleryText }) => 
   // Gallery images
   const images: GalleryImage[] = [
     {
-      src: "https://www.spain.info/export/sites/segtur/.content/images/cabeceras-grandes/comunidad-valenciana/ciudad-artes-ciencias-noche-valencia-pexel256150.jpg",
+      src: "https://cdn.tourtovalencia.com/public/images/spain-ciudad-artes-ciencias.jpg",
       alt: "City of Arts and Sciences",
       location: language === "en" ? "City of Arts and Sciences" : "Ciudad de las Artes y las Ciencias"
     },
     {
-      src: "https://covesdesantjosep.es/wp-content/uploads/2023/05/banner-coves-covesdesantjosep-2023.jpg",
+      src: "https://cdn.tourtovalencia.com/public/images/coves-santjosep-banner.jpg",
       alt: "Cuevas de San José",
       location: "Cuevas de San José"
     },
     {
-      src: "https://mediaim.expedia.com/destination/9/f1cedf5105d3f0679eb01587b6bb4b72.jpg",
+      src: "https://cdn.tourtovalencia.com/public/uploads/expedia-destination.jpg",
       alt: "Valencia Cathedral",
       location: language === "en" ? "Valencia Cathedral" : "Catedral de Valencia"
     },
@@ -56,9 +56,9 @@ const TravelGallery: React.FC<TravelGalleryProps> = ({ width, galleryText }) => 
       location: "Albufera de Valencia"
     },
     {
-      src: "https://images.unsplash.com/photo-1624396372026-dac58b4fb3b8?q=80&w=3157&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      alt: "Torres de Serranos",
-      location: language === "en" ? "Torres de Serranos" : "Torres de Serranos"
+      src: "https://cdn.tourtovalencia.com/public/images/valencia-beach.jpg",
+      alt: "Valencia Beach",
+      location: language === "en" ? "Valencia Beach" : "Playa de Valencia"
     }
   ];
 

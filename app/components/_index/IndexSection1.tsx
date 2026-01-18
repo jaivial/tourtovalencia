@@ -17,7 +17,7 @@ const IndexSection1: React.FC<ChildProps> = ({ width, height, indexSection1Text 
         <div
           className={`rounded-2xl transition-all duration-500 ease-in-out ${
             width <= 300 ? "w-[200px] h-[380px] bg-cover ml-[15px] -mt-[15px]" : width <= 350 ? "w-[250px] h-[380px] bg-cover ml-[20px] -mt-[20px]" : width <= 400 ? "w-[280px] h-[420px] bg-cover ml-[30px] -mt-[30px]" : width <= 450 ? "w-[300px] h-[450px] bg-cover ml-[30px] -mt-[30px]" : "w-[300px] h-[450px] bg-contain ml-[40px] -mt-[40px]"
-          }   bg-[url('/photo1section1.jpg')] bg-no-repeat  absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]  z-30`}
+          }   bg-[url('https://cdn.tourtovalencia.com/public/uploads/photo1section1.jpg')] bg-no-repeat  absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]  z-30`}
         ></div>
         <div className={`transition-all duration-500 ease-in-out rounded-2xl ${width <= 300 ? "w-[200px] h-[380px]" : width <= 350 ? "w-[250px] h-[380px]" : width <= 400 ? "w-[280px] h-[420px]" : width <= 450 ? "w-[300px] h-[450px]" : "w-[300px] h-[450px]"}   bg-blue-100 absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%] z-20`}></div>
         <div

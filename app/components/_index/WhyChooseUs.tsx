@@ -97,8 +97,8 @@ export default function WhyChooseUs({ width, whyChooseUsText }: WhyChooseUsProps
             className="w-full h-[500px] md:h-[600px] rounded-2xl overflow-hidden"
           >
             <img
-              src="https://images.unsplash.com/photo-1624396372016-dac58b4fb3b8?q=80&w=3157&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              alt="Torres de Serranos, Valencia"
+              src="https://cdn.tourtovalencia.com/public/images/valencia-beach.jpg"
+              alt="Valencia Beach"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-blue-900/70 to-transparent"></div>

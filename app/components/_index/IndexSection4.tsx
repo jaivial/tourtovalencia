@@ -17,7 +17,7 @@ type ChildProps = {
 const Card = (props: CardProps) => (
   <Panel {...props} bordered header="" className="max-w-[420px] w-[420px] h-[680px] bg-gradient-to-b from-blue-50 to-blue-100 shadow-lg hover:shadow-xl hover:from-blue-100 hover:to-blue-200 transition-all hover:w-[470px] hover:max-w-[470px] duration-500 hover:cursor-pointer group">
     <div className="flex flex-col items-center h-[620px]">
-      <div className="w-full h-[600px] mt-0 bg-blue-300 rounded-lg bg-[url('/sanjuancard.jpg')] bg-cover bg-center"></div>
+      <div className="w-full h-[600px] mt-0 bg-blue-300 rounded-lg bg-[url('https://cdn.tourtovalencia.com/public/uploads/sanjuancard.jpg')] bg-cover bg-center"></div>
       <div className="pt-8 pb-0 py-2 flex flex-col items-center gap-4 flex-grow justify-between h-full">
         {/* Div with image of the adventure */}
         <div>

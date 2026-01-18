@@ -1,6 +1,6 @@
 import { json } from "@remix-run/server-runtime";
 import type { ActionFunctionArgs } from "@remix-run/server-runtime";
-import { useNavigation, Outlet, useLocation } from "@remix-run/react";
+import { useNavigation, Outlet, useLocation, isRouteErrorResponse, useRouteError } from "@remix-run/react";
 import type { MetaFunction } from "@remix-run/react";
 import { BookingLoading } from "~/components/_book/BookingLoading";
 import type { Booking } from "~/types/booking";
@@ -37,7 +37,7 @@ export const meta: MetaFunction = () => {
   const title = "Book Your Experience | Tour To Valencia";
   const description = "Book your unique dining experience with us";
   const url = "https://tourtovalencia.com/book";
-  const imageUrl = "https://tourtovalencia.com/tourtovalenciablackbg.webp";
+  const imageUrl = "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp";
 
   return [
     { title },
@@ -288,4 +288,60 @@ export default function Book() {
   }
 
   return <Outlet />;
+}
+
+// ============================================================================
+// Error Boundary - Handles PayPal and other errors gracefully
+// ============================================================================
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div className="container mx-auto px-4 py-8 mt-24 text-center">
+        <h1 className="text-2xl font-bold text-destructive mb-4">{error.status}</h1>
+        <p className="text-muted-foreground">{error.data}</p>
+        <a
+          href="/book"
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-4 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          Try Again
+        </a>
+      </div>
+    );
+  }
+
+  // Handle PayPal script loading errors
+  if (error instanceof Error && error.message.includes('flat')) {
+    return (
+      <div className="container mx-auto px-4 py-8 mt-24 text-center">
+        <h1 className="text-2xl font-bold text-destructive mb-4">Payment System Loading Error</h1>
+        <p className="text-muted-foreground mb-4">
+          There was an issue loading the payment system. This is usually temporary.
+        </p>
+        <a
+          href="/book"
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-4 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          Refresh Page
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 mt-24 text-center">
+      <h1 className="text-2xl font-bold mb-4">Unexpected Error</h1>
+      <p className="text-muted-foreground mb-4">
+        Something went wrong. Please try again or contact support.
+      </p>
+      <a
+        href="/book"
+        className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-4 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
+      >
+        Try Again
+      </a>
+    </div>
+  );
 }

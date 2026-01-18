@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, startTransition } from 'react';
 import { useTranslation as useI18nextTranslation } from 'react-i18next';
 import i18n from '~/utils/i18n/config';
 
@@ -17,17 +17,23 @@ export function useTranslation(lang: string = 'es') {
 
   useEffect(() => {
     async function loadTranslations() {
-      setLoading(true);
+      startTransition(() => {
+        setLoading(true);
+      });
       try {
         const res = await fetch(`/api/translations?lang=${lang}`);
         if (res.ok) {
           const data = await res.json();
-          setTranslations(data);
+          startTransition(() => {
+            setTranslations(data);
+          });
         }
       } catch (error) {
         console.error('Error loading translations:', error);
       } finally {
-        setLoading(false);
+        startTransition(() => {
+          setLoading(false);
+        });
       }
     }
 
@@ -51,11 +57,13 @@ export function useI18nTranslation(namespaces: string[] = ['commons']) {
 
   useEffect(() => {
     async function loadNamespaces() {
-      setIsLoading(true);
-      
+      startTransition(() => {
+        setIsLoading(true);
+      });
+
       // Load requested namespaces for current language
       const currentLng = i18nInstance.language || 'es';
-      
+
       const promises = namespaces.map(async (ns) => {
         try {
           const response = await fetch(`/locales/${currentLng}/${ns}.json`);
@@ -69,13 +77,17 @@ export function useI18nTranslation(namespaces: string[] = ['commons']) {
       });
 
       await Promise.all(promises);
-      setIsLoading(false);
+      startTransition(() => {
+        setIsLoading(false);
+      });
     }
 
     if (!i18nInstance.isInitialized) {
       loadNamespaces();
     } else {
-      setIsLoading(false);
+      startTransition(() => {
+        setIsLoading(false);
+      });
     }
   }, [namespaces, i18nInstance.language]);
 
@@ -105,13 +117,17 @@ export function useLanguage() {
   useEffect(() => {
     const saved = localStorage.getItem('language') as 'es' | 'en' | null;
     if (saved && (saved === 'es' || saved === 'en')) {
-      setCurrentLang(saved);
+      startTransition(() => {
+        setCurrentLang(saved);
+      });
     }
   }, []);
 
   const setLanguage = useCallback((lang: 'es' | 'en') => {
     localStorage.setItem('language', lang);
-    setCurrentLang(lang);
+    startTransition(() => {
+      setCurrentLang(lang);
+    });
     i18n.changeLanguage(lang);
   }, []);
 

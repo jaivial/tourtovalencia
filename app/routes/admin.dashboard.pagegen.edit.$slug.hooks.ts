@@ -286,7 +286,7 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
   const handleSection5ImageRemove = () => {
     setSection5Data(prev => ({
       ...prev,
-      image: "/plazareina2.jpg" // Reset to default image
+      image: "https://cdn.tourtovalencia.com/public/plazareina2.jpg" // Reset to default image
     }));
   };
 

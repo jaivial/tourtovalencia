@@ -4,11 +4,124 @@ import axios from "axios";
 import sharp from "sharp";
 import dotenv from "dotenv";
 import { generateTranslationFiles } from "./i18n/file-generator";
+import FtpClientModule from "ftp";
 
 // Initialize dotenv
 dotenv.config();
 
-const MAX_IMAGE_SIZE = 400 * 1024; // 400KB limit per image (reduced from 500KB)
+// Bunny CDN Configuration
+const BUNNY_CONFIG = {
+  host: process.env.BUNNY_STORAGE_HOST || "storage.bunnycdn.com",
+  user: process.env.BUNNY_STORAGE_USER || "tourtovalencia",
+  password: process.env.BUNNY_STORAGE_PASSWORD || "6c94d8d9-908a-42fc-bace94bb92ce-2a83-4033",
+  basePath: process.env.BUNNY_STORAGE_BASE_PATH || "/public/uploads",
+  cdnBaseUrl: process.env.BUNNY_CDN_BASE_URL || "https://cdn.tourtovalencia.com/public/uploads"
+};
+
+// FTP client singleton
+let ftpClient: FtpClientModule | null = null;
+
+function getFtpClient(): FtpClientModule {
+  if (!ftpClient) {
+    ftpClient = new FtpClientModule();
+    ftpClient.on("error", (err: Error) => {
+      console.error("FTP Error:", err);
+    });
+  }
+  return ftpClient;
+}
+
+async function connectFtp(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const client = getFtpClient();
+    client.connect({
+      host: BUNNY_CONFIG.host,
+      user: BUNNY_CONFIG.user,
+      password: BUNNY_CONFIG.password,
+    });
+    client.on("ready", () => {
+      console.log("FTP connected to Bunny Storage");
+      resolve();
+    });
+    client.on("error", (err) => {
+      console.error("FTP connection error:", err);
+      reject(err);
+    });
+  });
+}
+
+async function disconnectFtp(): Promise<void> {
+  return new Promise((resolve) => {
+    const client = getFtpClient();
+    client.end();
+    ftpClient = null;
+    console.log("FTP disconnected");
+    resolve();
+  });
+}
+
+// Helper function to upload image to Bunny CDN
+async function uploadToBunnyCDN(base64Data: string, imagePath: string): Promise<string> {
+  try {
+    // Extract the actual base64 data
+    const mimeType = base64Data.split(";")[0].split(":")[1] || "image/webp";
+    const base64Image = base64Data.split(";base64,").pop();
+    if (!base64Image) {
+      throw new Error("Invalid base64 image data");
+    }
+
+    const buffer = Buffer.from(base64Image, "base64");
+
+    // Generate unique filename
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const extension = mimeType.split("/")[1] || "webp";
+    const filename = `${imagePath.replace(/[^a-zA-Z0-9]/g, "-")}-${timestamp}-${randomSuffix}.${extension}`;
+    const fullPath = `${BUNNY_CONFIG.basePath}/${filename}`;
+
+    // Connect to FTP and upload
+    await connectFtp();
+
+    return new Promise((resolve, reject) => {
+      const client = getFtpClient();
+      client.put(buffer, fullPath, (err) => {
+        if (err) {
+          console.error("FTP upload error:", err);
+          reject(err);
+          return;
+        }
+        console.log(`Image uploaded to Bunny CDN: ${fullPath}`);
+        const cdnUrl = `${BUNNY_CONFIG.cdnBaseUrl}/${filename}`;
+        resolve(cdnUrl);
+      });
+    });
+  } catch (error) {
+    console.error("Error uploading to Bunny CDN:", error);
+    throw error;
+  }
+}
+
+// Helper function to upload multiple images in batch
+async function uploadImagesToBunnyBatch(
+  images: Array<{ base64: string; path: string }>
+): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+
+  for (const img of images) {
+    try {
+      const url = await uploadToBunnyCDN(img.base64, img.path);
+      results.set(img.path, url);
+    } catch (error) {
+      console.error(`Failed to upload image at ${img.path}:`, error);
+      // Keep original base64 if upload fails
+      results.set(img.path, img.base64);
+    }
+  }
+
+  return results;
+}
+
+const MAX_IMAGE_SIZE = 200 * 1024; // 200KB limit per image (reduced from 400KB)
 // Configuration for Google AI Studio API
 const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
 // Using gemini-2.0-flash-lite for better rate limits
@@ -308,14 +421,24 @@ async function optimizeImage(base64Data: string, keyPath: string = "unknown"): P
     }
     
     // Detailed logging of image optimization
-    console.log(`📸 [${keyPath}] Image optimized: 
+    console.log(`📸 [${keyPath}] Image optimized:
       Original: ${(originalSize / 1024).toFixed(2)}KB (${originalWidth}x${originalHeight}) ${mimeType}
       Final: ${(optimizedBuffer.length / 1024).toFixed(2)}KB (${width}x${height}) webp
       Reduction: ${((1 - optimizedBuffer.length / originalSize) * 100).toFixed(2)}%
       Quality: ${quality}
     `);
-    
-    return `data:image/webp;base64,${optimizedBuffer.toString("base64")}`;
+
+    // Upload to Bunny CDN and return the URL
+    const optimizedBase64 = `data:image/webp;base64,${optimizedBuffer.toString("base64")}`;
+    try {
+      const cdnUrl = await uploadToBunnyCDN(optimizedBase64, keyPath);
+      console.log(`🚀 [${keyPath}] Image uploaded to Bunny CDN: ${cdnUrl}`);
+      return cdnUrl;
+    } catch (uploadError) {
+      console.warn(`⚠️ [${keyPath}] Failed to upload to Bunny CDN, using base64 fallback`);
+      // Fallback to base64 if upload fails
+      return optimizedBase64;
+    }
   } catch (error) {
     console.error(`Error optimizing image at ${keyPath}:`, error);
     return base64Data; // Return original if optimization fails

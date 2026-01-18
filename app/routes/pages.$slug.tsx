@@ -74,12 +74,12 @@ export const meta: MetaFunction = ({ data }) => {
     { name: "description", content: description },
     { property: "og:title", content: `${typedData.page.name} | Tour To Valencia` },
     { property: "og:description", content: description },
-    { property: "og:image", content: "https://tourtovalencia.com/tourtovalenciablackbg.webp" },
+    { property: "og:image", content: "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp" },
     { property: "og:image:width", content: "1200" },
     { property: "og:image:height", content: "630" },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
-    { name: "twitter:image", content: "https://tourtovalencia.com/tourtovalenciablackbg.webp" },
+    { name: "twitter:image", content: "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp" },
     { rel: "icon", type: "image/x-icon", href: "https://tourtovalencia.com/favicon.ico" },
     { name: "google-site-verification", content: "63kEgo-K5QpeD7-YtpQpviW4aSnh6NAEPEsyUMybOec" }
   ];

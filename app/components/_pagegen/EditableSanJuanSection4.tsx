@@ -121,56 +121,56 @@ const animationOptions = [
   {
     id: "gif-1",
     name: "Barco GIF",
-    src: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzE1djk0bXFzb253ZjhocnRkeWIzdTJiNWN5dWtjczJ1aWFlNThzZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/Yw8LhqJYneW06RfgIf/giphy.gif",
+    src: "https://cdn.tourtovalencia.com/public/images/giphy-animation-1.gif",
     preview: "gif",
     icon: null
   },
   {
     id: "gif-2",
     name: "Playa GIF",
-    src: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXFxc3h2NnNyZGM4ZnU5eWQ3cmM2Y2loMXM5N2RsNmJscGQzZzc3aCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/7cVBRpwlPyIznC2sDq/giphy.gif",
+    src: "https://cdn.tourtovalencia.com/public/images/giphy-animation-2.gif",
     preview: "gif",
     icon: null
   },
   {
     id: "gif-3",
     name: "Palmera GIF",
-    src: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExaDRtMXJsNW5lOHhnOGlxcnA5ZWVuZXVscnhkejRscjFyODl4cG5tcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/R0qEWj33vaHTUG3WFF/giphy.gif",
+    src: "https://cdn.tourtovalencia.com/public/images/giphy-animation-3.gif",
     preview: "gif",
     icon: null
   },
   {
     id: "gif-4",
     name: "Viaje GIF",
-    src: "https://media.giphy.com/media/UVkQ14VTDTI26GyXVU/giphy.gif?cid=790b76112k2ebt9egpdhjk596fg5fbdn4hw6mf05hawd6r7q&ep=v1_stickers_search&rid=giphy.gif&ct=s",
+    src: "https://cdn.tourtovalencia.com/public/images/giphy-animation-4.gif",
     preview: "gif",
     icon: null
   },
   {
     id: "gif-5",
     name: "Maleta GIF",
-    src: "https://media.giphy.com/media/LrM4uGlpOHitZ5Ogub/giphy.gif?cid=790b76112k2ebt9egpdhjk596fg5fbdn4hw6mf05hawd6r7q&ep=v1_stickers_search&rid=giphy.gif&ct=s",
+    src: "https://cdn.tourtovalencia.com/public/images/giphy-animation-5.gif",
     preview: "gif",
     icon: null
   },
   {
     id: "gif-6",
     name: "Avión GIF",
-    src: "https://media.giphy.com/media/UQgwxFSjhbUGpoSEXL/giphy.gif?cid=ecf05e47smj5s9k5bjdzz3ta9iuw19q6w6odr4t7f9rr0lof&ep=v1_stickers_search&rid=giphy.gif&ct=s",
+    src: "https://cdn.tourtovalencia.com/public/images/giphy-animation-6.gif",
     preview: "gif",
     icon: null
   },
   {
     id: "gif-7",
     name: "Mapa GIF",
-    src: "https://media.giphy.com/media/dAu3qBzpmXstCTimDv/giphy.gif?cid=790b7611264cotuvxju8qcgxmvcuucs1z4l6vtcjgmwx57xq&ep=v1_stickers_search&rid=giphy.gif&ct=s",
+    src: "https://cdn.tourtovalencia.com/public/images/giphy-animation-7.gif",
     preview: "gif",
     icon: null
   },
   {
     id: "gif-8",
     name: "Brújula GIF",
-    src: "https://media.giphy.com/media/8p1WPEOeDWFCksfe18/giphy.gif?cid=790b7611264cotuvxju8qcgxmvcuucs1z4l6vtcjgmwx57xq&ep=v1_stickers_search&rid=giphy.gif&ct=s",
+    src: "https://cdn.tourtovalencia.com/public/images/giphy-animation-8.gif",
     preview: "gif",
     icon: null
   }

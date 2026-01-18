@@ -21,7 +21,7 @@ const DEFAULT_SECTION1_DATA: sanJuanSection1Type = {
   thirdSquareP: "",
   button: "",
   backgroundImage: {
-    preview: '/olgaphoto3.jpeg'
+    preview: 'https://cdn.tourtovalencia.com/public/olgaphoto3.jpeg'
   }
 };
 
@@ -30,7 +30,7 @@ const DEFAULT_SECTION2_DATA: sanJuansection2Type = {
   secondH3: "",
   thirdH3: "",
   sectionImage: {
-    preview: '/olgaphoto3.jpeg'
+    preview: 'https://cdn.tourtovalencia.com/public/olgaphoto3.jpeg'
   },
   lottieAnimation: {
     enabled: false,
@@ -126,7 +126,7 @@ export const usePageGenerator = () => {
   const handleSection1ImageRemove = () => {
     setSection1Data(prev => ({
       ...prev,
-      backgroundImage: { preview: '/olgaphoto3.jpeg' }
+      backgroundImage: { preview: 'https://cdn.tourtovalencia.com/public/olgaphoto3.jpeg' }
     }));
   };
 
@@ -149,7 +149,7 @@ export const usePageGenerator = () => {
   const handleSection2ImageRemove = () => {
     setSection2Data(prev => ({
       ...prev,
-      sectionImage: { preview: '/olgaphoto3.jpeg' }
+      sectionImage: { preview: 'https://cdn.tourtovalencia.com/public/olgaphoto3.jpeg' }
     }));
   };
 
@@ -221,7 +221,7 @@ export const usePageGenerator = () => {
   const handleSection5ImageRemove = () => {
     setSection5Data(prev => ({
       ...prev,
-      image: "/plazareina2.jpg" // Reset to default image
+      image: "https://cdn.tourtovalencia.com/public/plazareina2.jpg" // Reset to default image
     }));
   };
 

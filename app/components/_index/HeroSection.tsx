@@ -24,12 +24,12 @@ const HeroSection: React.FC<ChildProps> = ({ width, height, heroSectionText }) =
           {/* Mobile portrait */}
           <source
             media="(max-width: 570px)"
-            srcSet="/hero3.jpg"
+            srcSet="https://cdn.tourtovalencia.com/public/uploads/hero3.jpg"
           />
 
           {/* Desktop default */}
           <img
-            src="/hero3.jpg"
+            src="https://cdn.tourtovalencia.com/public/uploads/hero3.jpg"
             alt="Valencia Adventure Background"
             className="w-full h-full object-cover brightness-[1] object-[50%_center] sm:object-center"
           />

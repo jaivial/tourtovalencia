@@ -10,7 +10,7 @@ export const meta: MetaFunction = () => {
   const title = "Valencia Tourism Guide - Things to Do & See in Valencia, Spain";
   const description = "Discover the best things to do in Valencia, Spain. From city tours to boat trips, find all the top attractions, activities, and places to visit in Valencia.";
   const url = "https://tourtovalencia.com/valencia-things-to-do";
-  const imageUrl = "https://tourtovalencia.com/tourtovalenciablackbg.webp";
+  const imageUrl = "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp";
 
   return [
     { title },
@@ -191,8 +191,8 @@ export default function ValenciaSEO() {
           transition={{ duration: 10, ease: "easeOut" }}
           className="absolute inset-0 z-0"
         >
-          <img 
-            src="https://images.unsplash.com/photo-1583265101492-bfe6ef35cef8?q=80&w=4000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+          <img
+            src="https://cdn.tourtovalencia.com/public/uploads/unsplash-valencia-1.jpg?v=20260118"
             alt="Valencia City of Arts and Sciences" 
             className="w-full h-full object-cover"
           />
@@ -272,8 +272,8 @@ export default function ValenciaSEO() {
             transition={{ duration: 0.8 }}
           >
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1602597421452-64682dc51a71?q=80&w=3024&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+              <img
+                src="https://cdn.tourtovalencia.com/public/uploads/unsplash-valencia-2.jpg?v=20260118"
                 alt="Valencia Old Town" 
                 className="w-full h-64 object-cover"
               />
@@ -298,8 +298,8 @@ export default function ValenciaSEO() {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1595242797386-d1405ae6dc77?q=80&w=4374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+              <img
+                src="https://cdn.tourtovalencia.com/public/uploads/unsplash-valencia-3.jpg"
                 alt="Valencia Tours" 
                 className="w-full h-64 object-cover"
               />

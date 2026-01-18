@@ -34,7 +34,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     <div className={`relative w-full h-full ${className}`}>
       {/* Image display */}
       <img 
-        src={currentImage || '/plazareina2.jpg'}
+        src={currentImage || 'https://cdn.tourtovalencia.com/public/plazareina2.jpg'}
         alt="Tour"
         className="w-full h-full object-cover"
       />

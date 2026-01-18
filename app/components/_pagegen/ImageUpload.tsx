@@ -52,7 +52,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     <div className={`relative w-full h-full group ${className}`}>
       {/* Image element with styling matching SanJuanSection5.tsx */}
       <img 
-        src={imageUrl || '/plazareina2.jpg'}
+        src={imageUrl || 'https://cdn.tourtovalencia.com/public/plazareina2.jpg'}
         alt="Section content"
         className="w-full h-full object-cover rounded-2xl transition-transform duration-700"
       />

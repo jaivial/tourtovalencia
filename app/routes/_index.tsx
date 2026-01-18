@@ -1,12 +1,22 @@
 // Page component: just responsible for containing providers, feature components and fectch data from the ssr.
 import { useLoaderData } from "@remix-run/react";
 import type { MetaFunction } from "@remix-run/react";
-import IndexContainer from "~/components/_index/IndexContainer";
+import { lazy, Suspense, startTransition, useState, useEffect, useCallback } from "react";
 import { getDb } from "~/utils/db.server";
 import type { Tour, Page } from "~/utils/db.schema.server";
 import { i18n, getTranslations } from "~/utils/i18n.server";
-import { useState, useEffect } from "react";
 import { IndexLoadingScreen } from "~/components/ui/IndexLoadingScreen";
+
+// Lazy load heavy components
+const IndexContainer = lazy(() => import("~/components/_index/IndexContainer"));
+
+function LoadingPlaceholder() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <IndexLoadingScreen />
+    </div>
+  );
+}
 
 // Define a serializable version of the Tour type for use with JSON
 type SerializableTour = Omit<Tour, "createdAt" | "updatedAt"> & {
@@ -18,10 +28,6 @@ type SerializableTour = Omit<Tour, "createdAt" | "updatedAt"> & {
 type SerializablePage = Omit<Page, "createdAt" | "updatedAt"> & {
   createdAt: string;
   updatedAt: string;
-  content?: {
-    es: Record<string, unknown>;
-    en: Record<string, unknown>;
-  };
 };
 
 // Define the loader return type
@@ -79,7 +85,7 @@ export const loader = async () => {
       .limit(5)
       .toArray();
     console.log(`[INDEX LOADER] Fetched ${tourDocs.length} tours in ${Date.now() - toursStart}ms`);
-    tours = (tourDocs.map((doc) => ({
+    tours = tourDocs.map((doc) => ({
       _id: doc._id?.toString(),
       slug: doc.slug || '',
       tourName: doc.tourName || { en: '', es: '' },
@@ -88,9 +94,9 @@ export const loader = async () => {
       duration: doc.duration || { en: '', es: '' },
       heroImage: doc.heroImage,
       pageId: doc.pageId,
-    }))) as unknown as SerializableTour[];
+    })) as SerializableTour[];
 
-    // Fetch pages - including content for tour cards (OPTIMIZED)
+    // Fetch pages - ONLY essential fields (OPTIMIZED)
     const pagesStart = Date.now();
     const pageDocs = await db.collection("pages")
       .find({ status: { $ne: 'inactive' } })
@@ -101,20 +107,18 @@ export const loader = async () => {
         template: 1,
         status: 1,
         pageType: 1,
-        content: 1,
       })
       .limit(10)
       .toArray();
     console.log(`[INDEX LOADER] Fetched ${pageDocs.length} pages in ${Date.now() - pagesStart}ms`);
-    pages = (pageDocs.map((doc) => ({
+    pages = pageDocs.map((doc) => ({
       _id: doc._id?.toString(),
       slug: doc.slug || '',
       name: doc.name || '',
       template: doc.template || '',
       status: doc.status || 'upcoming',
       pageType: doc.pageType,
-      content: doc.content,
-    }))) as unknown as SerializablePage[];
+    })) as SerializablePage[];
   } catch (error) {
     console.error("Error fetching data:", error);
     tours = [];
@@ -143,7 +147,7 @@ export const meta: MetaFunction = () => {
     { property: "og:description", content: "Disfruta de excursiones, viajes y visitas guiadas en Valencia para tus vacaciones. Excursiones disponibles: viaje desde Valencia a las Cuevas de San Juan con visita guiada y paseo en barca." },
     { property: "og:type", content: "website" },
     { property: "og:url", content: "https://www.tourtovalencia.com/" },
-    { property: "og:image", content: "https://tourtovalencia.com/tourtovalenciablackbg.webp" },
+    { property: "og:image", content: "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp" },
     { property: "og:image:width", content: "1200" }, // Recommended image width for WhatsApp
     { property: "og:image:height", content: "630" }, // Recommended image height for WhatsApp
     { property: "og:image:alt", content: "Excursión a las Cuevas de San Juan, salida desde Valencia" },
@@ -164,13 +168,19 @@ export default function Index() {
   const { tours, pages, translations } = useLoaderData<LoaderData>();
   const [isLoading, setIsLoading] = useState(true);
 
+  const stopLoading = useCallback(() => {
+    startTransition(() => {
+      setIsLoading(false);
+    });
+  }, []);
+
   useEffect(() => {
     // Check if all assets are loaded
     const handleLoad = () => {
       if (document.readyState === "complete") {
         // Add a small delay to ensure smooth transition
         setTimeout(() => {
-          setIsLoading(false);
+          stopLoading();
         }, 500);
       }
     };
@@ -178,18 +188,24 @@ export default function Index() {
     // Check if document is already loaded
     if (document.readyState === "complete") {
       setTimeout(() => {
-        setIsLoading(false);
+        stopLoading();
       }, 500);
     } else {
       window.addEventListener("load", handleLoad);
       return () => window.removeEventListener("load", handleLoad);
     }
-  }, []);
+  }, [stopLoading]);
 
   return (
     <>
       <IndexLoadingScreen isLoading={isLoading} message={translations["loading.tourToValencia"] || "Cargando Tour To Valencia..."} />
-      <IndexContainer tours={tours} pages={pages} />
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <IndexLoadingScreen isLoading={true} message={translations["loading"] || "Cargando..."} />
+        </div>
+      }>
+        <IndexContainer tours={tours} pages={pages} />
+      </Suspense>
     </>
   );
 }

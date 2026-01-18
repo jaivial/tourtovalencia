@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 
 interface IndexLoadingScreenProps {
   message?: string;
@@ -12,12 +12,16 @@ export const IndexLoadingScreen = ({ message = "Cargando...", isLoading }: Index
 
   useEffect(() => {
     if (!isLoading) {
-      // Start fade out
-      setOpacity("opacity-0");
+      // Start fade out wrapped in startTransition to avoid hydration issues
+      startTransition(() => {
+        setOpacity("opacity-0");
+      });
 
       // After transition completes, set display to none
       const timer = setTimeout(() => {
-        setDisplay("hidden");
+        startTransition(() => {
+          setDisplay("hidden");
+        });
       }, 1000); // Match this with the transition duration
 
       return () => clearTimeout(timer);
@@ -30,7 +34,7 @@ export const IndexLoadingScreen = ({ message = "Cargando...", isLoading }: Index
     <div className={`fixed inset-0 bg-gray-900 flex flex-col items-center justify-center z-50 ${opacity} transition-opacity duration-1000`} style={{ display: display === "hidden" ? "none" : "flex" }}>
       <div className="bg-gray-800 rounded-lg p-8 shadow-xl flex flex-col items-center">
         <div className="w-48 h-48 mb-4 relative">
-          <img src="/tourtovalencialogo.png" alt="Tour To Valencia Logo" className="w-full h-full object-contain" />
+          <img src="https://cdn.tourtovalencia.com/public/tourtovalencialogo.png" alt="Tour To Valencia Logo" className="w-full h-full object-contain" />
         </div>
 
         <div className="flex flex-col items-center gap-4 mt-2">

@@ -54,7 +54,7 @@ const SanJuanSection5Dynamic: React.FC<SanJuanSection5DynamicProps> = ({
     `${width <= 350 ? small : width <= 450 ? semismall : width <= 580 ? medium : width <= 768 ? semilarge : large}`;  
 
   // Use the image from the database or fallback to the default
-  const imageUrl = SanJuanSection5Text.image || "/plazareina2.jpg";
+  const imageUrl = SanJuanSection5Text.image || "https://cdn.tourtovalencia.com/public/plazareina2.jpg";
 
   // Function to render the appropriate animation based on the source
   const renderAnimation = () => {

@@ -9,7 +9,7 @@ export const AdminLoadingScreen = ({ message = "Verificando credenciales..." }: 
     <div className="fixed inset-0 bg-gray-900 flex flex-col items-center justify-center z-50">
       <div className="bg-gray-800 rounded-lg p-8 shadow-xl flex flex-col items-center">
         <div className="w-48 h-48 mb-4 relative">
-          <img src="/tourtovalencialogo.png" alt="Tour To Valencia Logo" className="w-full h-full object-contain" />
+          <img src="https://cdn.tourtovalencia.com/public/tourtovalencialogo.png" alt="Tour To Valencia Logo" className="w-full h-full object-contain" />
         </div>
 
         <div className="flex flex-col items-center gap-4 mt-2">

@@ -4,7 +4,6 @@ import { Menu, ArrowRightToLine, ChevronDown, Settings } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "~/components/ui/select";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import { useFetcher, useLocation, useLoaderData, useNavigate } from "@remix-run/react";
-import { Link } from "@remix-run/react";
 import type { RootLoaderData } from "~/root";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 
@@ -156,9 +155,7 @@ const Nav: React.FC<NavProps> = () => {
         >
             <LanguageSelector />
           <div className="w-[45px]" />
-          <Link to="/">
-           <img src="/tourtovalencialogo.png" alt="Olga Travel" loading="eager" className={` ${clientWidth < 380 ? "h-[20px]" : "h-[80px]"} py-2 absolute left-1/2 -translate-x-1/2 w-auto cursor-pointer`} />
-          </Link>
+           <img src="https://cdn.tourtovalencia.com/public/tourtovalencialogo.png" alt="Olga Travel" loading="eager" className={` ${clientWidth < 380 ? "h-[20px]" : "h-[80px]"} py-2 absolute left-1/2 -translate-x-1/2 w-auto`} />
           <div className="flex items-center gap-3">
             <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors" size={45} onClick={() => setMobileNavOpen(true)} />
           </div>
@@ -181,9 +178,7 @@ const Nav: React.FC<NavProps> = () => {
           }}
         >
             <LanguageSelector />
-          <Link to="/">
-          <img src="/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[50px]" : clientWidth < 450 ? "h-[50px]" : clientWidth < 500 ? "h-[50px]" : "h-[50px]"} cursor-pointer`} />
-          </Link>
+          <img src="https://cdn.tourtovalencia.com/public/tourtovalencialogo.png" alt="Olga Travel" className={` ${clientWidth < 380 ? "h-[50px]" : clientWidth < 450 ? "h-[50px]" : clientWidth < 500 ? "h-[50px]" : "h-[50px]"}`} />
           <div className="flex items-center gap-3">
             <Menu className="text-white cursor-pointer hover:text-blue-200 transition-colors z-[990]" size={45} onClick={() => setMobileNavOpen(true)} />
           </div>
@@ -220,9 +215,7 @@ const Nav: React.FC<NavProps> = () => {
             >
               <div className="flex flex-col w-full min-h-full justify-between py-4">
                 <div className="flex flex-col gap-6">
-                  <Link to="/">
-                   <img src="/tourtovalencialogo.png" alt="Olga Travel" loading="lazy" className={`${clientWidth < 380 ? "h-[60px]" : "h-[80px]"} mx-auto mb-4 cursor-pointer`} />
-                  </Link>
+                   <img src="https://cdn.tourtovalencia.com/public/tourtovalencialogo.png" alt="Olga Travel" loading="lazy" className={`${clientWidth < 380 ? "h-[60px]" : "h-[80px]"} mx-auto mb-4`} />
                   
                   {/* Regular Nav Links */}
                   <div className="flex flex-col gap-4 w-full">

@@ -1,0 +1,829 @@
+{
+  "meta": {
+    "description": "Mapeo de imágenes utilizadas en el proyecto Tour To Valencia",
+    "version": "4.0",
+    "lastUpdated": "2026-01-18",
+    "imagesBasePath": "/public",
+    "imagesFolder": "/public/images",
+    "cdnBaseUrl": "https://cdn.tourtovalencia.com/public",
+    "cdnImagesUrl": "https://cdn.tourtovalencia.com/public/images",
+    "cdnUploadsUrl": "https://cdn.tourtovalencia.com/public/uploads",
+    "r2BaseUrl": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public"
+  },
+  "compressedImages": {
+    "note": "Imágenes comprimidas a máximo 500KB y subido a /public/uploads/",
+    "images": [
+      {"name": "herosection6.webp", "size": "436 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/herosection6.webp"},
+      {"name": "herosection62.webp", "size": "506 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/herosection62.webp"},
+      {"name": "herosection3.jpg", "size": "342 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/herosection3.jpg"},
+      {"name": "herosection6.jpg", "size": "398 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/herosection6.jpg"},
+      {"name": "hero3.jpg", "size": "398 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/hero3.jpg"},
+      {"name": "expedia-destination.jpg", "size": "392 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/expedia-destination.jpg"},
+      {"name": "valenciaadventure1-mobile.webp", "size": "157 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/valenciaadventure1-mobile.webp"},
+      {"name": "hero1Copia.webp", "size": "50 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/hero1Copia.webp"},
+      {"name": "valenciaadventure1.jpg", "size": "462 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/valenciaadventure1.jpg"},
+      {"name": "herosection5.jpg", "size": "383 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/herosection5.jpg"},
+      {"name": "herosection2.jpg", "size": "462 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/herosection2.jpg"},
+      {"name": "hero2.jpg", "size": "383 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/hero2.jpg"},
+      {"name": "sanjuancard.jpg", "size": "473 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/sanjuancard.jpg"},
+      {"name": "plazadelareina.jpg", "size": "339 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/plazadelareina.jpg"},
+      {"name": "photo1section1.jpg", "size": "91 KB", "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/photo1section1.jpg"}
+    ]
+  },
+  "cdnUrls": {
+    "base": "https://cdn.tourtovalencia.com/public",
+    "imagesFolder": "https://cdn.tourtovalencia.com/public/images",
+    "files": {
+      "/public/": "https://cdn.tourtovalencia.com/public/",
+      "/public/images/": "https://cdn.tourtovalencia.com/public/images/"
+    }
+  },
+  "pages": [
+    {
+      "name": "Index Page",
+      "route": "app/routes/_index.tsx",
+      "images": [
+        {
+          "usage": "Meta og:image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalenciablackbg.webp",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp",
+          "localPath": "/public/tourtovalenciablackbg.webp",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "Index Page (old)",
+      "route": "app/routes/index.tsx",
+      "images": [
+        {
+          "usage": "Meta imageUrl",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalenciablackbg.webp",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp",
+          "localPath": "/public/tourtovalenciablackbg.webp",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "Book Page",
+      "route": "app/routes/book.tsx",
+      "images": [
+        {
+          "usage": "imageUrl",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalenciablackbg.webp",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp",
+          "localPath": "/public/tourtovalenciablackbg.webp",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "Legal Page",
+      "route": "app/routes/legal.tsx",
+      "images": [
+        {
+          "usage": "Meta og:image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalenciablackbg.webp",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp",
+          "localPath": "/public/tourtovalenciablackbg.webp",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "Pages (Dynamic Slug)",
+      "route": "app/routes/pages.$slug.tsx",
+      "images": [
+        {
+          "usage": "Meta og:image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalenciablackbg.webp",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp",
+          "localPath": "/public/tourtovalenciablackbg.webp",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        },
+        {
+          "usage": "Meta twitter:image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalenciablackbg.webp",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp",
+          "localPath": "/public/tourtovalenciablackbg.webp",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "Valencia Things To Do",
+      "route": "app/routes/valencia-things-to-do.tsx",
+      "images": [
+        {
+          "usage": "imageUrl",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalenciablackbg.webp",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp",
+          "localPath": "/public/tourtovalenciablackbg.webp",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "Admin Page Creation",
+      "route": "app/routes/admin.pagecreation.tsx",
+      "images": [
+        {
+          "usage": "Default image (line 16)",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/plazareina2.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/plazareina2.jpg",
+          "localPath": "/public/plazareina2.jpg",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        },
+        {
+          "usage": "Default image (line 66)",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/plazareina2.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/plazareina2.jpg",
+          "localPath": "/public/plazareina2.jpg",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "name": "HeroSection",
+      "path": "app/components/_index/HeroSection.tsx",
+      "images": [
+        {
+          "usage": "Background image (srcSet mobile)",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/hero3.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/hero3.jpg",
+          "localPath": "/public/hero3.jpg",
+          "existsLocal": true,
+          "uploadedToCdn": true,
+          "compressed": true,
+          "compressedSize": "398 KB"
+        },
+        {
+          "usage": "Background image (src desktop)",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/hero3.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/hero3.jpg",
+          "localPath": "/public/hero3.jpg",
+          "existsLocal": true,
+          "uploadedToCdn": true,
+          "compressed": true,
+          "compressedSize": "398 KB"
+        }
+      ]
+    },
+    {
+      "name": "IndexSection1",
+      "path": "app/components/_index/IndexSection1.tsx",
+      "images": [
+        {
+          "usage": "Background image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/photo1section1.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/photo1section1.jpg",
+          "localPath": "/public/photo1section1.jpg",
+          "existsLocal": true,
+          "uploadedToCdn": true,
+          "compressed": true,
+          "compressedSize": "91 KB"
+        }
+      ]
+    },
+    {
+      "name": "IndexSection4",
+      "path": "app/components/_index/IndexSection4.tsx",
+      "images": [
+        {
+          "usage": "Card background image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/sanjuancard.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/sanjuancard.jpg",
+          "localPath": "/public/sanjuancard.jpg",
+          "existsLocal": true,
+          "uploadedToCdn": true,
+          "compressed": true,
+          "compressedSize": "473 KB"
+        }
+      ]
+    },
+    {
+      "name": "WhyChooseUs",
+      "path": "app/components/_index/WhyChooseUs.tsx",
+      "images": [
+        {
+          "usage": "Valencia beach image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/valencia-beach.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/images/valencia-beach.jpg",
+          "localPath": "/images/valencia-beach.jpg",
+          "existsLocal": true,
+          "downloaded": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "TravelGallery",
+      "path": "app/components/_index/TravelGallery.tsx",
+      "images": [
+        {
+          "usage": "Gallery image 1 - Ciudad de las Artes y las Ciencias",
+          "originalUrl": "https://www.spain.info/export/sites/segtur/.content/images/cabeceras-grandes/comunidad-valenciana/ciudad-artes-ciencias-noche-valencia-pexel256150.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/images/spain-ciudad-artes-ciencias.jpg",
+          "localPath": "/images/spain-ciudad-artes-ciencias.jpg",
+          "type": "downloaded",
+          "downloaded": true,
+          "uploadedToCdn": true
+        },
+        {
+          "usage": "Gallery image 2 - Cuevas de San José",
+          "originalUrl": "https://covesdesantjosep.es/wp-content/uploads/2023/05/banner-coves-covesdesantjosep-2023.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/images/coves-santjosep-banner.jpg",
+          "localPath": "/images/coves-santjosep-banner.jpg",
+          "type": "downloaded",
+          "downloaded": true,
+          "uploadedToCdn": true
+        },
+        {
+          "usage": "Gallery image 3 - Destination",
+          "originalUrl": "https://mediaim.expedia.com/destination/9/f1cedf5105d3f0679eb01587b6bb4b72.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/expedia-destination.jpg",
+          "localPath": "/images/expedia-destination.jpg",
+          "type": "downloaded",
+          "downloaded": true,
+          "uploadedToCdn": true,
+          "compressed": true,
+          "compressedSize": "392 KB"
+        },
+        {
+          "usage": "Gallery image 4 - GetYourGuide (PROTEGIDA)",
+          "originalUrl": "https://cdn.getyourguide.com/img/tour/93401d6e4a87171fbac4dec20f4ba387f8153018f7535ad68e63541cae889af4.jpg/146.jpg",
+          "cdnUrl": null,
+          "localPath": null,
+          "type": "external",
+          "note": "URL protegida, no se pudo descargar ni subir a CDN"
+        },
+        {
+          "usage": "Gallery image 5 (R2)",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/valencia-beach.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/images/valencia-beach.jpg",
+          "localPath": "/images/valencia-beach.jpg",
+          "existsLocal": true,
+          "downloaded": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "IndexLoadingScreen",
+      "path": "app/components/ui/IndexLoadingScreen.tsx",
+      "images": [
+        {
+          "usage": "Logo image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalencialogo.png",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalencialogo.png",
+          "localPath": "/public/tourtovalencialogo.png",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "AdminLoadingScreen",
+      "path": "app/components/ui/AdminLoadingScreen.tsx",
+      "images": [
+        {
+          "usage": "Logo image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalencialogo.png",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalencialogo.png",
+          "localPath": "/public/tourtovalencialogo.png",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "Navigation",
+      "path": "app/components/layout/nav.tsx",
+      "images": [
+        {
+          "usage": "Logo mobile (line 158)",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalencialogo.png",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalencialogo.png",
+          "localPath": "/public/tourtovalencialogo.png",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        },
+        {
+          "usage": "Logo desktop (line 181)",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalencialogo.png",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalencialogo.png",
+          "localPath": "/public/tourtovalencialogo.png",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        },
+        {
+          "usage": "Logo mobile menu (line 218)",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalencialogo.png",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalencialogo.png",
+          "localPath": "/public/tourtovalencialogo.png",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "Footer",
+      "path": "app/components/layout/footer.tsx",
+      "images": [
+        {
+          "usage": "Footer logo",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/tourtovalencialogo.png",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/tourtovalencialogo.png",
+          "localPath": "/public/tourtovalencialogo.png",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "Root",
+      "path": "app/root.tsx",
+      "images": [
+        {
+          "usage": "Favicon",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/favicon.png",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/favicon.png",
+          "localPath": "/public/favicon.png",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "SanJuanSection5",
+      "path": "app/components/_sanjuan/SanJuanSection5.tsx",
+      "images": [
+        {
+          "usage": "Section image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/plazareina2.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/plazareina2.jpg",
+          "localPath": "/public/plazareina2.jpg",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "SanJuanSection5Dynamic",
+      "path": "app/components/_sanjuan/SanJuanSection5Dynamic.tsx",
+      "images": [
+        {
+          "usage": "Dynamic image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/plazareina2.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/plazareina2.jpg",
+          "localPath": "/public/plazareina2.jpg",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "SanJuanSection3Dynamic",
+      "path": "app/components/_sanjuan/SanJuanSection3Dynamic.tsx",
+      "images": [
+        {
+          "usage": "Fallback image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/hero1.webp",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/hero1.webp",
+          "localPath": "/public/hero1.webp",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "ImageUpload",
+      "path": "app/components/_pagegen/ImageUpload.tsx",
+      "images": [
+        {
+          "usage": "Default fallback image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/plazareina2.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/plazareina2.jpg",
+          "localPath": "/public/plazareina2.jpg",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    },
+    {
+      "name": "ImageUploader",
+      "path": "app/components/_pagegen/ImageUploader.tsx",
+      "images": [
+        {
+          "usage": "Default fallback image",
+          "r2Url": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/plazareina2.jpg",
+          "cdnUrl": "https://cdn.tourtovalencia.com/public/plazareina2.jpg",
+          "localPath": "/public/plazareina2.jpg",
+          "existsLocal": true,
+          "uploadedToCdn": true
+        }
+      ]
+    }
+  ],
+  "dataImages": {
+    "file": "app/data/data.json",
+    "images": [
+      {
+        "usage": "sanJuanSection3 images",
+        "images": [
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/photo4IS3.webp",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/photo4IS3.webp",
+            "localPath": "/public/photo4IS3.webp",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/olgaphoto6.jpeg",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/olgaphoto6.jpeg",
+            "localPath": "/public/olgaphoto6.jpeg",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/photo2IS3.webp",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/photo2IS3.webp",
+            "localPath": "/public/photo2IS3.webp",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/airbnb.jpeg",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/airbnb.jpeg",
+            "localPath": "/public/airbnb.jpeg",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/olgaphoto8.jpeg",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/olgaphoto8.jpeg",
+            "localPath": "/public/olgaphoto8.jpeg",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/photo1IndexSection2.webp",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/photo1IndexSection2.webp",
+            "localPath": "/public/photo1IndexSection2.webp",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/photo3IS3.webp",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/photo3IS3.webp",
+            "localPath": "/public/photo3IS3.webp",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/photo1IS3.webp",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/photo1IS3.webp",
+            "localPath": "/public/photo1IS3.webp",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/olgaphoto9.jpeg",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/olgaphoto9.jpeg",
+            "localPath": "/public/olgaphoto9.jpeg",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/olgaphoto1.jpeg",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/olgaphoto1.jpeg",
+            "localPath": "/public/olgaphoto1.jpeg",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/olgaphoto5.jpeg",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/olgaphoto5.jpeg",
+            "localPath": "/public/olgaphoto5.jpeg",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/olgaphoto2.jpeg",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/olgaphoto2.jpeg",
+            "localPath": "/public/olgaphoto2.jpeg",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/olgaphoto3.jpeg",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/olgaphoto3.jpeg",
+            "localPath": "/public/olgaphoto3.jpeg",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/olgaphoto4.jpeg",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/olgaphoto4.jpeg",
+            "localPath": "/public/olgaphoto4.jpeg",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/olgaphoto7.jpeg",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/olgaphoto7.jpeg",
+            "localPath": "/public/olgaphoto7.jpeg",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          },
+          {
+            "source": "/airbnb3.avif",
+            "cdnUrl": "https://cdn.tourtovalencia.com/public/airbnb3.avif",
+            "localPath": "/public/airbnb3.avif",
+            "existsLocal": true,
+            "uploadedToCdn": true
+          }
+        ]
+      }
+    ]
+  },
+  "giphyImages": {
+    "downloadedFolder": "/public/images",
+    "cdnFolder": "https://cdn.tourtovalencia.com/public/images",
+    "note": "Giphy GIFs animados descargados y subidos a CDN",
+    "images": [
+      {
+        "localName": "giphy-animation-1.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-1.gif",
+        "originalUrl": "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzE1djk0bXFzb253ZjhocnRkeWIzdTJiNWN5dWtjczJ1aWFlNThzZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/Yw8LhqJYneW06RfgIf/giphy.gif",
+        "size": "125 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "localName": "giphy-animation-2.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-2.gif",
+        "originalUrl": "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXFxc3h2NnNyZGM4ZnU5eWQ3cmM2Y2loMXM5N2RsNmJscGQzZzc3aCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/7cVBRpwlPyIznC2sDq/giphy.gif",
+        "size": "2.0 MB",
+        "uploadedToCdn": true
+      },
+      {
+        "localName": "giphy-animation-3.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-3.gif",
+        "originalUrl": "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExaDRtMXJsNW5lOHhnOGlxcnA5ZWVuZXVscnhkejRscjFyODl4cG5tcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/R0qEWj33vaHTUG3WFF/giphy.gif",
+        "size": "81 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "localName": "giphy-animation-4.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-4.gif",
+        "originalUrl": "https://media.giphy.com/media/UVkQ14VTDTI26GyXVU/giphy.gif",
+        "size": "2.0 MB",
+        "uploadedToCdn": true
+      },
+      {
+        "localName": "giphy-animation-5.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-5.gif",
+        "originalUrl": "https://media.giphy.com/media/LrM4uGlpOHitZ5Ogub/giphy.gif",
+        "size": "18 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "localName": "giphy-animation-6.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-6.gif",
+        "originalUrl": "https://media.giphy.com/media/UQgwxFSjhbUGpoSEXL/giphy.gif",
+        "size": "14 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "localName": "giphy-animation-7.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-7.gif",
+        "originalUrl": "https://media.giphy.com/media/dAu3qBzpmXstCTimDv/giphy.gif",
+        "size": "83 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "localName": "giphy-animation-8.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-8.gif",
+        "originalUrl": "https://media.giphy.com/media/8p1WPEOeDWFCksfe18/giphy.gif",
+        "size": "1.4 MB",
+        "uploadedToCdn": true
+      },
+      {
+        "localName": "giphy-animation-9.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-9.gif",
+        "originalUrl": "https://media.giphy.com/media/3o7WIAwEIpiH58BQYM/giphy.gif",
+        "size": "347 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "localName": "giphy-animation-10.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-10.gif",
+        "originalUrl": "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdm80emV4bjd6cWt2NzdjdHpxNXdnZ25mZHBndG1ucGhwemxkODVqbCZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/cnPihpbzb1KM14OU3B/giphy.gif",
+        "size": "607 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "localName": "giphy-animation-11.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-11.gif",
+        "originalUrl": "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdm80emV4bjd6cWt2NzdjdHpxNXdnZ25mZHBndG1ucGhwemxkODVqbCZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/jPBeUiexbtmTXYBvBf/giphy.gif",
+        "size": "147 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "localName": "giphy-animation-12.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-12.gif",
+        "originalUrl": "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGR2ejJiYWZnaG91czhmbjBmNHVuc2FjM3ZqdWNjM2Q0Y2ZxcHVvbyZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/UsBJ28yTpIvflXiBzX/giphy.gif",
+        "size": "4.0 MB",
+        "uploadedToCdn": true
+      },
+      {
+        "localName": "giphy-animation-13.gif",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/giphy-animation-13.gif",
+        "originalUrl": "https://media.giphy.com/media/LI7LkDukPz467s4sOO/giphy.gif",
+        "size": "3.1 MB",
+        "uploadedToCdn": true
+      }
+    ]
+  },
+  "downloadedImages": {
+    "folder": "/public/images",
+    "cdnFolder": "https://cdn.tourtovalencia.com/public/images",
+    "images": [
+      {
+        "name": "valencia-beach.jpg",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/valencia-beach.jpg",
+        "source": "R2 Cloudflare",
+        "originalUrl": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/valencia-beach.jpg",
+        "size": "331 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "name": "spain-ciudad-artes-ciencias.jpg",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/spain-ciudad-artes-ciencias.jpg",
+        "source": "spain.info",
+        "originalUrl": "https://www.spain.info/export/sites/segtur/.content/images/cabeceras-grandes/comunidad-valenciana/ciudad-artes-ciencias-noche-valencia-pexel256150.jpg",
+        "size": "436 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "name": "coves-santjosep-banner.jpg",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/images/coves-santjosep-banner.jpg",
+        "source": "covesdesantjosep.es",
+        "originalUrl": "https://covesdesantjosep.es/wp-content/uploads/2023/05/banner-coves-covesdesantjosep-2023.jpg",
+        "size": "113 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "name": "expedia-destination.jpg",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/expedia-destination.jpg",
+        "source": "expedia.com",
+        "originalUrl": "https://mediaim.expedia.com/destination/9/f1cedf5105d3f0679eb01587b6bb4b72.jpg",
+        "originalSize": "2.5 MB",
+        "compressedSize": "392 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "name": "unsplash-valencia-1.jpg",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/unsplash-valencia-1.jpg",
+        "source": "unsplash.com",
+        "originalUrl": "https://images.unsplash.com/photo-1583265101492-bfe6ef35cef8",
+        "originalSize": "~4 MB",
+        "compressedSize": "468 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "name": "unsplash-valencia-2.jpg",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/unsplash-valencia-2.jpg",
+        "source": "unsplash.com",
+        "originalUrl": "https://images.unsplash.com/photo-1602597421452-64682dc51a71",
+        "originalSize": "~3 MB",
+        "compressedSize": "428 KB",
+        "uploadedToCdn": true
+      },
+      {
+        "name": "unsplash-valencia-3.jpg",
+        "cdnUrl": "https://cdn.tourtovalencia.com/public/uploads/unsplash-valencia-3.jpg",
+        "source": "unsplash.com",
+        "originalUrl": "https://images.unsplash.com/photo-1595242797386-d1405ae6dc77",
+        "originalSize": "~4 MB",
+        "compressedSize": "392 KB",
+        "uploadedToCdn": true
+      }
+    ]
+  },
+  "allCdnUrls": {
+    "base": "https://cdn.tourtovalencia.com/public",
+    "examples": {
+      "hero3.jpg": "https://cdn.tourtovalencia.com/public/hero3.jpg",
+      "tourtovalenciablackbg.webp": "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp",
+      "tourtovalencialogo.png": "https://cdn.tourtovalencia.com/public/tourtovalencialogo.png",
+      "sanjuancard.jpg": "https://cdn.tourtovalencia.com/public/sanjuancard.jpg",
+      "valencia-beach.jpg": "https://cdn.tourtovalencia.com/public/images/valencia-beach.jpg",
+      "giphy-animation-1.gif": "https://cdn.tourtovalencia.com/public/images/giphy-animation-1.gif"
+    }
+  },
+  "localImages": {
+    "basePath": "public/",
+    "allImages": [
+      "airbnb.jpeg",
+      "airbnb2.jpeg",
+      "airbnb3.avif",
+      "apple-touch-icon.png",
+      "apple-touch-icon-precomposed.png",
+      "disneyland-paris.jpg",
+      "favicon-192.png",
+      "favicon-512.png",
+      "favicon.png",
+      "hero1.webp",
+      "hero1Copia.jpg",
+      "hero1Copia.webp",
+      "hero2.jpg",
+      "hero3.jpg",
+      "herosection2.jpg",
+      "herosection3.jpg",
+      "herosection4.avif",
+      "herosection5.jpg",
+      "herosection6.jpg",
+      "herosection6.webp",
+      "herosection62.webp",
+      "logo-dark.png",
+      "logo-light.png",
+      "logonuevoolga.png",
+      "logonuevoolga2.png",
+      "logonuevoolga4.png",
+      "logoolgatravel.webp",
+      "olgaphoto1.jpeg",
+      "olgaphoto2.jpeg",
+      "olgaphoto3.jpeg",
+      "olgaphoto4.jpeg",
+      "olgaphoto5.jpeg",
+      "olgaphoto6.jpeg",
+      "olgaphoto7.jpeg",
+      "olgaphoto8.jpeg",
+      "olgaphoto9.jpeg",
+      "photo1IS3.webp",
+      "photo1IndexSection2.webp",
+      "photo1section1.jpg",
+      "photo2IS3.webp",
+      "photo3IS3.webp",
+      "photo4IS3.webp",
+      "plazadelareina.jpg",
+      "plazareina2.jpg",
+      "sanjuanbarca.jpg",
+      "sanjuancard.jpg",
+      "tourtovalenciablackbg.webp",
+      "tourtovalencialogo.png",
+      "tourtovalencialogo2.png",
+      "valenciaadventure1.jpg",
+      "valenciaadventure1-mobile.webp"
+    ]
+  },
+  "newlyDownloadedImages": {
+    "folder": "public/images",
+    "count": 17,
+    "images": [
+      "valencia-beach.jpg",
+      "spain-ciudad-artes-ciencias.jpg",
+      "coves-santjosep-banner.jpg",
+      "expedia-destination.jpg",
+      "giphy-animation-1.gif",
+      "giphy-animation-2.gif",
+      "giphy-animation-3.gif",
+      "giphy-animation-4.gif",
+      "giphy-animation-5.gif",
+      "giphy-animation-6.gif",
+      "giphy-animation-7.gif",
+      "giphy-animation-8.gif",
+      "giphy-animation-9.gif",
+      "giphy-animation-10.gif",
+      "giphy-animation-11.gif",
+      "giphy-animation-12.gif",
+      "giphy-animation-13.gif"
+    ]
+  },
+  "cdnUploadStatus": {
+    "totalFiles": 68,
+    "uploadedToCdn": 68,
+    "failedUploads": 0,
+    "pendingUploads": 0
+  },
+  "failedDownloads": [
+    {
+      "name": "getyourguide-tour.jpg",
+      "url": "https://cdn.getyourguide.com/img/tour/93401d6e4a87171fbac4dec20f4ba387f8153018f7535ad68e63541cae889af4.jpg/146.jpg",
+      "reason": "URL protegida con Cloudflare - requiere token/referer"
+    }
+  ]
+}

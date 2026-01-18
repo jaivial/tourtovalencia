@@ -13,7 +13,7 @@ export default function PageCreationRoute() {
     thirdH3: "Disfrutaremos de un día de playa y relax",
     fourthH3: "Podremos practicar snorkel y ver los peces",
     fifthH3: "Tendremos tiempo libre para explorar el pueblo",
-    image: "/plazareina2.jpg"
+    image: "https://cdn.tourtovalencia.com/public/plazareina2.jpg"
   });
   
   // Other state declarations and handlers would be here
@@ -63,7 +63,7 @@ export default function PageCreationRoute() {
       // Reset to default image
       setSection5Data(prev => ({
         ...prev,
-        image: "/plazareina2.jpg"
+        image: "https://cdn.tourtovalencia.com/public/plazareina2.jpg"
       }));
     } catch (error) {
       console.error('Error removing section5 image:', error);

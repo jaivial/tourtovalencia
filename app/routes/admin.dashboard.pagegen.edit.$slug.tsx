@@ -1,19 +1,29 @@
 import { json } from "@remix-run/server-runtime";
 import { useLoaderData, Link } from "@remix-run/react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { ArrowLeftIcon, SaveIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Alert, AlertDescription } from "~/components/ui/alert";
-import PageTemplate from "~/components/_pagegen/PageTemplate";
 import { useEditPage } from "./admin.dashboard.pagegen.edit.$slug.hooks";
 import { getPageBySlug } from "~/utils/page.server";
 import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
-import { motion } from "framer-motion";
-import type { EditableCardType, IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
-import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 import { convertFileToBase64 } from "~/utils/image.client";
 import { LoadingOverlay } from "~/components/ui/loading-overlay";
+import type { EditableCardType, IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
+import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
+
+// Lazy load heavy components
+const PageTemplate = lazy(() => import("~/components/_pagegen/PageTemplate"));
+
+function LoadingFallback({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex justify-center items-center p-8">
+      {children}
+    </div>
+  );
+}
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { slug } = params;
@@ -345,11 +355,7 @@ export default function EditPageRoute() {
             >
               {isSaving ? (
                 <>
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="h-4 w-4 border-2 border-white border-t-transparent rounded-full"
-                  />
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Guardando...
                 </>
               ) : (
@@ -394,35 +400,41 @@ export default function EditPageRoute() {
         </div>
 
         <div className="w-full">
-          <PageTemplate
-            status={status}
-            onStatusChange={adaptStatusChange}
-            pageName={pageName}
-            price={price}
-            onPriceChange={handlePriceChange}
-            indexSection5Data={indexSection5Data}
-            onIndexSection5Update={adaptIndexSection5Update}
-            section1Data={section1Data}
-            onSection1Update={adaptSection1Update}
-            section2Data={section2Data}
-            onSection2Update={adaptSection2Update}
-            section3Data={section3Data}
-            onSection3ImageUpdate={adaptSection3ImageUpdate}
-            onSection3ImageRemove={handleSection3ImageRemove}
-            section4Data={section4Data}
-            onSection4Update={adaptSection4Update}
-            section5Data={section5Data}
-            onSection5Update={adaptSection5Update}
-            onSection5ImageUpdate={adaptSection5ImageUpdate}
-            onSection5ImageRemove={adaptSection5ImageRemove}
-            section6Data={section6Data}
-            onSection6Update={adaptSection6Update}
-            timelineData={timelineData}
-            onTimelineUpdate={adaptTimelineUpdate}
-            cardData={cardData}
-            onCardUpdate={adaptCardUpdate}
-            isEditMode={true}
-          />
+          <Suspense fallback={
+            <LoadingFallback>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </LoadingFallback>
+          }>
+            <PageTemplate
+              status={status}
+              onStatusChange={adaptStatusChange}
+              pageName={pageName}
+              price={price}
+              onPriceChange={handlePriceChange}
+              indexSection5Data={indexSection5Data}
+              onIndexSection5Update={adaptIndexSection5Update}
+              section1Data={section1Data}
+              onSection1Update={adaptSection1Update}
+              section2Data={section2Data}
+              onSection2Update={adaptSection2Update}
+              section3Data={section3Data}
+              onSection3ImageUpdate={adaptSection3ImageUpdate}
+              onSection3ImageRemove={handleSection3ImageRemove}
+              section4Data={section4Data}
+              onSection4Update={adaptSection4Update}
+              section5Data={section5Data}
+              onSection5Update={adaptSection5Update}
+              onSection5ImageUpdate={adaptSection5ImageUpdate}
+              onSection5ImageRemove={adaptSection5ImageRemove}
+              section6Data={section6Data}
+              onSection6Update={adaptSection6Update}
+              timelineData={timelineData}
+              onTimelineUpdate={adaptTimelineUpdate}
+              cardData={cardData}
+              onCardUpdate={adaptCardUpdate}
+              isEditMode={true}
+            />
+          </Suspense>
         </div>
       </div>
     </div>

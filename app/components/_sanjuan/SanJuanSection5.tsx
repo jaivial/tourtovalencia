@@ -189,7 +189,7 @@ const SanJuanSection5: React.FC<ChildProps> = ({ width, SanJuanSection5Text }) =
           <motion.img 
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.3 }}
-            src={SanJuanSection5Text.image || "/plazareina2.jpg"} 
+            src={SanJuanSection5Text.image || "https://cdn.tourtovalencia.com/public/plazareina2.jpg"}
             alt="Viajes en Barca en San Juan desde Valencia. BOAT TRIP AND EXCURSION FROM VALENCIA" 
             className="
               rounded-2xl max-h-[350px] object-cover 

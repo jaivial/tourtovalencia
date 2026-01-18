@@ -31,6 +31,10 @@ if (typeof window !== 'undefined') {
     if (typeof message === 'string' && (message.includes('require is not defined') || message.includes('module is not defined'))) {
       return true; // Suppress the error
     }
+    // Ignore Suspense hydration errors - React handles these automatically by switching to client rendering
+    if (typeof message === 'string' && message.includes('Suspense boundary received an update before it finished hydrating')) {
+      return true; // Suppress the error - React handles this gracefully
+    }
     if (originalOnerror) {
       return originalOnerror(message, source, lineno, colno, error);
     }

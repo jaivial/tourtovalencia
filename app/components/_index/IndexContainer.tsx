@@ -1,5 +1,5 @@
 // Feature component: just responsible for containing UI components, fetch data and handle features and pass down props to UI components.
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import HeroSection from "./HeroSection";
 import IndexSection2 from "./IndexSection2";
 import IndexFeatures from "./IndexFeatures";
@@ -48,8 +48,10 @@ const IndexContainer: React.FC<IndexContainerProps> = ({ tours = [], pages = [] 
 
   useEffect(() => {
     const updateSize = () => {
-      setClientWidth(window.innerWidth);
-      setClientHeight(window.innerHeight);
+      startTransition(() => {
+        setClientWidth(window.innerWidth);
+        setClientHeight(window.innerHeight);
+      });
     };
     updateSize();
     window.addEventListener("resize", updateSize);

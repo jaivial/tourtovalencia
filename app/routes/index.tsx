@@ -11,7 +11,7 @@ export const meta = () => {
   const title = "Tour To Valencia - Explore the Best Experiences in Valencia";
   const description = "Discover the best tours and experiences in Valencia with our expert local guides. Book your adventure today!";
   const url = "https://tourtovalencia.com";
-  const imageUrl = "https://tourtovalencia.com/tourtovalenciablackbg.webp";
+  const imageUrl = "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp";
 
   return [
     { title },
