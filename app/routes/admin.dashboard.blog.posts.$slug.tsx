@@ -6,7 +6,6 @@ import { requireAdminSession } from "~/utils/admin-session.server";
 import { getBlogPostsCollection, getToursCollection } from "~/utils/db.server";
 import type { BlogPost } from "~/utils/db.schema.server";
 import GutenbergEditor from "~/components/admin/GutenbergEditor";
-import { paragraphsToBlocks } from "~/utils/blogBlocks.server";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
@@ -40,25 +39,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const toursCollection = await getToursCollection();
   const tours = await toursCollection.find({ status: "active" }).toArray();
 
-  const hydratedPost: BlogPost = {
-    ...post,
-    content: {
-      es: {
-        ...post.content.es,
-        blocks: post.content.es.blocks && post.content.es.blocks.length > 0
-          ? post.content.es.blocks
-          : paragraphsToBlocks(post.content.es.paragraphs || []),
-      },
-      en: {
-        ...post.content.en,
-        blocks: post.content.en.blocks && post.content.en.blocks.length > 0
-          ? post.content.en.blocks
-          : paragraphsToBlocks(post.content.en.paragraphs || []),
-      },
-    },
-  };
-
-  return json({ post: hydratedPost, tours });
+  return json({ post, tours });
 };
 
 function extractParagraphsFromHtml(html: string): string[] {
@@ -167,30 +148,44 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   return json({ success: true });
 };
 
+function ensureGutenbergComments(html: string): string {
+  if (!html) return html;
+  if (html.includes("<!-- wp:paragraph -->")) return html;
+  return html.replace(
+    /(<p[^>]*>[\s\S]*?<\/p>)/gi,
+    "<!-- wp:paragraph -->\n$1\n<!-- /wp:paragraph -->"
+  );
+}
+
 export default function AdminBlogEditorRoute() {
   const { post, tours } = useLoaderData<typeof loader>();
   const [activeLang, setActiveLang] = useState<"es" | "en">("es");
   const [status, setStatus] = useState(post.status === "published");
 
-  const [blocksEs, setBlocksEs] = useState(post.content.es.blocks || []);
+  const [blocksEs, setBlocksEs] = useState<any[]>([]);
   const [htmlEs, setHtmlEs] = useState(post.content.es.html || "");
-  const [blocksEn, setBlocksEn] = useState(post.content.en.blocks || []);
+  const [blocksEn, setBlocksEn] = useState<any[]>([]);
   const [htmlEn, setHtmlEn] = useState(post.content.en.html || "");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const needsEs = (!post.content.es.blocks || post.content.es.blocks.length === 0) && post.content.es.html;
-    const needsEn = (!post.content.en.blocks || post.content.en.blocks.length === 0) && post.content.en.html;
-    if (!needsEs && !needsEn) return;
     import("@wordpress/blocks").then(({ parse }) => {
-      if (needsEs && post.content.es.html) {
-        setBlocksEs(parse(post.content.es.html));
+      if (post.content.es.html) {
+        const esHtml = ensureGutenbergComments(post.content.es.html);
+        console.log("[GUTENBERG] ES HTML preview:", esHtml.slice(0, 300));
+        const esParsed = parse(esHtml);
+        console.log("[GUTENBERG] ES parsed blocks:", esParsed.length, esParsed.map((b: any) => b.name));
+        setBlocksEs(esParsed);
       }
-      if (needsEn && post.content.en.html) {
-        setBlocksEn(parse(post.content.en.html));
+      if (post.content.en.html) {
+        const enHtml = ensureGutenbergComments(post.content.en.html);
+        console.log("[GUTENBERG] EN HTML preview:", enHtml.slice(0, 300));
+        const enParsed = parse(enHtml);
+        console.log("[GUTENBERG] EN parsed blocks:", enParsed.length, enParsed.map((b: any) => b.name));
+        setBlocksEn(enParsed);
       }
     });
-  }, [post.content.en.blocks, post.content.en.html, post.content.es.blocks, post.content.es.html]);
+  }, [post.content.es.html, post.content.en.html]);
 
   const handleEsChange = useCallback((value: { blocks: any[]; html: string }) => {
     setBlocksEs(value.blocks);

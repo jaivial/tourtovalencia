@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "fs";
 import { getBlogPostsCollection, getToursCollection } from "~/utils/db.server";
 import type { BlogPost, BlogSettings, Tour } from "~/utils/db.schema.server";
 import { generateSlug } from "~/utils/page.server";
-import { paragraphsToBlocks } from "~/utils/blogBlocks.server";
+import { paragraphsToBlocks, paragraphsToGutenbergHtml } from "~/utils/blogBlocks.server";
 
 const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
 const GOOGLE_AI_MODEL = "gemini-2.0-flash-lite";
@@ -137,19 +137,6 @@ function normalizeParagraphs(paragraphs: string[], min: number, max: number): st
   return trimmed;
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-function paragraphsToHtml(paragraphs: string[]): string {
-  return paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("");
-}
-
 function getAxiosErrorMessage(error: unknown): string | null {
   if (!axios.isAxiosError(error)) return null;
   const status = error.response?.status;
@@ -221,8 +208,8 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
   const esParagraphs = normalizeParagraphs(parsed.es.paragraphs, settings.paragraphsMin, settings.paragraphsMax);
   const enParagraphs = normalizeParagraphs(parsed.en.paragraphs, settings.paragraphsMin, settings.paragraphsMax);
   const wordCount = countWords(esParagraphs);
-  const esHtml = paragraphsToHtml(esParagraphs);
-  const enHtml = paragraphsToHtml(enParagraphs);
+  const esHtml = paragraphsToGutenbergHtml(esParagraphs);
+  const enHtml = paragraphsToGutenbergHtml(enParagraphs);
   const esBlocks = paragraphsToBlocks(esParagraphs);
   const enBlocks = paragraphsToBlocks(enParagraphs);
 

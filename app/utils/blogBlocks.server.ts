@@ -30,3 +30,11 @@ export function paragraphsToBlocks(paragraphs: string[]): GutenbergBlock[] {
       } satisfies GutenbergBlock;
     });
 }
+
+export function paragraphsToGutenbergHtml(paragraphs: string[]): string {
+  return paragraphs
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => `<!-- wp:paragraph -->\n<p>${escapeHtml(p)}</p>\n<!-- /wp:paragraph -->`)
+    .join("\n\n");
+}
