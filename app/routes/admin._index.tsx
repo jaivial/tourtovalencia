@@ -1,5 +1,6 @@
 import { json } from "@remix-run/server-runtime";
 import { useLoaderData, useNavigate } from "@remix-run/react";
+import { useEffect } from "react";
 import { AuthProvider } from "~/context/auth.context";
 import { AdminLoginFeature } from "~/components/features/AdminLoginFeature";
 import { languages } from "~/data/data";
@@ -55,10 +56,11 @@ export default function AdminLoginRoute() {
   const navigate = useNavigate();
   const { redirectTo, strings, isAuthenticated } = (data as any)?.data || { redirectTo: undefined, strings: undefined, isAuthenticated: false };
   
-  if (isAuthenticated && redirectTo) {
-    navigate(redirectTo, { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (isAuthenticated && redirectTo) {
+      navigate(redirectTo, { replace: true });
+    }
+  }, [isAuthenticated, redirectTo, navigate]);
   
   return (
     <AuthProvider strings={strings} isAuthenticated={isAuthenticated}>

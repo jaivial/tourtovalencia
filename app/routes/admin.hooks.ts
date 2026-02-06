@@ -39,7 +39,7 @@ export const useStates = (props: UseStatesProps) => {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "same-origin",
+        credentials: "include",
         body: JSON.stringify({ username, password }),
       });
       
