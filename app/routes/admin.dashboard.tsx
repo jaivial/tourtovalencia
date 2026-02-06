@@ -9,6 +9,7 @@ import { logger } from "~/utils/logger.server";
 export const loader = async ({ request }: { request: Request }) => {
   console.log("[ADMIN-DASHBOARD] Loader called, URL:", request.url);
   console.log("[ADMIN-DASHBOARD] Cookie header:", request.headers.get("Cookie") ? "present" : "missing");
+  console.log("[ADMIN-DASHBOARD] Cookie header raw:", request.headers.get("Cookie") || "none");
   
   const session = await getAdminSession(request);
   

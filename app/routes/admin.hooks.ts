@@ -44,11 +44,14 @@ export const useStates = (props: UseStatesProps) => {
       });
       
       console.log("[ADMIN-HOOKS] Response status:", response.status);
+      console.log("[ADMIN-HOOKS] Response headers set-cookie:", response.headers.get("set-cookie"));
       const data = await response.json();
       console.log("[ADMIN-HOOKS] Response data:", data);
       
       if (data.success) {
         console.log("[ADMIN-HOOKS] Login successful, navigating to /admin/dashboard");
+        console.log("[ADMIN-HOOKS] Current location:", window.location.href);
+        console.log("[ADMIN-HOOKS] document.cookie (length):", document.cookie?.length || 0);
         // Force a full reload so the server sees the new session cookie
         window.location.assign("/admin/dashboard");
         return true;

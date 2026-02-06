@@ -10,6 +10,8 @@ import { logger } from "~/utils/logger.server";
 
 export const loader = async ({ request }: { request: Request }) => {
   console.log("[ADMIN-INDEX] Loader called, URL:", request.url);
+  console.log("[ADMIN-INDEX] Origin:", new URL(request.url).origin);
+  console.log("[ADMIN-INDEX] Cookie header:", request.headers.get("Cookie") || "none");
   
   try {
     await initializeDefaultAdminUser();
