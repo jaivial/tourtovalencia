@@ -15,12 +15,18 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+/** Escape HTML then convert markdown bold (**text**) to <strong> tags */
+function formatParagraph(value: string): string {
+  const escaped = escapeHtml(value);
+  return escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+}
+
 export function paragraphsToBlocks(paragraphs: string[]): GutenbergBlock[] {
   return paragraphs
     .map((paragraph) => paragraph.trim())
     .filter(Boolean)
     .map((paragraph) => {
-      const content = escapeHtml(paragraph);
+      const content = formatParagraph(paragraph);
       return {
         name: "core/paragraph",
         attributes: { content },
@@ -35,6 +41,6 @@ export function paragraphsToGutenbergHtml(paragraphs: string[]): string {
   return paragraphs
     .map((p) => p.trim())
     .filter(Boolean)
-    .map((p) => `<!-- wp:paragraph -->\n<p>${escapeHtml(p)}</p>\n<!-- /wp:paragraph -->`)
+    .map((p) => `<!-- wp:paragraph -->\n<p>${formatParagraph(p)}</p>\n<!-- /wp:paragraph -->`)
     .join("\n\n");
 }

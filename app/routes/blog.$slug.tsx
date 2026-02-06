@@ -50,6 +50,11 @@ function estimateReadingTime(wordCount: number): number {
   return Math.max(1, Math.round(wordCount / 200));
 }
 
+/** Convert markdown bold (**text**) to <strong> tags in plain text */
+function markdownBoldToHtml(text: string): string {
+  return text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+}
+
 export default function BlogPostRoute() {
   const { post, language, relatedTours } = useLoaderData<typeof loader>();
   const content = post.content[language];
@@ -131,8 +136,8 @@ export default function BlogPostRoute() {
         {/* Article Content */}
         {html ? (
           <div
-            className="prose prose-lg prose-gray max-w-none
-              prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900
+            className="prose prose-lg prose-gray max-w-none text-justify
+              prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900 prose-headings:text-left
               prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4
               prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
               prose-p:text-gray-700 prose-p:leading-[1.8] prose-p:mb-6
@@ -141,12 +146,16 @@ export default function BlogPostRoute() {
               prose-img:rounded-xl prose-img:shadow-md
               prose-blockquote:border-l-amber-400 prose-blockquote:bg-amber-50/50 prose-blockquote:py-1 prose-blockquote:rounded-r-lg
               prose-li:text-gray-700"
-            dangerouslySetInnerHTML={{ __html: html }}
+            dangerouslySetInnerHTML={{ __html: markdownBoldToHtml(html) }}
           />
         ) : (
           <div className="space-y-6">
             {content.paragraphs.map((paragraph: string, index: number) => (
-              <p key={index} className="text-lg text-gray-700 leading-[1.8]">{paragraph}</p>
+              <p
+                key={index}
+                className="text-lg text-gray-700 leading-[1.8] text-justify"
+                dangerouslySetInnerHTML={{ __html: markdownBoldToHtml(paragraph) }}
+              />
             ))}
           </div>
         )}
