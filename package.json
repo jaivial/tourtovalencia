@@ -8,7 +8,7 @@
     "react-dom": "^18.3.1"
   },
   "scripts": {
-    "build": "remix vite:build && ./scripts/copy-fonts-to-build.sh",
+    "build": "remix vite:build && ./scripts/copy-fonts-to-build.sh && ./scripts/add-react-exports.sh",
     "dev": "remix vite:dev",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "remix-serve ./build/server/index.js",
@@ -16,6 +16,8 @@
     "delete-old-pages": "tsx scripts/delete-old-pages.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.971.0",
+    "@aws-sdk/s3-request-presigner": "^3.971.0",
     "@dotlottie/react-player": "^1.6.19",
     "@heroui/calendar": "^2.2.13",
     "@heroui/input": "^2.4.13",
