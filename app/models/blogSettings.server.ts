@@ -6,7 +6,7 @@ export const DEFAULT_BLOG_SETTINGS: Omit<BlogSettings, "_id"> = {
   key: "default",
   frequency: "weekly",
   publishHour: 10,
-  weeklyDay: 3,
+  selectedWeekdays: [3],
   monthlyCount: 4,
   selectedTourSlugs: [],
   selectAllTours: true,
@@ -26,6 +26,14 @@ export async function getBlogSettings(): Promise<BlogSettings> {
   const existing = await collection.findOne({ key: "default" });
 
   if (existing) {
+    if (!Array.isArray(existing.selectedWeekdays) || existing.selectedWeekdays.length === 0) {
+      const fallback = typeof (existing as any).weeklyDay === "number" ? [(existing as any).weeklyDay] : [3];
+      await collection.updateOne(
+        { key: "default" },
+        { $set: { selectedWeekdays: fallback, updatedAt: new Date() } }
+      );
+      return { ...existing, selectedWeekdays: fallback };
+    }
     return existing;
   }
 
@@ -44,7 +52,7 @@ export async function getBlogSettings(): Promise<BlogSettings> {
 export type BlogSettingsInput = {
   frequency: "daily" | "weekly" | "monthly";
   publishHour: number;
-  weeklyDay: number;
+  selectedWeekdays: number[];
   monthlyCount: number;
   selectedTourSlugs: string[];
   selectAllTours: boolean;

@@ -61,7 +61,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const frequency = String(formData.get("frequency") || "weekly") as "daily" | "weekly" | "monthly";
   const publishHour = Number(formData.get("publishHour") || 10);
-  const weeklyDay = Number(formData.get("weeklyDay") || 3);
+  const selectedWeekdays = formData.getAll("selectedWeekdays").map((value) => Number(value));
   const monthlyCount = Number(formData.get("monthlyCount") || 4);
   const wordCountMin = Number(formData.get("wordCountMin") || 400);
   const wordCountMax = Number(formData.get("wordCountMax") || 600);
@@ -75,7 +75,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   await updateBlogSettings({
     frequency,
     publishHour,
-    weeklyDay,
+    selectedWeekdays: selectedWeekdays.length > 0 ? selectedWeekdays : [3],
     monthlyCount,
     selectedTourSlugs,
     selectAllTours,
@@ -104,10 +104,13 @@ export default function AdminBlogSettingsRoute() {
   const { settings, tours } = useLoaderData<typeof loader>();
   const [frequency, setFrequency] = useState(settings.frequency);
   const [publishHour, setPublishHour] = useState(String(settings.publishHour));
-  const [weeklyDay, setWeeklyDay] = useState(String(settings.weeklyDay));
+  const [selectedWeekdays, setSelectedWeekdays] = useState<number[]>(settings.selectedWeekdays || [3]);
   const [tone, setTone] = useState(settings.tone);
   const [includeSeoKeywords, setIncludeSeoKeywords] = useState(settings.includeSeoKeywords);
   const [selectAllTours, setSelectAllTours] = useState(settings.selectAllTours);
+  const [monthlyCount, setMonthlyCount] = useState(String(settings.monthlyCount));
+  const [wordRange, setWordRange] = useState(`${settings.wordCountMin}-${settings.wordCountMax}`);
+  const [paragraphRange, setParagraphRange] = useState(`${settings.paragraphsMin}-${settings.paragraphsMax}`);
 
   return (
     <div className="p-8">
@@ -120,10 +123,17 @@ export default function AdminBlogSettingsRoute() {
           <Form method="post" className="space-y-8">
             <input type="hidden" name="frequency" value={frequency} />
             <input type="hidden" name="publishHour" value={publishHour} />
-            <input type="hidden" name="weeklyDay" value={weeklyDay} />
+            {selectedWeekdays.map((day) => (
+              <input key={day} type="hidden" name="selectedWeekdays" value={String(day)} />
+            ))}
             <input type="hidden" name="tone" value={tone} />
             <input type="hidden" name="includeSeoKeywords" value={includeSeoKeywords ? "true" : "false"} />
             <input type="hidden" name="selectAllTours" value={selectAllTours ? "true" : "false"} />
+            <input type="hidden" name="monthlyCount" value={monthlyCount} />
+            <input type="hidden" name="wordCountMin" value={wordRange.split("-")[0]} />
+            <input type="hidden" name="wordCountMax" value={wordRange.split("-")[1]} />
+            <input type="hidden" name="paragraphsMin" value={paragraphRange.split("-")[0]} />
+            <input type="hidden" name="paragraphsMax" value={paragraphRange.split("-")[1]} />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
@@ -156,16 +166,80 @@ export default function AdminBlogSettingsRoute() {
                 </Select>
               </div>
 
+              {(frequency === "daily" || frequency === "weekly") && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Selecciona días de publicación</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {weekdayOptions.map((option) => {
+                      const isSelected = selectedWeekdays.includes(option.value);
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            setSelectedWeekdays((prev) => {
+                              if (prev.includes(option.value)) {
+                                return prev.filter((day) => day !== option.value);
+                              }
+                              return [...prev, option.value].sort((a, b) => a - b);
+                            });
+                          }}
+                          className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                            isSelected ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 hover:border-blue-300"
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {frequency === "monthly" && (
+                <div className="space-y-2">
+                  <Label>Publicaciones mensuales</Label>
+                  <Select value={monthlyCount} onValueChange={setMonthlyCount}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 12 }).map((_, index) => (
+                        <SelectItem key={index + 1} value={String(index + 1)}>
+                          {index + 1} por mes
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="space-y-2">
-                <Label>Publicación semanal</Label>
-                <Select value={weeklyDay} onValueChange={setWeeklyDay}>
+                <Label>Rango de palabras</Label>
+                <Select value={wordRange} onValueChange={setWordRange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Día" />
+                    <SelectValue placeholder="Selecciona" />
                   </SelectTrigger>
                   <SelectContent>
-                    {weekdayOptions.map((option) => (
-                      <SelectItem key={option.value} value={String(option.value)}>
-                        {option.label}
+                    {["300-400", "400-600", "600-800", "800-1000", "1000-1200", "1200-1500"].map((range) => (
+                      <SelectItem key={range} value={range}>
+                        {range} palabras
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Rango de párrafos</Label>
+                <Select value={paragraphRange} onValueChange={setParagraphRange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["4-5", "6-7", "8-9", "10-11", "12-13", "14-15"].map((range) => (
+                      <SelectItem key={range} value={range}>
+                        {range} párrafos
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -174,30 +248,7 @@ export default function AdminBlogSettingsRoute() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Label>Publicaciones mensuales</Label>
-                <Input name="monthlyCount" type="number" min={1} max={12} defaultValue={settings.monthlyCount} />
-              </div>
-              <div className="space-y-2">
-                <Label>Palabras mínimas</Label>
-                <Input name="wordCountMin" type="number" min={200} max={1200} defaultValue={settings.wordCountMin} />
-              </div>
-              <div className="space-y-2">
-                <Label>Palabras máximas</Label>
-                <Input name="wordCountMax" type="number" min={200} max={1200} defaultValue={settings.wordCountMax} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Label>Párrafos mínimos</Label>
-                <Input name="paragraphsMin" type="number" min={3} max={12} defaultValue={settings.paragraphsMin} />
-              </div>
-              <div className="space-y-2">
-                <Label>Párrafos máximos</Label>
-                <Input name="paragraphsMax" type="number" min={3} max={12} defaultValue={settings.paragraphsMax} />
-              </div>
-              <div className="space-y-2">
+              <div className="space-y-2 md:col-span-1">
                 <Label>Tono</Label>
                 <Select value={tone} onValueChange={setTone}>
                   <SelectTrigger>

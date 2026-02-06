@@ -126,34 +126,31 @@ export function calculateNextRunAt(settings: BlogSettings, fromDate: Date): Date
   const timeZone = settings.timezone || "Europe/Madrid";
   const nowParts = getZonedParts(fromDate, timeZone);
   const publishHour = Math.max(0, Math.min(23, settings.publishHour));
+  const selectedWeekdays = (settings.selectedWeekdays && settings.selectedWeekdays.length > 0)
+    ? settings.selectedWeekdays
+    : [3];
 
-  if (settings.frequency === "daily") {
-    const isToday = nowParts.hour < publishHour;
-    const dayOffset = isToday ? 0 : 1;
-    const targetDate = new Date(Date.UTC(nowParts.year, nowParts.month - 1, nowParts.day + dayOffset, 12, 0, 0));
-    const targetParts = getZonedParts(targetDate, timeZone);
-    return zonedTimeToUtcDate({
-      year: targetParts.year,
-      month: targetParts.month,
-      day: targetParts.day,
-      hour: publishHour,
-      minute: 0,
-      second: 0,
-    }, timeZone);
-  }
-
-  if (settings.frequency === "weekly") {
-    const desiredDay = Math.max(0, Math.min(6, settings.weeklyDay));
-    let daysUntil = (desiredDay - nowParts.weekday + 7) % 7;
-    if (daysUntil === 0 && nowParts.hour >= publishHour) {
-      daysUntil = 7;
+  if (settings.frequency === "daily" || settings.frequency === "weekly") {
+    for (let offset = 0; offset <= 7; offset += 1) {
+      const candidate = new Date(Date.UTC(nowParts.year, nowParts.month - 1, nowParts.day + offset, 12, 0, 0));
+      const candidateParts = getZonedParts(candidate, timeZone);
+      if (!selectedWeekdays.includes(candidateParts.weekday)) continue;
+      if (offset === 0 && nowParts.hour >= publishHour) continue;
+      return zonedTimeToUtcDate({
+        year: candidateParts.year,
+        month: candidateParts.month,
+        day: candidateParts.day,
+        hour: publishHour,
+        minute: 0,
+        second: 0,
+      }, timeZone);
     }
-    const targetDate = new Date(Date.UTC(nowParts.year, nowParts.month - 1, nowParts.day + daysUntil, 12, 0, 0));
-    const targetParts = getZonedParts(targetDate, timeZone);
+    const nextWeek = new Date(Date.UTC(nowParts.year, nowParts.month - 1, nowParts.day + 7, 12, 0, 0));
+    const nextParts = getZonedParts(nextWeek, timeZone);
     return zonedTimeToUtcDate({
-      year: targetParts.year,
-      month: targetParts.month,
-      day: targetParts.day,
+      year: nextParts.year,
+      month: nextParts.month,
+      day: nextParts.day,
       hour: publishHour,
       minute: 0,
       second: 0,

@@ -145,7 +145,7 @@ export interface BlogSettings {
   key: "default";
   frequency: "daily" | "weekly" | "monthly";
   publishHour: number;
-  weeklyDay: number;
+  selectedWeekdays: number[];
   monthlyCount: number;
   selectedTourSlugs: string[];
   selectAllTours: boolean;
