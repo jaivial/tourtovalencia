@@ -42,21 +42,35 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (intent === "generate") {
     const settings = await getBlogSettings();
     const now = new Date();
-    await generateBlogPostFromSettings(settings);
-    const nextRunAt = calculateNextRunAt(settings, now);
     const collection = await getBlogSettingsCollection();
-    await collection.updateOne(
-      { key: "default" },
-      {
-        $set: {
-          lastRunAt: now,
-          nextRunAt,
-          lastError: null,
-          updatedAt: new Date(),
-        },
-      }
-    );
-    return json({ success: true, generated: true });
+    try {
+      await generateBlogPostFromSettings(settings);
+      const nextRunAt = calculateNextRunAt(settings, now);
+      await collection.updateOne(
+        { key: "default" },
+        {
+          $set: {
+            lastRunAt: now,
+            nextRunAt,
+            lastError: null,
+            updatedAt: new Date(),
+          },
+        }
+      );
+      return json({ success: true, generated: true });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      await collection.updateOne(
+        { key: "default" },
+        {
+          $set: {
+            lastError: message,
+            updatedAt: new Date(),
+          },
+        }
+      );
+      return json({ success: false, error: message }, { status: 500 });
+    }
   }
 
   const frequency = String(formData.get("frequency") || "weekly") as "daily" | "weekly" | "monthly";
@@ -91,13 +105,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 const weekdayOptions = [
-  { value: 0, label: "Domingo" },
   { value: 1, label: "Lunes" },
   { value: 2, label: "Martes" },
   { value: 3, label: "Miércoles" },
   { value: 4, label: "Jueves" },
   { value: 5, label: "Viernes" },
   { value: 6, label: "Sábado" },
+  { value: 0, label: "Domingo" },
 ];
 
 export default function AdminBlogSettingsRoute() {

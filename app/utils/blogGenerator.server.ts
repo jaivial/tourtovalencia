@@ -136,6 +136,17 @@ function normalizeParagraphs(paragraphs: string[], min: number, max: number): st
   return trimmed;
 }
 
+function getAxiosErrorMessage(error: unknown): string | null {
+  if (!axios.isAxiosError(error)) return null;
+  const status = error.response?.status;
+  const data = error.response?.data as { error?: { message?: string } } | undefined;
+  const message = data?.error?.message || error.message;
+  if (status) {
+    return `Google AI API error ${status}: ${message}`;
+  }
+  return `Google AI API error: ${message}`;
+}
+
 export async function generateBlogPostFromSettings(settings: BlogSettings): Promise<BlogPost> {
   if (!GOOGLE_AI_API_KEY) {
     throw new Error("GOOGLE_AI_API_KEY is not configured");
@@ -148,28 +159,50 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
 
   const prompt = buildPrompt(settings, tours);
 
-  const response = await axios.post(
-    `${GOOGLE_AI_API_URL}?key=${GOOGLE_AI_API_KEY}`,
-    {
-      contents: [
-        {
-          parts: [{ text: prompt }],
+  let responseText = "";
+  try {
+    const response = await axios.post(
+      `${GOOGLE_AI_API_URL}?key=${GOOGLE_AI_API_KEY}`,
+      {
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt }],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.6,
+          maxOutputTokens: 2048,
         },
-      ],
-      generationConfig: {
-        temperature: 0.6,
-        maxOutputTokens: 2048,
       },
-    },
-    { headers: { "Content-Type": "application/json" } }
-  );
+      { headers: { "Content-Type": "application/json" } }
+    );
+    responseText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  } catch (error) {
+    const axiosMessage = getAxiosErrorMessage(error);
+    if (axiosMessage) {
+      console.error("[BLOG-GENERATOR] Google AI request failed:", axiosMessage);
+      throw new Error(axiosMessage);
+    }
+    console.error("[BLOG-GENERATOR] Google AI request failed:", error);
+    throw error;
+  }
 
-  const responseText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  if (!responseText) {
+    throw new Error("Google AI response was empty");
+  }
+
   const cleaned = responseText.replace(/```json\n?|\n?```/g, "").trim();
-  const parsed = JSON.parse(cleaned) as {
+  let parsed: {
     es: { title: string; excerpt: string; paragraphs: string[]; seoTitle: string; seoDescription: string; seoKeywords?: string[]; };
     en: { title: string; excerpt: string; paragraphs: string[]; seoTitle: string; seoDescription: string; seoKeywords?: string[]; };
   };
+  try {
+    parsed = JSON.parse(cleaned) as typeof parsed;
+  } catch (error) {
+    console.error("[BLOG-GENERATOR] Failed to parse JSON:", cleaned.slice(0, 500));
+    throw new Error("Google AI returned invalid JSON");
+  }
 
   const esParagraphs = normalizeParagraphs(parsed.es.paragraphs, settings.paragraphsMin, settings.paragraphsMax);
   const enParagraphs = normalizeParagraphs(parsed.en.paragraphs, settings.paragraphsMin, settings.paragraphsMax);
