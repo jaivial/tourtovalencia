@@ -173,6 +173,72 @@
   padding: 0;
 }
 
+/* Gap between blocks */
+.gutenberg-canvas .block-editor-block-list__layout > .wp-block {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+/* ── Between-blocks insertion point (blue line + plus) ── */
+
+.block-editor-block-list__insertion-point {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* Show on hover between blocks */
+.block-editor-block-list__layout > .block-editor-block-list__insertion-point:hover,
+.block-editor-block-list__insertion-point.is-with-inserter {
+  opacity: 1;
+}
+
+/* The blue horizontal line */
+.block-editor-block-list__insertion-point-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--wp-admin-theme-color, #007cba);
+  border-radius: 1px;
+}
+
+/* The circular + button on the line */
+.block-editor-block-list__insertion-point-inserter {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.block-editor-block-list__insertion-point-inserter .block-editor-inserter__toggle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--wp-admin-theme-color, #007cba);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.block-editor-block-list__insertion-point-inserter .block-editor-inserter__toggle:hover {
+  background: #005a87;
+}
+
+.block-editor-block-list__insertion-point-inserter .block-editor-inserter__toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* Ensure the block inserter popup appears above everything */
 .block-editor-inserter__popover,
 .components-popover {
