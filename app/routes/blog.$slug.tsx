@@ -61,12 +61,31 @@ export default function BlogPostRoute() {
     { year: "numeric", month: "long", day: "numeric", timeZone: "Europe/Madrid" }
   );
 
+  // Curated Unsplash photos — Valencia, Spain, Mediterranean travel
+  const unsplashPhotos = [
+    "photo-1599998372649-3e01b1c2d5be", // Valencia city arts sciences
+    "photo-1562883676-8c7feb83f09b", // Mediterranean coast
+    "photo-1504019347908-b45f9b0b8dd5", // Spanish old town
+    "photo-1558618666-fcd25c85f82e", // Sunset over Mediterranean sea
+    "photo-1539037116277-4db20889f2d7", // Paella close-up
+    "photo-1512753360435-329c4535a9a7", // European architecture
+    "photo-1543783207-ec64e4d95325", // Orange tree lined street
+    "photo-1523531294919-4bcd7c65e216", // Spanish market
+    "photo-1570168007204-dfb528c6958f", // Beach and city
+    "photo-1590523741831-ab7e8b8f9c7f", // Mediterranean harbor
+    "photo-1555881400-74d7acaacd8b", // Spanish balcony
+    "photo-1509840841025-9088ba78a826", // Cityscape at golden hour
+  ];
+  // Pick a consistent image per slug
+  const hash = post.slug.split("").reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0);
+  const heroImage = `https://images.unsplash.com/${unsplashPhotos[hash % unsplashPhotos.length]}?w=1600&h=900&fit=crop&q=80`;
+
   return (
     <article className="w-full min-h-screen bg-white">
       {/* Hero Section */}
       <div className="relative w-full h-[50vh] min-h-[400px] max-h-[600px]">
         <img
-          src={post.featuredImageUrl}
+          src={heroImage}
           alt={content.title}
           className="absolute inset-0 w-full h-full object-cover"
         />
