@@ -6,6 +6,7 @@ import { requireAdminSession } from "~/utils/admin-session.server";
 import { getBlogPostsCollection, getToursCollection } from "~/utils/db.server";
 import type { BlogPost } from "~/utils/db.schema.server";
 import GutenbergEditor from "~/components/admin/GutenbergEditor";
+import { paragraphsToGutenbergHtml } from "~/utils/blogBlocks.server";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
@@ -38,6 +39,14 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 
   const toursCollection = await getToursCollection();
   const tours = await toursCollection.find({ status: "active" }).toArray();
+
+  // Backfill html from paragraphs for posts created before the html field existed
+  if (!post.content.es.html && post.content.es.paragraphs?.length) {
+    post.content.es.html = paragraphsToGutenbergHtml(post.content.es.paragraphs);
+  }
+  if (!post.content.en.html && post.content.en.paragraphs?.length) {
+    post.content.en.html = paragraphsToGutenbergHtml(post.content.en.paragraphs);
+  }
 
   return json({ post, tours });
 };
