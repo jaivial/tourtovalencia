@@ -48,6 +48,7 @@ export const meta: MetaFunction = ({ data }) => {
 export default function BlogPostRoute() {
   const { post, language, relatedTours } = useLoaderData<typeof loader>();
   const content = post.content[language];
+  const html = content.html || "";
 
   return (
     <div className="w-full min-h-screen bg-white">
@@ -60,11 +61,18 @@ export default function BlogPostRoute() {
         <h1 className="text-4xl font-bold text-gray-900 mb-6">{content.title}</h1>
         <img src={post.featuredImageUrl} alt={content.title} className="w-full h-72 object-cover rounded-lg mb-8" />
         <p className="text-lg text-gray-700 mb-6">{content.excerpt}</p>
-        <div className="space-y-6 text-gray-800 leading-relaxed">
-          {content.paragraphs.map((paragraph: string, index: number) => (
-            <p key={index}>{paragraph}</p>
-          ))}
-        </div>
+        {html ? (
+          <div
+            className="space-y-6 text-gray-800 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        ) : (
+          <div className="space-y-6 text-gray-800 leading-relaxed">
+            {content.paragraphs.map((paragraph: string, index: number) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+          </div>
+        )}
 
         {relatedTours.length > 0 && (
           <div className="mt-12 border-t pt-8">

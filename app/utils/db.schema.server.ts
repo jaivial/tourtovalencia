@@ -122,6 +122,8 @@ export interface BlogPost {
       title: string;
       excerpt: string;
       paragraphs: string[];
+      blocks?: any[];
+      html?: string;
       seoTitle: string;
       seoDescription: string;
       seoKeywords?: string[];
@@ -130,6 +132,8 @@ export interface BlogPost {
       title: string;
       excerpt: string;
       paragraphs: string[];
+      blocks?: any[];
+      html?: string;
       seoTitle: string;
       seoDescription: string;
       seoKeywords?: string[];

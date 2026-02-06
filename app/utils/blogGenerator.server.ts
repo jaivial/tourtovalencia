@@ -136,6 +136,19 @@ function normalizeParagraphs(paragraphs: string[], min: number, max: number): st
   return trimmed;
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function paragraphsToHtml(paragraphs: string[]): string {
+  return paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("");
+}
+
 function getAxiosErrorMessage(error: unknown): string | null {
   if (!axios.isAxiosError(error)) return null;
   const status = error.response?.status;
@@ -207,6 +220,8 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
   const esParagraphs = normalizeParagraphs(parsed.es.paragraphs, settings.paragraphsMin, settings.paragraphsMax);
   const enParagraphs = normalizeParagraphs(parsed.en.paragraphs, settings.paragraphsMin, settings.paragraphsMax);
   const wordCount = countWords(esParagraphs);
+  const esHtml = paragraphsToHtml(esParagraphs);
+  const enHtml = paragraphsToHtml(enParagraphs);
 
   const now = new Date();
   const titleForSlug = parsed.es.title || parsed.en.title || "blog-post";
@@ -225,6 +240,8 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
         title: parsed.es.title,
         excerpt: parsed.es.excerpt,
         paragraphs: esParagraphs,
+        blocks: [],
+        html: esHtml,
         seoTitle: parsed.es.seoTitle,
         seoDescription: parsed.es.seoDescription,
         seoKeywords: settings.includeSeoKeywords ? parsed.es.seoKeywords : undefined,
@@ -233,6 +250,8 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
         title: parsed.en.title,
         excerpt: parsed.en.excerpt,
         paragraphs: enParagraphs,
+        blocks: [],
+        html: enHtml,
         seoTitle: parsed.en.seoTitle,
         seoDescription: parsed.en.seoDescription,
         seoKeywords: settings.includeSeoKeywords ? parsed.en.seoKeywords : undefined,

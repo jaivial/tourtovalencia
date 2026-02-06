@@ -15,7 +15,7 @@ export function AdminDashboardLayout({ strings }: AdminDashboardLayoutProps) {
   const isBookingsActive = location.pathname === "/admin/dashboard/bookings";
   const isPageGenActive = location.pathname === "/admin/dashboard/pagegen";
   const isAccountActive = location.pathname === "/admin/dashboard/account";
-  const isBlogActive = location.pathname === "/admin/dashboard/blog";
+  const isBlogActive = location.pathname.startsWith("/admin/dashboard/blog");
 
   return (
     <div className="min-h-screen bg-gray-100">
