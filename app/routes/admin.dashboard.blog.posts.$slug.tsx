@@ -17,11 +17,19 @@ import { Button } from "~/components/ui/button";
 import wpComponentsCss from "@wordpress/components/build-style/style.css?url";
 import wpBlockEditorCss from "@wordpress/block-editor/build-style/style.css?url";
 import wpBlockLibraryCss from "@wordpress/block-library/build-style/style.css?url";
+import wpBlockLibraryEditorCss from "@wordpress/block-library/build-style/editor.css?url";
+import wpBlockLibraryThemeCss from "@wordpress/block-library/build-style/theme.css?url";
+import wpFormatLibraryCss from "../../node_modules/@wordpress/format-library/build-style/style.css?url";
+import gutenbergEditorCss from "~/styles/gutenberg-editor.css?url";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: wpComponentsCss },
   { rel: "stylesheet", href: wpBlockEditorCss },
   { rel: "stylesheet", href: wpBlockLibraryCss },
+  { rel: "stylesheet", href: wpBlockLibraryEditorCss },
+  { rel: "stylesheet", href: wpBlockLibraryThemeCss },
+  { rel: "stylesheet", href: wpFormatLibraryCss },
+  { rel: "stylesheet", href: gutenbergEditorCss },
 ];
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {

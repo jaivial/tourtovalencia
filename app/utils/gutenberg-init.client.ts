@@ -1,5 +1,7 @@
 import apiFetch from "@wordpress/api-fetch";
 import { registerCoreBlocks } from "@wordpress/block-library";
+// Side-effect: registers bold, italic, link, strikethrough, code, etc.
+import "@wordpress/format-library";
 
 let initialized = false;
 
