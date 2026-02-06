@@ -63,52 +63,59 @@ export default function AdminBlogPostsRoute() {
         {posts.length === 0 ? (
           <p className="text-sm text-gray-500">No hay posts aún.</p>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
             {posts.map((post: any) => {
               const title = post.content?.es?.title || post.content?.en?.title || post.slug;
               const isPublished = post.status === "published";
               return (
-                <div key={post.slug} className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">
-                      {post.publishedAt
-                        ? new Date(post.publishedAt).toLocaleString("es-ES", { timeZone: "Europe/Madrid" })
-                        : "Sin fecha"}
-                    </p>
-                    <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-                    <div className="mt-1 flex gap-3 text-xs text-gray-500">
-                      <span>Slug: {post.slug}</span>
-                      <span>{post.wordCount} palabras</span>
-                      <span>{post.paragraphCount} párrafos</span>
+                <div key={post.slug} className="rounded-2xl border bg-white p-5 shadow-sm">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                        <span className="rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-wide">
+                          {isPublished ? "Publicado" : "Borrador"}
+                        </span>
+                        <span>
+                          {post.publishedAt
+                            ? new Date(post.publishedAt).toLocaleString("es-ES", { timeZone: "Europe/Madrid" })
+                            : "Sin fecha"}
+                        </span>
+                        <span>•</span>
+                        <span>{post.wordCount} palabras</span>
+                        <span>•</span>
+                        <span>{post.paragraphCount} párrafos</span>
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+                      <p className="text-sm text-gray-500">/{post.slug}</p>
                     </div>
-                  </div>
 
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500">{isPublished ? "Publicado" : "Borrador"}</span>
-                      <Switch
-                        checked={isPublished}
-                        onCheckedChange={(checked) => {
-                          toggleFetcher.submit(
-                            { intent: "toggleStatus", slug: post.slug, status: checked ? "published" : "draft" },
-                            { method: "post" }
-                          );
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex items-center gap-2 rounded-full border px-3 py-1">
+                        <span className="text-xs text-gray-500">Publicar</span>
+                        <Switch
+                          checked={isPublished}
+                          onCheckedChange={(checked) => {
+                            toggleFetcher.submit(
+                              { intent: "toggleStatus", slug: post.slug, status: checked ? "published" : "draft" },
+                              { method: "post" }
+                            );
+                          }}
+                        />
+                      </div>
+                      <Button asChild variant="outline">
+                        <Link to={`/admin/dashboard/blog/posts/${post.slug}`}>Editar</Link>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => {
+                          if (!window.confirm("¿Eliminar este post permanentemente?")) return;
+                          deleteFetcher.submit({ intent: "delete", slug: post.slug }, { method: "post" });
                         }}
-                      />
+                      >
+                        Eliminar
+                      </Button>
                     </div>
-                    <Button asChild variant="outline">
-                      <Link to={`/admin/dashboard/blog/posts/${post.slug}`}>Editar</Link>
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      onClick={() => {
-                        if (!window.confirm("¿Eliminar este post permanentemente?")) return;
-                        deleteFetcher.submit({ intent: "delete", slug: post.slug }, { method: "post" });
-                      }}
-                    >
-                      Eliminar
-                    </Button>
                   </div>
                 </div>
               );

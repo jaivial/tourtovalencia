@@ -6,6 +6,7 @@ import { requireAdminSession } from "~/utils/admin-session.server";
 import { getBlogPostsCollection, getToursCollection } from "~/utils/db.server";
 import type { BlogPost } from "~/utils/db.schema.server";
 import GutenbergEditor from "~/components/admin/GutenbergEditor";
+import { paragraphsToBlocks } from "~/utils/blogBlocks.server";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
@@ -39,7 +40,25 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const toursCollection = await getToursCollection();
   const tours = await toursCollection.find({ status: "active" }).toArray();
 
-  return json({ post, tours });
+  const hydratedPost: BlogPost = {
+    ...post,
+    content: {
+      es: {
+        ...post.content.es,
+        blocks: post.content.es.blocks && post.content.es.blocks.length > 0
+          ? post.content.es.blocks
+          : paragraphsToBlocks(post.content.es.paragraphs || []),
+      },
+      en: {
+        ...post.content.en,
+        blocks: post.content.en.blocks && post.content.en.blocks.length > 0
+          ? post.content.en.blocks
+          : paragraphsToBlocks(post.content.en.paragraphs || []),
+      },
+    },
+  };
+
+  return json({ post: hydratedPost, tours });
 };
 
 function extractParagraphsFromHtml(html: string): string[] {

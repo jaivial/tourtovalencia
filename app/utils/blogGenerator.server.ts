@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "fs";
 import { getBlogPostsCollection, getToursCollection } from "~/utils/db.server";
 import type { BlogPost, BlogSettings, Tour } from "~/utils/db.schema.server";
 import { generateSlug } from "~/utils/page.server";
+import { paragraphsToBlocks } from "~/utils/blogBlocks.server";
 
 const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
 const GOOGLE_AI_MODEL = "gemini-2.0-flash-lite";
@@ -222,6 +223,8 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
   const wordCount = countWords(esParagraphs);
   const esHtml = paragraphsToHtml(esParagraphs);
   const enHtml = paragraphsToHtml(enParagraphs);
+  const esBlocks = paragraphsToBlocks(esParagraphs);
+  const enBlocks = paragraphsToBlocks(enParagraphs);
 
   const now = new Date();
   const titleForSlug = parsed.es.title || parsed.en.title || "blog-post";
@@ -240,7 +243,7 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
         title: parsed.es.title,
         excerpt: parsed.es.excerpt,
         paragraphs: esParagraphs,
-        blocks: [],
+        blocks: esBlocks,
         html: esHtml,
         seoTitle: parsed.es.seoTitle,
         seoDescription: parsed.es.seoDescription,
@@ -250,7 +253,7 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
         title: parsed.en.title,
         excerpt: parsed.en.excerpt,
         paragraphs: enParagraphs,
-        blocks: [],
+        blocks: enBlocks,
         html: enHtml,
         seoTitle: parsed.en.seoTitle,
         seoDescription: parsed.en.seoDescription,
