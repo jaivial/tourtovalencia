@@ -72,21 +72,6 @@ export default function BlogPostRoute() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
 
-        {/* Breadcrumb */}
-        <div className="absolute top-6 left-0 right-0 z-10">
-          <div className="container mx-auto px-6 max-w-4xl">
-            <Link
-              to="/blog"
-              className="inline-flex items-center gap-2 text-white/90 hover:text-white text-sm font-medium transition-colors backdrop-blur-sm bg-white/10 rounded-full px-4 py-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              {language === "en" ? "Back to Blog" : "Volver al Blog"}
-            </Link>
-          </div>
-        </div>
-
         {/* Title overlay */}
         <div className="absolute bottom-0 left-0 right-0 z-10">
           <div className="container mx-auto px-6 max-w-4xl pb-10">
@@ -102,6 +87,19 @@ export default function BlogPostRoute() {
             </h1>
           </div>
         </div>
+      </div>
+
+      {/* Breadcrumb */}
+      <div className="container mx-auto px-6 max-w-3xl mt-6 mb-2">
+        <Link
+          to="/blog"
+          className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 text-sm font-medium transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          {language === "en" ? "Back to Blog" : "Volver al Blog"}
+        </Link>
       </div>
 
       {/* Content Body */}
