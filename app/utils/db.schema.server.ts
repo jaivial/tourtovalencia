@@ -159,6 +159,8 @@ export interface BlogSettings {
   paragraphsMax: number;
   includeSeoKeywords: boolean;
   tone: "formal" | "casual" | "friendly" | "professional" | "journalist";
+  useCustomPrompt: boolean;
+  customPrompt: string;
   timezone: "Europe/Madrid";
   lastRunAt?: Date;
   nextRunAt?: Date;

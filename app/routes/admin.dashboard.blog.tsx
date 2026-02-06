@@ -9,19 +9,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({});
 };
 
-const tabs = [
-  { label: "Configuración", to: "/admin/dashboard/blog" },
-  { label: "Posts", to: "/admin/dashboard/blog/posts" },
-];
-
 export default function AdminBlogLayoutRoute() {
   const location = useLocation();
   const navigate = useNavigate();
   const currentTab = location.pathname.startsWith("/admin/dashboard/blog/posts") ? "posts" : "config";
 
   return (
-    <div className="p-8">
+    <div className="p-6 md:p-8">
       <div className="max-w-5xl mx-auto">
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">Blog</h1>
+          <p className="text-sm text-gray-500">Gestiona la generación automática y tus publicaciones</p>
+        </div>
         <Tabs
           value={currentTab}
           onValueChange={(value) => {
@@ -30,12 +29,18 @@ export default function AdminBlogLayoutRoute() {
               navigate(target);
             }
           }}
-          className="mb-6"
+          className="mb-8"
         >
-          <TabsList className="mx-auto w-fit justify-center bg-white border border-gray-200">
-            <TabsTrigger value="config">Configuración</TabsTrigger>
-            <TabsTrigger value="posts">Posts</TabsTrigger>
-          </TabsList>
+          <div className="flex justify-center">
+            <TabsList className="inline-flex h-11 items-center gap-1 rounded-xl bg-gray-100 p-1">
+              <TabsTrigger value="config" className="rounded-lg px-6 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                Configuración
+              </TabsTrigger>
+              <TabsTrigger value="posts" className="rounded-lg px-6 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                Posts
+              </TabsTrigger>
+            </TabsList>
+          </div>
         </Tabs>
         <Outlet />
       </div>

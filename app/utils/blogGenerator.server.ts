@@ -115,7 +115,10 @@ function buildPrompt(settings: BlogSettings, tours: TourPromptData[], topic: str
 Eres un escritor profesional de blogs de viajes especializado en Valencia, España. Tu objetivo es escribir contenido SEO de alta calidad que atraiga tráfico orgánico a la web.
 
 TEMA DEL ARTÍCULO:
-${topic}
+${topic}${settings.useCustomPrompt && settings.customPrompt ? `
+
+ENFOQUE PERSONALIZADO DEL USUARIO (dale prioridad a este enfoque):
+${settings.customPrompt}` : ""}
 
 INSTRUCCIONES IMPORTANTES:
 - El artículo debe tratar sobre el TEMA indicado, NO sobre excursiones ni tours concretos.

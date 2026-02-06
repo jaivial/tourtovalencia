@@ -16,6 +16,8 @@ export const DEFAULT_BLOG_SETTINGS: Omit<BlogSettings, "_id"> = {
   paragraphsMax: 7,
   includeSeoKeywords: true,
   tone: "journalist",
+  useCustomPrompt: false,
+  customPrompt: "",
   timezone: "Europe/Madrid",
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -62,6 +64,8 @@ export type BlogSettingsInput = {
   paragraphsMax: number;
   includeSeoKeywords: boolean;
   tone: "formal" | "casual" | "friendly" | "professional" | "journalist";
+  useCustomPrompt: boolean;
+  customPrompt: string;
 };
 
 export async function updateBlogSettings(input: BlogSettingsInput): Promise<BlogSettings> {

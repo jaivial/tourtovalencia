@@ -13,6 +13,7 @@ import { Label } from "~/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Button } from "~/components/ui/button";
+import { Textarea } from "~/components/ui/textarea";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await requireAdminSession(request);
@@ -84,6 +85,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const tone = String(formData.get("tone") || "journalist") as "formal" | "casual" | "friendly" | "professional" | "journalist";
   const selectAllTours = formData.get("selectAllTours") === "true";
   const selectedTourSlugs = formData.getAll("selectedTourSlugs").map(String);
+  const useCustomPrompt = formData.get("useCustomPrompt") === "true";
+  const customPrompt = String(formData.get("customPrompt") || "");
 
   await updateBlogSettings({
     frequency,
@@ -98,6 +101,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     paragraphsMax,
     includeSeoKeywords,
     tone,
+    useCustomPrompt,
+    customPrompt,
   });
 
   return json({ success: true });
@@ -126,6 +131,8 @@ export default function AdminBlogSettingsRoute() {
   const [paragraphRange, setParagraphRange] = useState(`${settings.paragraphsMin}-${settings.paragraphsMax}`);
   const generateFetcher = useFetcher<typeof action>();
   const navigate = useNavigate();
+  const [useCustomPrompt, setUseCustomPrompt] = useState(settings.useCustomPrompt ?? false);
+  const [customPrompt, setCustomPrompt] = useState(settings.customPrompt ?? "");
   const [showSuccess, setShowSuccess] = useState(false);
 
   const isGenerating = generateFetcher.state !== "idle";
@@ -178,6 +185,8 @@ export default function AdminBlogSettingsRoute() {
             <input type="hidden" name="wordCountMax" value={wordRange.split("-")[1]} />
             <input type="hidden" name="paragraphsMin" value={paragraphRange.split("-")[0]} />
             <input type="hidden" name="paragraphsMax" value={paragraphRange.split("-")[1]} />
+            <input type="hidden" name="useCustomPrompt" value={useCustomPrompt ? "true" : "false"} />
+            <input type="hidden" name="customPrompt" value={customPrompt} />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
@@ -325,7 +334,31 @@ export default function AdminBlogSettingsRoute() {
                 </div>
                 <Switch checked={selectAllTours} onCheckedChange={setSelectAllTours} />
               </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <Label>Usar prompt personalizado</Label>
+                  <p className="text-sm text-gray-500">Añadir un enfoque o tema específico que la IA priorizará.</p>
+                </div>
+                <Switch checked={useCustomPrompt} onCheckedChange={setUseCustomPrompt} />
+              </div>
             </div>
+
+            {useCustomPrompt && (
+              <div className="space-y-2">
+                <Label>Prompt personalizado</Label>
+                <Textarea
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  placeholder="Ej: Enfócate en la gastronomía valenciana y menciona restaurantes típicos del centro histórico..."
+                  rows={4}
+                  className="resize-y"
+                />
+                <p className="text-xs text-gray-500">
+                  Este texto se añadirá como enfoque prioritario al generar el artículo.
+                </p>
+              </div>
+            )}
 
             <div className="space-y-3">
               <Label>Tours incluidos</Label>
