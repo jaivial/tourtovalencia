@@ -8,9 +8,9 @@ import {
   BlockEditorKeyboardShortcuts,
 } from "@wordpress/block-editor";
 import { serialize } from "@wordpress/blocks";
-import { registerCoreBlocks } from "@wordpress/block-library";
-import { SlotFillProvider, Popover } from "@wordpress/components";
+import { SlotFillProvider } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
+import { initGutenberg } from "~/utils/gutenberg-init.client";
 
 export type GutenbergEditorValue = {
   blocks: any[];
@@ -22,41 +22,29 @@ type GutenbergEditorProps = {
   onChange: (value: GutenbergEditorValue) => void;
 };
 
-let coreBlocksRegistered = false;
-
 export default function GutenbergEditorClient({ initialBlocks, onChange }: GutenbergEditorProps) {
   const [blocks, setBlocks] = useState<any[]>(initialBlocks || []);
 
   useEffect(() => {
-    if (!coreBlocksRegistered) {
-      registerCoreBlocks();
-      coreBlocksRegistered = true;
-    }
+    initGutenberg();
   }, []);
 
   useEffect(() => {
-    console.log("[GUTENBERG-EDITOR] initialBlocks received:", initialBlocks?.length, initialBlocks?.map((b: any) => b.name));
     setBlocks(initialBlocks || []);
   }, [initialBlocks]);
 
   useEffect(() => {
     const html = serialize(blocks);
-    console.log("[GUTENBERG-EDITOR] serialize output length:", html.length);
     onChange({ blocks, html });
   }, [blocks, onChange]);
-
-  const handleBlockChange = (newBlocks: any[]) => {
-    console.log("[GUTENBERG-EDITOR] blocks changed:", newBlocks.length, newBlocks.map((b: any) => b.name));
-    setBlocks(newBlocks);
-  };
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white">
       <SlotFillProvider>
         <BlockEditorProvider
           value={blocks}
-          onInput={handleBlockChange}
-          onChange={handleBlockChange}
+          onInput={setBlocks}
+          onChange={setBlocks}
           settings={{ hasFixedToolbar: true }}
         >
           <div className="border-b border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600">
@@ -72,7 +60,6 @@ export default function GutenbergEditorClient({ initialBlocks, onChange }: Guten
             </WritingFlow>
           </BlockTools>
           <BlockEditorKeyboardShortcuts />
-          <Popover />
         </BlockEditorProvider>
       </SlotFillProvider>
     </div>
