@@ -17,9 +17,8 @@ import {
   Popover,
   Button,
 } from "@wordpress/components";
-import { useSelect, useDispatch } from "@wordpress/data";
 import { __ } from "@wordpress/i18n";
-import { undo as undoIcon, redo as redoIcon, plus, drawerRight, listView } from "@wordpress/icons";
+import { plus, drawerRight, listView } from "@wordpress/icons";
 import { ShortcutProvider } from "@wordpress/keyboard-shortcuts";
 import { initGutenberg } from "~/utils/gutenberg-init.client";
 
@@ -44,15 +43,6 @@ function EditorToolbar({
   showListView: boolean;
   onToggleListView: () => void;
 }) {
-  const { hasUndo, hasRedo } = useSelect(
-    (select: any) => ({
-      hasUndo: select("core/block-editor").hasUndo(),
-      hasRedo: select("core/block-editor").hasRedo(),
-    }),
-    []
-  );
-  const { undo, redo } = useDispatch("core/block-editor");
-
   return (
     <div className="gutenberg-toolbar">
       <div className="gutenberg-toolbar__left">
@@ -69,20 +59,6 @@ function EditorToolbar({
               className="gutenberg-toolbar__inserter-toggle"
             />
           )}
-        />
-        <Button
-          icon={undoIcon}
-          label={__("Deshacer")}
-          disabled={!hasUndo}
-          onClick={() => undo()}
-          className="gutenberg-toolbar__button"
-        />
-        <Button
-          icon={redoIcon}
-          label={__("Rehacer")}
-          disabled={!hasRedo}
-          onClick={() => redo()}
-          className="gutenberg-toolbar__button"
         />
         <Button
           icon={listView}
