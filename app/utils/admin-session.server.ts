@@ -16,6 +16,7 @@ const adminSessionStorage = createCookieSessionStorage({
     httpOnly: true,
     maxAge: 60 * 60 * 8, // 8 hours
     path: "/",
+    domain: ".tourtovalencia.com",
     sameSite: "lax",
     secrets: [sessionSecret!],
     secure: process.env.NODE_ENV === "production",
@@ -60,7 +61,7 @@ export async function createAdminSession(request, username) {
   const headers = new Headers();
   headers.append("Set-Cookie", cookieValue);
   
-  return { headers };
+  return { headers, cookieValue };
 }
 
 export async function destroyAdminSession(request) {

@@ -76,7 +76,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         throw e;
       }
       console.log("[API-ADMIN-LOGIN] Session created, headers:", result.headers ? "headers set" : "no headers");
-      return json({ success: true }, result);
+      return json(
+        { success: true },
+        {
+          headers: {
+            "Set-Cookie": result.cookieValue,
+          },
+        }
+      );
     } else {
       console.log("[API-ADMIN-LOGIN] Login failed - invalid credentials");
       logger.warn("Admin login failed - invalid credentials", { username, ip });
