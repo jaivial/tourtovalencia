@@ -268,13 +268,17 @@ export default function AdminBlogSettingsRoute() {
               <p>
                 Próxima ejecución:{" "}
                 <span className="font-medium">
-                  {settings.nextRunAt ? new Date(settings.nextRunAt).toLocaleString("es-ES") : "No programado"}
+                  {settings.nextRunAt
+                    ? new Date(settings.nextRunAt).toLocaleString("es-ES", { timeZone: "Europe/Madrid" })
+                    : "No programado"}
                 </span>
               </p>
               <p>
                 Última ejecución:{" "}
                 <span className="font-medium">
-                  {settings.lastRunAt ? new Date(settings.lastRunAt).toLocaleString("es-ES") : "Sin ejecuciones"}
+                  {settings.lastRunAt
+                    ? new Date(settings.lastRunAt).toLocaleString("es-ES", { timeZone: "Europe/Madrid" })
+                    : "Sin ejecuciones"}
                 </span>
               </p>
             </div>

@@ -41,7 +41,9 @@ export default function BlogIndexRoute() {
                 <img src={post.featuredImageUrl} alt={content.title} className="w-full h-48 object-cover" loading="lazy" />
                 <div className="p-6">
                   <p className="text-sm text-gray-500 mb-2">
-                    {new Date(post.publishedAt).toLocaleDateString(language === "en" ? "en-GB" : "es-ES")}
+                    {new Date(post.publishedAt).toLocaleDateString(language === "en" ? "en-GB" : "es-ES", {
+                      timeZone: "Europe/Madrid",
+                    })}
                   </p>
                   <h2 className="text-2xl font-semibold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
                     {content.title}

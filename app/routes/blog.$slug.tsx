@@ -53,7 +53,9 @@ export default function BlogPostRoute() {
     <div className="w-full min-h-screen bg-white">
       <div className="container mx-auto px-6 py-16 max-w-4xl">
         <p className="text-sm text-gray-500 mb-3">
-          {new Date(post.publishedAt).toLocaleDateString(language === "en" ? "en-GB" : "es-ES")}
+          {new Date(post.publishedAt).toLocaleDateString(language === "en" ? "en-GB" : "es-ES", {
+            timeZone: "Europe/Madrid",
+          })}
         </p>
         <h1 className="text-4xl font-bold text-gray-900 mb-6">{content.title}</h1>
         <img src={post.featuredImageUrl} alt={content.title} className="w-full h-72 object-cover rounded-lg mb-8" />
