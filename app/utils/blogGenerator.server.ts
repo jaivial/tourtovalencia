@@ -73,38 +73,74 @@ async function getSelectedTours(settings: BlogSettings): Promise<TourPromptData[
   });
 }
 
-function buildPrompt(settings: BlogSettings, tours: TourPromptData[]) {
-  const toursSummary = tours.map((tour, index) => (
-    `${index + 1}. ${tour.nameEs} (slug: ${tour.slug})
-- Descripcion ES: ${tour.descriptionEs}
-- Duracion ES: ${tour.durationEs}
-- Incluye ES: ${tour.includesEs}
-- Punto de encuentro ES: ${tour.meetingPointEs}
-- Extra ES: ${tour.extraEs}
-- Name EN: ${tour.nameEn}
-- Description EN: ${tour.descriptionEn}
-`
-  )).join("\n");
+// Topics pool — each generated post picks a random topic about Valencia
+const VALENCIA_TOPICS = [
+  "El clima de Valencia: qué tiempo hace en cada estación y cuál es la mejor época para visitar",
+  "Las mejores playas de Valencia: Malvarrosa, Patacona, El Saler y calas escondidas",
+  "La Ciudad de las Artes y las Ciencias: guía completa del complejo más icónico de Valencia",
+  "Historia de Valencia: desde la fundación romana hasta la ciudad moderna",
+  "Las Fallas de Valencia: origen, tradición y cómo vivir la fiesta",
+  "La gastronomía valenciana: paella, horchata, fartons y mucho más",
+  "El barrio del Carmen: historia, arte urbano y vida nocturna en el casco antiguo",
+  "La Albufera de Valencia: el parque natural, paseos en barca y atardeceres únicos",
+  "Mercado Central de Valencia: uno de los mercados más grandes y bonitos de Europa",
+  "La Lonja de la Seda: patrimonio de la humanidad en el corazón de Valencia",
+  "Jardines de Valencia: Turia, Botánico, Viveros y los espacios verdes de la ciudad",
+  "Fiestas y tradiciones valencianas: Semana Santa Marinera, la Tomatina, Moros y Cristianos",
+  "El puerto de Valencia y la Marina: paseos, restaurantes y la America's Cup",
+  "Arquitectura modernista en Valencia: Estación del Norte, Mercado de Colón y más",
+  "Valencia con niños: planes familiares, el Oceanogràfic, Bioparc y parques",
+  "Rutas en bicicleta por Valencia: la ciudad más bike-friendly de España",
+  "Horchata y fartons: la tradición dulce más valenciana y dónde probarla",
+  "La Semana Santa Marinera del Cabanyal: una fiesta única en Valencia",
+  "Pueblos bonitos cerca de Valencia: Xàtiva, Sagunto, Chelva, Bocairent",
+  "El arte en Valencia: IVAM, Centro del Carmen, graffiti y galerías contemporáneas",
+  "Vida nocturna en Valencia: barrios, bares de tapas y terrazas con encanto",
+  "Compras en Valencia: desde tiendas locales hasta grandes centros comerciales",
+  "Valencia sostenible: movilidad verde, huerta y proyectos ecológicos",
+  "El Cabanyal: el barrio marinero que renace con arte y gastronomía",
+  "Deportes acuáticos en Valencia: surf, kayak, paddle surf y vela",
+];
+
+function pickTopic(existingSlugs: string[]): string {
+  // Use current date + existing post count as seed for variety
+  const seed = new Date().getDate() + existingSlugs.length;
+  return VALENCIA_TOPICS[seed % VALENCIA_TOPICS.length];
+}
+
+function buildPrompt(settings: BlogSettings, tours: TourPromptData[], topic: string) {
+  const tourNames = tours.map((t) => `"${t.nameEs}" / "${t.nameEn}"`).join(", ");
 
   return `
-Eres un escritor profesional de blogs de viajes. Genera un nuevo post sobre excursiones y cosas que hacer en Valencia, relacionado estrechamente con los tours listados. El contenido debe apoyar el SEO y sonar natural. Debes producir contenido en ESPAÑOL y en INGLÉS.
+Eres un escritor profesional de blogs de viajes especializado en Valencia, España. Tu objetivo es escribir contenido SEO de alta calidad que atraiga tráfico orgánico a la web.
 
-Reglas de contenido:
-- Longitud total entre ${settings.wordCountMin} y ${settings.wordCountMax} palabras.
-- Entre ${settings.paragraphsMin} y ${settings.paragraphsMax} párrafos.
+TEMA DEL ARTÍCULO:
+${topic}
+
+INSTRUCCIONES IMPORTANTES:
+- El artículo debe tratar sobre el TEMA indicado, NO sobre excursiones ni tours concretos.
+- Escribe sobre Valencia como destino: su cultura, historia, gastronomía, playas, monumentos, fiestas, naturaleza, etc.
+- El contenido debe ser informativo, útil y atractivo para alguien que busca información sobre Valencia en Google.
+- NUNCA sugieras que se pueden hacer dos excursiones en un mismo día ni combines tours.
+- NUNCA centres el artículo en los tours. Los tours son secundarios.
+- Solo al final del artículo, incluye UNA frase sutil mencionando que para conocer Valencia de forma especial se puede considerar una visita guiada, sin ser comercial ni agresivo.
+- No inventes datos factuales específicos (precios, horarios exactos).
+
+Formato:
+- Longitud: entre ${settings.wordCountMin} y ${settings.wordCountMax} palabras POR IDIOMA.
+- Párrafos: entre ${settings.paragraphsMin} y ${settings.paragraphsMax}.
 - Tono: ${settings.tone}.
-- Incluye una introducción breve y un cierre con CTA suave hacia tours relacionados.
-- Basado en los tours listados.
-- No inventes datos factuales específicos (precios, horarios exactos) si no están presentes.
+- Produce contenido en ESPAÑOL y en INGLÉS (no traduzcas literalmente, adapta cada versión al idioma).
 
 SEO:
-- includeSeoKeywords: ${settings.includeSeoKeywords ? "true" : "false"}.
-- Si includeSeoKeywords es true, incluye una lista breve de palabras clave SEO.
+- Optimiza el título y la meta descripción para posicionamiento en buscadores.
+- ${settings.includeSeoKeywords ? "Incluye una lista de 5-8 palabras clave SEO relevantes al tema." : "No incluyas palabras clave SEO."}
+- Las keywords deben ser sobre el TEMA (ej: "playas valencia", "clima valencia"), NO sobre tours.
 
-Tours disponibles:
-${toursSummary}
+Tours disponibles (solo como referencia, NO como tema principal):
+${tourNames}
 
-Devuelve SOLO un JSON válido con esta estructura:
+Devuelve SOLO un JSON válido con esta estructura exacta:
 {
   "es": {
     "title": "...",
@@ -158,7 +194,12 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
     throw new Error("No tours available to generate blog content");
   }
 
-  const prompt = buildPrompt(settings, tours);
+  // Pick a Valencia topic that varies over time
+  const postsCollection = await getBlogPostsCollection();
+  const existingSlugs = await postsCollection.distinct("slug");
+  const topic = pickTopic(existingSlugs);
+
+  const prompt = buildPrompt(settings, tours, topic);
 
   let responseText = "";
   try {
@@ -172,8 +213,8 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
           },
         ],
         generationConfig: {
-          temperature: 0.6,
-          maxOutputTokens: 2048,
+          temperature: 0.7,
+          maxOutputTokens: 4096,
         },
       },
       { headers: { "Content-Type": "application/json" } }
