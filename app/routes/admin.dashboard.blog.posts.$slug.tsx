@@ -169,13 +169,17 @@ export default function AdminBlogEditorRoute() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    console.log("[GUTENBERG] useEffect fired, es html length:", post.content.es.html?.length, "en html length:", post.content.en.html?.length);
     import("@wordpress/blocks").then(({ parse }) => {
+      console.log("[GUTENBERG] @wordpress/blocks imported, parse:", typeof parse);
       if (post.content.es.html) {
         const esHtml = ensureGutenbergComments(post.content.es.html);
         console.log("[GUTENBERG] ES HTML preview:", esHtml.slice(0, 300));
         const esParsed = parse(esHtml);
         console.log("[GUTENBERG] ES parsed blocks:", esParsed.length, esParsed.map((b: any) => b.name));
         setBlocksEs(esParsed);
+      } else {
+        console.log("[GUTENBERG] ES html is empty/falsy:", JSON.stringify(post.content.es.html));
       }
       if (post.content.en.html) {
         const enHtml = ensureGutenbergComments(post.content.en.html);
@@ -183,7 +187,11 @@ export default function AdminBlogEditorRoute() {
         const enParsed = parse(enHtml);
         console.log("[GUTENBERG] EN parsed blocks:", enParsed.length, enParsed.map((b: any) => b.name));
         setBlocksEn(enParsed);
+      } else {
+        console.log("[GUTENBERG] EN html is empty/falsy:", JSON.stringify(post.content.en.html));
       }
+    }).catch((err) => {
+      console.error("[GUTENBERG] Failed to import @wordpress/blocks:", err);
     });
   }, [post.content.es.html, post.content.en.html]);
 
