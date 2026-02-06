@@ -49,7 +49,8 @@ export const useStates = (props: UseStatesProps) => {
       
       if (data.success) {
         console.log("[ADMIN-HOOKS] Login successful, navigating to /admin/dashboard");
-        navigate("/admin/dashboard");
+        // Force a full reload so the server sees the new session cookie
+        window.location.assign("/admin/dashboard");
         return true;
       } else {
         console.log("[ADMIN-HOOKS] Login failed:", data.error);
