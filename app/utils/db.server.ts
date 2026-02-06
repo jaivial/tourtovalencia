@@ -1,6 +1,6 @@
 import { MongoClient, Document, MongoClientOptions } from "mongodb";
 import { ensureDbIndexes } from "./db.schema.server";
-import type { Translation, Page, Tour } from "./db.schema.server";
+import type { Translation, Page, Tour, BlogPost, BlogSettings } from "./db.schema.server";
 // Import dotenv to ensure environment variables are loaded
 import * as dotenv from "dotenv";
 
@@ -102,6 +102,14 @@ export async function getPagesCollection() {
 
 export async function getToursCollection() {
   return getCollection<Tour>("tours");
+}
+
+export async function getBlogPostsCollection() {
+  return getCollection<BlogPost>("blogposts");
+}
+
+export async function getBlogSettingsCollection() {
+  return getCollection<BlogSettings>("blogsettings");
 }
 
 export { db };

@@ -104,6 +104,7 @@ export const loader = async ({ request }: { request: Request }) => {
 const ALLOWED_REDIRECTS = [
   '/',
   '/book',
+  '/blog',
   '/sanjuan',
   '/valencia-things-to-do',
   '/pages',

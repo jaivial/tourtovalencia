@@ -11,8 +11,16 @@ dotenv.config();
 import { PassThrough } from "node:stream";
 import { RemixServer } from "@remix-run/react";
 import { renderToPipeableStream } from "react-dom/server";
+import { startBlogScheduler } from "~/utils/blogScheduler.server";
 
 const ABORT_DELAY = 5000;
+
+if (!(globalThis as any).__blogSchedulerStarted) {
+  (globalThis as any).__blogSchedulerStarted = true;
+  startBlogScheduler().catch((error) => {
+    console.error("[BLOG-SCHEDULER] Failed to start:", error);
+  });
+}
 
 export default function handleRequest(request: Request, responseStatusCode: number, responseHeaders: Headers, remixContext: any) {
   const url = new URL(request.url);

@@ -1,6 +1,6 @@
 import { Link, useLocation, Outlet } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
-import { LogOut, Home, Calendar, FileText, User } from "lucide-react";
+import { LogOut, Home, Calendar, FileText, User, Newspaper } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { MobileNav } from "./MobileNav";
 import { useAuth } from "~/context/auth.context";
@@ -15,6 +15,7 @@ export function AdminDashboardLayout({ strings }: AdminDashboardLayoutProps) {
   const isBookingsActive = location.pathname === "/admin/dashboard/bookings";
   const isPageGenActive = location.pathname === "/admin/dashboard/pagegen";
   const isAccountActive = location.pathname === "/admin/dashboard/account";
+  const isBlogActive = location.pathname === "/admin/dashboard/blog";
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -36,6 +37,10 @@ export function AdminDashboardLayout({ strings }: AdminDashboardLayoutProps) {
             <Link to="/admin/dashboard/pagegen" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isPageGenActive ? "bg-primary text-white hover:bg-primary/90" : "")} prefetch="intent">
               <FileText className="h-5 w-5" />
               <span>{strings.pageGenerator}</span>
+            </Link>
+            <Link to="/admin/dashboard/blog" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isBlogActive ? "bg-primary text-white hover:bg-primary/90" : "")} prefetch="intent">
+              <Newspaper className="h-5 w-5" />
+              <span>{strings.blog}</span>
             </Link>
             <Link to="/admin/dashboard/account" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isAccountActive ? "bg-primary text-white hover:bg-primary/90" : "")} prefetch="intent">
               <User className="h-5 w-5" />
@@ -69,6 +74,10 @@ export function AdminDashboardLayout({ strings }: AdminDashboardLayoutProps) {
             <Link to="/admin/dashboard/pagegen" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isPageGenActive ? "bg-primary text-white hover:bg-primary/90" : "")} prefetch="intent">
               <FileText className="h-5 w-5" />
               <span>{strings.pageGenerator}</span>
+            </Link>
+            <Link to="/admin/dashboard/blog" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isBlogActive ? "bg-primary text-white hover:bg-primary/90" : "")} prefetch="intent">
+              <Newspaper className="h-5 w-5" />
+              <span>{strings.blog}</span>
             </Link>
             <Link to="/admin/dashboard/account" className={cn("flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100", isAccountActive ? "bg-primary text-white hover:bg-primary/90" : "")} prefetch="intent">
               <User className="h-5 w-5" />

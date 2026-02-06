@@ -107,6 +107,63 @@ export interface AdminUser {
   updatedAt: Date;
 }
 
+// Blog post interface for MongoDB
+export interface BlogPost {
+  _id?: string;
+  slug: string;
+  status: "published" | "draft";
+  publishedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  featuredImageUrl: string;
+  relatedTourSlugs: string[];
+  content: {
+    es: {
+      title: string;
+      excerpt: string;
+      paragraphs: string[];
+      seoTitle: string;
+      seoDescription: string;
+      seoKeywords?: string[];
+    };
+    en: {
+      title: string;
+      excerpt: string;
+      paragraphs: string[];
+      seoTitle: string;
+      seoDescription: string;
+      seoKeywords?: string[];
+    };
+  };
+  wordCount: number;
+  paragraphCount: number;
+}
+
+// Blog settings interface for MongoDB
+export interface BlogSettings {
+  _id?: string;
+  key: "default";
+  frequency: "daily" | "weekly" | "monthly";
+  publishHour: number;
+  weeklyDay: number;
+  monthlyCount: number;
+  selectedTourSlugs: string[];
+  selectAllTours: boolean;
+  wordCountMin: number;
+  wordCountMax: number;
+  paragraphsMin: number;
+  paragraphsMax: number;
+  includeSeoKeywords: boolean;
+  tone: "formal" | "casual" | "friendly" | "professional" | "journalist";
+  timezone: "Europe/Madrid";
+  lastRunAt?: Date;
+  nextRunAt?: Date;
+  lockedUntil?: Date;
+  lastError?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export async function ensureDbIndexes() {
   const db = await getDb();
   
@@ -162,5 +219,17 @@ export async function ensureDbIndexes() {
     { key: { username: 1 }, unique: true },
     // Index for sorting by creation date
     { key: { createdAt: -1 } }
+  ]);
+
+  // Create indexes for blogposts collection
+  await db.collection("blogposts").createIndexes([
+    { key: { slug: 1 }, unique: true },
+    { key: { publishedAt: -1 } }
+  ]);
+
+  // Create indexes for blogsettings collection
+  await db.collection("blogsettings").createIndexes([
+    { key: { key: 1 }, unique: true },
+    { key: { nextRunAt: 1 } }
   ]);
 }
