@@ -2,7 +2,7 @@ import axios from "axios";
 import path from "path";
 import { existsSync, readFileSync } from "fs";
 import { getBlogPostsCollection, getToursCollection } from "~/utils/db.server";
-import type { BlogPost, BlogSettings, Tour } from "~/utils/db.schema.server";
+import type { BlogPost, BlogSettings } from "~/utils/db.schema.server";
 import { generateSlug } from "~/utils/page.server";
 import { paragraphsToBlocks, paragraphsToGutenbergHtml } from "~/utils/blogBlocks.server";
 
@@ -27,15 +27,38 @@ type TourPromptData = {
   extraEs: string;
 };
 
+type GeneratedLanguageContent = {
+  title: string;
+  excerpt: string;
+  paragraphs: string[];
+  seoTitle: string;
+  seoDescription: string;
+  seoKeywords?: string[];
+};
+
+type GeneratedBlogResponse = {
+  es: GeneratedLanguageContent;
+  en: GeneratedLanguageContent;
+};
+
+function getSectionText(section: unknown, primaryKey: string, fallbackKey: string): string {
+  if (!section || typeof section !== "object") return "";
+  const record = section as Record<string, unknown>;
+  const primary = record[primaryKey];
+  if (typeof primary === "string") return primary;
+  const fallback = record[fallbackKey];
+  return typeof fallback === "string" ? fallback : "";
+}
+
 function loadTourExtraText(slug: string): string {
   const filePath = path.join(process.cwd(), "src", "locales", "pages", slug, "es.json");
   if (!existsSync(filePath)) return "";
   try {
     const raw = readFileSync(filePath, "utf-8");
-    const json = JSON.parse(raw) as Record<string, any>;
-    const section1 = json.section1?.firstSquareP || json.section1?.firstH3;
-    const section2 = json.section2?.firstH3 || json.section2?.secondH3;
-    const section5 = json.section5?.firstH3 || json.section5?.secondH3;
+    const json = JSON.parse(raw) as Record<string, unknown>;
+    const section1 = getSectionText(json.section1, "firstSquareP", "firstH3");
+    const section2 = getSectionText(json.section2, "firstH3", "secondH3");
+    const section5 = getSectionText(json.section5, "firstH3", "secondH3");
     return [section1, section2, section5].filter(Boolean).join(" ");
   } catch {
     return "";
@@ -176,6 +199,21 @@ function normalizeParagraphs(paragraphs: string[], min: number, max: number): st
   return trimmed;
 }
 
+function isGeneratedLanguageContent(value: unknown): value is GeneratedLanguageContent {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.title === "string" &&
+    typeof candidate.excerpt === "string" &&
+    Array.isArray(candidate.paragraphs) &&
+    candidate.paragraphs.every((paragraph) => typeof paragraph === "string") &&
+    typeof candidate.seoTitle === "string" &&
+    typeof candidate.seoDescription === "string" &&
+    (candidate.seoKeywords === undefined ||
+      (Array.isArray(candidate.seoKeywords) && candidate.seoKeywords.every((keyword) => typeof keyword === "string")))
+  );
+}
+
 function getAxiosErrorMessage(error: unknown): string | null {
   if (!axios.isAxiosError(error)) return null;
   const status = error.response?.status;
@@ -238,14 +276,18 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
   }
 
   const cleaned = responseText.replace(/```json\n?|\n?```/g, "").trim();
-  let parsed: {
-    es: { title: string; excerpt: string; paragraphs: string[]; seoTitle: string; seoDescription: string; seoKeywords?: string[]; };
-    en: { title: string; excerpt: string; paragraphs: string[]; seoTitle: string; seoDescription: string; seoKeywords?: string[]; };
-  };
+  let parsed: GeneratedBlogResponse;
   try {
-    parsed = JSON.parse(cleaned) as typeof parsed;
+    const maybeParsed = JSON.parse(cleaned) as Record<string, unknown>;
+    if (!isGeneratedLanguageContent(maybeParsed.es) || !isGeneratedLanguageContent(maybeParsed.en)) {
+      throw new Error("Google AI response must include valid 'es' and 'en' content");
+    }
+    parsed = { es: maybeParsed.es, en: maybeParsed.en };
   } catch (error) {
     console.error("[BLOG-GENERATOR] Failed to parse JSON:", cleaned.slice(0, 500));
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
     throw new Error("Google AI returned invalid JSON");
   }
 

@@ -3,6 +3,15 @@ import { json } from "@remix-run/server-runtime";
 import { useLoaderData, Link } from "@remix-run/react";
 import { getBlogPostsCollection, getToursCollection } from "~/utils/db.server";
 import { languageCookie } from "~/utils/cookies";
+import { getBlogTexts, resolveBlogLanguage } from "~/data/blogTexts";
+import { useLanguageContext } from "~/providers/LanguageContext";
+import type { BlogPost, Tour } from "~/utils/db.schema.server";
+
+type LoaderData = {
+  post: BlogPost;
+  language: "es" | "en";
+  relatedTours: Tour[];
+};
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const slug = params.slug || "";
@@ -22,26 +31,31 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     .find({ slug: { $in: post.relatedTourSlugs } })
     .toArray();
 
-  return json({ post, language, relatedTours });
+  return json<LoaderData>({
+    post: post as BlogPost,
+    language,
+    relatedTours: relatedTours as Tour[],
+  });
 };
 
-export const meta: MetaFunction = ({ data }) => {
-  const typed = data as any;
-  if (!typed?.post) {
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  const language = data?.language === "en" ? "en" : "es";
+  const texts = getBlogTexts(language);
+
+  if (!data?.post) {
     return [
-      { title: "Blog | Tour To Valencia" },
-      { name: "description", content: "Post no encontrado." },
+      { title: texts.index.metaTitle },
+      { name: "description", content: texts.post.notFoundDescription },
     ];
   }
 
-  const language = typed.language === "en" ? "en" : "es";
-  const content = typed.post.content[language];
+  const content = data.post.content[language] || data.post.content.es || data.post.content.en;
   return [
     { title: content.seoTitle || content.title },
     { name: "description", content: content.seoDescription || content.excerpt },
     { property: "og:title", content: content.seoTitle || content.title },
     { property: "og:description", content: content.seoDescription || content.excerpt },
-    { property: "og:image", content: typed.post.featuredImageUrl },
+    { property: "og:image", content: data.post.featuredImageUrl },
     { property: "og:type", content: "article" },
   ];
 };
@@ -56,8 +70,11 @@ function markdownBoldToHtml(text: string): string {
 }
 
 export default function BlogPostRoute() {
-  const { post, language, relatedTours } = useLoaderData<typeof loader>();
-  const content = post.content[language];
+  const { post, language: loaderLanguage, relatedTours } = useLoaderData<typeof loader>();
+  const { state } = useLanguageContext();
+  const language = resolveBlogLanguage(state.currentLanguage, loaderLanguage);
+  const texts = getBlogTexts(language);
+  const content = post.content[language] || post.content.es || post.content.en;
   const html = content.html || "";
   const readingTime = estimateReadingTime(post.wordCount || 0);
 
@@ -103,7 +120,7 @@ export default function BlogPostRoute() {
               <time dateTime={new Date(post.publishedAt).toISOString()}>{formattedDate}</time>
               <span className="w-1 h-1 rounded-full bg-white/60" />
               <span>
-                {readingTime} min {language === "en" ? "read" : "de lectura"}
+                {readingTime} min {texts.post.readingTimeLabel}
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight">
@@ -122,7 +139,7 @@ export default function BlogPostRoute() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          {language === "en" ? "Back to Blog" : "Volver al Blog"}
+          {texts.post.backToBlog}
         </Link>
       </div>
 
@@ -172,20 +189,16 @@ export default function BlogPostRoute() {
         {/* Share / CTA Section */}
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 sm:p-10 text-center mb-14">
           <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
-            {language === "en"
-              ? "Ready to explore Valencia?"
-              : "¿Listo para explorar Valencia?"}
+            {texts.post.ctaTitle}
           </h3>
           <p className="text-gray-300 mb-6 max-w-md mx-auto">
-            {language === "en"
-              ? "Discover unique experiences and unforgettable tours with local experts."
-              : "Descubre experiencias únicas y tours inolvidables con expertos locales."}
+            {texts.post.ctaDescription}
           </p>
           <Link
             to="/#tours"
             className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-gray-900 font-semibold px-8 py-3 rounded-full transition-colors"
           >
-            {language === "en" ? "View all tours" : "Ver todos los tours"}
+            {texts.post.ctaButton}
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -199,16 +212,14 @@ export default function BlogPostRoute() {
           <div className="container mx-auto px-6 max-w-5xl">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                {language === "en" ? "Related Tours" : "Tours Relacionados"}
+                {texts.post.relatedToursTitle}
               </h2>
               <p className="text-gray-500">
-                {language === "en"
-                  ? "Experiences mentioned in this article"
-                  : "Experiencias mencionadas en este artículo"}
+                {texts.post.relatedToursSubtitle}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {relatedTours.map((tour: any) => {
+              {relatedTours.map((tour) => {
                 const tourName = language === "en"
                   ? tour.tourName?.en || tour.slug
                   : tour.tourName?.es || tour.slug;
@@ -253,7 +264,7 @@ export default function BlogPostRoute() {
                           )}
                         </div>
                         <span className="inline-flex items-center gap-1 text-amber-600 font-semibold text-sm group-hover:gap-2 transition-all">
-                          {language === "en" ? "View tour" : "Ver tour"}
+                          {texts.post.viewTour}
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
@@ -277,7 +288,7 @@ export default function BlogPostRoute() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          {language === "en" ? "All articles" : "Todos los artículos"}
+          {texts.post.allArticles}
         </Link>
       </div>
     </article>
