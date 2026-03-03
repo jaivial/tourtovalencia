@@ -460,8 +460,8 @@ function PayPalWrapper({ fallback }: { fallback: React.ReactNode }) {
         clientId: paypalClientId,
         currency: "EUR",
         intent: "capture",
-        // Load both wallet buttons and card fields so users can pay with either method.
-        components: "buttons,card-fields,funding-eligibility",
+        // Keep card payments inside PayPal buttons (no separate card-fields tab).
+        components: "buttons,funding-eligibility",
       }}
     >
       <Suspense fallback={<BookingLoading />}>
