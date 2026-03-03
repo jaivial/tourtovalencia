@@ -34,7 +34,7 @@ export const IndexLoadingScreen = ({ message = "Cargando...", isLoading }: Index
     <div className={`fixed inset-0 bg-gray-900 flex flex-col items-center justify-center z-50 ${opacity} transition-opacity duration-1000`} style={{ display: display === "hidden" ? "none" : "flex" }}>
       <div className="bg-gray-800 rounded-lg p-8 shadow-xl flex flex-col items-center">
         <div className="w-48 h-48 mb-4 relative">
-          <img src="https://cdn.tourtovalencia.com/public/tourtovalencialogo.png" alt="Tour To Valencia Logo" className="w-full h-full object-contain" />
+          <img src="https://tourtovalencia.b-cdn.net/public/newtourtovalencialogo.png" alt="Tour To Valencia Logo" className="w-full h-full object-contain" />
         </div>
 
         <div className="flex flex-col items-center gap-4 mt-2">

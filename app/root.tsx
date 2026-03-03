@@ -144,18 +144,18 @@ export const action = async ({ request }: { request: Request }) => {
 export const links = () => [
   {
     rel: "shortcut icon",
-    href: "/favicon.ico",
+    href: "https://tourtovalencia.b-cdn.net/public/newtourtovalencialogo.png",
   },
   {
     rel: "icon",
-    type: "image/x-icon",
-    href: "https://tourtovalencia.com/favicon.ico",
+    type: "image/png",
+    href: "https://tourtovalencia.b-cdn.net/public/newtourtovalencialogo.png",
   },
   {
     rel: "icon",
     type: "image/png",
     sizes: "32x32",
-    href: "https://cdn.tourtovalencia.com/public/favicon.png",
+    href: "https://tourtovalencia.b-cdn.net/public/newtourtovalencialogo.png",
   },
   {
     rel: "manifest",
@@ -182,7 +182,7 @@ export default function App() {
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-          <link rel="icon" type="image/x-icon" href="https://tourtovalencia.com/favicon.ico" />
+          <link rel="icon" type="image/png" href="https://tourtovalencia.b-cdn.net/public/newtourtovalencialogo.png" />
           <meta name="google-site-verification" content="63kEgo-K5QpeD7-YtpQpviW4aSnh6NAEPEsyUMybOec" />
 
 
@@ -205,7 +205,7 @@ export default function App() {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="google-site-verification" content="63kEgo-K5QpeD7-YtpQpviW4aSnh6NAEPEsyUMybOec" />
-        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="shortcut icon" href="https://tourtovalencia.b-cdn.net/public/newtourtovalencialogo.png" />
         <Meta />
         <Links />
       </head>

@@ -8,17 +8,17 @@
     "theme_color": "#ffffff",
     "icons": [
         {
-            "src": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/favicon.ico",
+            "src": "https://tourtovalencia.b-cdn.net/public/newtourtovalencialogo.png",
             "sizes": "64x64 32x32 24x24 16x16",
-            "type": "image/x-icon"
+            "type": "image/png"
         },
         {
-            "src": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/favicon-192.png",
+            "src": "https://tourtovalencia.b-cdn.net/public/newtourtovalencialogo.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/favicon-512.png",
+            "src": "https://tourtovalencia.b-cdn.net/public/newtourtovalencialogo.png",
             "sizes": "512x512",
             "type": "image/png"
         }

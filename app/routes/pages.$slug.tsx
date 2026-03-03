@@ -50,7 +50,7 @@ export const meta: MetaFunction = ({ data }) => {
     return [
       { title: "Página no encontrada | Viajes Olga" },
       { name: "description", content: "La página que buscas no existe o ha sido movida." },
-      { rel: "icon", type: "image/x-icon", href: "https://tourtovalencia.com/favicon.ico" },
+      { rel: "icon", type: "image/png", href: "https://tourtovalencia.b-cdn.net/public/newtourtovalencialogo.png" },
       { name: "google-site-verification", content: "63kEgo-K5QpeD7-YtpQpviW4aSnh6NAEPEsyUMybOec" }
     ];
   }
@@ -80,7 +80,7 @@ export const meta: MetaFunction = ({ data }) => {
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:image", content: "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp" },
-    { rel: "icon", type: "image/x-icon", href: "https://tourtovalencia.com/favicon.ico" },
+    { rel: "icon", type: "image/png", href: "https://tourtovalencia.b-cdn.net/public/newtourtovalencialogo.png" },
     { name: "google-site-verification", content: "63kEgo-K5QpeD7-YtpQpviW4aSnh6NAEPEsyUMybOec" }
   ];
 };
