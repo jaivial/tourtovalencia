@@ -1,10 +1,19 @@
-import { PayPalButtons } from "@paypal/react-paypal-js";
-import type { CreateOrderActions, OnApproveActions, OnApproveData } from "@paypal/paypal-js";
+import {
+  PayPalButtons,
+  PayPalCardFieldsProvider,
+  PayPalCVVField,
+  PayPalExpiryField,
+  PayPalNameField,
+  PayPalNumberField,
+  usePayPalCardFields,
+} from "@paypal/react-paypal-js";
+import type { CardFieldsOnApproveData, CreateOrderActions, OnApproveActions, OnApproveData } from "@paypal/paypal-js";
 import { useBooking } from "~/context/BookingContext";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AlertCircle, CreditCard, Loader2, Wallet } from "lucide-react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
 
 interface PaymentOptionsProps {
   onProcessingChange?: (processing: boolean) => void;
@@ -24,6 +33,8 @@ interface CaptureResponse {
   issue?: string;
   sessionId?: string;
 }
+
+type PaymentMode = "paypal" | "card";
 
 const RESTARTABLE_PAYPAL_ISSUES = new Set([
   "INSTRUMENT_DECLINED",
@@ -60,20 +71,130 @@ async function safeJson<T>(response: Response): Promise<T | null> {
   }
 }
 
+interface CardSubmitButtonProps {
+  label: string;
+  unavailableMessage: string;
+  disabled: boolean;
+  onError: (message: string) => void;
+  onSubmittingChange: (isSubmitting: boolean) => void;
+}
+
+function CardSubmitButton({
+  label,
+  unavailableMessage,
+  disabled,
+  onError,
+  onSubmittingChange,
+}: CardSubmitButtonProps) {
+  const { cardFieldsForm } = usePayPalCardFields();
+
+  const handleSubmit = async () => {
+    if (!cardFieldsForm || typeof cardFieldsForm.submit !== "function") {
+      onError(unavailableMessage);
+      return;
+    }
+
+    onSubmittingChange(true);
+    try {
+      await cardFieldsForm.submit();
+    } catch (error) {
+      onError(extractErrorMessage(error, unavailableMessage));
+    } finally {
+      onSubmittingChange(false);
+    }
+  };
+
+  return (
+    <Button
+      type="button"
+      onClick={handleSubmit}
+      className="w-full bg-primary hover:bg-primary/90 text-white"
+      disabled={disabled || !cardFieldsForm}
+    >
+      {label}
+    </Button>
+  );
+}
+
+function CardFieldsReadyWatcher({ onReadyChange }: { onReadyChange: (ready: boolean) => void }) {
+  const { cardFieldsForm } = usePayPalCardFields();
+
+  useEffect(() => {
+    onReadyChange(Boolean(cardFieldsForm));
+  }, [cardFieldsForm, onReadyChange]);
+
+  return null;
+}
+
 const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
   const booking = useBooking();
   const { state } = useLanguageContext();
   const paypalText = state.booking.paypalPayment;
   const paymentText = state.booking.payment;
+  const languageCode = getCurrentLanguageCode(state.currentLanguage);
 
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>("paypal");
   const [isPayPalButtonsReady, setIsPayPalButtonsReady] = useState(false);
+  const [isCardFieldsReady, setIsCardFieldsReady] = useState(false);
+  const [isSubmittingCard, setIsSubmittingCard] = useState(false);
+  const [cardInitTimedOut, setCardInitTimedOut] = useState(false);
   const [isInitializingPayment, setIsInitializingPayment] = useState(false);
   const [isCapturingPayment, setIsCapturingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const sessionIdRef = useRef<string | null>(null);
 
-  const isProcessingPayment = isInitializingPayment || isCapturingPayment;
+  const uiText = useMemo(
+    () =>
+      languageCode === "en"
+        ? {
+            modes: {
+              paypal: "PayPal",
+              card: "Card",
+            },
+            card: {
+              title: "Pay with card",
+              subtitle: "Secure card payment powered by PayPal",
+              cardholderLabel: "Cardholder name",
+              numberLabel: "Card number",
+              expiryLabel: "Expiry date",
+              cvvLabel: "Security code",
+              cardholderPlaceholder: "Full name",
+              numberPlaceholder: "1234 1234 1234 1234",
+              expiryPlaceholder: "MM/YY",
+              cvvPlaceholder: "CVV",
+              payButton: "Pay with card",
+              unavailable: "Card payment is temporarily unavailable. Please use PayPal.",
+              declined: "Card was declined. Try another card or pay with PayPal.",
+              loading: "Loading secure card form...",
+            },
+          }
+        : {
+            modes: {
+              paypal: "PayPal",
+              card: "Tarjeta",
+            },
+            card: {
+              title: "Pagar con tarjeta",
+              subtitle: "Pago seguro con tarjeta a traves de PayPal",
+              cardholderLabel: "Titular de la tarjeta",
+              numberLabel: "Numero de tarjeta",
+              expiryLabel: "Fecha de caducidad",
+              cvvLabel: "Codigo de seguridad",
+              cardholderPlaceholder: "Nombre completo",
+              numberPlaceholder: "1234 1234 1234 1234",
+              expiryPlaceholder: "MM/AA",
+              cvvPlaceholder: "CVV",
+              payButton: "Pagar con tarjeta",
+              unavailable: "El pago con tarjeta no esta disponible temporalmente. Usa PayPal.",
+              declined: "La tarjeta fue rechazada. Prueba otra tarjeta o paga con PayPal.",
+              loading: "Cargando formulario seguro de tarjeta...",
+            },
+          },
+    [languageCode]
+  );
+
+  const isProcessingPayment = isInitializingPayment || isCapturingPayment || isSubmittingCard;
 
   useEffect(() => {
     onProcessingChange?.(isProcessingPayment);
@@ -85,9 +206,30 @@ const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
     };
   }, [onProcessingChange]);
 
-  const bookingDraft = useMemo(() => {
-    const languageCode = getCurrentLanguageCode(state.currentLanguage);
+  useEffect(() => {
+    if (paymentMode !== "card" || isCardFieldsReady) {
+      setCardInitTimedOut(false);
+      return;
+    }
 
+    const timer = window.setTimeout(() => {
+      setCardInitTimedOut(true);
+    }, 8000);
+
+    return () => window.clearTimeout(timer);
+  }, [paymentMode, isCardFieldsReady]);
+
+  const handlePaymentModeChange = (mode: PaymentMode) => {
+    setPaymentMode(mode);
+    setPaymentError(null);
+    setCardInitTimedOut(false);
+
+    if (mode === "card") {
+      setIsCardFieldsReady(false);
+    }
+  };
+
+  const bookingDraft = useMemo(() => {
     return {
       fullName: booking.formData.fullName,
       email: booking.formData.email,
@@ -122,9 +264,10 @@ const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
     booking.formData.country,
     booking.formData.countryCode,
     booking.selectedTour,
+    languageCode,
   ]);
 
-  const createPaymentSession = async () => {
+  const createPaymentSession = useCallback(async () => {
     const response = await fetch("/api/payments/paypal/session", {
       method: "POST",
       headers: {
@@ -142,7 +285,61 @@ const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
     setSessionId(payload.sessionId);
     sessionIdRef.current = payload.sessionId;
     return payload.orderId;
-  };
+  }, [bookingDraft, paymentText.errors.paymentFailed]);
+
+  const createOrderWithSession = useCallback(async () => {
+    setPaymentError(null);
+    setIsInitializingPayment(true);
+
+    try {
+      return await createPaymentSession();
+    } catch (error) {
+      const message = extractErrorMessage(error, paymentText.errors.initError);
+      setPaymentError(message);
+      throw new Error(message);
+    } finally {
+      setIsInitializingPayment(false);
+    }
+  }, [createPaymentSession, paymentText.errors.initError]);
+
+  const captureOrder = useCallback(
+    async (orderId: string, restartOrder?: () => Promise<void>) => {
+      const captureResponse = await fetch("/api/payments/paypal/capture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId: sessionIdRef.current || sessionId,
+          orderId,
+        }),
+      });
+
+      const payload = await safeJson<CaptureResponse>(captureResponse);
+
+      if (!captureResponse.ok || !payload?.success) {
+        const issue = payload?.issue;
+        const recoverable = Boolean(payload?.recoverable || (issue && RESTARTABLE_PAYPAL_ISSUES.has(issue)));
+
+        if (recoverable && restartOrder) {
+          await restartOrder();
+          return false;
+        }
+
+        const fallback = recoverable ? uiText.card.declined : paymentText.errors.captureError;
+        throw new Error(payload?.error || fallback);
+      }
+
+      const resolvedSessionId = payload.sessionId || sessionIdRef.current || sessionId;
+      if (!resolvedSessionId) {
+        throw new Error("Missing payment session id after capture");
+      }
+
+      window.location.href = `/book/success?sessionId=${encodeURIComponent(resolvedSessionId)}`;
+      return true;
+    },
+    [sessionId, paymentText.errors.captureError, uiText.card.declined]
+  );
 
   return (
     <div className="p-8 mt-4 rounded-xl">
@@ -157,6 +354,33 @@ const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
         <div className={isProcessingPayment ? "pointer-events-none select-none" : ""}>
           <h1 className="text-3xl font-bold mb-8 text-center">{paypalText.title}</h1>
 
+          <div className="grid grid-cols-2 gap-2 rounded-lg bg-muted p-1 mb-6">
+            <button
+              type="button"
+              onClick={() => handlePaymentModeChange("paypal")}
+              className={`inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                paymentMode === "paypal"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Wallet className="h-4 w-4" />
+              {uiText.modes.paypal}
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePaymentModeChange("card")}
+              className={`inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                paymentMode === "card"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <CreditCard className="h-4 w-4" />
+              {uiText.modes.card}
+            </button>
+          </div>
+
           {paymentError && (
             <Alert variant="destructive" className="mb-6">
               <AlertCircle className="h-4 w-4" />
@@ -165,14 +389,14 @@ const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
           )}
 
           <div className="scale-125 transform-gpu origin-top">
-            {!isPayPalButtonsReady && (
+            {paymentMode === "paypal" && !isPayPalButtonsReady && (
               <div className="py-10 flex flex-col items-center justify-center gap-3">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 <p className="text-sm text-muted-foreground">{paymentText.buttons.processing}</p>
               </div>
             )}
 
-            <div className={isPayPalButtonsReady ? "" : "opacity-0 pointer-events-none h-0 overflow-hidden"}>
+            <div className={paymentMode === "paypal" ? (isPayPalButtonsReady ? "" : "opacity-0 pointer-events-none h-0 overflow-hidden") : "hidden"}>
               <PayPalButtons
                 style={{
                   layout: "vertical",
@@ -183,18 +407,7 @@ const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
                 }}
                 onInit={() => setIsPayPalButtonsReady(true)}
                 createOrder={async (_data, _actions: CreateOrderActions) => {
-                  setPaymentError(null);
-                  setIsInitializingPayment(true);
-
-                  try {
-                    return await createPaymentSession();
-                  } catch (error) {
-                    const message = extractErrorMessage(error, paymentText.errors.initError);
-                    setPaymentError(message);
-                    throw new Error(message);
-                  } finally {
-                    setIsInitializingPayment(false);
-                  }
+                  return createOrderWithSession();
                 }}
                 onApprove={async (data: OnApproveData, actions: OnApproveActions) => {
                   setPaymentError(null);
@@ -206,40 +419,11 @@ const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
                       throw new Error(paypalText.errors.noPaymentId);
                     }
 
-                    const captureResponse = await fetch("/api/payments/paypal/capture", {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({
-                        sessionId: sessionIdRef.current || sessionId,
-                        orderId,
-                      }),
-                    });
-
-                    const payload = await safeJson<CaptureResponse>(captureResponse);
-
-                    if (!captureResponse.ok || !payload?.success) {
-                      const issue = payload?.issue;
-                      const recoverable = Boolean(payload?.recoverable || (issue && RESTARTABLE_PAYPAL_ISSUES.has(issue)));
-
-                      if (recoverable && actions.order) {
-                        setIsCapturingPayment(false);
-                        return actions.restart();
-                      }
-
-                      throw new Error(payload?.error || paymentText.errors.captureError);
-                    }
-
-                    const resolvedSessionId = payload.sessionId || sessionIdRef.current || sessionId;
-                    if (!resolvedSessionId) {
-                      throw new Error("Missing payment session id after capture");
-                    }
-
-                    window.location.href = `/book/success?sessionId=${encodeURIComponent(resolvedSessionId)}`;
+                    await captureOrder(orderId, actions.order ? () => actions.order.restart() : undefined);
                   } catch (error) {
                     const message = extractErrorMessage(error, paymentText.errors.paymentFailed);
                     setPaymentError(message);
+                  } finally {
                     setIsCapturingPayment(false);
                   }
                 }}
@@ -254,6 +438,108 @@ const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
                   setIsCapturingPayment(false);
                 }}
               />
+            </div>
+
+            <div className={paymentMode === "card" ? "space-y-4 mt-6 scale-[0.8] origin-top" : "hidden"}>
+              <div className="text-center space-y-1">
+                <h2 className="text-2xl font-semibold">{uiText.card.title}</h2>
+                <p className="text-sm text-muted-foreground">{uiText.card.subtitle}</p>
+              </div>
+
+              {!isCardFieldsReady && !cardInitTimedOut && (
+                <div className="py-6 flex flex-col items-center justify-center gap-3">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">{uiText.card.loading}</p>
+                </div>
+              )}
+
+              {cardInitTimedOut && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{uiText.card.unavailable}</AlertDescription>
+                </Alert>
+              )}
+
+              <PayPalCardFieldsProvider
+                createOrder={createOrderWithSession}
+                onApprove={async (data: CardFieldsOnApproveData) => {
+                  setPaymentError(null);
+                  setIsCapturingPayment(true);
+
+                  try {
+                    if (!data.orderID) {
+                      throw new Error(paypalText.errors.noPaymentId);
+                    }
+
+                    await captureOrder(data.orderID);
+                  } catch (error) {
+                    const message = extractErrorMessage(error, uiText.card.declined);
+                    setPaymentError(message);
+                  } finally {
+                    setIsCapturingPayment(false);
+                  }
+                }}
+                onError={(error) => {
+                  const message = extractErrorMessage(error, uiText.card.declined);
+                  setPaymentError(message);
+                  setIsInitializingPayment(false);
+                  setIsSubmittingCard(false);
+                  setIsCapturingPayment(false);
+                }}
+                onCancel={() => {
+                  setIsSubmittingCard(false);
+                  setIsInitializingPayment(false);
+                  setIsCapturingPayment(false);
+                }}
+                style={{
+                  input: {
+                    "font-size": "16px",
+                    color: "#111827",
+                  },
+                  ".invalid": {
+                    color: "#dc2626",
+                  },
+                }}
+              >
+                <CardFieldsReadyWatcher onReadyChange={setIsCardFieldsReady} />
+
+                <div className={isCardFieldsReady ? "space-y-3" : "opacity-0 h-0 overflow-hidden pointer-events-none"}>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">{uiText.card.cardholderLabel}</p>
+                    <div className="rounded-md border border-input bg-background px-3 py-2">
+                      <PayPalNameField placeholder={uiText.card.cardholderPlaceholder} />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">{uiText.card.numberLabel}</p>
+                    <div className="rounded-md border border-input bg-background px-3 py-2">
+                      <PayPalNumberField placeholder={uiText.card.numberPlaceholder} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">{uiText.card.expiryLabel}</p>
+                      <div className="rounded-md border border-input bg-background px-3 py-2">
+                        <PayPalExpiryField placeholder={uiText.card.expiryPlaceholder} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">{uiText.card.cvvLabel}</p>
+                      <div className="rounded-md border border-input bg-background px-3 py-2">
+                        <PayPalCVVField placeholder={uiText.card.cvvPlaceholder} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <CardSubmitButton
+                    label={uiText.card.payButton}
+                    unavailableMessage={uiText.card.unavailable}
+                    disabled={isProcessingPayment}
+                    onError={setPaymentError}
+                    onSubmittingChange={setIsSubmittingCard}
+                  />
+                </div>
+              </PayPalCardFieldsProvider>
             </div>
           </div>
         </div>
