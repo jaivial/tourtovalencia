@@ -435,18 +435,16 @@ async function optimizeImage(base64Data: string, keyPath: string = "unknown"): P
 
     // Upload to Bunny CDN and return the URL
     const optimizedBase64 = `data:image/webp;base64,${optimizedBuffer.toString("base64")}`;
-    try {
-      const cdnUrl = await uploadToBunnyCDN(optimizedBase64, keyPath);
-      console.log(`🚀 [${keyPath}] Image uploaded to Bunny CDN: ${cdnUrl}`);
-      return cdnUrl;
-    } catch (uploadError) {
-      console.warn(`⚠️ [${keyPath}] Failed to upload to Bunny CDN, using base64 fallback`);
-      // Fallback to base64 if upload fails
-      return optimizedBase64;
-    }
+    const cdnUrl = await uploadToBunnyCDN(optimizedBase64, keyPath);
+    console.log(`🚀 [${keyPath}] Image uploaded to Bunny CDN: ${cdnUrl}`);
+    return cdnUrl;
   } catch (error) {
     console.error(`Error optimizing image at ${keyPath}:`, error);
-    return base64Data; // Return original if optimization fails
+    throw new Error(
+      `[ImageUpload] Could not optimize/upload image at "${keyPath}" to Bunny CDN: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 }
 
@@ -515,17 +513,12 @@ export async function processContent(content: Record<string, unknown>, translate
       // Handle base64 images - always optimize regardless of size
       else if (typeof value === "string") {
         if (value.startsWith("data:image")) {
-          try {
-            // Always optimize images, regardless of size
-            processed[key] = await optimizeImage(value, currentPath);
-          } catch (error) {
-            console.error(`Error processing image at ${currentPath}:`, error);
-            processed[key] = value; // Keep original if processing fails
-          }
+          // Always optimize images and require Bunny CDN URL output
+          processed[key] = await optimizeImage(value, currentPath);
         } else if (value.startsWith("blob:")) {
-          // Handle blob URLs directly
-          console.log(`🔴 [${currentPath}] Found blob URL that cannot be processed: ${value.substring(0, 30)}...`);
-          processed[key] = ""; // Set to empty string as fallback
+          throw new Error(
+            `[ImageUpload] Found blob URL at "${currentPath}". Blob URLs must be converted to data URLs before saving.`
+          );
         } else if (value.trim() !== "") {
           // For text content, only translate if translate flag is true
           processed[key] = translate ? await translateText(value) : value;
@@ -544,11 +537,9 @@ export async function processContent(content: Record<string, unknown>, translate
             preview: optimizedPreview
           };
         } else {
-          console.log(`🔴 [${currentPath}] Found blob image object with non-data URL: ${imgObj.preview.substring(0, 30)}...`);
-          processed[key] = {
-            ...imgObj,
-            preview: "" // Set to empty string as fallback for blob URLs
-          };
+          throw new Error(
+            `[ImageUpload] Found non-data preview at "${currentPath}". Expected a data URL ready for Bunny upload.`
+          );
         }
       } else if (typeof value === "object") {
         processed[key] = await processContent(value as Record<string, unknown>, translate, currentPath);

@@ -9,6 +9,7 @@ import {
   SanJuanSection6Type 
 } from "~/data/data";
 import { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
+import { convertFileToBase64 } from "~/utils/image.client";
 
 // Default data
 const DEFAULT_SECTION1_DATA: sanJuanSection1Type = {
@@ -115,12 +116,16 @@ export const usePageGenerator = () => {
     }));
   };
 
-  const handleSection1ImageUpdate = (file: File) => {
-    const preview = URL.createObjectURL(file);
-    setSection1Data(prev => ({
-      ...prev,
-      backgroundImage: { file, preview }
-    }));
+  const handleSection1ImageUpdate = async (file: File) => {
+    try {
+      const preview = await convertFileToBase64(file);
+      setSection1Data(prev => ({
+        ...prev,
+        backgroundImage: { file, preview }
+      }));
+    } catch (error) {
+      console.error("PageGenerator: Failed to convert section1 image to base64", error);
+    }
   };
 
   const handleSection1ImageRemove = () => {
@@ -138,12 +143,16 @@ export const usePageGenerator = () => {
     }));
   };
 
-  const handleSection2ImageUpdate = (file: File) => {
-    const preview = URL.createObjectURL(file);
-    setSection2Data(prev => ({
-      ...prev,
-      sectionImage: { file, preview }
-    }));
+  const handleSection2ImageUpdate = async (file: File) => {
+    try {
+      const preview = await convertFileToBase64(file);
+      setSection2Data(prev => ({
+        ...prev,
+        sectionImage: { file, preview }
+      }));
+    } catch (error) {
+      console.error("PageGenerator: Failed to convert section2 image to base64", error);
+    }
   };
 
   const handleSection2ImageRemove = () => {

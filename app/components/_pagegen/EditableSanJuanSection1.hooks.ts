@@ -18,8 +18,7 @@ export const useEditableSanJuanSection1 = (initialData: sanJuanSection1Type) => 
     }));
   };
 
-  const handleImageChange = (file: File) => {
-    const preview = URL.createObjectURL(file);
+  const handleImageChange = (file: File, preview: string) => {
     console.log("useEditableSanJuanSection1: updating backgroundImage to:", preview);
     setSectionData(prev => ({
       ...prev,

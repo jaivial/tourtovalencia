@@ -24,6 +24,7 @@ import {
   Cloud,
   X
 } from "lucide-react";
+import { convertFileToBase64 } from "~/utils/image.client";
 import {
   Dialog,
   DialogContent,
@@ -376,10 +377,14 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
             <div className="w-[800px] h-[300px] relative rounded-lg overflow-hidden">
               <ImageUpload 
                 imageUrl={data.sectionImage?.preview || ""} 
-                onImageChange={(file) => {
-                  handleImageChange(file);
-                  const preview = URL.createObjectURL(file);
-                  onUpdate('sectionImage', { file, preview });
+                onImageChange={async (file) => {
+                  try {
+                    const preview = await convertFileToBase64(file);
+                    handleImageChange(file, preview);
+                    onUpdate('sectionImage', { file, preview });
+                  } catch (error) {
+                    console.error("EditableSanJuanSection2: Failed to convert image to base64", error);
+                  }
                 }}
                 onImageRemove={() => {
                   handleImageRemove();

@@ -4,6 +4,7 @@ import { sanJuanSection1Type } from "~/data/data";
 import ImageUpload from "./ImageUpload";
 import EditableText from "./EditableText";
 import { useEditableSanJuanSection1 } from "./EditableSanJuanSection1.hooks";
+import { convertFileToBase64 } from "~/utils/image.client";
 
 type EditableSanJuanSection1Props = {
   width: number;
@@ -28,10 +29,14 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
     onUpdate(field, value);
   };
 
-  const handleLocalImageChange = (file: File) => {
-    handleImageChange(file);
-    const preview = URL.createObjectURL(file);
-    onUpdate('backgroundImage', { file, preview });
+  const handleLocalImageChange = async (file: File) => {
+    try {
+      const preview = await convertFileToBase64(file);
+      handleImageChange(file, preview);
+      onUpdate('backgroundImage', { file, preview });
+    } catch (error) {
+      console.error("EditableSanJuanSection1: Failed to convert image to base64", error);
+    }
   };
 
   const handleLocalImageRemove = () => {

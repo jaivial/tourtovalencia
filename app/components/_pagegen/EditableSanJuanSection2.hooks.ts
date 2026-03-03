@@ -11,8 +11,7 @@ export const useEditableSanJuanSection2 = (initialData: sanJuansection2Type) => 
     }));
   };
 
-  const handleImageChange = (file: File) => {
-    const preview = URL.createObjectURL(file);
+  const handleImageChange = (file: File, preview: string) => {
     handleTextUpdate('sectionImage', { file, preview });
   };
 
