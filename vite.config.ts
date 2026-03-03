@@ -16,7 +16,7 @@ function cjsCompatTransform(): Plugin {
       if (id.includes("@heroui/theme")) {
         let transformed = code;
         const colorImportRegex = /import\s+(\w+)\s+from\s+["']color["']/g;
-        transformed = transformed.replace(colorImportRegex, "import * as $1 from \"color\"");
+        transformed = transformed.replace(colorImportRegex, "import * as color from \"color\"");
         return { code: transformed, map: null };
       }
       return null;
@@ -39,6 +39,9 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
     plugins: [remix({ future: { v3_singleFetch: true, v3_lazyRouteDiscovery: true } }), tsconfigPaths(), cjsCompatTransform(), requirePolyfill()],
+    server: {
+      allowedHosts: ["www.tourtovalencia.com", "tourtovalencia.com"],
+    },
     build: {
       chunkSizeWarningLimit: 150,
       base: "https://cdn.tourtovalencia.com/",
