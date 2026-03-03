@@ -460,6 +460,9 @@ function PayPalWrapper({ fallback }: { fallback: React.ReactNode }) {
         clientId: paypalClientId,
         currency: "EUR",
         intent: "capture",
+        // Keep checkout on PayPal wallet flow; PayPal-hosted card flow
+        // (`/smart/card-fields`) emits recoverable declines and noisy SDK logs.
+        disableFunding: "card,credit",
         // We use Smart Buttons flow only; loading card-fields brings an extra SDK app
         // that emits noisy browser warnings and is not needed for this integration.
         components: "buttons,funding-eligibility",
