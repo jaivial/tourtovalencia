@@ -95,12 +95,7 @@ interface TourDocument {
 export type LoaderData = {
   availableDates: Array<DateAvailability>;
   selectedDateAvailability?: DateAvailability;
-  paypalClientId?: string;
   error?: string;
-  emailConfig?: {
-    gmailUser: string;
-    gmailAppPassword: string;
-  };
   tours: Tour[];
   unavailableDates: UnavailableDate[];
 };
@@ -304,11 +299,6 @@ export async function loader() {
     return json<LoaderData>({
       availableDates: [],
       selectedDateAvailability: undefined,
-      paypalClientId: process.env.PAYPAL_CLIENT_ID,
-      emailConfig: {
-        gmailUser: process.env.GMAIL_USER || "",
-        gmailAppPassword: process.env.GMAIL_APP_PASSWORD || "",
-      },
       tours: formattedTours,
       unavailableDates
     });
@@ -381,7 +371,7 @@ export async function action({ request }: { request: Request }) {
 
 export default function BookIndex() {
   const data = useLoaderData<typeof loader>() as LoaderData;
-  const { availableDates, selectedDateAvailability, paypalClientId, emailConfig, tours, unavailableDates } = data;
+  const { availableDates, selectedDateAvailability, tours, unavailableDates } = data;
   
   // Use a ref to track if we've already logged the tours
   const hasLoggedToursRef = useRef(false);
@@ -399,8 +389,6 @@ export default function BookIndex() {
         availableDates: availableDates || [],
         selectedDateAvailability,
         serverError: null,
-        paypalClientId: paypalClientId || "",
-        emailConfig: emailConfig || { gmailUser: "", gmailAppPassword: "" },
         tours: tours || [],
         unavailableDates: unavailableDates || [],
       }}
@@ -408,10 +396,7 @@ export default function BookIndex() {
       <div className="container mx-auto px-4 py-8">
         <div className="mt-8 flex justify-center">
           <ClientOnly fallback={<BookingLoading />}>
-            <PayPalWrapper
-              clientId={paypalClientId || ""}
-              fallback={<BookingLoading />}
-            />
+            <PayPalWrapper fallback={<BookingLoading />} />
           </ClientOnly>
         </div>
       </div>
@@ -419,36 +404,64 @@ export default function BookIndex() {
   );
 }
 
-// PayPalWrapper - loads PayPalScriptProvider only on client
-function PayPalWrapper({ clientId, fallback }: { clientId: string; fallback: React.ReactNode }) {
+// PayPalWrapper - loads PayPal client id and PayPalScriptProvider only on client
+function PayPalWrapper({ fallback }: { fallback: React.ReactNode }) {
   const [PayPalComp, setPayPalComp] = useState<React.ComponentType<any> | null>(null);
+  const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    import("@paypal/react-paypal-js")
-      .then((module) => {
+    let isCancelled = false;
+
+    const loadPayPal = async () => {
+      try {
+        const [module, response] = await Promise.all([
+          import("@paypal/react-paypal-js"),
+          fetch("/api/paypal-client-id"),
+        ]);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch PayPal client id");
+        }
+
+        const data = await response.json() as { clientId?: string };
+        if (!data.clientId) {
+          throw new Error("PayPal client id is missing");
+        }
+
+        if (isCancelled) return;
         setPayPalComp(() => module.PayPalScriptProvider);
-      })
-      .catch((err) => {
+        setPaypalClientId(data.clientId);
+      } catch (err) {
+        if (isCancelled) return;
         console.error("Failed to load PayPal:", err);
         setError("Failed to load payment system");
-      });
+      }
+    };
+
+    loadPayPal();
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   if (error) {
     return <div className="text-red-500">{error}</div>;
   }
 
-  if (!PayPalComp) {
+  if (!PayPalComp || !paypalClientId) {
     return <>{fallback}</>;
   }
 
   return (
     <PayPalComp
       options={{
-        clientId,
+        clientId: paypalClientId,
         currency: "EUR",
         intent: "capture",
+        // We use Smart Buttons flow only; loading card-fields brings an extra SDK app
+        // that emits noisy browser warnings and is not needed for this integration.
         components: "buttons,funding-eligibility",
       }}
     >
