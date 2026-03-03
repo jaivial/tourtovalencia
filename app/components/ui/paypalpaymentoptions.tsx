@@ -264,6 +264,7 @@ const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
 
             <div className={isPayPalButtonsReady ? "space-y-3" : "opacity-0 pointer-events-none h-0 overflow-hidden"}>
               <PayPalButtons
+                fundingSource="paypal"
                 style={{
                   layout: "vertical",
                   color: "blue",
