@@ -52,8 +52,13 @@ const getDkimConfig = (): DkimConfig | null => {
 const initializeEmailTransporter = () => {
   if (!transporter) {
     const dkimConfig = getDkimConfig();
-    const smtpUser = process.env.GMAIL_USER || process.env.SMTP_USER;
-    const smtpPass = process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
+    const smtpUser = (process.env.GMAIL_USER || process.env.SMTP_USER || "").trim();
+    const rawSmtpPass = process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || "";
+    const smtpPass = rawSmtpPass.replace(/\s+/g, "");
+
+    if (rawSmtpPass && rawSmtpPass !== smtpPass) {
+      console.warn("SMTP password contains whitespace; normalizing before authentication.");
+    }
 
     if (!smtpUser || !smtpPass) {
       throw new Error("SMTP credentials are missing. Set GMAIL_USER and GMAIL_APP_PASSWORD.");
