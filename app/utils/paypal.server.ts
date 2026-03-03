@@ -9,15 +9,37 @@ const PAYPAL_API_BASE = process.env.NODE_ENV === 'production'
   ? 'https://api-m.paypal.com'
   : 'https://api-m.paypal.com';
 
-// Log environment variables for debugging
-console.log('PayPal Server Initialization:');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('PAYPAL_CLIENT_ID exists:', !!process.env.PAYPAL_CLIENT_ID);
-console.log('PAYPAL_CLIENT_SECRET exists:', !!process.env.PAYPAL_CLIENT_SECRET);
-if (process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET) {
-  console.log('ID and Secret are identical:', process.env.PAYPAL_CLIENT_ID === process.env.PAYPAL_CLIENT_SECRET);
-  console.log('ID first 4 chars:', process.env.PAYPAL_CLIENT_ID.substring(0, 4));
-  console.log('Secret first 4 chars:', process.env.PAYPAL_CLIENT_SECRET.substring(0, 4));
+export interface PayPalPurchaseUnit {
+  reference_id?: string;
+  description?: string;
+  custom_id?: string;
+  amount: {
+    currency_code: string;
+    value: string;
+  };
+}
+
+export interface CreatePayPalOrderInput {
+  intent?: "CAPTURE";
+  purchase_units: PayPalPurchaseUnit[];
+}
+
+export interface PayPalOrderResponse {
+  id: string;
+  status: string;
+  intent?: string;
+  purchase_units?: Array<{
+    amount?: { value?: string; currency_code?: string };
+    payments?: {
+      captures?: Array<{
+        id?: string;
+        status?: string;
+        amount?: { value?: string; currency_code?: string };
+      }>;
+    };
+  }>;
+  details?: Array<{ issue?: string; description?: string }>;
+  [key: string]: unknown;
 }
 
 // Mock successful refund response for development when credentials are missing
@@ -40,12 +62,6 @@ async function getAccessToken(): Promise<string> {
   const clientId = process.env.PAYPAL_CLIENT_ID;
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 
-  // Log the actual values for debugging
-  console.log('getAccessToken called with:');
-  console.log('- clientId length:', clientId?.length);
-  console.log('- clientSecret length:', clientSecret?.length);
-  console.log('- Are identical:', clientId === clientSecret);
-  
   // More detailed validation of credentials
   if (!clientId) {
     throw new Error('PayPal Client ID is missing. Please check your environment variables.');
@@ -58,8 +74,6 @@ async function getAccessToken(): Promise<string> {
   // Check if client ID and secret are identical (common mistake)
   if (clientId === clientSecret) {
     console.warn('WARNING: PayPal Client ID and Client Secret are identical. This is likely incorrect.');
-    console.warn('ID:', clientId);
-    console.warn('Secret:', clientSecret);
     
     // Try to clean up quotes if present (sometimes an issue with .env parsing)
     const cleanId = clientId.replace(/^['"]|['"]$/g, '');
@@ -72,6 +86,134 @@ async function getAccessToken(): Promise<string> {
   }
 
   return getAccessTokenWithCredentials(clientId, clientSecret);
+}
+
+function getPayPalErrorMessage(data: any): string {
+  if (!data) return "Unknown PayPal error";
+  const detail = data.details?.[0];
+  if (detail?.description) return detail.description;
+  if (detail?.issue) return detail.issue;
+  if (data.message) return data.message;
+  if (data.error_description) return data.error_description;
+  if (data.error) return data.error;
+  return "Unknown PayPal error";
+}
+
+export async function createPayPalOrder(input: CreatePayPalOrderInput): Promise<PayPalOrderResponse> {
+  const accessToken = await getAccessToken();
+
+  const payload = {
+    intent: input.intent || "CAPTURE",
+    purchase_units: input.purchase_units,
+  };
+
+  const response = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const text = await response.text();
+  let data: any;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(`PayPal create order returned non-JSON response: ${text}`);
+  }
+
+  if (!response.ok) {
+    throw new Error(`PayPal create order failed (${response.status}): ${getPayPalErrorMessage(data)}`);
+  }
+
+  if (!data.id) {
+    throw new Error(`PayPal create order missing id: ${JSON.stringify(data)}`);
+  }
+
+  return data as PayPalOrderResponse;
+}
+
+export async function capturePayPalOrder(orderId: string): Promise<PayPalOrderResponse> {
+  if (!orderId) {
+    throw new Error("Missing PayPal order id");
+  }
+
+  const accessToken = await getAccessToken();
+  const response = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${orderId}/capture`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify({}),
+  });
+
+  const text = await response.text();
+  let data: any;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(`PayPal capture returned non-JSON response: ${text}`);
+  }
+
+  if (!response.ok) {
+    const err: any = new Error(`PayPal capture failed (${response.status}): ${getPayPalErrorMessage(data)}`);
+    err.data = data;
+    throw err;
+  }
+
+  return data as PayPalOrderResponse;
+}
+
+interface VerifyWebhookSignatureInput {
+  transmissionId: string;
+  transmissionTime: string;
+  certUrl: string;
+  authAlgo: string;
+  transmissionSig: string;
+  webhookId: string;
+  eventBody: Record<string, unknown>;
+}
+
+export async function verifyPayPalWebhookSignature(input: VerifyWebhookSignatureInput): Promise<boolean> {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(`${PAYPAL_API_BASE}/v1/notifications/verify-webhook-signature`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      auth_algo: input.authAlgo,
+      cert_url: input.certUrl,
+      transmission_id: input.transmissionId,
+      transmission_sig: input.transmissionSig,
+      transmission_time: input.transmissionTime,
+      webhook_id: input.webhookId,
+      webhook_event: input.eventBody,
+    }),
+  });
+
+  const text = await response.text();
+  let data: any;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    console.error("PayPal webhook verification returned non-JSON response:", text);
+    return false;
+  }
+
+  if (!response.ok) {
+    console.error("PayPal webhook verification failed:", response.status, data);
+    return false;
+  }
+
+  return data?.verification_status === "SUCCESS";
 }
 
 // Helper function to get access token with specific credentials

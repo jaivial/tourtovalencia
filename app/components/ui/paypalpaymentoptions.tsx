@@ -1,357 +1,262 @@
 import { PayPalButtons } from "@paypal/react-paypal-js";
-import type { CreateOrderActions, OnApproveData, OnApproveActions, OrderResponseBody } from "@paypal/paypal-js";
+import type { CreateOrderActions, OnApproveActions, OnApproveData } from "@paypal/paypal-js";
 import { useBooking } from "~/context/BookingContext";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 
-// Define ApplePay availability check type
-declare global {
-  interface Window {
-    ApplePaySession?: {
-      canMakePayments: () => boolean;
-      STATUS_SUCCESS: number;
-      STATUS_FAILURE: number;
-      supportsVersion: (version: number) => boolean;
-      new (version: number, request: ApplePayPaymentRequest): ApplePaySession;
-    };
+interface PaymentOptionsProps {
+  onProcessingChange?: (processing: boolean) => void;
+}
+
+interface CreateSessionResponse {
+  success?: boolean;
+  error?: string;
+  sessionId?: string;
+  orderId?: string;
+}
+
+interface CaptureResponse {
+  success?: boolean;
+  error?: string;
+  recoverable?: boolean;
+  issue?: string;
+  sessionId?: string;
+}
+
+const RESTARTABLE_PAYPAL_ISSUES = new Set([
+  "INSTRUMENT_DECLINED",
+  "PAYER_ACTION_REQUIRED",
+  "PAYMENT_SOURCE_DECLINED_BY_PROCESSOR",
+]);
+
+function getCurrentLanguageCode(currentLanguage: string): "en" | "es" {
+  return currentLanguage === "English" ? "en" : "es";
+}
+
+function extractErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) return error.message;
+
+  if (typeof error === "string" && error.trim()) {
+    return error;
   }
-  
-  interface ApplePaySession {
-    begin: () => void;
-    abort: () => void;
-    completeMerchantValidation: (merchantSession: unknown) => void;
-    completePayment: (status: number) => void;
-    onvalidatemerchant: (event: { validationURL: string }) => void;
-    onpaymentauthorized: (event: { payment: unknown }) => void;
+
+  if (error && typeof error === "object") {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
   }
-  
-  interface ApplePayPaymentRequest {
-    countryCode: string;
-    currencyCode: string;
-    supportedNetworks: string[];
-    merchantCapabilities: string[];
-    total: {
-      label: string;
-      amount: string;
-    };
+
+  return fallback;
+}
+
+async function safeJson<T>(response: Response): Promise<T | null> {
+  try {
+    return (await response.json()) as T;
+  } catch {
+    return null;
   }
 }
 
-const PaymentOptions = () => {
-  const states = useBooking();
+const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
+  const booking = useBooking();
   const { state } = useLanguageContext();
   const paypalText = state.booking.paypalPayment;
-  const [isApplePayAvailable, setIsApplePayAvailable] = useState(false);
-  
-  // Calculate price based on selected tour price or use a default price
-  const tourPrice = states.selectedTour?.content?.en?.price || states.selectedTour?.tourPrice || 120;
-  const totalPrice = states.formData.partySize * tourPrice;
-  
-  // Format the total price to 2 decimal places for PayPal
-  const formattedTotalPrice = totalPrice.toFixed(2);
+  const paymentText = state.booking.payment;
 
-  // Check if Apple Pay is available on this device
+  const [isPayPalButtonsReady, setIsPayPalButtonsReady] = useState(false);
+  const [isInitializingPayment, setIsInitializingPayment] = useState(false);
+  const [isCapturingPayment, setIsCapturingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const sessionIdRef = useRef<string | null>(null);
+
+  const isProcessingPayment = isInitializingPayment || isCapturingPayment;
+
   useEffect(() => {
-    const checkApplePayAvailability = () => {
-      if (window.ApplePaySession && window.ApplePaySession.canMakePayments()) {
-        setIsApplePayAvailable(true);
-      }
+    onProcessingChange?.(isProcessingPayment);
+  }, [isProcessingPayment, onProcessingChange]);
+
+  useEffect(() => {
+    return () => {
+      onProcessingChange?.(false);
     };
-    
-    // Only run in browser environment
-    if (typeof window !== 'undefined') {
-      checkApplePayAvailability();
-    }
-  }, []);
+  }, [onProcessingChange]);
 
-  const handlePaymentSuccess = async (details: OrderResponseBody, paymentMethod = 'paypal') => {
-    try {
-      const amount = details.purchase_units?.[0]?.amount?.value;
-      console.log(`${paymentMethod} payment amount:`, amount);
-      
-      if (!amount) {
-        throw new Error(paypalText.errors.invalidAmount);
-      }
+  const bookingDraft = useMemo(() => {
+    const languageCode = getCurrentLanguageCode(state.currentLanguage);
 
-      const paymentId = details.id;
-      if (!paymentId) {
-        throw new Error(paypalText.errors.noPaymentId);
-      }
-
-      // Get the transaction/capture ID which is needed for refunds
-      const transactionId = details.purchase_units?.[0]?.payments?.captures?.[0]?.id;
-      console.log(`${paymentMethod} transaction ID:`, transactionId);
-
-      // Calculate the expected amount based on the form data
-      const expectedAmount = states.formData.partySize * (states.selectedTour?.content?.en?.price || states.selectedTour?.tourPrice || 120);
-      console.log("Expected amount:", expectedAmount);
-      console.log(`${paymentMethod} amount:`, Number(amount));
-
-      // Create booking data
-      const bookingData = {
-        ...states.formData,
-        status: "confirmed",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        paymentIntentId: paymentId,
-        paymentStatus: "paid",
-        totalAmount: Number(amount),
-        amount: Number(amount), // Required by Booking interface
-        paymentId, // Required by Booking interface
-        paid: true,
-        paymentMethod, // Set payment method
-        transactionId: transactionId, // Store the transaction ID for refunds
-        tourName: states.selectedTour?.content?.en?.title || 
-                 states.selectedTour?.tourName?.en || 
-                 states.selectedTour?.name || 
-                 states.formData.tourSlug || ""
-      };
-
-      console.log(`${paymentMethod} payment success, preparing to navigate with booking data`);
-      
-      // Check if we're in a browser environment before using sessionStorage
-      if (typeof window !== 'undefined' && window.sessionStorage) {
-        // Store booking data in sessionStorage before navigation
-        const bookingDataString = JSON.stringify({
-          booking: bookingData,
-          paymentMethod,
-          timestamp: Date.now() // Add timestamp to ensure freshness
-        });
-        
-        try {
-          sessionStorage.setItem('bookingData', bookingDataString);
-          console.log("Booking data stored in sessionStorage, size:", bookingDataString.length);
-          
-          // Double-check that the data was stored correctly
-          const storedData = sessionStorage.getItem('bookingData');
-          if (storedData) {
-            console.log("Verified data in sessionStorage, redirecting to success page");
-          } else {
-            console.error("Failed to store data in sessionStorage");
-          }
-        } catch (storageError) {
-          console.error("Error storing data in sessionStorage:", storageError);
-        }
-        
-        // Add a small delay before redirecting to ensure sessionStorage is updated
-        setTimeout(() => {
-          window.location.href = "/book/success";
-        }, 100);
-      } else {
-        console.log("Not in browser environment, cannot store in sessionStorage");
-        window.location.href = "/book/success";
-      }
-    } catch (error) {
-      console.error(paypalText.errors.processingError, error);
-      window.location.href = "/book?error=payment-failed";
-    }
-  };
-
-  // Handle Apple Pay payment
-  const handleApplePayment = () => {
-    if (!window.ApplePaySession) {
-      console.error("Apple Pay is not available on this device/browser");
-      return;
-    }
-
-    // Create Apple Pay payment request
-    const request: ApplePayPaymentRequest = {
-      countryCode: 'ES', // Spain
-      currencyCode: 'EUR',
-      supportedNetworks: ['visa', 'masterCard', 'amex'],
-      merchantCapabilities: ['supports3DS'],
-      total: {
-        label: states.selectedTour?.tourName?.en || 'Tour To Valencia',
-        amount: formattedTotalPrice
-      }
+    return {
+      fullName: booking.formData.fullName,
+      email: booking.formData.email,
+      date: booking.formData.date,
+      time: booking.formData.time,
+      partySize: booking.formData.partySize,
+      phoneNumber: booking.formData.phoneNumber,
+      tourSlug: booking.formData.tourSlug,
+      tourName:
+        languageCode === "en"
+          ? booking.selectedTour?.content?.en?.title ||
+            booking.selectedTour?.tourName?.en ||
+            booking.selectedTour?.name ||
+            booking.formData.tourSlug
+          : booking.selectedTour?.content?.es?.title ||
+            booking.selectedTour?.tourName?.es ||
+            booking.selectedTour?.name ||
+            booking.formData.tourSlug,
+      language: languageCode,
+      country: booking.formData.country,
+      countryCode: booking.formData.countryCode,
     };
+  }, [
+    state.currentLanguage,
+    booking.formData.fullName,
+    booking.formData.email,
+    booking.formData.date,
+    booking.formData.time,
+    booking.formData.partySize,
+    booking.formData.phoneNumber,
+    booking.formData.tourSlug,
+    booking.formData.country,
+    booking.formData.countryCode,
+    booking.selectedTour,
+  ]);
 
-    // Create a new Apple Pay session
-    try {
-      // We've already checked window.ApplePaySession exists above
-      const session = new window.ApplePaySession(6, request);
+  const createPaymentSession = async () => {
+    const response = await fetch("/api/payments/paypal/session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ booking: bookingDraft }),
+    });
 
-      // Handle merchant validation
-      session.onvalidatemerchant = async (event: { validationURL: string }) => {
-        try {
-          // In a real implementation, you'd make a server call to validate
-          // For demo purposes, we'll simulate a successful validation
-          console.log("Apple Pay merchant validation requested", event);
-          
-          // Mock merchant session for demo
-          // In production, you'd get this from your server which would validate with Apple
-          const mockMerchantSession = {
-            merchantSessionIdentifier: "merchant.session.id." + Date.now(),
-            nonce: "nonce-" + Date.now(),
-            merchantIdentifier: "merchant.com.your.identifier",
-            domainName: window.location.hostname,
-            displayName: "Tour To Valencia",
-            signature: "dummy-signature-for-demo",
-            validationURL: event.validationURL
-          };
-          
-          session.completeMerchantValidation(mockMerchantSession);
-        } catch (error) {
-          console.error("Error validating merchant:", error);
-          session.abort();
-        }
-      };
+    const payload = await safeJson<CreateSessionResponse>(response);
 
-      // Handle payment authorization
-      session.onpaymentauthorized = (event: { payment: unknown }) => {
-        try {
-          console.log("Payment authorized:", event.payment);
-          
-          // In a real app, you'd process payment through your server
-          // For demo, we'll create a mock OrderResponseBody compatible with handlePaymentSuccess
-          const mockOrderDetails: OrderResponseBody = {
-            id: "APPLEPAY-" + Date.now(),
-            intent: "CAPTURE",
-            status: "COMPLETED",
-            purchase_units: [{
-              amount: {
-                value: formattedTotalPrice,
-                currency_code: "EUR"
-              },
-              payments: {
-                captures: [{
-                  id: "APPLECAPTURE-" + Date.now(),
-                  status: "COMPLETED",
-                  amount: {
-                    value: formattedTotalPrice,
-                    currency_code: "EUR"
-                  }
-                }]
-              }
-            }]
-          };
-          
-          // Ensure window.ApplePaySession is available
-          if (window.ApplePaySession) {
-            session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
-          } else {
-            console.error("ApplePaySession no longer available");
-            session.completePayment(0); // Use 0 as a fallback
-          }
-          
-          // Process the payment with our handler passing 'applepay' as the method
-          handlePaymentSuccess(mockOrderDetails, 'applepay');
-        } catch (error) {
-          console.error("Error processing Apple Pay payment:", error);
-          // Ensure window.ApplePaySession is available
-          if (window.ApplePaySession) {
-            session.completePayment(window.ApplePaySession.STATUS_FAILURE);
-          } else {
-            console.error("ApplePaySession no longer available");
-            session.completePayment(1); // Use 1 as a fallback for failure
-          }
-        }
-      };
-
-      // Begin the Apple Pay session
-      session.begin();
-    } catch (error) {
-      console.error("Error setting up Apple Pay session:", error);
+    if (!response.ok || !payload?.success || !payload.orderId || !payload.sessionId) {
+      throw new Error(payload?.error || paymentText.errors.paymentFailed);
     }
+
+    setSessionId(payload.sessionId);
+    sessionIdRef.current = payload.sessionId;
+    return payload.orderId;
   };
 
   return (
     <div className="p-8 mt-4 rounded-xl">
-      <h1 className="text-3xl font-bold mb-8 text-center">{paypalText.title}</h1>
-      <div className="space-y-8">
-        {/* Apple Pay Button - Only shown if available */}
-        {isApplePayAvailable && (
-          <div className="mb-8">
-            <button 
-              onClick={handleApplePayment}
-              className="w-full bg-black text-white py-5 px-6 rounded-lg text-xl font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center justify-center"
-            >
-              <svg className="h-8 w-8 mr-3" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.0771 10.8995C17.0458 8.43717 19.0544 7.08924 19.1463 7.03245C17.9438 5.26251 16.0524 5.00239 15.3998 4.98553C13.8099 4.8217 12.2636 5.93235 11.4575 5.93235C10.6345 5.93235 9.37484 4.99963 8.04305 5.02471C6.31151 5.04955 4.67724 6.10397 3.7775 7.71631C1.9289 10.9923 3.31306 15.7939 5.0855 18.2123C5.9622 19.3876 6.9891 20.7136 8.32643 20.6644C9.61799 20.6128 10.1091 19.7978 11.6636 19.7978C13.201 19.7978 13.6607 20.6644 15.0107 20.6384C16.4086 20.6128 17.2956 19.4436 18.1439 18.257C19.1519 16.884 19.5601 15.537 19.5776 15.4631C19.5426 15.4465 17.1128 14.5339 17.0771 10.8995Z" />
-                <path d="M15.0168 3.36289C15.7321 2.47475 16.2095 1.24939 16.0567 0C14.9887 0.0452889 13.6784 0.720745 12.9375 1.58186C12.2678 2.34984 11.698 3.61335 11.8682 4.82347C13.0591 4.90596 14.2786 4.2341 15.0168 3.36289Z" />
-              </svg>
-              <span className="text-xl">Pay with Apple Pay</span>
-            </button>
+      <div className="relative">
+        {isProcessingPayment && (
+          <div className="absolute inset-0 z-20 bg-white/80 backdrop-blur-[1px] flex flex-col items-center justify-center gap-4">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            <p className="text-base text-muted-foreground">{paymentText.buttons.processing}</p>
           </div>
         )}
-        
-        {/* PayPal Buttons */}
-        <div className="scale-125 transform-gpu origin-top">
-          <PayPalButtons
-            style={{ 
-              layout: "vertical", 
-              color: "blue", 
-              shape: "pill", 
-              label: "paypal",
-              height: 55
-            }}
-            createOrder={async (data, actions: CreateOrderActions) => {
-              return actions.order.create({
-                intent: "CAPTURE",
-                purchase_units: [
-                  {
-                    amount: {
-                      currency_code: "EUR",
-                      value: formattedTotalPrice,
-                    },
-                  },
-                ],
-              });
-            }}
-            onApprove={async (data: OnApproveData, actions: OnApproveActions) => {
-              if (actions.order) {
-                try {
-                  console.log("PayPal payment approved, capturing order...");
-                  
-                  // Set a flag to indicate payment is being processed
-                  if (typeof window !== 'undefined' && window.sessionStorage) {
-                    try {
-                      sessionStorage.setItem('paypalPaymentProcessing', 'true');
-                      console.log("Set paypalPaymentProcessing flag in sessionStorage");
-                    } catch (storageError) {
-                      console.error("Error setting paypalPaymentProcessing flag:", storageError);
-                    }
+
+        <div className={isProcessingPayment ? "pointer-events-none select-none" : ""}>
+          <h1 className="text-3xl font-bold mb-8 text-center">{paypalText.title}</h1>
+
+          {paymentError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{paymentError}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="scale-125 transform-gpu origin-top">
+            {!isPayPalButtonsReady && (
+              <div className="py-10 flex flex-col items-center justify-center gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">{paymentText.buttons.processing}</p>
+              </div>
+            )}
+
+            <div className={isPayPalButtonsReady ? "" : "opacity-0 pointer-events-none h-0 overflow-hidden"}>
+              <PayPalButtons
+                style={{
+                  layout: "vertical",
+                  color: "blue",
+                  shape: "pill",
+                  label: "paypal",
+                  height: 55,
+                }}
+                onInit={() => setIsPayPalButtonsReady(true)}
+                createOrder={async (_data, _actions: CreateOrderActions) => {
+                  setPaymentError(null);
+                  setIsInitializingPayment(true);
+
+                  try {
+                    return await createPaymentSession();
+                  } catch (error) {
+                    const message = extractErrorMessage(error, paymentText.errors.initError);
+                    setPaymentError(message);
+                    throw new Error(message);
+                  } finally {
+                    setIsInitializingPayment(false);
                   }
-                  
-                  // Capture the order
-                  console.log("Capturing PayPal order...");
-                  const details = await actions.order.capture();
-                  console.log("PayPal order captured successfully:", details.id);
-                  
-                  // Process the payment success
-                  await handlePaymentSuccess(details, 'paypal');
-                } catch (error) {
-                  console.error(paypalText.errors.captureError, error);
-                  
-                  // Clear the processing flag
-                  if (typeof window !== 'undefined' && window.sessionStorage) {
-                    try {
-                      sessionStorage.removeItem('paypalPaymentProcessing');
-                    } catch (e) {
-                      // Ignore errors when clearing
+                }}
+                onApprove={async (data: OnApproveData, actions: OnApproveActions) => {
+                  setPaymentError(null);
+                  setIsCapturingPayment(true);
+
+                  try {
+                    const orderId = data.orderID;
+                    if (!orderId) {
+                      throw new Error(paypalText.errors.noPaymentId);
                     }
+
+                    const captureResponse = await fetch("/api/payments/paypal/capture", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        sessionId: sessionIdRef.current || sessionId,
+                        orderId,
+                      }),
+                    });
+
+                    const payload = await safeJson<CaptureResponse>(captureResponse);
+
+                    if (!captureResponse.ok || !payload?.success) {
+                      const issue = payload?.issue;
+                      const recoverable = Boolean(payload?.recoverable || (issue && RESTARTABLE_PAYPAL_ISSUES.has(issue)));
+
+                      if (recoverable && actions.order) {
+                        setIsCapturingPayment(false);
+                        return actions.restart();
+                      }
+
+                      throw new Error(payload?.error || paymentText.errors.captureError);
+                    }
+
+                    const resolvedSessionId = payload.sessionId || sessionIdRef.current || sessionId;
+                    if (!resolvedSessionId) {
+                      throw new Error("Missing payment session id after capture");
+                    }
+
+                    window.location.href = `/book/success?sessionId=${encodeURIComponent(resolvedSessionId)}`;
+                  } catch (error) {
+                    const message = extractErrorMessage(error, paymentText.errors.paymentFailed);
+                    setPaymentError(message);
+                    setIsCapturingPayment(false);
                   }
-                  
-                  window.location.href = "/book?error=payment-failed";
-                }
-              } else {
-                console.error("PayPal actions.order is undefined");
-                window.location.href = "/book?error=payment-failed";
-              }
-            }}
-            onError={(err) => {
-              console.error(paypalText.errors.paypalError, err);
-              window.location.href = "/book?error=payment-failed";
-            }}
-          />
+                }}
+                onError={(error) => {
+                  const message = extractErrorMessage(error, paypalText.errors.paypalError);
+                  setPaymentError(message);
+                  setIsInitializingPayment(false);
+                  setIsCapturingPayment(false);
+                }}
+                onCancel={() => {
+                  setIsInitializingPayment(false);
+                  setIsCapturingPayment(false);
+                }}
+              />
+            </div>
+          </div>
         </div>
-        
-        {/* Total Amount Display
-        <div className="mt-8 text-center">
-          <p className="text-2xl font-semibold">
-            Total Amount: <span className="text-primary">{formattedTotalPrice}€</span>
-          </p>
-        </div> */}
       </div>
     </div>
   );

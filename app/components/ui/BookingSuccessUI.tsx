@@ -48,10 +48,6 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
   const [countdown, setCountdown] = useState(60);
 
   useEffect(() => {
-    if (emailStatus !== 'sent' && emailStatus !== 'error') {
-      return;
-    }
-    
     // Only run in browser environment
     if (typeof window === 'undefined') {
       return;
@@ -141,12 +137,26 @@ export const BookingSuccessUI = ({ booking, emailStatus }: BookingSuccessUIProps
             </motion.div>
 
             <motion.div className="space-y-3" variants={itemVariants}>
-              <Alert className="bg-green-50 border-green-200 shadow-sm">
-                <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
-                <AlertDescription className="text-green-700 text-center sm:text-left">
-                  Se ha enviado un email de confirmación a <span className="font-medium break-all">{booking.email}</span>
-                </AlertDescription>
-              </Alert>
+              {emailStatus === "sent" ? (
+                <Alert className="bg-green-50 border-green-200 shadow-sm">
+                  <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
+                  <AlertDescription className="text-green-700 text-center sm:text-left">
+                    Se ha enviado un email de confirmación a <span className="font-medium break-all">{booking.email}</span>
+                  </AlertDescription>
+                </Alert>
+              ) : emailStatus === "error" ? (
+                <Alert className="bg-yellow-50 border-yellow-200 shadow-sm">
+                  <AlertDescription className="text-yellow-700 text-center sm:text-left">
+                    Tu reserva está confirmada, pero el email automático no se pudo enviar ahora mismo.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <Alert className="bg-slate-50 border-slate-200 shadow-sm">
+                  <AlertDescription className="text-slate-700 text-center sm:text-left">
+                    Confirmando el envío del email de reserva...
+                  </AlertDescription>
+                </Alert>
+              )}
             </motion.div>
 
             <motion.div className="space-y-4 pt-4" variants={itemVariants}>

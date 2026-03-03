@@ -196,6 +196,7 @@ async function tryAcquireLock(now: Date): Promise<BlogSettings | null> {
       nextRunAt: { $lte: now },
       $or: [
         { lockedUntil: { $exists: false } },
+        { lockedUntil: null },
         { lockedUntil: { $lte: now } },
       ],
     },
@@ -205,7 +206,8 @@ async function tryAcquireLock(now: Date): Promise<BlogSettings | null> {
     { returnDocument: "after" }
   );
 
-  return result.value as BlogSettings | null;
+  // mongodb@6 returns the updated document directly (or null), not { value }.
+  return (result ?? null) as BlogSettings | null;
 }
 
 async function runSchedulerTick() {
@@ -247,6 +249,8 @@ async function runSchedulerTick() {
 export async function startBlogScheduler() {
   if (schedulerStarted) return;
   schedulerStarted = true;
+  console.log("[BLOG-SCHEDULER] Initializing...");
+
   const settings = await getBlogSettings();
   if (!settings.nextRunAt) {
     const collection = await getBlogSettingsCollection();
@@ -255,9 +259,16 @@ export async function startBlogScheduler() {
       { $set: { nextRunAt: calculateNextRunAt(settings, new Date()) } }
     );
   }
-  setInterval(() => {
+
+  const runTick = () => {
     runSchedulerTick().catch((error) => {
       console.error("[BLOG-SCHEDULER] Error:", error);
     });
-  }, SCHEDULER_INTERVAL_MS);
+  };
+
+  // Catch up overdue jobs immediately after startup/restart.
+  runTick();
+  setInterval(runTick, SCHEDULER_INTERVAL_MS);
+
+  console.log("[BLOG-SCHEDULER] Started. Interval(ms):", SCHEDULER_INTERVAL_MS);
 }

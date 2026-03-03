@@ -1,5 +1,4 @@
-import { useState, useCallback } from "react";
-import { useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useFetcher } from "@remix-run/react";
 import type { Booking } from "~/types/booking";
 
@@ -23,15 +22,34 @@ export const useBookingSuccessStates = (initialBooking: Booking) => {
     setEmailStatus('sending');
     const formData = new FormData();
     formData.set("booking", JSON.stringify(booking));
-    fetcher.submit(formData, { method: "post" });
+    fetcher.submit(formData, { method: "post", action: "/book/success" });
   }, [booking, emailStatus, fetcher]);
 
   useEffect(() => {
     // Only update status when we have a response and we're in sending state
-    if (fetcher.data && emailStatus === 'sending') {
+    if (emailStatus !== 'sending') {
+      return;
+    }
+
+    if (fetcher.state === "idle" && fetcher.data) {
       setEmailStatus(fetcher.data.success ? 'sent' : 'error');
     }
-  }, [fetcher.data, emailStatus]);
+  }, [fetcher.data, fetcher.state, emailStatus]);
+
+  useEffect(() => {
+    if (emailStatus !== "sending") {
+      return;
+    }
+
+    // Fallback for malformed/non-JSON upstream responses (e.g. 504 HTML pages)
+    const timer = setTimeout(() => {
+      if (fetcher.state !== "idle" || !fetcher.data) {
+        setEmailStatus("error");
+      }
+    }, 20000);
+
+    return () => clearTimeout(timer);
+  }, [emailStatus, fetcher.state, fetcher.data]);
 
   return {
     booking,

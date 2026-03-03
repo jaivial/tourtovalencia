@@ -183,6 +183,14 @@ export async function ensureDbIndexes() {
     { key: { paymentIntentId: 1 } }
   ]);
 
+  // Create indexes for payment sessions collection
+  await db.collection("paymentSessions").createIndexes([
+    { key: { sessionId: 1 }, unique: true },
+    { key: { orderId: 1 }, sparse: true },
+    { key: { createdAt: -1 } },
+    { key: { expiresAt: 1 }, expireAfterSeconds: 0 },
+  ]);
+
   // Create indexes for translations collection
   await db.collection("translations").createIndexes([
     // Compound index for quick translation lookups

@@ -52,14 +52,28 @@ const getDkimConfig = (): DkimConfig | null => {
 const initializeEmailTransporter = () => {
   if (!transporter) {
     const dkimConfig = getDkimConfig();
+    const smtpUser = process.env.GMAIL_USER || process.env.SMTP_USER;
+    const smtpPass = process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
+
+    if (!smtpUser || !smtpPass) {
+      throw new Error("SMTP credentials are missing. Set GMAIL_USER and GMAIL_APP_PASSWORD.");
+    }
     
     // Create the basic transport configuration
     const transportConfig = {
-      service: "gmail",
+      host: process.env.SMTP_HOST || "smtp.gmail.com",
+      port: Number(process.env.SMTP_PORT || "587"),
+      secure: (process.env.SMTP_PORT || "587") === "465",
+      requireTLS: true,
       pool: true,
+      maxConnections: 2,
+      maxMessages: 100,
+      connectionTimeout: 7000,
+      greetingTimeout: 7000,
+      socketTimeout: 10000,
       auth: {
-        user: "jaimebillanueba99@gmail.com",
-        pass: "kkpu opyf opsm ouxj",
+        user: smtpUser,
+        pass: smtpPass,
       },
     };
     
@@ -97,6 +111,7 @@ const initializeEmailTransporter = () => {
 
 export const sendEmail = async ({ to, subject, component }: SendEmailProps): Promise<nodemailer.SentMessageInfo> => {
   const emailTransporter = initializeEmailTransporter();
+  const smtpFrom = process.env.EMAIL_FROM || process.env.GMAIL_USER || "tourtovalencia@gmail.com";
 
   try {
     const htmlContent = renderToString(component);
@@ -117,7 +132,7 @@ export const sendEmail = async ({ to, subject, component }: SendEmailProps): Pro
     }
 
     const info = await emailTransporter.sendMail({
-      from: `"Tour To Valencia" <tourtovalencia@gmail.com>`,
+      from: `"Tour To Valencia" <${smtpFrom}>`,
       to,
       subject,
       html: htmlContent,

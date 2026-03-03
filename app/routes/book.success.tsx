@@ -1,23 +1,138 @@
-import { useNavigate, useLocation, json } from "@remix-run/react";
+import { json } from "@remix-run/server-runtime";
+import { useLoaderData } from "@remix-run/react";
 import { useEffect, useState } from "react";
-import { BookingSuccessProvider } from "~/context/BookingSuccessContext";
-import { BookingSuccessFeature } from "~/components/features/BookingSuccessFeature";
+import { BookingSuccessUI } from "~/components/ui/BookingSuccessUI";
 import type { Booking } from "~/types/booking";
 import { sendEmail } from "~/utils/email.server";
 import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmationEmail";
 import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
 import { getCollection } from "~/utils/db.server";
+import { getPaymentSessionPublicData, type PaymentSessionPublicData } from "~/services/paymentSession.server";
 
-// Add a loader function to handle direct navigation to the success page
-export async function loader() {
-  // This loader allows the page to be loaded directly
-  // The client-side code will handle redirecting if no booking data is found
-  return json({ ok: true });
+const EMAIL_TIMEOUT_MS = 8_000;
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+    }),
+  ]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
+interface PersistedBookingRecord {
+  _id?: unknown;
+  fullName: string;
+  email: string;
+  date: Date;
+  partySize: number;
+  status: "confirmed";
+  createdAt: Date;
+  updatedAt: Date;
+  paymentIntentId: string;
+  paymentStatus: "paid";
+  totalAmount: number;
+  amount: number;
+  phoneNumber: string;
+  country?: string;
+  countryCode?: string;
+  tourSlug?: string;
+  tourName?: string;
+  paymentMethod: "paypal";
+  language: string;
+  customerEmailSentAt?: Date;
+  adminEmailSentAt?: Date;
+}
+
+function toBookingModel(record: PersistedBookingRecord): Booking {
+  return {
+    _id: String(record._id ?? record.paymentIntentId),
+    fullName: record.fullName,
+    email: record.email,
+    date: record.date,
+    partySize: record.partySize,
+    amount: record.amount ?? record.totalAmount,
+    totalAmount: record.totalAmount,
+    paymentIntentId: record.paymentIntentId,
+    phoneNumber: record.phoneNumber,
+    country: record.country,
+    countryCode: record.countryCode,
+    status: record.status,
+    paymentStatus: record.paymentStatus,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+    tourSlug: record.tourSlug,
+    tourName: record.tourName,
+    paymentMethod: record.paymentMethod,
+    language: record.language,
+  };
+}
+
+interface LoaderData {
+  sessionId: string | null;
+  session: PaymentSessionPublicData | null;
+  error?: string;
+}
+
+// Server-authoritative success page: only reads payment session status by sessionId.
+export async function loader({ request }: { request: Request }) {
+  const url = new URL(request.url);
+  const sessionId = url.searchParams.get("sessionId");
+
+  if (!sessionId) {
+    return json<LoaderData>(
+      {
+        sessionId: null,
+        session: null,
+        error: "Missing payment session id.",
+      },
+      { status: 400 }
+    );
+  }
+
+  const session = await getPaymentSessionPublicData(sessionId);
+
+  if (!session) {
+    return json<LoaderData>(
+      {
+        sessionId,
+        session: null,
+        error: "Payment session not found.",
+      },
+      { status: 404 }
+    );
+  }
+
+  return json<LoaderData>({
+    sessionId,
+    session,
+  });
 }
 
 export async function action({ request }: { request: Request }) {
   const formData = await request.formData();
-  const bookingData = JSON.parse(formData.get("booking") as string) as Booking;
+  const rawBooking = formData.get("booking");
+
+  if (typeof rawBooking !== "string") {
+    return json({ success: false, error: "Missing booking payload" }, { status: 400 });
+  }
+
+  let bookingData: Booking;
+  try {
+    bookingData = JSON.parse(rawBooking) as Booking;
+  } catch {
+    return json({ success: false, error: "Invalid booking payload" }, { status: 400 });
+  }
+
+  if (!bookingData.paymentIntentId) {
+    return json({ success: false, error: "Missing payment intent id" }, { status: 400 });
+  }
 
   try {
     // Log the amount for debugging
@@ -27,8 +142,8 @@ export async function action({ request }: { request: Request }) {
     console.log("Payment method:", bookingData.paymentMethod || "PayPal");
     console.log("Language:", bookingData.language || "es");
     
-    // Save to MongoDB
-    const bookingsCollection = await getCollection("bookings");
+    // Save to MongoDB (idempotent by paymentIntentId)
+    const bookingsCollection = await getCollection<PersistedBookingRecord>("bookings");
     const now = new Date();
 
     // Ensure we have the tour name
@@ -67,7 +182,7 @@ export async function action({ request }: { request: Request }) {
     console.log("Final calculated amount:", finalAmount);
     
     // Create the booking record
-    const bookingRecord = {
+    const bookingRecord: Omit<PersistedBookingRecord, "_id"> = {
       fullName: bookingData.fullName,
       email: bookingData.email,
       date: new Date(bookingData.date),
@@ -88,137 +203,223 @@ export async function action({ request }: { request: Request }) {
       language: bookingData.language || "es",
     };
 
-    await bookingsCollection.insertOne(bookingRecord);
+    const existingBooking = await bookingsCollection.findOne({
+      paymentIntentId: bookingData.paymentIntentId,
+    });
 
-    // After insertion, create a complete booking object for the email
-    const completeBooking: Booking = {
-      _id: bookingData.paymentIntentId,
-      ...bookingRecord
-    };
+    let persistedBooking: PersistedBookingRecord;
+
+    if (existingBooking) {
+      persistedBooking = existingBooking;
+      console.log(`Booking already exists for payment ${bookingData.paymentIntentId}, skipping duplicate insert`);
+    } else {
+      const insertResult = await bookingsCollection.insertOne(bookingRecord);
+      persistedBooking = { ...bookingRecord, _id: insertResult.insertedId };
+    }
+
+    // Build the complete booking object for emails/UI
+    const completeBooking = toBookingModel(persistedBooking);
 
     // Send confirmation email to customer
-    try {
-      // Set the email subject based on the language
-      const emailSubject = bookingData.language === "en" 
-        ? "Booking Confirmation - Tour to Valencia" 
+    const shouldSendCustomerEmail = !persistedBooking.customerEmailSentAt;
+    const shouldSendAdminEmail = !persistedBooking.adminEmailSentAt;
+    let customerEmailSent = !shouldSendCustomerEmail;
+    let adminEmailSent = !shouldSendAdminEmail;
+
+    const emailTasks: Promise<void>[] = [];
+
+    if (shouldSendCustomerEmail) {
+      const emailSubject = bookingData.language === "en"
+        ? "Booking Confirmation - Tour to Valencia"
         : "Confirmación de Reserva - Tour to Valencia";
-        
-      await sendEmail({
-        to: bookingData.email,
-        subject: emailSubject,
-        component: BookingConfirmationEmail({ 
-          booking: {
-            ...bookingData,
-            paymentMethod: "paypal", // Ensure PayPal is set as payment method
-            language: bookingData.language || "es" // Ensure language is passed to the email component
-          } 
-        }),
-      });
-      console.log(`✅ Customer confirmation email sent to ${bookingData.email}`);
-    } catch (emailError) {
-      console.error("Error sending customer confirmation email:", emailError);
-      // Continue execution even if customer email fails
+
+      emailTasks.push(
+        withTimeout(
+          sendEmail({
+            to: bookingData.email,
+            subject: emailSubject,
+            component: BookingConfirmationEmail({
+              booking: {
+                ...completeBooking,
+                paymentMethod: "paypal",
+                language: bookingData.language || "es",
+              },
+            }),
+          }),
+          EMAIL_TIMEOUT_MS,
+          "Customer email"
+        )
+          .then(async () => {
+            customerEmailSent = true;
+            await bookingsCollection.updateOne(
+              { paymentIntentId: bookingData.paymentIntentId },
+              { $set: { customerEmailSentAt: new Date(), updatedAt: new Date() } }
+            );
+            console.log(`✅ Customer confirmation email sent to ${bookingData.email}`);
+          })
+          .catch((emailError) => {
+            console.error("Error sending customer confirmation email:", emailError);
+          })
+      );
     }
 
-    // Send admin notification with better error handling
-    try {
-      // Get admin email with fallback and logging
+    if (shouldSendAdminEmail) {
       const adminEmail = process.env.ADMIN_EMAIL || "tourtovalencia@gmail.com";
       console.log(`Attempting to send admin notification to: ${adminEmail}`);
-      
-      const adminEmailComponent = <BookingAdminEmail booking={completeBooking} />;
-      
-      await sendEmail({
-        to: adminEmail,
-        subject: `Nueva Reserva: ${bookingData.fullName} - ${tourName || 'Tour to Valencia'}`,
-        component: adminEmailComponent,
-      });
-      console.log(`✅ Admin notification email sent to ${adminEmail}`);
-    } catch (adminEmailError) {
-      console.error("Error sending admin notification email:", adminEmailError);
-      // Continue execution even if admin email fails
+
+      emailTasks.push(
+        withTimeout(
+          sendEmail({
+            to: adminEmail,
+            subject: `Nueva Reserva: ${bookingData.fullName} - ${tourName || "Tour to Valencia"}`,
+            component: <BookingAdminEmail booking={completeBooking} />,
+          }),
+          EMAIL_TIMEOUT_MS,
+          "Admin email"
+        )
+          .then(async () => {
+            adminEmailSent = true;
+            await bookingsCollection.updateOne(
+              { paymentIntentId: bookingData.paymentIntentId },
+              { $set: { adminEmailSentAt: new Date(), updatedAt: new Date() } }
+            );
+            console.log(`✅ Admin notification email sent to ${adminEmail}`);
+          })
+          .catch((adminEmailError) => {
+            console.error("Error sending admin notification email:", adminEmailError);
+          })
+      );
     }
 
-    return json({ success: true, booking: bookingData });
+    // Never block booking confirmation due to email transport issues.
+    // Run email attempts in the background and return success immediately.
+    if (emailTasks.length > 0) {
+      void Promise.all(emailTasks).catch((backgroundEmailError) => {
+        console.error("Background email processing failed:", backgroundEmailError);
+      });
+    }
+
+    return json({
+      success: true,
+      booking: completeBooking,
+      emails: {
+        customer: customerEmailSent,
+        admin: adminEmailSent,
+      },
+    });
   } catch (error) {
     console.error("Error processing booking:", error);
-    return json({ success: false, error: "Failed to process booking" });
+    return json({ success: false, error: "Failed to process booking" }, { status: 500 });
   }
 }
 
 export default function BookingSuccess() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  
-  // Use useState to handle client-side data retrieval
-  const [bookingData, setBookingData] = useState(location.state?.booking || null);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  useEffect(() => {
-    // Only run in browser environment
-    if (typeof window !== 'undefined') {
-      console.log("Running useEffect in browser environment");
-      
-      // Add a small delay to ensure sessionStorage is populated
-      const timer = setTimeout(() => {
-        // Try to get data from sessionStorage
-        const storedData = sessionStorage.getItem('bookingData');
-        console.log("Checking sessionStorage:", storedData ? "Data found" : "No data found");
-        
-        if (storedData) {
-          try {
-            const parsedData = JSON.parse(storedData);
-            if (parsedData.booking) {
-              console.log("Retrieved booking data from sessionStorage in useEffect");
-              setBookingData(parsedData.booking);
-              // Clear the sessionStorage after retrieving the data
-              sessionStorage.removeItem('bookingData');
-              setIsLoading(false);
-              return;
-            }
-          } catch (error) {
-            console.error("Error parsing stored booking data:", error);
-          }
-        }
-        
-        // Check if we have data from location state
-        if (location.state?.booking) {
-          console.log("Using booking data from location state");
-          setBookingData(location.state.booking);
-          setIsLoading(false);
-          return;
-        }
-        
-        // If we don't have data from either source, redirect
-        if (!bookingData) {
-          console.log("No booking data found, redirecting to booking page");
-          navigate("/book", { replace: true });
-        } else {
-          setIsLoading(false);
-        }
-      }, 300); // Small delay to ensure sessionStorage is populated
-      
-      return () => clearTimeout(timer);
-    }
-  }, [location.state, navigate]);
+  const { sessionId, session, error } = useLoaderData<LoaderData>();
+  const [sessionData, setSessionData] = useState<PaymentSessionPublicData | null>(session);
+  const [pollError, setPollError] = useState<string | null>(null);
 
-  // Show loading state during initial render
-  if (isLoading) {
+  const shouldPoll = Boolean(
+    sessionId &&
+      sessionData &&
+      sessionData.bookingStatus !== "confirmed" &&
+      sessionData.status !== "failed"
+  );
+
+  useEffect(() => {
+    if (!shouldPoll || !sessionId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/payments/session/${encodeURIComponent(sessionId)}`);
+        const payload = (await response.json()) as {
+          success?: boolean;
+          error?: string;
+          session?: PaymentSessionPublicData;
+        };
+
+        if (!response.ok || !payload.success || !payload.session) {
+          throw new Error(payload.error || "Unable to refresh payment status");
+        }
+
+        if (!cancelled) {
+          setSessionData(payload.session);
+          setPollError(null);
+        }
+      } catch (pollingError) {
+        if (!cancelled) {
+          setPollError(pollingError instanceof Error ? pollingError.message : "Unable to refresh payment status");
+        }
+      }
+    };
+
+    void poll();
+    const interval = setInterval(() => {
+      void poll();
+    }, 2000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [sessionId, shouldPoll]);
+
+  if (error || !sessionId) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+      <div className="flex min-h-screen items-center justify-center px-6 text-center">
+        <div className="space-y-4">
+          <h1 className="text-2xl font-semibold">Booking confirmation unavailable</h1>
+          <p className="text-muted-foreground">{error || "Missing payment session id."}</p>
+          <a href="/book" className="text-primary underline">
+            Back to booking
+          </a>
+        </div>
       </div>
     );
   }
 
-  if (!bookingData) {
-    // Return a loading state or null for server-side rendering
-    return null;
+  if (!sessionData) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500" />
+      </div>
+    );
   }
 
-  return (
-    <BookingSuccessProvider booking={bookingData}>
-      <BookingSuccessFeature />
-    </BookingSuccessProvider>
-  );
+  if (sessionData.status === "failed" || sessionData.bookingStatus === "failed") {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-6 text-center">
+        <div className="space-y-4">
+          <h1 className="text-2xl font-semibold">Payment failed</h1>
+          <p className="text-muted-foreground">
+            {sessionData.errorMessage || "The payment could not be confirmed. Please try again."}
+          </p>
+          <a href="/book" className="text-primary underline">
+            Return to booking
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  if (sessionData.bookingStatus !== "confirmed" || !sessionData.booking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-6 text-center">
+        <div className="space-y-4">
+          <div className="mx-auto animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500" />
+          <h1 className="text-2xl font-semibold">Finalizing your booking</h1>
+          <p className="text-muted-foreground">
+            Your payment is confirmed. We are finishing your booking details...
+          </p>
+          {pollError && <p className="text-sm text-muted-foreground">{pollError}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  const emailStatus = sessionData.customerEmailSent ? "sent" : "sending";
+  return <BookingSuccessUI booking={sessionData.booking} emailStatus={emailStatus} />;
 }

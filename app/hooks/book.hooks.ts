@@ -30,16 +30,6 @@ export interface FetcherData {
   success?: boolean;
 }
 
-/**
- * STRICT interface for email configuration
- */
-export interface EmailConfig {
-  template?: string;
-  subject?: string;
-  from?: string;
-  [key: string]: unknown;
-}
-
 export type BookingStates = Omit<BookingContextState, "setCurrentStep" | "setFormData" | "setErrors" | "setSelectedDateAvailability" | "setIsSubmitting" | "setIsSuccess" | "setPaymentClientSecret" | "setPaymentIntentId" | "setServerError">;
 
 export interface BookingActions {
@@ -107,7 +97,6 @@ export function useBookingStates(initialState?: {
   const [isSuccess, setIsSuccess] = useState(false);
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
-  const [emailConfig, setEmailConfig] = useState<EmailConfig>({});
   return {
     currentStep,
     formData,
@@ -119,7 +108,6 @@ export function useBookingStates(initialState?: {
     isSuccess,
     paymentClientSecret,
     paymentIntentId,
-    emailConfig,
     setCurrentStep,
     setFormData,
     setErrors,
@@ -129,7 +117,6 @@ export function useBookingStates(initialState?: {
     setPaymentClientSecret,
     setPaymentIntentId,
     setServerError,
-    setEmailConfig,
   };
 }
 
@@ -236,7 +223,6 @@ export function useBookingActions(context: BookingContextState): BookingActions 
         ...bookingInfo,
       };
       formData.append("booking", JSON.stringify(booking));
-      formData.append("emailConfig", JSON.stringify(context.emailConfig));
 
       submit(formData, {
         method: "post",

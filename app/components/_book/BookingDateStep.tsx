@@ -1,7 +1,7 @@
 import { useBooking } from "~/context/BookingContext";
 import { Label } from "../ui/label";
 import { cn } from "~/lib/utils";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Alert, AlertDescription } from "../ui/alert";
 import { TourSelectorUI } from "../ui/TourSelectorUI";
@@ -54,23 +54,6 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
   const [isTourSelected, setIsTourSelected] = useState(!!formData.tourSlug);
   // State to track errors
   const [fetchError, setFetchError] = useState<string | null>(null);
-
-  // Log unavailable dates when component mounts
-  useEffect(() => {
-    console.log("BookingDateStep mounted");
-    console.log("Total unavailable dates:", unavailableDates.length);
-    if (unavailableDates.length > 0) {
-      console.log("First few unavailable dates:", unavailableDates.slice(0, 3));
-      
-      // Group by tour and count
-      const countByTour = unavailableDates.reduce((acc, date) => {
-        acc[date.tourSlug] = (acc[date.tourSlug] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      
-      console.log("Unavailable dates by tour:", countByTour);
-    }
-  }, [unavailableDates]);
   
   // Get today's date for min value
   const todayDate = today(getLocalTimeZone());
@@ -97,24 +80,9 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       // Assuming it's a CalendarDate
       const calendarDate = date as CalendarDate;
       
-      // Log the date components for debugging
-      console.log("Checking availability for date:", {
-        year: calendarDate.year,
-        month: calendarDate.month,
-        day: calendarDate.day
-      });
-      
       // Create a date at midnight in local timezone
       jsDate = new Date(calendarDate.year, calendarDate.month - 1, calendarDate.day);
       jsDate.setHours(0, 0, 0, 0);
-      
-      // Log the created JavaScript Date
-      console.log("Converted to JS Date:", {
-        iso: jsDate.toISOString(),
-        year: jsDate.getFullYear(),
-        month: jsDate.getMonth() + 1,
-        day: jsDate.getDate()
-      });
     } catch (error) {
       console.error("Error converting date:", error);
       return false; // If we can't convert, don't disable the date
@@ -138,19 +106,11 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     // Format the date for comparison - use our utility function for consistent formatting
     const dateString = formatLocalDate(jsDate);
     
-    // Log the formatted date string
-    console.log(`Checking if ${dateString} is unavailable for tour ${formData.tourSlug}`);
-    
     // Check if the date is in the unavailable dates list for this tour
     const matchingUnavailableDates = unavailableDates
       .filter(d => d.tourSlug === formData.tourSlug && d.date === dateString);
     
     const isUnavailable = matchingUnavailableDates.length > 0;
-    
-    // Log the result for debugging
-    if (isUnavailable) {
-      console.log(`Date ${dateString} is unavailable for tour ${formData.tourSlug}`, matchingUnavailableDates);
-    }
     
     return isUnavailable;
   };
@@ -159,31 +119,15 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
   const handleDateSelect = async (date: CalendarDate | null) => {
     if (!date) return;
     
-    // Log the selected date components
-    console.log("Date selected:", {
-      year: date.year,
-      month: date.month,
-      day: date.day
-    });
-    
     // Convert CalendarDate to JavaScript Date
     const jsDate = new Date(date.year, date.month - 1, date.day);
     jsDate.setHours(0, 0, 0, 0);
-    
-    // Log the converted JavaScript Date
-    console.log("Converted to JS Date:", {
-      iso: jsDate.toISOString(),
-      year: jsDate.getFullYear(),
-      month: jsDate.getMonth() + 1,
-      day: jsDate.getDate()
-    });
     
     // Reset previous errors
     setFetchError(null);
 
     // Format the date for form data using our utility function
     const formattedDate = formatLocalDate(jsDate);
-    console.log("Formatted date for API:", formattedDate);
 
     // Check if a tour is selected
     if (!formData.tourSlug) {
@@ -193,7 +137,6 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
 
     // Double check if the date is available
     if (isDateUnavailable(date)) {
-      console.log(`Prevented selection of unavailable date: ${formattedDate}`);
       setFetchError(localizedText[currentLanguage].dateUnavailable);
       return;
     }
@@ -203,7 +146,6 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       const timestamp = new Date().getTime();
       
       // Fetch available places from the API with cache-busting parameter
-      console.log(`Fetching available places for ${formattedDate} and tour ${formData.tourSlug}`);
       const response = await fetch(`/api/booking-places?date=${formattedDate}&tourSlug=${formData.tourSlug}&_t=${timestamp}`);
       
       if (!response.ok) {
@@ -211,10 +153,8 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       }
       
       const availabilityData = await response.json();
-      console.log("Availability data from API:", availabilityData);
       
       if (!availabilityData.isAvailable) {
-        console.log(`API reports date ${formattedDate} is not available`);
         setFetchError(localizedText[currentLanguage].dateUnavailable);
         return;
       }
@@ -233,8 +173,6 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
         isAvailable: availabilityData.isAvailable
       });
       
-      console.log(`Successfully selected date ${formattedDate} with ${availabilityData.availablePlaces} available places`);
-      
     } catch (error) {
       console.error("Error fetching availability:", error);
       setFetchError("Error checking availability. Please try again.");
@@ -246,11 +184,8 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     // Reset any previous errors
     setFetchError(null);
     
-    console.log(`Tour selection changed to: ${tourSlug}`);
-    
     // Check if we're already on this tour
     if (formData.tourSlug === tourSlug) {
-      console.log("Already on this tour, no changes needed");
       return;
     }
     
@@ -263,30 +198,11 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     
     // Find the selected tour object
     const selectedTour = tours.find(tour => tour.slug === tourSlug);
-    console.log("Found selected tour:", selectedTour);
     
     if (selectedTour) {
       setSelectedTour(selectedTour);
       // Set tour as selected to show the calendar
       setIsTourSelected(true);
-      
-      // Log unavailable dates for this tour
-      console.log(`Selected tour: ${tourSlug}`);
-      const tourUnavailableDates = unavailableDates.filter(
-        unavailableDate => unavailableDate.tourSlug === tourSlug
-      );
-      
-      console.log(`Total unavailable dates for ${tourSlug}:`, tourUnavailableDates.length);
-      console.log(`Sample unavailable dates for ${tourSlug}:`, tourUnavailableDates.slice(0, 5));
-      
-      // Check if any unavailable dates have unexpected format
-      const invalidFormatDates = tourUnavailableDates.filter(date => 
-        !date.date || typeof date.date !== 'string' || !date.date.match(/^\d{4}-\d{2}-\d{2}$/)
-      );
-      
-      if (invalidFormatDates.length > 0) {
-        console.warn("Found dates with invalid format:", invalidFormatDates);
-      }
     }
   };
 

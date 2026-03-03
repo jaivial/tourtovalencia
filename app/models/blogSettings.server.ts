@@ -100,5 +100,10 @@ export async function updateBlogSettings(input: BlogSettingsInput): Promise<Blog
     { upsert: true, returnDocument: "after" }
   );
 
-  return result.value as BlogSettings;
+  // mongodb@6 returns the updated document directly (or null), not { value }.
+  if (!result) {
+    throw new Error("Failed to update blog settings");
+  }
+
+  return result as BlogSettings;
 }

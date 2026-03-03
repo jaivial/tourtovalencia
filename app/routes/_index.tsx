@@ -1,22 +1,12 @@
 // Page component: just responsible for containing providers, feature components and fectch data from the ssr.
 import { useLoaderData } from "@remix-run/react";
 import type { MetaFunction } from "@remix-run/react";
-import { lazy, Suspense, startTransition, useState, useEffect, useCallback } from "react";
+import { startTransition, useState, useEffect, useCallback } from "react";
 import { getDb } from "~/utils/db.server";
 import type { Tour, Page } from "~/utils/db.schema.server";
-import { i18n, getTranslations } from "~/utils/i18n.server";
+import { i18n } from "~/utils/i18n.server";
 import { IndexLoadingScreen } from "~/components/ui/IndexLoadingScreen";
-
-// Lazy load heavy components
-const IndexContainer = lazy(() => import("~/components/_index/IndexContainer"));
-
-function LoadingPlaceholder() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <IndexLoadingScreen />
-    </div>
-  );
-}
+import IndexContainer from "~/components/_index/IndexContainer";
 
 // Define a serializable version of the Tour type for use with JSON
 type SerializableTour = Omit<Tour, "createdAt" | "updatedAt"> & {
@@ -203,13 +193,7 @@ export default function Index() {
   return (
     <>
       <IndexLoadingScreen isLoading={isLoading} message={translations["loading.tourToValencia"] || "Cargando Tour To Valencia..."} />
-      <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <IndexLoadingScreen isLoading={true} message={translations["loading"] || "Cargando..."} />
-        </div>
-      }>
-        <IndexContainer tours={tours} pages={pages} />
-      </Suspense>
+      <IndexContainer tours={tours} pages={pages} />
     </>
   );
 }

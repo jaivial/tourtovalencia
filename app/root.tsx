@@ -57,10 +57,6 @@ interface RouteHandle {
 
 export interface RootLoaderData {
   initialLanguage: typeof languageData.en;
-  ENV: {
-    STRIPE_PUBLIC_KEY: string | undefined;
-    PAYPAL_CLIENT_ID: string | undefined;
-  };
   pages: Awaited<ReturnType<typeof getAllPages>>;
   tours: Tour[];
   cookieConsent: boolean | null;
@@ -91,10 +87,6 @@ export const loader = async ({ request }: { request: Request }) => {
 
   return json<RootLoaderData>({
     initialLanguage: languageData[language] || languageData.en,
-    ENV: {
-      STRIPE_PUBLIC_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-      PAYPAL_CLIENT_ID: process.env.PAYPAL_CLIENT_ID
-    },
     pages,
     tours,
     cookieConsent,
@@ -164,7 +156,7 @@ export const links = () => [
 ];
 
 export default function App() {
-  const { initialLanguage, ENV, pages, cookieConsent } = useLoaderData<RootLoaderData>();
+  const { initialLanguage, pages, cookieConsent } = useLoaderData<RootLoaderData>();
   const location = useLocation();
   const matches = useMatches();
 
@@ -223,11 +215,6 @@ export default function App() {
              </LanguageContextProvider>
            </MotionProvider>
          <ScrollRestoration />
-         <script
-           dangerouslySetInnerHTML={{
-             __html: `window.ENV = ${JSON.stringify(ENV)};`,
-           }}
-         />
          <Scripts />
        </body>
     </html>

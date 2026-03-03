@@ -29,22 +29,21 @@ export default function handleRequest(request: Request, responseStatusCode: numb
   console.log(`[SERVER] Request started: ${request.method} ${url.pathname} - ${new Date(requestStartTime).toISOString()}`);
   
   responseHeaders.set("X-Content-Type-Options", "nosniff");
-  responseHeaders.set("X-Frame-Options", "DENY");
   responseHeaders.set("X-XSS-Protection", "1; mode=block");
   responseHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  responseHeaders.set("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+  // Permissions-Policy is managed at the reverse proxy layer to avoid conflicting duplicate headers.
   
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.paypal.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.paypal.com https://paypal.com https://www.paypalobjects.com https://*.paypal.com https://*.paypalobjects.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https: blob:",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://api.stripe.com https://api.paypal.com https://js.stripe.com https://www.paypal.com https://cdn.jsdelivr.net https://unpkg.com https://*.lottiefiles.com https://lottie.host",
-    "frame-src 'self' https://js.stripe.com https://www.paypal.com",
+    "connect-src 'self' https://api.stripe.com https://api.paypal.com https://api-m.paypal.com https://api-m.sandbox.paypal.com https://js.stripe.com https://www.paypal.com https://paypal.com https://www.paypalobjects.com https://*.paypal.com https://*.paypalobjects.com https://acs.revolut.com https://*.revolut.com https://cdn.jsdelivr.net https://unpkg.com https://*.lottiefiles.com https://lottie.host",
+    "frame-src 'self' https://js.stripe.com https://www.paypal.com https://paypal.com https://www.paypalobjects.com https://*.paypal.com https://*.paypalobjects.com https://acs.revolut.com https://*.revolut.com https:",
     "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'none'",
+    "form-action 'self' https://www.paypal.com https://paypal.com https://*.paypal.com https://acs.revolut.com https://*.revolut.com https:",
+    "frame-ancestors 'self' https://www.paypal.com https://*.paypal.com",
     "worker-src 'self' blob:",
   ].join("; ");
   

@@ -23,10 +23,6 @@ export interface BookingContextState {
   isSuccess: boolean;
   paymentClientSecret: string | null;
   paymentIntentId: string | null;
-  emailConfig?: {
-    gmailUser: string;
-    gmailAppPassword: string;
-  };
   tours: Tour[];
   selectedTour: Tour | null;
   unavailableDates: UnavailableDate[];
@@ -54,10 +50,6 @@ export interface BookingContextState {
   setPaymentClientSecret: (secret: string | null) => void;
   setPaymentIntentId: (id: string | null) => void;
   setServerError: (error: string | null) => void;
-  setEmailConfig: (config: {
-    gmailUser: string;
-    gmailAppPassword: string;
-  }) => void;
   setSelectedTour: (tour: Tour | null) => void;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   bookingSuccess: boolean;
@@ -94,10 +86,6 @@ export function BookingProvider({
     };
     serverError: string | null;
     paypalClientId?: string;
-    emailConfig?: {
-      gmailUser: string;
-      gmailAppPassword: string;
-    };
     tours: Tour[];
     unavailableDates: UnavailableDate[];
   };
@@ -150,7 +138,6 @@ export function BookingProvider({
   const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(initialState?.serverError || null);
-  const [emailConfig, setEmailConfig] = useState(initialState?.emailConfig);
   const tours = initialState?.tours || [];
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
   const [bookingSuccess, setBookingSuccess] = useState(false);
@@ -174,7 +161,6 @@ export function BookingProvider({
     isSuccess,
     paymentClientSecret,
     paymentIntentId,
-    emailConfig,
     tours,
     selectedTour,
     unavailableDates,
@@ -190,7 +176,6 @@ export function BookingProvider({
     setPaymentClientSecret,
     setPaymentIntentId,
     setServerError,
-    setEmailConfig,
     setSelectedTour,
     handleInputChange,
     bookingSuccess,

@@ -8,9 +8,10 @@ interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  disableClose?: boolean;
 }
 
-export const PaymentModal = ({ isOpen, onClose, children }: PaymentModalProps) => {
+export const PaymentModal = ({ isOpen, onClose, children, disableClose = false }: PaymentModalProps) => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -26,9 +27,9 @@ export const PaymentModal = ({ isOpen, onClose, children }: PaymentModalProps) =
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-[9998]"
-            onClick={onClose}
-          />
+              className="fixed inset-0 bg-black/50 z-[9998]"
+              onClick={disableClose ? undefined : onClose}
+            />
           <div className="fixed inset-0 overflow-y-auto z-[9999]">
             <div className="min-h-screen w-full flex items-center justify-center">
               <motion.div
@@ -39,15 +40,17 @@ export const PaymentModal = ({ isOpen, onClose, children }: PaymentModalProps) =
                 className="relative bg-white w-full h-screen max-h-screen overflow-y-auto"
               >
                 <div className="sticky top-4 right-4 flex justify-end z-10 px-4">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onClose}
-                    className="rounded-full hover:bg-gray-100"
-                    aria-label="Close payment modal"
-                  >
-                    <X className="h-6 w-6" />
-                  </Button>
+                  {!disableClose && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={onClose}
+                      className="rounded-full hover:bg-gray-100"
+                      aria-label="Close payment modal"
+                    >
+                      <X className="h-6 w-6" />
+                    </Button>
+                  )}
                 </div>
                 <div className="p-6 pt-0 h-full flex flex-col items-center justify-center">
                   {children}

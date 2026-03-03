@@ -10,14 +10,6 @@ export const BookingStepTwo = () => {
   const bookingStepTwoText = state.booking.bookingStepTwo;
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Log selected date availability for debugging
-  useEffect(() => {
-    if (selectedDateAvailability) {
-      console.log("BookingStepTwo - Selected date availability:", selectedDateAvailability);
-      console.log(`Available places for ${selectedDateAvailability.date}: ${selectedDateAvailability.availablePlaces}`);
-    }
-  }, [selectedDateAvailability]);
-
   // Refresh availability data when component mounts
   useEffect(() => {
     const refreshAvailabilityData = async () => {
@@ -27,8 +19,6 @@ export const BookingStepTwo = () => {
           
           // Add a timestamp to prevent caching
           const timestamp = new Date().getTime();
-          
-          console.log(`Refreshing availability data for ${formData.date} and tour ${formData.tourSlug}`);
           const response = await fetch(`/api/booking-places?date=${formData.date}&tourSlug=${formData.tourSlug}&_t=${timestamp}`);
           
           if (!response.ok) {
@@ -36,7 +26,6 @@ export const BookingStepTwo = () => {
           }
           
           const availabilityData = await response.json();
-          console.log("Refreshed availability data from API:", availabilityData);
           
           // Update the selected date availability in context
           setSelectedDateAvailability({
@@ -44,8 +33,6 @@ export const BookingStepTwo = () => {
             availablePlaces: availabilityData.availablePlaces,
             isAvailable: availabilityData.isAvailable
           });
-          
-          console.log(`Successfully refreshed availability data: ${availabilityData.availablePlaces} available places`);
         } catch (error) {
           console.error("Error refreshing availability data:", error);
         } finally {
