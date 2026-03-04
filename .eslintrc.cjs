@@ -19,7 +19,20 @@ module.exports = {
     commonjs: true,
     es6: true,
   },
-  ignorePatterns: ["!**/.server", "!**/.client"],
+  ignorePatterns: [
+    "!**/.server",
+    "!**/.client",
+    "copy-db.js",
+    "mongodb-*.js",
+    "scripts/**/*.js",
+    "app/utils/*.js",
+  ],
+
+  rules: {
+    "no-useless-escape": "warn",
+    "no-inner-declarations": "warn",
+    "no-extra-semi": "warn",
+  },
 
   // Base config
   extends: ["eslint:recommended"],
@@ -48,6 +61,21 @@ module.exports = {
           typescript: {},
         },
       },
+      rules: {
+        "react/no-unescaped-entities": "warn",
+        "jsx-a11y/no-static-element-interactions": "warn",
+        "jsx-a11y/click-events-have-key-events": "warn",
+        "jsx-a11y/heading-has-content": "warn",
+        "jsx-a11y/img-redundant-alt": "warn",
+        "jsx-a11y/label-has-associated-control": "warn",
+      },
+    },
+
+    {
+      files: ["**/*.tsx"],
+      rules: {
+        "react/prop-types": "off",
+      },
     },
 
     // Typescript
@@ -72,6 +100,17 @@ module.exports = {
         "plugin:import/recommended",
         "plugin:import/typescript",
       ],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            argsIgnorePattern: "^_",
+            varsIgnorePattern: "^_",
+          },
+        ],
+        "@typescript-eslint/no-var-requires": "off",
+      },
     },
 
     // Node

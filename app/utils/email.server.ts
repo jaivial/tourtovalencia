@@ -22,23 +22,11 @@ let transporter: nodemailer.Transporter | null = null;
 // Try to load DKIM private key if it exists
 const getDkimConfig = (): DkimConfig | null => {
   try {
-    // Check if we have environment variables for DKIM
     if (process.env.DKIM_PRIVATE_KEY) {
       return {
         domainName: process.env.DKIM_DOMAIN || "tourtovalencia.jaimedigitalstudio.com",
         keySelector: process.env.DKIM_SELECTOR || "default",
         privateKey: process.env.DKIM_PRIVATE_KEY,
-      };
-    }
-    
-    // Alternatively, try to load from a file
-    const keyPath = path.join(process.cwd(), "dkim-private.pem");
-    if (fs.existsSync(keyPath)) {
-      const privateKey = fs.readFileSync(keyPath, "utf8");
-      return {
-        domainName: "tourtovalencia.jaimedigitalstudio.com",
-        keySelector: "default",
-        privateKey,
       };
     }
     

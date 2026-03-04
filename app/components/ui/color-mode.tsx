@@ -35,10 +35,7 @@ export function ColorModeProvider(props: ColorModeProviderProps) {
   return (
     <div className="light">
       {/* Inline theme provider without external library */}
-      {React.createElement('div', {
-        'data-theme': props.defaultTheme || 'light',
-        children: props.children,
-      })}
+      {React.createElement('div', { 'data-theme': props.defaultTheme || 'light' }, props.children)}
     </div>
   );
 }

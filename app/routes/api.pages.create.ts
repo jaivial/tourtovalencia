@@ -1,6 +1,7 @@
 import { json } from "@remix-run/server-runtime";
 import type { ActionFunctionArgs } from "@remix-run/server-runtime";
 import { createPage } from "~/utils/page.server";
+import { requireAdminSession } from "~/utils/admin-session.server";
 
 function normalizeTourPrice(rawPrice: unknown): number {
   if (typeof rawPrice === "number" && Number.isFinite(rawPrice) && rawPrice >= 0) {
@@ -21,6 +22,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (request.method !== "POST") {
     return json({ error: "Method not allowed" }, { status: 405 });
   }
+
+  await requireAdminSession(request);
 
   try {
     const formData = await request.formData();

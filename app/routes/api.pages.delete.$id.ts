@@ -4,11 +4,14 @@ import { getPagesCollection, getToursCollection } from "~/utils/db.server";
 import { ObjectId } from "mongodb";
 import type { Filter } from "mongodb";
 import type { Page } from "~/utils/db.schema.server";
+import { requireAdminSession } from "~/utils/admin-session.server";
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   if (request.method !== "DELETE") {
     return json({ error: "Method not allowed" }, { status: 405 });
   }
+
+  await requireAdminSession(request);
 
   const { id } = params;
   

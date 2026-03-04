@@ -9,7 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Configuration
 const STORAGE_ZONE = 'tourtovalencia';
-const API_KEY = '6c94d8d9-908a-42fc-bace94bb92ce-2a83-4033';
+const API_KEY = process.env.BUNNY_STORAGE_API_KEY || process.env.BUNNY_API_KEY || '';
 const FTP_HOST = 'storage.bunnycdn.com';
 const CDN_URL = 'https://cdn.tourtovalencia.com';
 
@@ -20,6 +20,11 @@ const IGNORE_PATTERNS = ['.DS_Store', '.gitkeep', 'manifest.json'];
 
 async function deploy() {
   console.log('🚀 Bunny CDN Deployment (FTP)\n');
+
+  if (!API_KEY) {
+    console.error('❌ Missing Bunny API key. Set BUNNY_STORAGE_API_KEY or BUNNY_API_KEY.');
+    process.exit(1);
+  }
 
   if (!fs.existsSync(BUILD_DIR)) {
     console.error('❌ Build directory not found. Run "npm run build" first.');
@@ -60,7 +65,7 @@ async function deploy() {
 
     // Upload assets recursively
     console.log('\n📤 Uploading assets recursively...');
-    await uploadAll(client, ASSETS_DIR, '/', (success: boolean, fileName: string) => {
+    await uploadAll(client, ASSETS_DIR, '/', (success: boolean) => {
       if (success) {
         totalUploaded++;
       } else {
@@ -89,7 +94,7 @@ async function uploadAll(
   client: ftp.Client,
   dir: string,
   remoteDir: string,
-  logFn: (success: boolean, fileName: string) => void
+  logFn: (success: boolean) => void
 ) {
   const files = fs.readdirSync(dir);
 
@@ -106,10 +111,10 @@ async function uploadAll(
       try {
         await client.uploadFrom(filePath, remotePath);
         console.log(`  ✓ ${file}`);
-        logFn(true, file);
+        logFn(true);
       } catch (err) {
         console.log(`  ✗ ${file}: ${err}`);
-        logFn(false, file);
+        logFn(false);
       }
     }
   }

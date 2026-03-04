@@ -6,6 +6,7 @@ import { processContent, translateContentBulk, translateText, logContentSize } f
 import { generateTranslationFiles } from "~/utils/i18n/file-generator";
 import type { Page, Tour } from "~/utils/db.schema.server";
 import type { Filter } from "mongodb";
+import { requireAdminSession } from "~/utils/admin-session.server";
 
 // In-memory store for background jobs
 // In a production environment, this should be replaced with a proper job queue system
@@ -310,6 +311,8 @@ async function processPageUpdateInBackground(
 
 // Endpoint to check job status
 export const loader = async ({ request }: ActionFunctionArgs) => {
+  await requireAdminSession(request);
+
   const url = new URL(request.url);
   const jobId = url.searchParams.get('jobId');
   
@@ -341,6 +344,8 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   if (!id) {
     return json({ error: "Page ID is required" }, { status: 400 });
   }
+
+  await requireAdminSession(request);
 
   try {
     const formData = await request.formData();
