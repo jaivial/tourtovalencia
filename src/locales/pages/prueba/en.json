@@ -1,0 +1,130 @@
+{
+  "section1": {
+    "firstH3": "",
+    "firstSquareH3": "",
+    "firstSquareP": "",
+    "secondSquareH3": "",
+    "secondSquareP": "",
+    "thirdSquareH3": "",
+    "thirdSquareP": "",
+    "button": "",
+    "backgroundImage": {
+      "preview": "https://cdn.tourtovalencia.com/public/uploads/section1-backgroundImage-preview-1772554457876-ygc0x1.webp"
+    }
+  },
+  "section2": {
+    "firstH3": "",
+    "secondH3": "",
+    "thirdH3": "",
+    "sectionImage": {
+      "preview": "https://cdn.tourtovalencia.com/public/olgaphoto3.jpeg"
+    },
+    "lottieAnimation": {
+      "enabled": false,
+      "src": "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie"
+    }
+  },
+  "section3": {
+    "images": [
+      {
+        "source": "",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "",
+        "alt": "Gallery image"
+      }
+    ]
+  },
+  "section4": {
+    "firstH3": "¿What does the boat trip in San Juan include?",
+    "secondH3": "6-hour excursion",
+    "thirdH3": "Departure from Valencia"
+  },
+  "section5": {
+    "firstH3": "¿What will we do in San Juan?",
+    "secondH3": "We will swim in the crystal clear waters of San Juan beach",
+    "thirdH3": "We will enjoy a day at the beach and relax",
+    "fourthH3": "We can snorkel and see the fish",
+    "fifthH3": "We will have free time to explore the town"
+  },
+  "section6": {
+    "cardTitle": "Important information",
+    "cardDescription": "Everything you need to know about the excursion",
+    "firstH4": "What's included",
+    "list": [
+      {
+        "li": "Boat transport",
+        "index": 0
+      },
+      {
+        "li": "Expert guide",
+        "index": 1
+      },
+      {
+        "li": "Snorkel equipment",
+        "index": 2
+      },
+      {
+        "li": "Travel insurance",
+        "index": 3
+      }
+    ],
+    "secondH4": "Price",
+    "secondH4span": "1€ per person",
+    "button": "Book now"
+  },
+  "indexSection5": {
+    "firstH3": "This is a test",
+    "secondH3": ""
+  },
+  "timeline": {
+    "title": "Trip Timeline",
+    "subtitle": "Discover the itinerary step by step",
+    "steps": [
+      {
+        "title": "Departure",
+        "description": "Meeting point and departure from Valencia"
+      },
+      {
+        "title": "Arrival",
+        "description": "Arrival at the destination and welcome"
+      }
+    ]
+  },
+  "card": {
+    "title": "",
+    "duration": "",
+    "description": "",
+    "additionalInfo": "",
+    "quote": "",
+    "image": {
+      "preview": ""
+    }
+  },
+  "price": 0.5
+}
