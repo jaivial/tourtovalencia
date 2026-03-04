@@ -43,7 +43,7 @@ export const meta: MetaFunction = () => {
     { title },
     { name: "description", content: description },
     { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
-    { rel: "icon", type: "image/png", href: "https://tourtovalencia.b-cdn.net/public/newtourtovalencialogo.png" },
+    { rel: "icon", type: "image/png", href: "/tourtovalencialogo.png" },
     { name: "google-site-verification", content: "63kEgo-K5QpeD7-YtpQpviW4aSnh6NAEPEsyUMybOec" },
 
     

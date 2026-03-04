@@ -38,7 +38,7 @@ function requirePolyfill(): Plugin {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
-    plugins: [remix({ future: { v3_singleFetch: true, v3_lazyRouteDiscovery: true } }), tsconfigPaths(), cjsCompatTransform(), requirePolyfill()],
+    plugins: [remix({ future: { v3_singleFetch: true, v3_lazyRouteDiscovery: false } }), tsconfigPaths(), cjsCompatTransform(), requirePolyfill()],
     server: {
       allowedHosts: ["www.tourtovalencia.com", "tourtovalencia.com"],
     },
