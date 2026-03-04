@@ -196,7 +196,6 @@ async function tryAcquireLock(now: Date): Promise<BlogSettings | null> {
       nextRunAt: { $lte: now },
       $or: [
         { lockedUntil: { $exists: false } },
-        { lockedUntil: null },
         { lockedUntil: { $lte: now } },
       ],
     },
@@ -225,9 +224,11 @@ async function runSchedulerTick() {
         $set: {
           lastRunAt: now,
           nextRunAt,
-          lockedUntil: null,
-          lastError: null,
           updatedAt: new Date(),
+        },
+        $unset: {
+          lockedUntil: "",
+          lastError: "",
         },
       }
     );
@@ -237,9 +238,11 @@ async function runSchedulerTick() {
       { key: "default" },
       {
         $set: {
-          lockedUntil: null,
           lastError: error instanceof Error ? error.message : "Unknown error",
           updatedAt: new Date(),
+        },
+        $unset: {
+          lockedUntil: "",
         },
       }
     );

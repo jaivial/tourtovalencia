@@ -4,7 +4,6 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { writeAsyncIterableToWritable } from "@remix-run/node";
 
 // Initialize S3 client for Cloudflare R2
 const s3Client = new S3Client({
@@ -30,19 +29,14 @@ export interface UploadResult {
  * Upload a file to R2 and return the public URL
  */
 export async function uploadToR2(
-  file: AsyncIterable<Uint8Array> | File,
+  file: File | Buffer | Uint8Array,
   key: string,
   contentType?: string
 ): Promise<UploadResult> {
   try {
-    let body: AsyncIterable<Uint8Array>;
-    
-    if (file instanceof File) {
-      // Convert File to async iterable
-      body = fileToAsyncIterable(file);
-    } else {
-      body = file;
-    }
+    const body = file instanceof File
+      ? Buffer.from(await file.arrayBuffer())
+      : file;
 
     const uploadParams = {
       Bucket: BUCKET_NAME,
@@ -179,16 +173,6 @@ export async function getPresignedDownloadUrl(
   });
 
   return getSignedUrl(s3Client, command, { expiresIn });
-}
-
-// Helper function to convert File to async iterable
-async function* fileToAsyncIterable(file: File): AsyncIterable<Uint8Array> {
-  const reader = file.stream().getReader();
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    yield value;
-  }
 }
 
 /**

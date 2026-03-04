@@ -1,7 +1,5 @@
-// @ts-expect-error - Remix types compatibility
-import { json } from "@remix-run/node";
-// @ts-expect-error - Remix types compatibility
-import type { LoaderArgs, ActionArgs } from "@remix-run/node";
+import { json } from "@remix-run/server-runtime";
+import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/server-runtime";
 import { useLoaderData, useSubmit } from "@remix-run/react";
 import { AdminBookingsFeature } from "~/components/features/AdminBookingsFeature";
 import { getDb, getToursCollection } from "~/utils/db.server";
@@ -16,7 +14,7 @@ import { useState, useEffect } from "react";
 const ITEMS_PER_PAGE = 10;
 const DEFAULT_BOOKING_LIMIT = 10;
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
     const url = new URL(request.url);
     const dateParam = url.searchParams.get("date");
@@ -282,7 +280,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   }
 };
 
-export const action = async ({ request }: ActionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const intent = formData.get("intent");
 

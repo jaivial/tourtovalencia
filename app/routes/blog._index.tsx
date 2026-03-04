@@ -1,6 +1,7 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/server-runtime";
+import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
 import { useLoaderData, Link } from "@remix-run/react";
+import type { MetaFunction } from "@remix-run/react";
 import { getBlogPostsCollection } from "~/utils/db.server";
 import { languageCookie } from "~/utils/cookies";
 import { getBlogTexts, resolveBlogLanguage } from "~/data/blogTexts";

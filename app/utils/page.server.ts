@@ -239,10 +239,10 @@ function rebuildContentWithTranslations(
         const lottieObj = value as Record<string, unknown>;
         const translatedLottie: Record<string, unknown> = {};
         for (const [lottieKey, lottieValue] of Object.entries(lottieObj)) {
+          const lottiePath = `${currentPath}.${lottieKey}`;
           if (lottieKey === 'src' && typeof lottieValue === "string") {
             translatedLottie[lottieKey] = lottieValue;
           } else if (typeof lottieValue === "string") {
-            const lottiePath = `${currentPath}.${lottieKey}`;
             translatedLottie[lottieKey] = translations.get(lottiePath) || lottieValue;
           } else if (typeof lottieValue === "object") {
             translatedLottie[lottieKey] = rebuildContentWithTranslations(lottieValue, translations, lottiePath);

@@ -3,15 +3,20 @@ import { useLoaderData } from "@remix-run/react";
 import type { MetaFunction } from "@remix-run/react";
 import { startTransition, useState, useEffect, useCallback } from "react";
 import { getDb } from "~/utils/db.server";
-import type { Tour, Page } from "~/utils/db.schema.server";
+import type { Page } from "~/utils/db.schema.server";
 import { i18n } from "~/utils/i18n.server";
 import { IndexLoadingScreen } from "~/components/ui/IndexLoadingScreen";
 import IndexContainer from "~/components/_index/IndexContainer";
 
-// Define a serializable version of the Tour type for use with JSON
-type SerializableTour = Omit<Tour, "createdAt" | "updatedAt"> & {
-  createdAt: string;
-  updatedAt: string;
+type SerializableTour = {
+  _id?: string;
+  slug: string;
+  tourName: { en: string; es: string };
+  tourPrice: number;
+  status: string;
+  duration: { en: string; es: string };
+  heroImage?: string;
+  pageId?: string;
 };
 
 // Define a serializable version of the Page type for use with JSON
@@ -84,7 +89,7 @@ export const loader = async () => {
       duration: doc.duration || { en: '', es: '' },
       heroImage: doc.heroImage,
       pageId: doc.pageId,
-    })) as SerializableTour[];
+    }));
 
     // Fetch pages - ONLY essential fields (OPTIMIZED)
     const pagesStart = Date.now();

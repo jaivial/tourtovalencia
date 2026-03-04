@@ -9,6 +9,8 @@ if (!csrfSecret || csrfSecret.length < 32) {
   );
 }
 
+const csrfSecretValue = csrfSecret;
+
 const createCookie = createCookieFactory({ 
   sign: async () => {
     if (!csrfSecret) throw new Error("CSRF_SECRET is not set");
@@ -26,7 +28,7 @@ export async function generateCsrfToken(request: Request): Promise<{
     maxAge: 60 * 60,
     path: "/",
     sameSite: "strict",
-    secrets: [csrfSecret],
+    secrets: [csrfSecretValue],
     secure: process.env.NODE_ENV === "production",
   });
   const token = crypto.randomUUID();
@@ -53,7 +55,7 @@ export async function validateCsrfToken(
     maxAge: 60 * 60,
     path: "/",
     sameSite: "strict",
-    secrets: [csrfSecret],
+    secrets: [csrfSecretValue],
     secure: process.env.NODE_ENV === "production",
   });
   const sessionToken = await csrfTokenCookie.parse(cookieHeader);

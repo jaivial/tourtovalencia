@@ -1,7 +1,7 @@
 /// <reference types="@remix-run/node" />
 /// <reference types="vite/client" />
 
-declare module "@remix-run/node" {
+declare namespace NodeJS {
   interface ProcessEnv {
     GMAIL_USER: string;
     GMAIL_APP_PASSWORD: string;

@@ -59,8 +59,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     try {
       isValid = await verifyAdminCredentials(username, password);
     } catch (e) {
-      console.log("[API-ADMIN-LOGIN] Error in verifyAdminCredentials:", e.message);
-      throw e;
+      const error = e instanceof Error ? e : new Error(String(e));
+      console.log("[API-ADMIN-LOGIN] Error in verifyAdminCredentials:", error.message);
+      throw error;
     }
     console.log("[API-ADMIN-LOGIN] Credentials valid:", isValid);
     
@@ -72,8 +73,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       try {
         result = await createAdminSession(request, username);
       } catch (e) {
-        console.log("[API-ADMIN-LOGIN] Error in createAdminSession:", e.message);
-        throw e;
+        const error = e instanceof Error ? e : new Error(String(e));
+        console.log("[API-ADMIN-LOGIN] Error in createAdminSession:", error.message);
+        throw error;
       }
       console.log("[API-ADMIN-LOGIN] Session created, headers:", result.headers ? "headers set" : "no headers");
       return json(
@@ -93,11 +95,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       );
     }
   } catch (error) {
-    console.log("[API-ADMIN-LOGIN] Error caught:", error);
-    console.log("[API-ADMIN-LOGIN] Error name:", error?.name);
-    console.log("[API-ADMIN-LOGIN] Error message:", error?.message);
-    console.log("[API-ADMIN-LOGIN] Error stack:", error?.stack);
-    logger.error("Error en la autenticación", error, { ip });
+    const handledError = error instanceof Error ? error : new Error(String(error));
+    console.log("[API-ADMIN-LOGIN] Error caught:", handledError);
+    console.log("[API-ADMIN-LOGIN] Error name:", handledError.name);
+    console.log("[API-ADMIN-LOGIN] Error message:", handledError.message);
+    console.log("[API-ADMIN-LOGIN] Error stack:", handledError.stack);
+    logger.error("Error en la autenticación", handledError, { ip });
     return json(
       { success: false, error: "Error al procesar la solicitud" },
       { status: 500 }

@@ -18,7 +18,7 @@ const adminSessionStorage = createCookieSessionStorage({
     path: "/",
     domain: ".tourtovalencia.com",
     sameSite: "lax",
-    secrets: [sessionSecret!],
+    secrets: [sessionSecret],
     secure: process.env.NODE_ENV === "production",
   },
 });
@@ -29,9 +29,9 @@ export interface AdminSessionData {
   loginTime?: number;
 }
 
-export async function requireAdminSession(request) {
+export async function requireAdminSession(request: Request): Promise<AdminSessionData> {
   const session = await adminSessionStorage.getSession(request.headers.get("Cookie"));
-  const sessionData = session.get("adminSession");
+  const sessionData = session.get("adminSession") as AdminSessionData | undefined;
   
   if (!sessionData || !sessionData.isAuthenticated) {
     throw redirect("/admin");
@@ -40,7 +40,7 @@ export async function requireAdminSession(request) {
   return sessionData;
 }
 
-export async function createAdminSession(request, username) {
+export async function createAdminSession(request: Request, username: string): Promise<{ headers: Headers; cookieValue: string }> {
   const session = await adminSessionStorage.getSession(request.headers.get("Cookie"));
   console.log("[ADMIN-SESSION] createAdminSession called for:", username);
   
@@ -64,21 +64,25 @@ export async function createAdminSession(request, username) {
   return { headers, cookieValue };
 }
 
-export async function destroyAdminSession(request) {
+export async function destroyAdminSession(request: Request): Promise<{ headers: Headers }> {
   const session = await adminSessionStorage.getSession(request.headers.get("Cookie"));
+  const cookieValue = await adminSessionStorage.destroySession(session);
+
+  const headers = new Headers();
+  headers.append("Set-Cookie", cookieValue);
   
   return {
-    headers: adminSessionStorage.destroySession(session),
+    headers,
   };
 }
 
-export async function getAdminSession(request) {
+export async function getAdminSession(request: Request): Promise<AdminSessionData | null> {
   const cookieHeader = request.headers.get("Cookie");
   console.log("[ADMIN-SESSION] getAdminSession called");
   console.log("[ADMIN-SESSION] Cookie header present:", !!cookieHeader);
   
   const session = await adminSessionStorage.getSession(request.headers.get("Cookie"));
-  const sessionData = session.get("adminSession");
+  const sessionData = session.get("adminSession") as AdminSessionData | undefined;
   
   console.log("[ADMIN-SESSION] Session data found:", sessionData ? JSON.stringify(sessionData) : "null");
   

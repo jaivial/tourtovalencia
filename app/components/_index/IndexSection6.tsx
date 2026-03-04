@@ -1,6 +1,6 @@
 import { Panel, List } from "rsuite";
 import { useLanguageContext } from "~/providers/LanguageContext";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { 
   AccessibilityIcon, 
   InfoIcon, 
@@ -33,7 +33,7 @@ const IndexSection6 = () => {
   };
 
   // Safe animations that work well on mobile Safari
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -44,7 +44,7 @@ const IndexSection6 = () => {
     }
   };
 
-  const panelVariants = {
+  const panelVariants: Variants = {
     hidden: { 
       opacity: 0,
       x: 20
@@ -54,7 +54,7 @@ const IndexSection6 = () => {
       x: 0,
       transition: {
         duration: 0.5,
-        ease: "easeOut"
+        ease: "easeOut" as const
       }
     }
   };

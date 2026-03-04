@@ -1,18 +1,11 @@
 import { vitePlugin as remix } from "@remix-run/dev";
-import { defineConfig, loadEnv, Plugin } from "vite";
+import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import dotenv from "dotenv";
 
-declare module "@remix-run/node" {
-  interface Future {
-    v3_singleFetch: true;
-  }
-}
-
-function cjsCompatTransform(): Plugin {
+function cjsCompatTransform() {
   return {
     name: "cjs-compat-transform",
-    transform(code, id) {
+    transform(code: string, id: string) {
       if (id.includes("@heroui/theme")) {
         let transformed = code;
         const colorImportRegex = /import\s+(\w+)\s+from\s+["']color["']/g;
@@ -24,19 +17,18 @@ function cjsCompatTransform(): Plugin {
   };
 }
 
-function requirePolyfill(): Plugin {
+function requirePolyfill() {
   const requirePolyfillScript = "<script>window.require=function(m){if(m===\"color\"){return import(\"color\").then(x=>Object.assign({},x.default||x,x))}console.warn(\"Unknown\",m);return{};};</script>";
   return {
     name: "require-polyfill",
-    transformIndexHtml(html) {
+    transformIndexHtml(html: string) {
       const headRegex = /<head[^>]*>/;
       return html.replace(headRegex, "$&" + requirePolyfillScript);
     },
   };
 }
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
+export default defineConfig(() => {
   return {
     plugins: [remix({ future: { v3_singleFetch: true, v3_lazyRouteDiscovery: false } }), tsconfigPaths(), cjsCompatTransform(), requirePolyfill()],
     server: {
@@ -46,5 +38,5 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 150,
       base: "https://cdn.tourtovalencia.com/",
     },
-  };
+  } as any;
 });

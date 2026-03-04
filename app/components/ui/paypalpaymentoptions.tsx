@@ -183,7 +183,7 @@ const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
           return false;
         }
 
-        throw new Error(payload?.error || paymentText.errors.captureError);
+        throw new Error(payload?.error || paymentText.errors.paymentFailed);
       }
 
       const resolvedSessionId = payload.sessionId || sessionIdRef.current || sessionId;
@@ -194,7 +194,7 @@ const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
       window.location.href = `/book/success?sessionId=${encodeURIComponent(resolvedSessionId)}`;
       return true;
     },
-    [sessionId, paymentText.errors.captureError]
+    [sessionId, paymentText.errors.paymentFailed]
   );
 
   const handleApprove = useCallback(
@@ -208,7 +208,8 @@ const PaymentOptions = ({ onProcessingChange }: PaymentOptionsProps) => {
           throw new Error(paypalText.errors.noPaymentId);
         }
 
-        await captureOrder(orderId, actions.order ? () => actions.order.restart() : undefined);
+        const restart = (actions as unknown as { restart?: () => Promise<void> }).restart;
+        await captureOrder(orderId, typeof restart === "function" ? restart : undefined);
       } catch (error) {
         const message = extractErrorMessage(error, paymentText.errors.paymentFailed);
         setPaymentError(message);

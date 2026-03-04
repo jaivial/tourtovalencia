@@ -336,7 +336,7 @@ export const AdminBookingsUI = ({
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={(date) => date && onDateChange(date)}
+                  onSelect={(date: Date | undefined) => date && onDateChange(date)}
                   className="rounded-md border shadow-sm"
                   disabled={selectedStatus === "cancelled" && allDates}
                 />

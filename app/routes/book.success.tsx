@@ -123,8 +123,8 @@ export async function action({ request }: { request: Request }) {
 }
 
 export default function BookingSuccess() {
-  const { sessionId, session, error } = useLoaderData<LoaderData>();
-  const [sessionData, setSessionData] = useState<PaymentSessionPublicData | null>(session);
+  const { sessionId, session, error } = useLoaderData<typeof loader>();
+  const [sessionData, setSessionData] = useState(session);
   const [pollError, setPollError] = useState<string | null>(null);
 
   const shouldPoll = Boolean(
@@ -147,7 +147,7 @@ export default function BookingSuccess() {
         const payload = (await response.json()) as {
           success?: boolean;
           error?: string;
-          session?: PaymentSessionPublicData;
+          session?: typeof sessionData;
         };
 
         if (!response.ok || !payload.success || !payload.session) {
@@ -155,7 +155,7 @@ export default function BookingSuccess() {
         }
 
         if (!cancelled) {
-          setSessionData(payload.session);
+          setSessionData(payload.session ?? null);
           setPollError(null);
         }
       } catch (pollingError) {

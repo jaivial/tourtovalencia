@@ -1,0 +1,9 @@
+declare module "@wordpress/block-editor";
+declare module "@wordpress/blocks";
+declare module "@wordpress/keyboard-shortcuts";
+declare module "@wordpress/block-library";
+declare module "@wordpress/components";
+declare module "@wordpress/i18n";
+declare module "@wordpress/icons";
+declare module "@wordpress/api-fetch";
+declare module "@wordpress/format-library";

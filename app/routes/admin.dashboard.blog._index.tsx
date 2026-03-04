@@ -52,8 +52,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           $set: {
             lastRunAt: now,
             nextRunAt,
-            lastError: null,
             updatedAt: new Date(),
+          },
+          $unset: {
+            lastError: "",
           },
         }
       );
@@ -137,9 +139,10 @@ export default function AdminBlogSettingsRoute() {
 
   const isGenerating = generateFetcher.state !== "idle";
   const generatedSlug = generateFetcher.data && "slug" in generateFetcher.data ? generateFetcher.data.slug : null;
+  const isGenerated = Boolean(generateFetcher.data && "generated" in generateFetcher.data && generateFetcher.data.generated);
 
   useEffect(() => {
-    if (generateFetcher.data?.generated && generatedSlug) {
+    if (isGenerated && generatedSlug) {
       setShowSuccess(true);
       const timeout = window.setTimeout(() => {
         navigate(`/admin/dashboard/blog/posts/${generatedSlug}`);
@@ -147,7 +150,7 @@ export default function AdminBlogSettingsRoute() {
       return () => window.clearTimeout(timeout);
     }
     return undefined;
-  }, [generateFetcher.data, generatedSlug, navigate]);
+  }, [isGenerated, generatedSlug, navigate]);
 
   return (
     <div className="relative">
@@ -191,7 +194,7 @@ export default function AdminBlogSettingsRoute() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Label>Frecuencia</Label>
-                <Select value={frequency} onValueChange={setFrequency}>
+                <Select value={frequency} onValueChange={(value) => setFrequency(value as typeof frequency)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione" />
                   </SelectTrigger>
@@ -303,7 +306,7 @@ export default function AdminBlogSettingsRoute() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2 md:col-span-1">
                 <Label>Tono</Label>
-                <Select value={tone} onValueChange={setTone}>
+                <Select value={tone} onValueChange={(value) => setTone(value as typeof tone)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione tono" />
                   </SelectTrigger>

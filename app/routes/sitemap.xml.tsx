@@ -3,6 +3,13 @@ import { getPagesCollection, getBlogPostsCollection } from "~/utils/db.server";
 
 const SITE_URL = "https://tourtovalencia.com";
 
+type SitemapUrl = {
+  loc: string;
+  changefreq: string;
+  priority: string;
+  lastmod?: string;
+};
+
 function formatDate(date: Date) {
   return date.toISOString().split("T")[0];
 }
@@ -14,7 +21,7 @@ export const loader = async (_args: LoaderFunctionArgs) => {
   const pages = await pagesCollection.find({ status: "active" }).toArray();
   const blogPosts = await blogPostsCollection.find({ status: "published" }).toArray();
 
-  const staticUrls = [
+  const staticUrls: SitemapUrl[] = [
     { loc: `${SITE_URL}/`, changefreq: "daily", priority: "1.0" },
     { loc: `${SITE_URL}/book`, changefreq: "daily", priority: "0.9" },
     { loc: `${SITE_URL}/blog`, changefreq: "weekly", priority: "0.8" },
@@ -22,14 +29,14 @@ export const loader = async (_args: LoaderFunctionArgs) => {
     { loc: `${SITE_URL}/legal`, changefreq: "monthly", priority: "0.5" },
   ];
 
-  const pageUrls = pages.map((page) => ({
+  const pageUrls: SitemapUrl[] = pages.map((page) => ({
     loc: `${SITE_URL}/pages/${page.slug}`,
     changefreq: "weekly",
     priority: "0.8",
     lastmod: formatDate(page.updatedAt || page.createdAt),
   }));
 
-  const blogUrls = blogPosts.map((post) => ({
+  const blogUrls: SitemapUrl[] = blogPosts.map((post) => ({
     loc: `${SITE_URL}/blog/${post.slug}`,
     changefreq: "weekly",
     priority: "0.7",

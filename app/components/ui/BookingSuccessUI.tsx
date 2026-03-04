@@ -4,25 +4,29 @@ import { CheckCircle2, Home } from "lucide-react";
 import type { Booking } from "~/types/booking";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { Button } from "~/components/ui/button";
 import { useEffect, useState } from "react";
 
 interface BookingSuccessUIProps {
-  booking: Booking;
+  booking: Omit<Booking, "date" | "createdAt" | "updatedAt"> & {
+    date: string | Date;
+    createdAt?: string | Date;
+    updatedAt?: string | Date;
+  };
   emailStatus: "idle" | "sending" | "sent" | "error";
 }
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: "easeOut" },
+    transition: { duration: 0.6, ease: "easeOut" as const },
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, x: -20 },
   visible: {
     opacity: 1,
@@ -31,12 +35,12 @@ const itemVariants = {
   },
 };
 
-const iconVariants = {
+const iconVariants: Variants = {
   hidden: { scale: 0 },
   visible: {
     scale: 1,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 200,
       damping: 20,
       delay: 0.2,
