@@ -1,7 +1,75 @@
 import { json } from "@remix-run/server-runtime";
-import type { ActionFunctionArgs } from "@remix-run/server-runtime";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/server-runtime";
 import { createPage } from "~/utils/page.server";
 import { requireAdminSession } from "~/utils/admin-session.server";
+
+type CreatePageJob = {
+  status: "pending" | "processing" | "completed" | "failed";
+  message: string;
+  error?: string;
+  slug?: string;
+  startTime: Date;
+};
+
+const createPageJobs = new Map<string, CreatePageJob>();
+
+const CREATE_PAGE_JOB_TTL_MS = 60 * 60 * 1000;
+
+function cleanupExpiredCreateJobs() {
+  const cutoff = Date.now() - CREATE_PAGE_JOB_TTL_MS;
+  for (const [jobId, job] of createPageJobs.entries()) {
+    if (job.startTime.getTime() < cutoff) {
+      createPageJobs.delete(jobId);
+    }
+  }
+}
+
+function startCreatePageBackgroundJob(
+  name: string,
+  content: Record<string, unknown>,
+  status: "active" | "upcoming",
+): string {
+  const jobId = `create-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+  createPageJobs.set(jobId, {
+    status: "pending",
+    message: "Job en cola",
+    startTime: new Date(),
+  });
+
+  setTimeout(async () => {
+    try {
+      createPageJobs.set(jobId, {
+        ...createPageJobs.get(jobId)!,
+        status: "processing",
+        message: "Procesando contenido e imágenes",
+      });
+
+      const normalizedPrice = normalizeTourPrice(content.price);
+      content.price = normalizedPrice;
+
+      const page = await createPage(name, content, status, "tour");
+
+      createPageJobs.set(jobId, {
+        ...createPageJobs.get(jobId)!,
+        status: "completed",
+        message: "Tour creado correctamente",
+        slug: page.slug,
+      });
+    } catch (error) {
+      createPageJobs.set(jobId, {
+        ...createPageJobs.get(jobId)!,
+        status: "failed",
+        message: "Error al crear el tour",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      cleanupExpiredCreateJobs();
+    }
+  }, 0);
+
+  return jobId;
+}
 
 function normalizeTourPrice(rawPrice: unknown): number {
   if (typeof rawPrice === "number" && Number.isFinite(rawPrice) && rawPrice >= 0) {
@@ -18,6 +86,30 @@ function normalizeTourPrice(rawPrice: unknown): number {
   return 0;
 }
 
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  await requireAdminSession(request);
+
+  const url = new URL(request.url);
+  const jobId = url.searchParams.get("jobId");
+
+  if (!jobId) {
+    return json({ error: "Job ID is required" }, { status: 400 });
+  }
+
+  const job = createPageJobs.get(jobId);
+  if (!job) {
+    return json({ error: "Job not found" }, { status: 404 });
+  }
+
+  return json({
+    jobId,
+    status: job.status,
+    message: job.message,
+    slug: job.slug,
+    error: job.error,
+  });
+};
+
 export const action = async ({ request }: ActionFunctionArgs) => {
   if (request.method !== "POST") {
     return json({ error: "Method not allowed" }, { status: 405 });
@@ -30,6 +122,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const name = formData.get("name");
     const contentStr = formData.get("content");
     const status = formData.get("status");
+    const background = formData.get("background");
 
     if (!name || typeof name !== "string") {
       return json({ error: "Name is required" }, { status: 400 });
@@ -43,57 +136,40 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json({ error: "Status must be either 'active' or 'upcoming'" }, { status: 400 });
     }
 
-    const content = JSON.parse(contentStr);
+    let content: Record<string, unknown>;
+    try {
+      content = JSON.parse(contentStr) as Record<string, unknown>;
+    } catch (parseError) {
+      console.error("Error parsing create page content:", parseError);
+      return json({ error: "Invalid content format: Unable to parse JSON" }, { status: 400 });
+    }
     
     // Debug image data
     console.log("Creating page with name:", name);
     console.log("Status:", status);
     
-    // Check for image data in section1
-    if (content.section1?.backgroundImage?.preview) {
-      const preview = content.section1.backgroundImage.preview;
-      console.log("Section1 background image preview type:", typeof preview);
-      console.log("Section1 background image preview starts with:", 
-        typeof preview === 'string' ? preview.substring(0, 30) + '...' : 'not a string');
-    } else {
-      console.log("No section1 background image preview found");
-    }
-    
-    // Check for image data in section2
-    if (content.section2?.sectionImage?.preview) {
-      const preview = content.section2.sectionImage.preview;
-      console.log("Section2 image preview type:", typeof preview);
-      console.log("Section2 image preview starts with:", 
-        typeof preview === 'string' ? preview.substring(0, 30) + '...' : 'not a string');
-    } else {
-      console.log("No section2 image preview found");
-    }
-    
-    // Check for image data in section3
-    if (content.section3?.images && Array.isArray(content.section3.images)) {
-      console.log("Section3 has", content.section3.images.length, "images");
-      content.section3.images.forEach((img: unknown, index: number) => {
-        const source = typeof img === "object" && img !== null && "source" in img
-          ? (img as { source?: unknown }).source
-          : undefined;
+    if (background === "true") {
+      const jobId = startCreatePageBackgroundJob(
+        name,
+        content,
+        status as "active" | "upcoming",
+      );
 
-        if (source) {
-          console.log(`Section3 image ${index} source type:`, typeof source);
-          console.log(`Section3 image ${index} source starts with:`, 
-            typeof source === 'string' ? source.substring(0, 30) + '...' : 'not a string');
-        }
+      return json({
+        success: true,
+        message: "Page creation started in background",
+        jobId,
+        status: "processing",
       });
-    } else {
-      console.log("No section3 images found");
     }
-    
+
     // This endpoint is used by the tour page generator.
     // Always mark the page as a tour and keep the price normalized.
     const normalizedPrice = normalizeTourPrice(content.price);
     content.price = normalizedPrice;
     const template = "tour";
     console.log(`Creating page "${name}" as a tour with price ${normalizedPrice}€`);
-    
+
     // Create page with the content (images are already base64)
     const page = await createPage(name, content, status as "active" | "upcoming", template);
 

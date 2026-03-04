@@ -8,12 +8,107 @@ import { generateBlogPostFromSettings } from "~/utils/blogGenerator.server";
 import { calculateNextRunAt } from "~/utils/blogScheduler.server";
 import { getBlogSettingsCollection } from "~/utils/db.server";
 import { getToursCollection } from "~/utils/db.server";
+import type { BlogSettings } from "~/utils/db.schema.server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
+
+type BlogGenerationJob = {
+  status: "pending" | "processing" | "completed" | "failed";
+  message: string;
+  error?: string;
+  slug?: string;
+  startTime: Date;
+};
+
+const blogGenerationJobs = new Map<string, BlogGenerationJob>();
+const BLOG_JOB_TTL_MS = 60 * 60 * 1000;
+
+function cleanupExpiredBlogJobs() {
+  const cutoff = Date.now() - BLOG_JOB_TTL_MS;
+  for (const [jobId, job] of blogGenerationJobs.entries()) {
+    if (job.startTime.getTime() < cutoff) {
+      blogGenerationJobs.delete(jobId);
+    }
+  }
+}
+
+function startBlogGenerationJob(settings: BlogSettings): string {
+  const jobId = `blog-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+  blogGenerationJobs.set(jobId, {
+    status: "pending",
+    message: "Job en cola",
+    startTime: new Date(),
+  });
+
+  setTimeout(async () => {
+    const collection = await getBlogSettingsCollection();
+    const now = new Date();
+
+    try {
+      blogGenerationJobs.set(jobId, {
+        ...blogGenerationJobs.get(jobId)!,
+        status: "processing",
+        message: "Generando contenido del blog",
+      });
+
+      const post = await generateBlogPostFromSettings(settings);
+      const nextRunAt = calculateNextRunAt(settings, now);
+
+      await collection.updateOne(
+        { key: "default" },
+        {
+          $set: {
+            lastRunAt: now,
+            nextRunAt,
+            updatedAt: new Date(),
+          },
+          $unset: {
+            lastError: "",
+          },
+        },
+      );
+
+      blogGenerationJobs.set(jobId, {
+        ...blogGenerationJobs.get(jobId)!,
+        status: "completed",
+        message: "Post generado correctamente",
+        slug: post.slug,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+
+      blogGenerationJobs.set(jobId, {
+        ...blogGenerationJobs.get(jobId)!,
+        status: "failed",
+        message: "Error al generar el post",
+        error: message,
+      });
+
+      try {
+        await collection.updateOne(
+          { key: "default" },
+          {
+            $set: {
+              lastError: message,
+              updatedAt: new Date(),
+            },
+          },
+        );
+      } catch (updateError) {
+        console.error("Failed to persist blog generation error:", updateError);
+      }
+    } finally {
+      cleanupExpiredBlogJobs();
+    }
+  }, 0);
+
+  return jobId;
+}
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await requireAdminSession(request);
@@ -39,8 +134,41 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const intent = String(formData.get("intent") || "save");
 
+  if (intent === "generate-status") {
+    const jobId = String(formData.get("jobId") || "");
+    if (!jobId) {
+      return json({ success: false, error: "Job ID is required" }, { status: 400 });
+    }
+
+    const job = blogGenerationJobs.get(jobId);
+    if (!job) {
+      return json({ success: false, error: "Job not found" }, { status: 404 });
+    }
+
+    return json({
+      success: true,
+      jobId,
+      status: job.status,
+      message: job.message,
+      slug: job.slug,
+      error: job.error,
+    });
+  }
+
   if (intent === "generate") {
     const settings = await getBlogSettings();
+    const background = formData.get("background");
+
+    if (background === "true") {
+      const jobId = startBlogGenerationJob(settings);
+      return json({
+        success: true,
+        jobId,
+        status: "processing",
+        message: "Generación iniciada en segundo plano",
+      });
+    }
+
     const now = new Date();
     const collection = await getBlogSettingsCollection();
     try {
@@ -120,6 +248,16 @@ const weekdayOptions = [
   { value: 0, label: "Domingo" },
 ];
 
+type GenerateActionResponse = {
+  success?: boolean;
+  generated?: boolean;
+  slug?: string;
+  status?: "pending" | "processing" | "completed" | "failed";
+  message?: string;
+  jobId?: string;
+  error?: string;
+};
+
 export default function AdminBlogSettingsRoute() {
   const { settings, tours } = useLoaderData<typeof loader>();
   const [frequency, setFrequency] = useState(settings.frequency);
@@ -136,21 +274,149 @@ export default function AdminBlogSettingsRoute() {
   const [useCustomPrompt, setUseCustomPrompt] = useState(settings.useCustomPrompt ?? false);
   const [customPrompt, setCustomPrompt] = useState(settings.customPrompt ?? "");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [generationJobId, setGenerationJobId] = useState<string | null>(null);
+  const [generationMessage, setGenerationMessage] = useState<string | null>(null);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const [completedSlug, setCompletedSlug] = useState<string | null>(null);
 
-  const isGenerating = generateFetcher.state !== "idle";
-  const generatedSlug = generateFetcher.data && "slug" in generateFetcher.data ? generateFetcher.data.slug : null;
-  const isGenerated = Boolean(generateFetcher.data && "generated" in generateFetcher.data && generateFetcher.data.generated);
+  const isGenerating = generateFetcher.state !== "idle" || Boolean(generationJobId);
 
   useEffect(() => {
-    if (isGenerated && generatedSlug) {
+    const data = generateFetcher.data as GenerateActionResponse | undefined;
+    if (!data) {
+      return;
+    }
+
+    if (data.success === false) {
+      setGenerationError(data.error || "Error al generar el post");
+      setGenerationMessage(null);
+      setGenerationJobId(null);
+      return;
+    }
+
+    setGenerationError(null);
+
+    if (typeof data.jobId === "string" && data.jobId) {
+      setGenerationJobId(data.jobId);
+      setGenerationMessage(data.message || "Generación iniciada en segundo plano");
+      return;
+    }
+
+    if (data.generated && typeof data.slug === "string") {
+      setCompletedSlug(data.slug);
+    }
+  }, [generateFetcher.data]);
+
+  useEffect(() => {
+    if (!generationJobId) {
+      return;
+    }
+
+    let isCancelled = false;
+    let timeoutId: number | undefined;
+    let retries = 0;
+
+    const pollGenerationStatus = async () => {
+      if (isCancelled) {
+        return;
+      }
+
+      try {
+        const statusFormData = new FormData();
+        statusFormData.append("intent", "generate-status");
+        statusFormData.append("jobId", generationJobId);
+
+        const response = await fetch("/admin/dashboard/blog?index", {
+          method: "POST",
+          body: statusFormData,
+          credentials: "same-origin",
+        });
+
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          throw new Error("La sesión expiró o el servidor respondió de forma inesperada.");
+        }
+
+        const data = await response.json() as GenerateActionResponse;
+        if (!response.ok || data.success === false) {
+          throw new Error(data.error || "No se pudo verificar el estado de generación.");
+        }
+
+        retries = 0;
+
+        if (data.status === "completed") {
+          setGenerationJobId(null);
+          setGenerationMessage(null);
+
+          if (typeof data.slug === "string" && data.slug) {
+            setCompletedSlug(data.slug);
+            return;
+          }
+
+          setGenerationError("El post se generó pero no devolvió un slug válido.");
+          return;
+        }
+
+        if (data.status === "failed") {
+          setGenerationJobId(null);
+          setGenerationMessage(null);
+          setGenerationError(data.error || data.message || "Error al generar el post.");
+          return;
+        }
+
+        setGenerationMessage(data.message || "Generando post del blog...");
+        timeoutId = window.setTimeout(pollGenerationStatus, 3000);
+      } catch (error) {
+        retries += 1;
+
+        if (retries <= 5) {
+          setGenerationMessage("Reconectando con el servidor...");
+          timeoutId = window.setTimeout(pollGenerationStatus, 5000);
+          return;
+        }
+
+        setGenerationJobId(null);
+        setGenerationMessage(null);
+        setGenerationError(
+          error instanceof Error
+            ? error.message
+            : "No se pudo verificar el estado de generación.",
+        );
+      }
+    };
+
+    pollGenerationStatus();
+
+    return () => {
+      isCancelled = true;
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [generationJobId]);
+
+  useEffect(() => {
+    if (completedSlug) {
       setShowSuccess(true);
       const timeout = window.setTimeout(() => {
-        navigate(`/admin/dashboard/blog/posts/${generatedSlug}`);
+        navigate(`/admin/dashboard/blog/posts/${completedSlug}`);
       }, 5000);
       return () => window.clearTimeout(timeout);
     }
     return undefined;
-  }, [isGenerated, generatedSlug, navigate]);
+  }, [completedSlug, navigate]);
+
+  const handleGenerateNow = () => {
+    setShowSuccess(false);
+    setCompletedSlug(null);
+    setGenerationError(null);
+    setGenerationMessage("Iniciando generación...");
+
+    generateFetcher.submit(
+      { intent: "generate", background: "true" },
+      { method: "post" },
+    );
+  };
 
   return (
     <div className="relative">
@@ -158,7 +424,7 @@ export default function AdminBlogSettingsRoute() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3">
             <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-            <p className="text-sm font-medium text-gray-700">Generando post del blog...</p>
+            <p className="text-sm font-medium text-gray-700">{generationMessage || "Generando post del blog..."}</p>
           </div>
         </div>
       )}
@@ -172,6 +438,11 @@ export default function AdminBlogSettingsRoute() {
           {showSuccess && (
             <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
               Post generado correctamente. Te redirigimos al editor en 5 segundos.
+            </div>
+          )}
+          {generationError && (
+            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {generationError}
             </div>
           )}
           <Form method="post" className="space-y-8">
@@ -390,7 +661,7 @@ export default function AdminBlogSettingsRoute() {
                   type="button"
                   variant="outline"
                   disabled={isGenerating}
-                  onClick={() => generateFetcher.submit({ intent: "generate" }, { method: "post" })}
+                  onClick={handleGenerateNow}
                 >
                   Generar ahora
                 </Button>
