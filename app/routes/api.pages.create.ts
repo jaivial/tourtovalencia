@@ -2,6 +2,21 @@ import { json } from "@remix-run/server-runtime";
 import type { ActionFunctionArgs } from "@remix-run/server-runtime";
 import { createPage } from "~/utils/page.server";
 
+function normalizeTourPrice(rawPrice: unknown): number {
+  if (typeof rawPrice === "number" && Number.isFinite(rawPrice) && rawPrice >= 0) {
+    return rawPrice;
+  }
+
+  if (typeof rawPrice === "string") {
+    const parsed = Number.parseFloat(rawPrice);
+    if (Number.isFinite(parsed) && parsed >= 0) {
+      return parsed;
+    }
+  }
+
+  return 0;
+}
+
 export const action = async ({ request }: ActionFunctionArgs) => {
   if (request.method !== "POST") {
     return json({ error: "Method not allowed" }, { status: 405 });
@@ -54,23 +69,27 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     // Check for image data in section3
     if (content.section3?.images && Array.isArray(content.section3.images)) {
       console.log("Section3 has", content.section3.images.length, "images");
-      content.section3.images.forEach((img: any, index: number) => {
-        if (img.source) {
-          console.log(`Section3 image ${index} source type:`, typeof img.source);
+      content.section3.images.forEach((img: unknown, index: number) => {
+        const source = typeof img === "object" && img !== null && "source" in img
+          ? (img as { source?: unknown }).source
+          : undefined;
+
+        if (source) {
+          console.log(`Section3 image ${index} source type:`, typeof source);
           console.log(`Section3 image ${index} source starts with:`, 
-            typeof img.source === 'string' ? img.source.substring(0, 30) + '...' : 'not a string');
+            typeof source === 'string' ? source.substring(0, 30) + '...' : 'not a string');
         }
       });
     } else {
       console.log("No section3 images found");
     }
     
-    // Determine if this is a tour page based on price
-    let template = "";
-    if (content.price && typeof content.price === "number" && content.price > 0) {
-      template = "tour";
-      console.log(`Creating page "${name}" as a tour with price ${content.price}€`);
-    }
+    // This endpoint is used by the tour page generator.
+    // Always mark the page as a tour and keep the price normalized.
+    const normalizedPrice = normalizeTourPrice(content.price);
+    content.price = normalizedPrice;
+    const template = "tour";
+    console.log(`Creating page "${name}" as a tour with price ${normalizedPrice}€`);
     
     // Create page with the content (images are already base64)
     const page = await createPage(name, content, status as "active" | "upcoming", template);

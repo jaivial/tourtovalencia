@@ -57,7 +57,9 @@ export const loader = async () => {
   try {
     // Get active tours from the database
     const toursCollection = await getToursCollection();
-    const toursData = await toursCollection.find({ status: "active" }).toArray();
+    const toursData = await toursCollection
+      .find({ status: { $in: ["active", "upcoming"] } })
+      .toArray();
     
     // Get pages from the database
     const pagesCollection = await getPagesCollection();

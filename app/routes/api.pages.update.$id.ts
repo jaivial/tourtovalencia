@@ -2,7 +2,7 @@ import { json } from "@remix-run/server-runtime";
 import type { ActionFunctionArgs } from "@remix-run/server-runtime";
 import { getPagesCollection, getToursCollection } from "~/utils/db.server";
 import { ObjectId } from "mongodb";
-import { processContent, translateContent, translateContentBulk, translateText, logContentSize } from "~/utils/page.server";
+import { processContent, translateContentBulk, translateText, logContentSize } from "~/utils/page.server";
 import { generateTranslationFiles } from "~/utils/i18n/file-generator";
 import type { Page, Tour } from "~/utils/db.schema.server";
 import type { Filter } from "mongodb";
@@ -15,6 +15,39 @@ const backgroundJobs = new Map<string, {
   error?: string;
   startTime: Date;
 }>();
+
+function normalizeTourPrice(rawPrice: unknown): number {
+  if (typeof rawPrice === "number" && Number.isFinite(rawPrice) && rawPrice >= 0) {
+    return rawPrice;
+  }
+
+  if (typeof rawPrice === "string") {
+    const parsed = Number.parseFloat(rawPrice);
+    if (Number.isFinite(parsed) && parsed >= 0) {
+      return parsed;
+    }
+  }
+
+  return 0;
+}
+
+function hasTourGeneratorPayload(content: Record<string, unknown>): boolean {
+  const expectedTourFields = [
+    "section1",
+    "section2",
+    "section3",
+    "section4",
+    "section5",
+    "section6",
+    "timeline",
+    "indexSection5",
+    "card",
+  ];
+
+  return expectedTourFields.some((field) =>
+    Object.prototype.hasOwnProperty.call(content, field),
+  );
+}
 
 // Function to process page update in the background
 async function processPageUpdateInBackground(
@@ -70,6 +103,9 @@ async function processPageUpdateInBackground(
       if (!existingPage) {
         throw new Error("Page not found");
       }
+
+      const normalizedPrice = normalizeTourPrice(content.price);
+      content.price = normalizedPrice;
       
       // Update job status
       backgroundJobs.set(jobId, {
@@ -77,12 +113,13 @@ async function processPageUpdateInBackground(
         message: 'Updating tour information'
       });
       
-      // Determine if this is a tour page based on price
+      // Determine if this is a tour page based on the payload/template (not on price > 0)
       let template = existingPage.template || "";
+      const shouldSyncTour = existingPage.template === "tour" || hasTourGeneratorPayload(content);
       
-      if (content.price && typeof content.price === "number" && content.price > 0) {
+      if (shouldSyncTour) {
         template = "tour";
-        console.log(`Updating page "${name}" as a tour with price ${content.price}€`);
+        console.log(`Updating page "${name}" as a tour with price ${normalizedPrice}€`);
         
         // Translate the tour name
         let translatedTourName = name;
@@ -129,7 +166,7 @@ async function processPageUpdateInBackground(
                     es: name,
                     en: translatedTourName
                   },
-                  tourPrice: content.price,
+                  tourPrice: normalizedPrice,
                   status: status,
                   description: {
                     es: String((processedSpanishContent.section1 as Record<string, unknown>)?.title || ""),
@@ -151,7 +188,7 @@ async function processPageUpdateInBackground(
                 }
               }
             );
-            console.log(`Updated tour for page "${name}" with price ${content.price}€`);
+            console.log(`Updated tour for page "${name}" with price ${normalizedPrice}€`);
           } catch (tourUpdateError) {
             console.error("Error updating tour:", tourUpdateError);
             // Continue with page update even if tour update fails
@@ -165,7 +202,7 @@ async function processPageUpdateInBackground(
                 es: name,
                 en: translatedTourName
               },
-              tourPrice: content.price,
+              tourPrice: normalizedPrice,
               status: status,
               description: {
                 es: String((processedSpanishContent.section1 as Record<string, unknown>)?.title || ""),
@@ -189,7 +226,7 @@ async function processPageUpdateInBackground(
             };
             
             await toursCollection.insertOne(newTour);
-            console.log(`Created new tour for page "${name}" with price ${content.price}€`);
+            console.log(`Created new tour for page "${name}" with price ${normalizedPrice}€`);
             console.log(`Tour name set - ES: "${name}", EN: "${translatedTourName}"`);
           } catch (tourCreateError) {
             console.error("Error creating tour:", tourCreateError);
@@ -331,11 +368,14 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       console.error("Error parsing content JSON:", parseError);
       return json({ error: "Invalid content format: Unable to parse JSON" }, { status: 400 });
     }
+
+    const normalizedPrice = normalizeTourPrice(content.price);
+    content.price = normalizedPrice;
     
     // Check if this is a background processing request
     if (background === "true") {
       console.log("Starting background processing for page update:", id);
-      
+    
       try {
         // Start background processing and get job ID
         const jobId = await processPageUpdateInBackground(
@@ -407,13 +447,14 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       return json({ error: "Page not found" }, { status: 404 });
     }
 
-    // Determine if this is a tour page based on price
+    // Determine if this is a tour page based on the payload/template (not on price > 0)
     let template = existingPage.template || "";
     let tourUpdated = false;
+    const shouldSyncTour = existingPage.template === "tour" || hasTourGeneratorPayload(content);
     
-    if (content.price && typeof content.price === "number" && content.price > 0) {
+    if (shouldSyncTour) {
       template = "tour";
-      console.log(`Updating page "${name}" as a tour with price ${content.price}€`);
+      console.log(`Updating page "${name}" as a tour with price ${normalizedPrice}€`);
       
       // Translate the tour name
       let translatedTourName = name;
@@ -462,7 +503,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
                   es: name,
                   en: translatedTourName
                 },
-                tourPrice: content.price,
+                tourPrice: normalizedPrice,
                 status: status as 'active' | 'upcoming',
                 updatedAt: new Date()
               }
@@ -470,7 +511,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
           );
           
           tourUpdated = tourUpdateResult.modifiedCount > 0;
-          console.log(`Updated tour for page "${name}" with price ${content.price}€`);
+          console.log(`Updated tour for page "${name}" with price ${normalizedPrice}€`);
           console.log(`Tour name updated - ES: "${name}", EN: "${translatedTourName}"`);
         } catch (tourUpdateError) {
           console.error("Error updating tour:", tourUpdateError);
@@ -485,7 +526,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
               es: name,
               en: translatedTourName
             },
-            tourPrice: content.price,
+            tourPrice: normalizedPrice,
             status: status as 'active' | 'upcoming',
             description: {
               es: String((processedSpanishContent.section1 as Record<string, unknown>)?.title || ""),
@@ -510,7 +551,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
           
           await toursCollection.insertOne(newTour);
           tourUpdated = true;
-          console.log(`Created new tour for page "${name}" with price ${content.price}€`);
+          console.log(`Created new tour for page "${name}" with price ${normalizedPrice}€`);
           console.log(`Tour name set - ES: "${name}", EN: "${translatedTourName}"`);
         } catch (tourCreateError) {
           console.error("Error creating tour:", tourCreateError);
