@@ -8,14 +8,30 @@ import type { Page, Tour } from "~/utils/db.schema.server";
 import type { Filter } from "mongodb";
 import { requireAdminSession } from "~/utils/admin-session.server";
 
-// In-memory store for background jobs
-// In a production environment, this should be replaced with a proper job queue system
-const backgroundJobs = new Map<string, {
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+type BackgroundJobStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
+type BackgroundJob = {
+  status: BackgroundJobStatus;
   message: string;
   error?: string;
   startTime: Date;
-}>();
+};
+
+const BACKGROUND_JOB_TIMEOUT_MS = 12 * 60 * 1000;
+const BACKGROUND_JOB_TTL_MS = 60 * 60 * 1000;
+
+// In-memory store for background jobs
+// In a production environment, this should be replaced with a proper job queue system
+const backgroundJobs = new Map<string, BackgroundJob>();
+
+function cleanupOldBackgroundJobs() {
+  const oneHourAgo = new Date(Date.now() - BACKGROUND_JOB_TTL_MS);
+  for (const [key, job] of backgroundJobs.entries()) {
+    if (job.startTime < oneHourAgo) {
+      backgroundJobs.delete(key);
+    }
+  }
+}
 
 function normalizeTourPrice(rawPrice: unknown): number {
   if (typeof rawPrice === "number" && Number.isFinite(rawPrice) && rawPrice >= 0) {
@@ -65,6 +81,21 @@ async function processPageUpdateInBackground(
     message: 'Job queued',
     startTime: new Date()
   });
+
+  const timeoutHandle = setTimeout(() => {
+    const currentJob = backgroundJobs.get(jobId);
+    if (!currentJob) return;
+
+    if (currentJob.status === "pending" || currentJob.status === "processing") {
+      backgroundJobs.set(jobId, {
+        ...currentJob,
+        status: "failed",
+        message: "Job timed out",
+        error: `Background processing exceeded ${Math.floor(BACKGROUND_JOB_TIMEOUT_MS / 60000)} minutes`,
+      });
+      console.error(`Background job ${jobId} timed out`);
+    }
+  }, BACKGROUND_JOB_TIMEOUT_MS);
   
   // Process the job asynchronously
   setTimeout(async () => {
@@ -276,6 +307,12 @@ async function processPageUpdateInBackground(
         console.error(`[i18n] Error generating translation files:`, error);
         // Don't fail the job, translations can be regenerated manually
       }
+
+      const currentJob = backgroundJobs.get(jobId);
+      if (currentJob?.status === "failed" && currentJob.message === "Job timed out") {
+        console.warn(`Background job ${jobId} finished after timeout; keeping timed-out status.`);
+        return;
+      }
       
       // Update job status to completed
       backgroundJobs.set(jobId, {
@@ -285,14 +322,6 @@ async function processPageUpdateInBackground(
       });
       
       console.log(`Background job ${jobId} completed successfully`);
-      
-      // Clean up old jobs (older than 1 hour)
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-      for (const [key, job] of backgroundJobs.entries()) {
-        if (job.startTime < oneHourAgo) {
-          backgroundJobs.delete(key);
-        }
-      }
     } catch (error) {
       console.error(`Background job ${jobId} failed:`, error);
       
@@ -303,6 +332,9 @@ async function processPageUpdateInBackground(
         message: 'Job failed',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
+    } finally {
+      clearTimeout(timeoutHandle);
+      cleanupOldBackgroundJobs();
     }
   }, 0); // Start immediately but asynchronously
   

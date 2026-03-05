@@ -13,6 +13,21 @@ import type {
 } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 
+const JOB_POLL_INTERVAL_MS = 3000;
+const JOB_POLL_RETRY_MS = 5000;
+const JOB_MAX_POLL_TIME_MS = 12 * 60 * 1000;
+const JOB_MAX_POLL_ERRORS = 8;
+const UPDATE_REQUEST_TIMEOUT_MS = 10 * 60 * 1000;
+const MAX_UPDATE_PAYLOAD_BYTES = 18 * 1024 * 1024;
+
+function getPayloadSizeBytes(payload: string): number {
+  if (typeof TextEncoder !== 'undefined') {
+    return new TextEncoder().encode(payload).length;
+  }
+
+  return payload.length;
+}
+
 // Helper function to deserialize JSON content
 const deserializeContent = (page: Record<string, unknown>): Page => {
   // Create a deep copy of the page
@@ -353,6 +368,15 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
         card: cardData,
         price
       };
+
+      const serializedContent = JSON.stringify(content);
+      const payloadSizeBytes = getPayloadSizeBytes(serializedContent);
+      if (payloadSizeBytes > MAX_UPDATE_PAYLOAD_BYTES) {
+        const payloadSizeMb = (payloadSizeBytes / (1024 * 1024)).toFixed(2);
+        throw new Error(
+          `El contenido del tour pesa ${payloadSizeMb}MB. Reduce el tamaño o número de imágenes antes de guardar.`,
+        );
+      }
       
       // Short delay for data preparation
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -364,16 +388,16 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
       // Create form data
       const formData = new FormData();
       formData.append("name", pageName);
-      formData.append("content", JSON.stringify(content));
+      formData.append("content", serializedContent);
       formData.append("status", status);
       formData.append("id", deserializedPage._id || "");
       
       // Set a flag to indicate this is a background processing request
       formData.append("background", "true");
       
-      // Create an AbortController with a longer timeout (2 minutes)
+      // Create an AbortController with a longer timeout for slow mobile uploads
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+      const timeoutId = setTimeout(() => controller.abort(), UPDATE_REQUEST_TIMEOUT_MS);
       
       try {
         // Send initial request to start background processing
@@ -423,12 +447,31 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
           setSaveSuccess(true);
           
           // Set up polling to check job status
-          const pollJobStatus = async (jobId: string) => {
+          const pollJobStatus = async (
+            jobId: string,
+            startedAt: number = Date.now(),
+            consecutiveErrors: number = 0,
+          ) => {
             try {
+              const elapsedMs = Date.now() - startedAt;
+              if (elapsedMs > JOB_MAX_POLL_TIME_MS) {
+                setSaveError("El proceso está tardando demasiado y se detuvo la espera automática. Verifica el tour en la lista y vuelve a intentar si es necesario.");
+                setIsSaving(false);
+                setIsLoadingOverlayOpen(false);
+                return;
+              }
+
               const statusResponse = await fetch(`/api/pages/update/${deserializedPage._id}?jobId=${jobId}`);
               
               if (!statusResponse.ok) {
-                throw new Error("Error al verificar el estado del proceso");
+                if (statusResponse.status === 404) {
+                  setSaveError("No se pudo seguir el estado del proceso (job no encontrado). Es posible que el servidor se haya reiniciado; verifica el resultado en la lista de tours.");
+                  setIsSaving(false);
+                  setIsLoadingOverlayOpen(false);
+                  return;
+                }
+
+                throw new Error(`Error al verificar el estado del proceso (${statusResponse.status})`);
               }
               
               const jobStatus = await statusResponse.json() as {
@@ -485,14 +528,21 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
               
               // Continue polling if job is still in progress
               if (jobStatus.status === 'pending' || jobStatus.status === 'processing') {
-                setTimeout(() => pollJobStatus(jobId), 3000); // Poll every 3 seconds
+                setTimeout(() => pollJobStatus(jobId, startedAt, 0), JOB_POLL_INTERVAL_MS);
               }
             } catch (error) {
               console.error("Error polling job status:", error);
-              setSaveError("Error al verificar el estado del proceso. El proceso continúa en segundo plano.");
-              
-              // Continue polling despite errors
-              setTimeout(() => pollJobStatus(jobId), 5000); // Retry after 5 seconds on error
+
+              const nextErrorCount = consecutiveErrors + 1;
+              if (nextErrorCount >= JOB_MAX_POLL_ERRORS) {
+                setSaveError("No se pudo verificar el estado del proceso tras varios intentos. La espera automática se detuvo; revisa si el tour se actualizó en la lista.");
+                setIsSaving(false);
+                setIsLoadingOverlayOpen(false);
+                return;
+              }
+
+              setSaveError("Error temporal al verificar el estado del proceso. Reintentando...");
+              setTimeout(() => pollJobStatus(jobId, startedAt, nextErrorCount), JOB_POLL_RETRY_MS);
             }
           };
           
@@ -519,15 +569,15 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
       } catch (error) {
         // Handle AbortError (timeout)
         if (error instanceof DOMException && error.name === 'AbortError') {
-          // Instead of showing an error, inform the user that processing continues in the background
-          setSaveError("La operación está tardando más de lo esperado. Por favor, espere hasta que se complete la traducción y el procesamiento de imágenes.");
-          setSaveSuccess(true);
-          
-          // Keep the loading overlay open
-          updateLoadingStep(1, "completed");
-          updateLoadingStep(2, "processing");
-          
-          return; // Exit early but keep overlay open
+          setSaveError("La subida tardó demasiado en completarse desde este dispositivo. Revisa tu conexión o reduce el tamaño de las imágenes e inténtalo de nuevo.");
+          setIsSaving(false);
+          setSaveSuccess(false);
+
+          setTimeout(() => {
+            setIsLoadingOverlayOpen(false);
+          }, 3000);
+
+          return;
         }
         throw error; // Re-throw other errors to be caught by the outer catch
       }

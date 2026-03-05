@@ -21,8 +21,18 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
   const isInView = useInView(ref, { margin: "-100px" });
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
+  const [isTouchDevice, setIsTouchDevice] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    setIsTouchDevice(window.matchMedia('(hover: none), (pointer: coarse)').matches || navigator.maxTouchPoints > 0);
+  }, []);
 
   const handleImageClick = (index: number) => {
+    if (isTouchDevice) {
+      return;
+    }
+
     setSelectedImageIndex(index);
     setModalOpen(true);
   };

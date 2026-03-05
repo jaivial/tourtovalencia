@@ -75,6 +75,8 @@ const MIME_EXTENSION_MAP: Record<string, string> = {
   "image/avif": "avif",
   "image/heic": "heic",
   "image/heif": "heif",
+  "image/heic-sequence": "heic",
+  "image/heif-sequence": "heif",
   "image/bmp": "bmp",
   "image/x-ms-bmp": "bmp",
   "image/tiff": "tiff",
@@ -84,8 +86,115 @@ const MIME_EXTENSION_MAP: Record<string, string> = {
   "image/jfif": "jpg",
 };
 
+function normalizeMimeType(mimeType: string): string {
+  const normalizedMimeType = mimeType.toLowerCase().trim();
+
+  if (!normalizedMimeType || normalizedMimeType === "application/octet-stream" || normalizedMimeType === "binary/octet-stream") {
+    return "";
+  }
+
+  if (normalizedMimeType === "image/heic-sequence") {
+    return "image/heic";
+  }
+
+  if (normalizedMimeType === "image/heif-sequence") {
+    return "image/heif";
+  }
+
+  return normalizedMimeType;
+}
+
+function detectMimeTypeFromBuffer(buffer: Buffer): string | null {
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return "image/jpeg";
+  }
+
+  if (
+    buffer.length >= 8 &&
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a
+  ) {
+    return "image/png";
+  }
+
+  if (buffer.length >= 6) {
+    const gifHeader = buffer.toString("ascii", 0, 6);
+    if (gifHeader === "GIF87a" || gifHeader === "GIF89a") {
+      return "image/gif";
+    }
+  }
+
+  if (
+    buffer.length >= 12 &&
+    buffer.toString("ascii", 0, 4) === "RIFF" &&
+    buffer.toString("ascii", 8, 12) === "WEBP"
+  ) {
+    return "image/webp";
+  }
+
+  if (buffer.length >= 2 && buffer[0] === 0x42 && buffer[1] === 0x4d) {
+    return "image/bmp";
+  }
+
+  if (
+    buffer.length >= 4 &&
+    ((buffer[0] === 0x49 && buffer[1] === 0x49 && buffer[2] === 0x2a && buffer[3] === 0x00) ||
+      (buffer[0] === 0x4d && buffer[1] === 0x4d && buffer[2] === 0x00 && buffer[3] === 0x2a))
+  ) {
+    return "image/tiff";
+  }
+
+  if (buffer.length >= 4 && buffer[0] === 0x00 && buffer[1] === 0x00 && buffer[2] === 0x01 && buffer[3] === 0x00) {
+    return "image/x-icon";
+  }
+
+  if (buffer.length >= 12 && buffer.toString("ascii", 4, 8) === "ftyp") {
+    const majorBrand = buffer.toString("ascii", 8, 12).toLowerCase();
+
+    if (majorBrand.startsWith("avif") || majorBrand === "avis") {
+      return "image/avif";
+    }
+
+    if (
+      majorBrand.startsWith("heic") ||
+      majorBrand.startsWith("heix") ||
+      majorBrand.startsWith("hevc") ||
+      majorBrand.startsWith("hevx")
+    ) {
+      return "image/heic";
+    }
+
+    if (
+      majorBrand.startsWith("heif") ||
+      majorBrand.startsWith("heim") ||
+      majorBrand.startsWith("heis") ||
+      majorBrand === "mif1" ||
+      majorBrand === "msf1"
+    ) {
+      return "image/heif";
+    }
+  }
+
+  const textHeader = buffer.toString("utf8", 0, 512).trimStart().toLowerCase();
+  if (textHeader.startsWith("<svg") || (textHeader.startsWith("<?xml") && textHeader.includes("<svg"))) {
+    return "image/svg+xml";
+  }
+
+  return null;
+}
+
+function isImageDataUrl(value: string): boolean {
+  return /^data:(image\/[^;,]+|application\/octet-stream|binary\/octet-stream|)(;[^,]*)*;base64,/i.test(value);
+}
+
 function getExtensionFromMimeType(mimeType: string): string {
-  const normalizedMimeType = mimeType.toLowerCase();
+  const normalizedMimeType = normalizeMimeType(mimeType);
   const mappedExtension = MIME_EXTENSION_MAP[normalizedMimeType];
 
   if (mappedExtension) {
@@ -102,13 +211,21 @@ function getExtensionFromMimeType(mimeType: string): string {
 }
 
 function parseBase64DataUrl(base64Data: string): { mimeType: string; buffer: Buffer } {
-  const matches = base64Data.match(/^data:([^;]+)(?:;[^,]+)*;base64,(.+)$/);
+  const matches = base64Data.match(/^data:([^,;]*)(?:;[^,]*)*;base64,(.+)$/i);
   if (!matches) {
     throw new Error("Invalid base64 image data");
   }
 
-  const mimeType = matches[1] || "image/webp";
+  const rawMimeType = matches[1] || "";
   const buffer = Buffer.from(matches[2], "base64");
+
+  const normalizedMimeType = normalizeMimeType(rawMimeType);
+  const detectedMimeType = detectMimeTypeFromBuffer(buffer);
+  const mimeType = normalizedMimeType || detectedMimeType || "image/jpeg";
+
+  if (!normalizedMimeType && detectedMimeType) {
+    console.log(`[ImageUpload] MIME inferred from binary content: ${detectedMimeType} (raw data URL type: ${rawMimeType || "empty"})`);
+  }
 
   return {
     mimeType,
@@ -173,10 +290,11 @@ async function uploadImagesToBunnyBatch(
 const MAX_IMAGE_SIZE = 200 * 1024; // 200KB limit per image (reduced from 400KB)
 // Configuration for Google AI Studio API
 const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
-// Using gemini-2.0-flash-lite for better rate limits
-const GOOGLE_AI_MODEL = "gemini-2.0-flash-lite";
-// Use v1 API version for gemini-2.0-flash-lite
+// Using gemini-3.1-flash-lite-preview for translation
+const GOOGLE_AI_MODEL = "gemini-3.1-flash-lite-preview";
+// Use v1 API version
 const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/v1/models/${GOOGLE_AI_MODEL}:generateContent`;
+const TRANSLATION_REQUEST_TIMEOUT_MS = Number(process.env.GOOGLE_AI_TIMEOUT_MS || 45000);
 
 if (!GOOGLE_AI_API_KEY) {
   throw new Error("Google AI Studio API key is not configured. Please set GOOGLE_AI_API_KEY in your .env file");
@@ -188,7 +306,7 @@ function shouldSkipTranslation(value: string): boolean {
   if (value.toLowerCase() === "gallery image") return true;
   
   // Check for image extensions
-  const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i;
+  const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp|avif|heic|heif|tif|tiff|jfif|ico)$/i;
   if (imageExtensions.test(value)) return true;
   
   // Check for image/animation keywords
@@ -196,7 +314,7 @@ function shouldSkipTranslation(value: string): boolean {
   if (skipPatterns.test(value)) return true;
   
   // Check for data URLs
-  if (value.startsWith("data:image") || value.startsWith("blob:")) return true;
+  if (isImageDataUrl(value) || value.startsWith("blob:")) return true;
   
   return false;
 }
@@ -351,6 +469,7 @@ Respond with ONLY valid JSON in this format:
       },
       {
         headers: { "Content-Type": "application/json" },
+        timeout: TRANSLATION_REQUEST_TIMEOUT_MS,
       }
     );
 
@@ -361,7 +480,19 @@ Respond with ONLY valid JSON in this format:
     // Clean up the response (remove markdown code blocks if present)
     const cleanedResponse = responseText.replace(/```json\n?|\n?```/g, '').trim();
     
-    const translationMap = JSON.parse(cleanedResponse) as Record<string, string>;
+    let translationMap: Record<string, string>;
+    try {
+      translationMap = JSON.parse(cleanedResponse) as Record<string, string>;
+    } catch (parseError) {
+      console.error("[AI Translation][Bulk] Failed to parse response JSON", {
+        model: GOOGLE_AI_MODEL,
+        stringsCount: stringsToTranslate.length,
+        promptLength: prompt.length,
+        responsePreview: cleanedResponse.slice(0, 1200),
+        error: parseError instanceof Error ? parseError.message : String(parseError),
+      });
+      throw parseError;
+    }
     
     // Convert to Map for efficient lookup (strip PATH: prefix from keys)
     const translations = new Map<string, string>();
@@ -376,8 +507,26 @@ Respond with ONLY valid JSON in this format:
     // Rebuild content with translations
     return rebuildContentWithTranslations(content, translations) as Record<string, unknown>;
     
-  } catch (error) {
-    console.error("Bulk translation failed:", error);
+  } catch (error: unknown) {
+    const err = error as Error & {
+      code?: string;
+      response?: {
+        status?: number;
+        data?: unknown;
+      };
+    };
+
+    console.error("[AI Translation][Bulk] Translation failed", {
+      model: GOOGLE_AI_MODEL,
+      timeoutMs: TRANSLATION_REQUEST_TIMEOUT_MS,
+      stringsCount: stringsToTranslate.length,
+      promptLength: prompt.length,
+      status: err.response?.status,
+      code: err.code,
+      message: err.message,
+      responseData: err.response?.data,
+    });
+
     // Fallback to individual translations
     console.log("Falling back to individual translations...");
     return translateContent(content);
@@ -480,6 +629,13 @@ async function optimizeImage(base64Data: string, keyPath: string = "unknown"): P
       console.log(`🚀 [${keyPath}] Image uploaded to Bunny CDN: ${cdnUrl}`);
       return cdnUrl;
     } catch (optimizationError) {
+      const requiresServerTranscoding = mimeType === "image/heic" || mimeType === "image/heif";
+      if (requiresServerTranscoding) {
+        throw new Error(
+          `No se pudo convertir ${mimeType.toUpperCase()} en el servidor. Convierte la imagen a JPG/PNG/WebP e inténtalo de nuevo.`,
+        );
+      }
+
       console.warn(
         `[ImageUpload] Falling back to original format for "${keyPath}" (${mimeType}):`,
         optimizationError,
@@ -563,7 +719,7 @@ export async function processContent(content: Record<string, unknown>, translate
       }
       // Handle base64 images - always optimize regardless of size
       else if (typeof value === "string") {
-        if (value.startsWith("data:image")) {
+        if (isImageDataUrl(value)) {
           // Always optimize images and require Bunny CDN URL output
           processed[key] = await optimizeImage(value, currentPath);
         } else if (value.startsWith("blob:")) {
@@ -639,11 +795,9 @@ export async function translateText(text: string, retryCount = 0): Promise<strin
         headers: {
           "Content-Type": "application/json",
         },
+        timeout: TRANSLATION_REQUEST_TIMEOUT_MS,
       }
     );
-
-    // Add detailed logging for debugging
-    console.log("API Response:", JSON.stringify(response.data, null, 2));
 
     // Safely access the response data (Google AI Studio format)
     if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
@@ -653,13 +807,32 @@ export async function translateText(text: string, retryCount = 0): Promise<strin
       console.log("Translated text:", cleanedTranslation);
       return cleanedTranslation;
     } else {
-      console.error("Unexpected API response format:", response.data);
+      console.error("[AI Translation][Single] Unexpected API response format", {
+        model: GOOGLE_AI_MODEL,
+        timeoutMs: TRANSLATION_REQUEST_TIMEOUT_MS,
+        textLength: text.length,
+        textPreview: text.slice(0, 120),
+        responseData: response.data,
+      });
       return text;
     }
   } catch (error: unknown) {
-    const err = error as Error & { response?: { status?: number; data?: unknown } };
-    console.error("Translation error details:", {
+    const err = error as Error & {
+      code?: string;
+      response?: {
+        status?: number;
+        data?: unknown;
+      };
+    };
+
+    console.error("[AI Translation][Single] Translation failed", {
+      model: GOOGLE_AI_MODEL,
+      timeoutMs: TRANSLATION_REQUEST_TIMEOUT_MS,
+      retryCount,
+      textLength: text.length,
+      textPreview: text.slice(0, 120),
       status: err.response?.status,
+      code: err.code,
       data: err.response?.data,
       message: err.message,
       stack: err.stack,
@@ -732,7 +905,7 @@ export async function translateContent(content: Record<string, unknown>): Promis
           translated[key] = await translateContent(value as Record<string, unknown>);
         }
       } else if (typeof value === "string") {
-        translated[key] = isImageRelatedString(value) || value.startsWith("data:image") ? value : await translateText(value);
+        translated[key] = isImageRelatedString(value) || isImageDataUrl(value) ? value : await translateText(value);
       } else {
         translated[key] = value;
       }
@@ -747,8 +920,12 @@ export async function translateContent(content: Record<string, unknown>): Promis
 
 // Helper function to check if a string is image-related or animation-related
 function isImageRelatedString(str: string): boolean {
+  if (isImageDataUrl(str) || str.startsWith("blob:")) {
+    return true;
+  }
+
   // Check for common image extensions
-  const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i;
+  const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp|avif|heic|heif|tif|tiff|jfif|ico)$/i;
   // Check for image-related keywords
   const imageKeywords = /(image|photo|picture|preview|thumbnail|icon)/i;
   // Check for animation-related keywords and extensions
@@ -788,7 +965,7 @@ export async function logContentSize(content: Record<string, unknown>, operation
       for (const [key, value] of objEntries) {
         const currentPath = path ? `${path}.${key}` : key;
         
-        if (typeof value === 'string' && value.startsWith('data:image')) {
+        if (typeof value === 'string' && isImageDataUrl(value)) {
           // Extract base64 data
           const base64Data = value.split(';base64,')[1];
           if (base64Data) {
@@ -808,7 +985,7 @@ export async function logContentSize(content: Record<string, unknown>, operation
           }
         } else if (typeof value === 'object' && value !== null) {
           // Check for image objects with preview property
-          if ('preview' in value && typeof (value as { preview: unknown }).preview === 'string' && (value as { preview: string }).preview.startsWith('data:image')) {
+          if ('preview' in value && typeof (value as { preview: unknown }).preview === 'string' && isImageDataUrl((value as { preview: string }).preview)) {
             const base64Data = (value as { preview: string }).preview.split(';base64,')[1];
             if (base64Data) {
               const sizeInBytes = base64Data.length * 0.75;

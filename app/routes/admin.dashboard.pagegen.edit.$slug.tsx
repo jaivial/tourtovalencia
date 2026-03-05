@@ -125,11 +125,13 @@ export default function EditPageRoute() {
   };
 
   const adaptSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => {
+    const isImageValue = typeof value !== 'string' && ('preview' in value || 'file' in value);
+
     console.log(`EditPage: Processing section2 update for field ${String(field)}:`, 
       typeof value === 'string' 
         ? value 
-        : 'file' in value 
-          ? `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`
+        : isImageValue
+          ? `File: ${('file' in value && value.file?.name) ? value.file.name : 'none'}, Preview: ${('preview' in value && typeof value.preview === 'string' ? value.preview.substring(0, 30) : '')}...`
           : `Lottie: enabled=${(value as { enabled: boolean; src: string }).enabled}, src=${(value as { enabled: boolean; src: string }).src}`);
     
     // Handle lottieAnimation object
