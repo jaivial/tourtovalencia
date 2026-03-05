@@ -56,7 +56,7 @@ export type EditableCardType = {
   image: {
     preview: string;
     file?: File;
-  };
+  } | null;
 };
 
 export type IndexFeaturesType = {
@@ -96,7 +96,7 @@ export type sanJuanSection1Type = {
   backgroundImage?: {
     file?: File;
     preview: string;
-  };
+  } | null;
 };
 
 export type sanJuansection2Type = {
@@ -106,7 +106,7 @@ export type sanJuansection2Type = {
   sectionImage?: {
     file?: File;
     preview: string;
-  };
+  } | null;
   lottieAnimation?: {
     enabled: boolean;
     src: string;
@@ -129,7 +129,7 @@ export type sanJuanSection5Type = {
   thirdH3: string;
   fourthH3: string;
   fifthH3: string;
-  image?: string; // CDN URL for tour image
+  image?: string | null; // CDN URL for tour image
   lottieAnimation?: {
     enabled: boolean;
     src: string;
@@ -151,6 +151,13 @@ export type SanJuanSection6Type = {
   button: string;
 };
 
+export type InfoRequestContactType = {
+  countryCode: string;
+  dialCode: string;
+  phoneNumber: string;
+  message: string;
+};
+
 export type FooterType = {
   firstH4: string;
   firstp: string;
@@ -166,7 +173,7 @@ export type FooterType = {
 
 export type sanJuanSection3Type = {
   images: {
-    source: string;
+    source: string | null;
     alt: string;
   }[];
 };

@@ -53,8 +53,10 @@ const SanJuanSection5Dynamic: React.FC<SanJuanSection5DynamicProps> = ({
   const getResponsiveTextSize = (small: string, semismall: string, medium: string, semilarge: string, large: string) => 
     `${width <= 350 ? small : width <= 450 ? semismall : width <= 580 ? medium : width <= 768 ? semilarge : large}`;  
 
-  // Use the image from the database or fallback to the default
-  const imageUrl = SanJuanSection5Text.image || "https://cdn.tourtovalencia.com/public/plazareina2.jpg";
+  const imageRemoved = SanJuanSection5Text.image === null || SanJuanSection5Text.image === "";
+  const imageUrl = imageRemoved
+    ? null
+    : (SanJuanSection5Text.image || "https://cdn.tourtovalencia.com/public/plazareina2.jpg");
 
   // Function to render the appropriate animation based on the source
   const renderAnimation = () => {
@@ -193,16 +195,18 @@ const SanJuanSection5Dynamic: React.FC<SanJuanSection5DynamicProps> = ({
           transition={{ duration: 0.6, delay: 0.3 }}
           className="w-full flex flex-row flex-wrap justify-center items-center p-6 gap-8 -translate-y-[40px]"
         >
-          <motion.img 
-            whileHover={{ scale: 1.03 }}
-            transition={{ duration: 0.3 }}
-            src={imageUrl}
-            alt="Tour experience image" 
-            className="
-              rounded-2xl max-h-[350px] object-cover 
-              shadow-lg hover:shadow-xl transition-shadow duration-300
-            "
-          />
+          {imageUrl && (
+            <motion.img 
+              whileHover={{ scale: 1.03 }}
+              transition={{ duration: 0.3 }}
+              src={imageUrl}
+              alt="Tour experience image" 
+              className="
+                rounded-2xl max-h-[350px] object-cover 
+                shadow-lg hover:shadow-xl transition-shadow duration-300
+              "
+            />
+          )}
           
           <motion.div 
             animate={isInView ? 
@@ -212,7 +216,7 @@ const SanJuanSection5Dynamic: React.FC<SanJuanSection5DynamicProps> = ({
             transition={{ duration: 0.6, delay: 0.5 }}
             className={`
               flex flex-col gap-3 my-auto
-              ${width <= 1280 ? "w-full" : "w-1/2"}
+              ${width <= 1280 || !imageUrl ? "w-full" : "w-1/2"}
             `}
           >
             {[

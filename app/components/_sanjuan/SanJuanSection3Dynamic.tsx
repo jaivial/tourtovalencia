@@ -8,7 +8,7 @@ import ImageGalleryModal from "../ui/ImageGalleryModal";
 
 // Child Props type
 type ImageType = {
-  source: string;
+  source: string | null;
   alt: string;
 };
 
@@ -17,8 +17,6 @@ type ChildProps = {
   images?: ImageType[];
 };
 
-const FALLBACK_IMAGE = 'https://cdn.tourtovalencia.com/public/hero1.webp';
-
 const SanJuanSection3Dynamic: React.FC<ChildProps> = ({ width, images = [] }) => {
   const plugin = React.useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
   const ref = React.useRef(null);
@@ -26,23 +24,19 @@ const SanJuanSection3Dynamic: React.FC<ChildProps> = ({ width, images = [] }) =>
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
 
-  // Process images - use source directly, fallback only if missing
+  // Hide removed images (null/empty source)
   const processedImages = React.useMemo(() => {
-    const result = images.map(img => ({
-      source: img.source || FALLBACK_IMAGE,
-      alt: img.alt || "Tour image"
-    }));
-
-    // Fill remaining slots with fallback image
-    while (result.length < 6) {
-      result.push({
-        source: FALLBACK_IMAGE,
-        alt: `Tour image ${result.length + 1}`
-      });
-    }
-
-    return result;
+    return images
+      .filter((img): img is { source: string; alt: string } => typeof img?.source === "string" && img.source.trim().length > 0)
+      .map((img) => ({
+        source: img.source,
+        alt: img.alt || "Tour image",
+      }));
   }, [images]);
+
+  if (processedImages.length === 0) {
+    return null;
+  }
 
   const imageUrls = processedImages.map(img => img.source);
 
@@ -65,72 +59,20 @@ const SanJuanSection3Dynamic: React.FC<ChildProps> = ({ width, images = [] }) =>
           className="w-[95%] max-w-[1280px] mx-auto relative z-[1] px-4"
         >
           {width > 580 ? (
-            <div className="grid grid-cols-4 grid-rows-3 gap-4 h-[900px] my-10">
-              {/* Large image spanning 2 rows */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileHover={{ scale: 1.02 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl cursor-pointer"
-                onClick={() => handleImageClick(0)}
-              >
-                <img 
-                  src={processedImages[0].source}
-                  alt={processedImages[0].alt}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              </motion.div>
-
-              {/* Top right image */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileHover={{ scale: 1.02 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className="col-span-2 relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl cursor-pointer"
-                onClick={() => handleImageClick(1)}
-              >
-                <img 
-                  src={processedImages[1].source}
-                  alt={processedImages[1].alt}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              </motion.div>
-
-              {/* Bottom right images */}
-              {[2, 3].map((index) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-10">
+              {processedImages.map((image, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, scale: 0.95 }}
                   whileHover={{ scale: 1.02 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
-                  className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl cursor-pointer"
+                  className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl cursor-pointer aspect-[4/3]"
                   onClick={() => handleImageClick(index)}
                 >
                   <img 
-                    src={processedImages[index].source}
-                    alt={processedImages[index].alt}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                </motion.div>
-              ))}
-
-              {/* Third row images */}
-              {[4, 5].map((index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileHover={{ scale: 1.02 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                  className="col-span-2 relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl cursor-pointer"
-                  onClick={() => handleImageClick(index)}
-                >
-                  <img 
-                    src={processedImages[index].source}
-                    alt={processedImages[index].alt}
+                    src={image.source}
+                    alt={image.alt}
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 </motion.div>

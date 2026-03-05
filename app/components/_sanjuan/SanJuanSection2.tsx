@@ -30,7 +30,7 @@ type ChildProps = {
 const SanJuanSection2: React.FC<ChildProps> = ({ width, SanJuanSection2Text }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
-  const { imageStyle } = useSanJuanSection2(SanJuanSection2Text);
+  const { imageSrc, hasImage } = useSanJuanSection2(SanJuanSection2Text);
   const isLottieEnabled = SanJuanSection2Text.lottieAnimation?.enabled ?? true;
   const lottieSource = SanJuanSection2Text.lottieAnimation?.src || "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie";
 
@@ -198,33 +198,34 @@ const SanJuanSection2: React.FC<ChildProps> = ({ width, SanJuanSection2Text }) =
           ))}
         </motion.div>
 
-        {/* Right Image Section */}
-        <motion.div 
-          animate={isInView ? 
-            { opacity: 1, x: 0 } : 
-            { opacity: 0, x: 50 }
-          }
-          initial={{ opacity: 0, x: 50 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className={`
-            w-full max-w-[720px] px-4 
-            flex flex-col justify-center items-center relative 
-            ${width <= 1280 ? "h-fit mt-8 mb-0" : "h-[600px]"}
-          `}
-        >
-          <motion.img 
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.3 }}
-            src={imageStyle.src}
-            alt="Cuevas de San Juan, visita guiada y viaje en barca." 
-            className="
-              w-full h-auto rounded-2xl mt-28
-              shadow-lg hover:shadow-xl 
-              transition-shadow duration-300 
-              max-w-[100vw]
-            " 
-          />
-        </motion.div>
+        {hasImage && imageSrc && (
+          <motion.div 
+            animate={isInView ? 
+              { opacity: 1, x: 0 } : 
+              { opacity: 0, x: 50 }
+            }
+            initial={{ opacity: 0, x: 50 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className={`
+              w-full max-w-[720px] px-4 
+              flex flex-col justify-center items-center relative 
+              ${width <= 1280 ? "h-fit mt-8 mb-0" : "h-[600px]"}
+            `}
+          >
+            <motion.img 
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.3 }}
+              src={imageSrc}
+              alt="Cuevas de San Juan, visita guiada y viaje en barca." 
+              className="
+                w-full h-auto rounded-2xl mt-28
+                shadow-lg hover:shadow-xl 
+                transition-shadow duration-300 
+                max-w-[100vw]
+              " 
+            />
+          </motion.div>
+        )}
       </motion.div>
     </div>
   );

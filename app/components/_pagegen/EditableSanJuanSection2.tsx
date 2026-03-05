@@ -37,7 +37,7 @@ import {
 interface EditableSanJuanSection2Props {
   width: number;
   data: sanJuansection2Type;
-  onUpdate: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => void;
+  onUpdate: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string } | null) => void;
 }
 
 // Predefined animation options
@@ -388,7 +388,7 @@ const EditableSanJuanSection2: React.FC<EditableSanJuanSection2Props> = ({
                 }}
                 onImageRemove={() => {
                   handleImageRemove();
-                  onUpdate("sectionImage", { preview: "" });
+                  onUpdate("sectionImage", null);
                 }} 
                 className="w-full h-full object-cover" 
               />

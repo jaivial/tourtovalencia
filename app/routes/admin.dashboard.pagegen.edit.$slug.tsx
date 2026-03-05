@@ -52,6 +52,8 @@ export default function EditPageRoute() {
     pageName,
     status,
     price,
+    hasPrice,
+    infoRequestContact,
     section1Data,
     section2Data,
     section3Data,
@@ -70,6 +72,10 @@ export default function EditPageRoute() {
     setPageName,
     handleStatusChange,
     handlePriceChange,
+    handleHasPriceChange,
+    handleInfoRequestCountryChange,
+    handleInfoRequestPhoneChange,
+    handleInfoRequestMessageChange,
     handleSection1Update,
     handleSection2Update,
     handleSection3ImageUpdate,
@@ -92,12 +98,16 @@ export default function EditPageRoute() {
     handleStatusChange(checked ? 'active' : 'upcoming');
   };
 
-  const adaptSection1Update = async (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
+  const adaptSection1Update = async (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string } | null) => {
     console.log(`EditPage: Processing section1 update for field ${String(field)}:`, 
-      typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+      typeof value === 'string'
+        ? value
+        : value && typeof value === 'object'
+          ? `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`
+          : 'null');
     
     // If the value is an object with a file, convert it to base64 before updating
-    if (typeof value !== 'string' && value.file) {
+    if (value && typeof value !== 'string' && value.file) {
       try {
         const base64 = await convertFileToBase64(value.file);
         console.log(`EditPage: Converted section1 ${String(field)} image to base64:`, base64.substring(0, 30) + '...');
@@ -124,18 +134,20 @@ export default function EditPageRoute() {
     }
   };
 
-  const adaptSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => {
-    const isImageValue = typeof value !== 'string' && ('preview' in value || 'file' in value);
+  const adaptSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string } | null) => {
+    const isImageValue = !!value && typeof value !== 'string' && ('preview' in value || 'file' in value);
 
     console.log(`EditPage: Processing section2 update for field ${String(field)}:`, 
       typeof value === 'string' 
         ? value 
+        : value == null
+          ? 'null'
         : isImageValue
           ? `File: ${('file' in value && value.file?.name) ? value.file.name : 'none'}, Preview: ${('preview' in value && typeof value.preview === 'string' ? value.preview.substring(0, 30) : '')}...`
           : `Lottie: enabled=${(value as { enabled: boolean; src: string }).enabled}, src=${(value as { enabled: boolean; src: string }).src}`);
     
     // Handle lottieAnimation object
-    if (field === 'lottieAnimation' && typeof value === 'object' && 'enabled' in value) {
+    if (field === 'lottieAnimation' && value && typeof value === 'object' && 'enabled' in value) {
       const lottieValue = value as { enabled: boolean; src: string };
       const updatedData = { 
         ...section2Data, 
@@ -149,7 +161,7 @@ export default function EditPageRoute() {
     }
     
     // If the value is an object with a file, convert it to base64 before updating
-    if (typeof value !== 'string' && 'file' in value && value.file) {
+    if (value && typeof value !== 'string' && 'file' in value && value.file) {
       try {
         const base64 = await convertFileToBase64(value.file);
         console.log(`EditPage: Converted section2 ${String(field)} image to base64:`, base64.substring(0, 30) + '...');
@@ -195,7 +207,7 @@ export default function EditPageRoute() {
     handleSection4Update(updatedData);
   };
 
-  const adaptSection5Update = (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string }) => {
+  const adaptSection5Update = (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string } | null) => {
     const updatedData = { ...section5Data, [field]: value };
     handleSection5Update(updatedData);
   };
@@ -292,12 +304,16 @@ export default function EditPageRoute() {
     handleTimelineUpdate(updatedData);
   };
 
-  const adaptCardUpdate = async (field: keyof EditableCardType, value: string | { file?: File; preview: string }) => {
+  const adaptCardUpdate = async (field: keyof EditableCardType, value: string | { file?: File; preview: string } | null) => {
     console.log(`EditPage: Processing card update for field ${String(field)}:`, 
-      typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+      typeof value === 'string'
+        ? value
+        : value && typeof value === 'object'
+          ? `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`
+          : 'null');
     
     // If the value is an object with a file, convert it to base64 before updating
-    if (typeof value !== 'string' && value.file) {
+    if (value && typeof value !== 'string' && value.file) {
       try {
         const base64 = await convertFileToBase64(value.file);
         console.log(`EditPage: Converted card ${String(field)} image to base64:`, base64.substring(0, 30) + '...');
@@ -417,7 +433,13 @@ export default function EditPageRoute() {
               onStatusChange={adaptStatusChange}
               pageName={pageName}
               price={price}
+              hasPrice={hasPrice}
+              infoRequestContact={infoRequestContact}
               onPriceChange={handlePriceChange}
+              onHasPriceChange={handleHasPriceChange}
+              onInfoRequestCountryChange={handleInfoRequestCountryChange}
+              onInfoRequestPhoneChange={handleInfoRequestPhoneChange}
+              onInfoRequestMessageChange={handleInfoRequestMessageChange}
               indexSection5Data={indexSection5Data}
               onIndexSection5Update={adaptIndexSection5Update}
               section1Data={section1Data}

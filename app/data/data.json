@@ -624,7 +624,8 @@
         "next": "Next",
         "bookNow": "Book Now",
         "completeBooking": "Complete Your Booking",
-        "totalAmount": "Your total amount:"
+        "totalAmount": "Your total amount:",
+        "sendMessage": "Send message"
       },
       "feature": {
         "title": "Book Your Experience",
@@ -696,6 +697,11 @@
         "people": "people",
         "priceCalculation": "Price calculation: {partySize} people × {price}€ per person",
         "paymentMessage": "Your booking will be confirmed after successful payment. Click \"Book Now\" to proceed to payment."
+      },
+      "infoRequestStep": {
+        "progressLabel": "Request Info",
+        "description": "Ask about this service with no commitment! Click the button to request information.",
+        "missingContact": "Information requests are temporarily unavailable for this service."
       },
       "payment": {
         "buttons": {
@@ -1346,7 +1352,8 @@
         "next": "Siguiente",
         "bookNow": "Reservar Ahora",
         "completeBooking": "Completar tu Reserva",
-        "totalAmount": "Importe total:"
+        "totalAmount": "Importe total:",
+        "sendMessage": "Enviar mensaje"
       },
       "feature": {
         "title": "Reserva tu Experiencia",
@@ -1418,6 +1425,11 @@
         "people": "personas",
         "priceCalculation": "Cálculo del precio: {partySize} personas × {price}€ por persona",
         "paymentMessage": "Tu reserva se confirmará después del pago exitoso. Haz clic en \"Reservar Ahora\" para proceder al pago."
+      },
+      "infoRequestStep": {
+        "progressLabel": "Solicitar info",
+        "description": "Pregunta acerca de este servicio sin compromiso! Haz click en el botón para pedir información.",
+        "missingContact": "La solicitud de información no está disponible temporalmente para este servicio."
       },
       "payment": {
         "buttons": {

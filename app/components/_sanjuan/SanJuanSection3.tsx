@@ -23,7 +23,9 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
 
-  const imageUrls = images.map(img => img.source);
+  const imageUrls = images
+    .map((img) => (typeof img.source === "string" ? img.source : ""))
+    .filter((src) => src.trim().length > 0);
 
   const handleImageClick = (index: number) => {
     setSelectedImageIndex(index);
@@ -56,7 +58,7 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                 onClick={() => handleImageClick(0)}
               >
                 <img 
-                  src={images[0].source}
+                  src={images[0].source || ""}
                   alt={images[0].alt}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -72,7 +74,7 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                 onClick={() => handleImageClick(1)}
               >
                 <img 
-                  src={images[1].source}
+                  src={images[1].source || ""}
                   alt={images[1].alt}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -88,7 +90,7 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                 onClick={() => handleImageClick(2)}
               >
                 <img 
-                  src={images[2].source}
+                  src={images[2].source || ""}
                   alt={images[2].alt}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -103,7 +105,7 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                 onClick={() => handleImageClick(3)}
               >
                 <img 
-                  src={images[3].source}
+                  src={images[3].source || ""}
                   alt={images[3].alt}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -119,7 +121,7 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                 onClick={() => handleImageClick(4)}
               >
                 <img 
-                  src={images[4].source}
+                  src={images[4].source || ""}
                   alt={images[4].alt}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -134,7 +136,7 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                 onClick={() => handleImageClick(5)}
               >
                 <img 
-                  src={images[5].source}
+                  src={images[5].source || ""}
                   alt={images[5].alt}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -170,7 +172,7 @@ const SanJuanSection3: React.FC<ChildProps> = ({ width }) => {
                         <Card className="w-full aspect-square overflow-hidden shadow-lg hover:shadow-xl transition-all">
                           <CardContent className="w-full h-full p-0">
                             <img
-                              src={image.source}
+                              src={image.source || ""}
                               alt={image.alt}
                               className="w-full h-full object-cover"
                             />

@@ -4,9 +4,17 @@ import { useEffect, useState } from "react";
 
 interface FloatingButtonProps {
   text: string;
+  href?: string;
+  external?: boolean;
+  isHidden?: boolean;
 }
 
-const FloatingButton: React.FC<FloatingButtonProps> = ({ text }) => {
+const FloatingButton: React.FC<FloatingButtonProps> = ({
+  text,
+  href = "/book",
+  external = false,
+  isHidden = false,
+}) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isFooterVisible, setIsFooterVisible] = useState(false);
 
@@ -64,30 +72,46 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({ text }) => {
   // Button should be visible only when:
   // 1. We've scrolled past the hero section (isVisible is true)
   // 2. The footer is not visible
-  const shouldShowButton = isVisible && !isFooterVisible;
+  const shouldShowButton = isVisible && !isFooterVisible && !isHidden && Boolean(href);
+
+  if (isHidden || !href) {
+    return null;
+  }
+
+  const button = (
+    <AnimatePresence>
+      {shouldShowButton && (
+        <motion.div 
+          className="fixed bottom-8 mx-auto z-50"
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 100, opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <button 
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg py-4 px-12 rounded-full shadow-xl transition-colors duration-300"
+            aria-label={text}
+          >
+            {text}
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className="w-full flex justify-center">
+        {button}
+      </a>
+    );
+  }
 
   return (
-    <Link to="/book" className="w-full flex justify-center">
-      <AnimatePresence>
-        {shouldShowButton && (
-          <motion.div 
-            className="fixed bottom-8 mx-auto z-50"
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <button 
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg py-4 px-12 rounded-full shadow-xl transition-colors duration-300"
-              aria-label="Book now"
-            >
-              {text}
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <Link to={href} className="w-full flex justify-center">
+      {button}
     </Link>
   );
 };

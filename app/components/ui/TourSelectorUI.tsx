@@ -45,7 +45,11 @@ export function TourSelectorUI({
   
   // Helper function to get the tour price
   const getTourPrice = (tour: Tour) => {
-    return tour.tourPrice || (tour.content && tour.content.en && tour.content.en.price) || 0;
+    return tour.tourPrice ?? (tour.content && tour.content.en ? tour.content.en.price : 0) ?? 0;
+  };
+
+  const getTourHasPrice = (tour: Tour) => {
+    return tour.content?.en?.hasPrice ?? tour.content?.es?.hasPrice ?? tour.hasPrice ?? true;
   };
 
   return (
@@ -67,7 +71,7 @@ export function TourSelectorUI({
           {tours && tours.length > 0 ? (
             tours.map((tour) => (
               <SelectItem key={tour.slug} value={tour.slug}>
-                {getTourName(tour)} - {getTourPrice(tour)}€
+                {getTourName(tour)} - {getTourHasPrice(tour) ? `${getTourPrice(tour)}€` : (currentLanguage === "en" ? "No price" : "Sin precio")}
               </SelectItem>
             ))
           ) : (

@@ -4,6 +4,8 @@ import axios from "axios";
 import sharp from "sharp";
 import dotenv from "dotenv";
 import { generateTranslationFiles } from "./i18n/file-generator";
+import type { InfoRequestContactType } from "~/data/data";
+import { normalizeInfoRequestContact } from "./whatsapp";
 
 // Initialize dotenv
 dotenv.config();
@@ -264,13 +266,12 @@ async function uploadImagesToBunnyBatch(
   return results;
 }
 
-const MAX_IMAGE_SIZE = 200 * 1024; // 200KB limit per image (reduced from 400KB)
+const MAX_IMAGE_SIZE = 100 * 1024; // 100KB target per image (best-effort)
 // Configuration for Google AI Studio API
 const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
-// Using gemini-3.1-flash-lite-preview for translation
-const GOOGLE_AI_MODEL = "gemini-3.1-flash-lite-preview";
-// Use v1 API version
-const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/v1/models/${GOOGLE_AI_MODEL}:generateContent`;
+const GOOGLE_AI_MODEL = process.env.GOOGLE_AI_MODEL || "gemini-3.1-pro-preview";
+const GOOGLE_AI_API_VERSION = process.env.GOOGLE_AI_API_VERSION || (GOOGLE_AI_MODEL.startsWith("gemini-3.") ? "v1beta" : "v1");
+const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/${GOOGLE_AI_API_VERSION}/models/${GOOGLE_AI_MODEL}:generateContent`;
 const TRANSLATION_REQUEST_TIMEOUT_MS = Number(process.env.GOOGLE_AI_TIMEOUT_MS || 45000);
 
 if (!GOOGLE_AI_API_KEY) {
@@ -532,94 +533,87 @@ async function optimizeImage(base64Data: string, keyPath: string = "unknown"): P
       throw new Error(`Unsupported file type: ${mimeType}`);
     }
 
-    if (mimeType.toLowerCase() === "image/gif" || mimeType.toLowerCase() === "image/svg+xml") {
-      console.log(`📎 [${keyPath}] Keeping original ${mimeType} format`);
-      return uploadToBunnyCDN(base64Data, keyPath);
-    }
-
     const originalSize = buffer.length;
 
     try {
-      const metadata = await sharp(buffer).metadata();
+      const metadata = await sharp(buffer, { animated: true }).metadata();
       const originalWidth = metadata.width || 1200;
       const originalHeight = metadata.height || 800;
-      const aspectRatio = originalWidth / originalHeight;
+      const aspectRatio = originalWidth / Math.max(originalHeight, 1);
 
       let width = originalWidth;
       let height = originalHeight;
 
       if (width > 1600 || height > 1600) {
-        width = Math.min(width, 1600);
-        height = Math.round(width / aspectRatio);
+        const scale = Math.min(1600 / Math.max(width, 1), 1600 / Math.max(height, 1));
+        width = Math.max(Math.floor(width * scale), 1);
+        height = Math.max(Math.floor(height * scale), 1);
       }
 
-      let quality = 80;
+      let quality = 82;
       let optimizedBuffer: Buffer;
       let currentSize = buffer.length;
+      const minQuality = 20;
+      const minDimension = 280;
 
-      optimizedBuffer = await sharp(buffer)
-        .resize(width, height, { fit: "inside" })
+      optimizedBuffer = await sharp(buffer, { animated: true })
+        .rotate()
+        .resize(width, height, { fit: "inside", withoutEnlargement: true })
         .webp({ quality })
         .toBuffer();
       currentSize = optimizedBuffer.length;
 
-      while (currentSize > MAX_IMAGE_SIZE && quality > 15) {
-        quality -= 10;
-        optimizedBuffer = await sharp(buffer)
-          .resize(width, height, { fit: "inside" })
+      while (currentSize > MAX_IMAGE_SIZE && quality > minQuality) {
+        quality -= 8;
+        optimizedBuffer = await sharp(buffer, { animated: true })
+          .rotate()
+          .resize(width, height, { fit: "inside", withoutEnlargement: true })
           .webp({ quality })
           .toBuffer();
         currentSize = optimizedBuffer.length;
       }
 
-      while (currentSize > MAX_IMAGE_SIZE && (width > 400 || height > 400)) {
-        width = Math.floor(width * 0.8);
-        height = Math.floor(height * 0.8);
+      while (currentSize > MAX_IMAGE_SIZE && (width > minDimension || height > minDimension)) {
+        width = Math.max(Math.floor(width * 0.85), minDimension);
+        height = Math.max(Math.floor(width / aspectRatio), minDimension);
 
-        optimizedBuffer = await sharp(buffer)
-          .resize(width, height, { fit: "inside" })
+        if (height > 1600) {
+          height = 1600;
+          width = Math.max(Math.floor(height * aspectRatio), minDimension);
+        }
+
+        optimizedBuffer = await sharp(buffer, { animated: true })
+          .rotate()
+          .resize(width, height, { fit: "inside", withoutEnlargement: true })
           .webp({ quality })
           .toBuffer();
         currentSize = optimizedBuffer.length;
       }
 
-      if (currentSize > MAX_IMAGE_SIZE) {
-        width = Math.floor(width * 0.7);
-        height = Math.floor(height * 0.7);
-        quality = 10;
+      const isTargetMet = currentSize <= MAX_IMAGE_SIZE;
 
-        optimizedBuffer = await sharp(buffer)
-          .resize(width, height, { fit: "inside" })
-          .webp({ quality })
-          .toBuffer();
-      }
+      console.log(
+        `[ImageUpload] optimized_to_webp path=${keyPath} original_kb=${(originalSize / 1024).toFixed(2)} final_kb=${(optimizedBuffer.length / 1024).toFixed(2)} quality=${quality} dimensions=${width}x${height} source_mime=${mimeType}`,
+      );
 
-      console.log(`📸 [${keyPath}] Image optimized:
-      Original: ${(originalSize / 1024).toFixed(2)}KB (${originalWidth}x${originalHeight}) ${mimeType}
-      Final: ${(optimizedBuffer.length / 1024).toFixed(2)}KB (${width}x${height}) webp
-      Reduction: ${((1 - optimizedBuffer.length / originalSize) * 100).toFixed(2)}%
-      Quality: ${quality}
-    `);
-
-      const optimizedBase64 = `data:image/webp;base64,${optimizedBuffer.toString("base64")}`;
-      const cdnUrl = await uploadToBunnyCDN(optimizedBase64, keyPath);
-      console.log(`🚀 [${keyPath}] Image uploaded to Bunny CDN: ${cdnUrl}`);
-      return cdnUrl;
-    } catch (optimizationError) {
-      const requiresServerTranscoding = mimeType === "image/heic" || mimeType === "image/heif";
-      if (requiresServerTranscoding) {
-        throw new Error(
-          `No se pudo convertir ${mimeType.toUpperCase()} en el servidor. Convierte la imagen a JPG/PNG/WebP e inténtalo de nuevo.`,
+      if (!isTargetMet) {
+        console.warn(
+          `[ImageUpload] best_effort_over_100kb path=${keyPath} final_kb=${(optimizedBuffer.length / 1024).toFixed(2)} target_kb=${(MAX_IMAGE_SIZE / 1024).toFixed(2)}`,
         );
       }
 
+      const optimizedBase64 = `data:image/webp;base64,${optimizedBuffer.toString("base64")}`;
+      const cdnUrl = await uploadToBunnyCDN(optimizedBase64, keyPath);
+      console.log(`[ImageUpload] uploaded_webp path=${keyPath} cdn=${cdnUrl}`);
+      return cdnUrl;
+    } catch (optimizationError) {
       console.warn(
-        `[ImageUpload] Falling back to original format for "${keyPath}" (${mimeType}):`,
+        `[ImageUpload] fallback_original_on_conversion_failure path=${keyPath} source_mime=${mimeType}`,
         optimizationError,
       );
 
       const fallbackUrl = await uploadToBunnyCDN(base64Data, keyPath);
-      console.log(`🚀 [${keyPath}] Original image uploaded to Bunny CDN without optimization: ${fallbackUrl}`);
+      console.log(`[ImageUpload] uploaded_original_fallback path=${keyPath} cdn=${fallbackUrl}`);
       return fallbackUrl;
     }
   } catch (error) {
@@ -663,8 +657,11 @@ export async function processContent(content: Record<string, unknown>, translate
     const processed: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(content)) {
-      // Skip null or undefined values
-      if (value == null) continue;
+      // Preserve null/undefined to support explicit image removal contract
+      if (value == null) {
+        processed[key] = value;
+        continue;
+      }
       
       // Build the current path for logging
       const currentPath = path ? `${path}.${key}` : key;
@@ -1023,7 +1020,10 @@ export async function createPage(name: string, content: Record<string, unknown>,
   const slug = generateSlug(name);
 
   // Extract price from content if it exists
-  const price = typeof content.price === 'number' ? content.price : 0;
+  const hasPrice = typeof content.hasPrice === "boolean" ? content.hasPrice : true;
+  const rawPrice = typeof content.price === 'number' && Number.isFinite(content.price) && content.price >= 0 ? content.price : 0;
+  const price = hasPrice ? rawPrice : 0;
+  const infoRequestContact = normalizeInfoRequestContact(content.infoRequestContact);
 
   // Process the Spanish content (only optimize images, no translation)
   console.log("Processing Spanish content...");
@@ -1040,7 +1040,11 @@ export async function createPage(name: string, content: Record<string, unknown>,
 
   // Ensure price is set in both language versions
   (processedSpanishContent as Record<string, unknown>).price = price;
+  (processedSpanishContent as Record<string, unknown>).hasPrice = hasPrice;
+  (processedSpanishContent as Record<string, unknown>).infoRequestContact = infoRequestContact;
   (englishContent as Record<string, unknown>).price = price;
+  (englishContent as Record<string, unknown>).hasPrice = hasPrice;
+  (englishContent as Record<string, unknown>).infoRequestContact = infoRequestContact;
 
   // Create the final page object with both language versions
   const page = {
@@ -1168,6 +1172,21 @@ async function createTourFromPage(page: Page): Promise<void> {
       return ((content.section4 as Record<string, unknown>).thirdH3 as string);
     return '';
   };
+
+  const hasPrice =
+    (typeof enContent.hasPrice === "boolean" ? enContent.hasPrice : undefined) ??
+    (typeof esContent.hasPrice === "boolean" ? esContent.hasPrice : undefined) ??
+    true;
+
+  const infoRequestContact = normalizeInfoRequestContact(
+    (enContent.infoRequestContact as InfoRequestContactType | undefined) ??
+      (esContent.infoRequestContact as InfoRequestContactType | undefined),
+  );
+
+  const normalizedTourPrice =
+    typeof enContent.price === "number" && Number.isFinite(enContent.price) && enContent.price >= 0
+      ? enContent.price
+      : 0;
   
   const tour = {
     slug: page.slug,
@@ -1175,7 +1194,9 @@ async function createTourFromPage(page: Page): Promise<void> {
       en: enTitle,
       es: esTitle,
     },
-    tourPrice: (enContent.price as number) || 0,
+    tourPrice: hasPrice ? normalizedTourPrice : 0,
+    hasPrice,
+    infoRequestContact,
     status: page.status,
     description: {
       en: getDescription(enContent),

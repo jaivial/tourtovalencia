@@ -12,18 +12,19 @@ type SanJuanSection1Props = {
 };
 
 const SanJuanSection1: React.FC<SanJuanSection1Props> = ({ width, sanJuanSection1Text }) => {
-  const { backgroundStyle } = useSanJuanSection1(sanJuanSection1Text);
+  const { backgroundStyle, hasBackgroundImage } = useSanJuanSection1(sanJuanSection1Text);
 
   return (
     <div className="w-[95%] max-w-[1280px] flex flex-row flex-wrap items-center justify-center mb-10 mx-auto relative z-0">
       <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }} className="w-full flex flex-col items-center justify-center max-w-[1180px] gap-0 bg-white rounded-3xl p-0 shadow-lg">
-        {/* Background image with overlay */}
-        <div className="w-full h-[600px] relative bg-white rounded-2xl overflow-hidden mb-0 px-12">
-          <div 
-            style={backgroundStyle} 
-            className={`absolute inset-0 bg-cover bg-bottom transform transition-transform duration-700 rounded-2xl bg-white ${width <= 700 ? "m-0" : "m-8"}`}
-          ></div>
-        </div>
+        {hasBackgroundImage && (
+          <div className="w-full h-[600px] relative bg-white rounded-2xl overflow-hidden mb-0 px-12">
+            <div 
+              style={backgroundStyle || undefined}
+              className={`absolute inset-0 bg-cover bg-bottom transform transition-transform duration-700 rounded-2xl bg-white ${width <= 700 ? "m-0" : "m-8"}`}
+            ></div>
+          </div>
+        )}
 
         {/* Content */}
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }} viewport={{ once: true }} className="flex flex-col items-center text-center gap-8 max-w-4xl mt-10 p-6">

@@ -11,6 +11,7 @@ import { BookingConfirmationEmail } from "~/components/emails/BookingConfirmatio
 import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
 import { useEffect, useState, useRef } from "react";
 import { getPayPalTransactionDetails } from "~/utils/paypal.server";
+import type { InfoRequestContactType } from "~/data/data";
 
 // PayPal order type
 interface PayPalOrder {
@@ -78,6 +79,8 @@ export type Tour = {
   _id: string;
   slug: string;
   name?: string;
+  hasPrice?: boolean;
+  infoRequestContact?: InfoRequestContactType;
   tourName?: {
     en: string;
     es: string;
@@ -87,11 +90,13 @@ export type Tour = {
     en: {
       title: string;
       price: number;
+      hasPrice: boolean;
       [key: string]: string | number | boolean | object;
     };
     es: {
       title: string;
       price: number;
+      hasPrice: boolean;
       [key: string]: string | number | boolean | object;
     };
   };
@@ -134,16 +139,20 @@ export async function loader() {
         _id: tour._id.toString(),
         slug: tour.slug || "",
         name: tour.tourName?.en || tour.slug || "",
+        hasPrice: typeof tour.hasPrice === "boolean" ? tour.hasPrice : true,
+        infoRequestContact: tour.infoRequestContact,
         tourName: tour.tourName || { en: "", es: "" },
-        tourPrice: tour.tourPrice || 0,
+        tourPrice: typeof tour.tourPrice === "number" ? tour.tourPrice : 0,
         content: {
           en: {
             title: tour.tourName?.en || tour.slug || "",
-            price: tour.tourPrice || 0
+            price: typeof tour.tourPrice === "number" ? tour.tourPrice : 0,
+            hasPrice: typeof tour.hasPrice === "boolean" ? tour.hasPrice : true,
           },
           es: {
             title: tour.tourName?.es || tour.slug || "",
-            price: tour.tourPrice || 0
+            price: typeof tour.tourPrice === "number" ? tour.tourPrice : 0,
+            hasPrice: typeof tour.hasPrice === "boolean" ? tour.hasPrice : true,
           }
         }
       }))

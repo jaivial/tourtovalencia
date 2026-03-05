@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 const SUPPORTED_IMAGE_ACCEPT = "image/*,.jpg,.jpeg,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff,.svg,.jfif";
 
 type ImageUploadProps = {
-  imageUrl: string;
+  imageUrl?: string | null;
   className?: string;
   onImageChange: (file: File) => void;
   onImageRemove: () => void;
@@ -19,6 +19,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const hasImage = typeof imageUrl === "string" && imageUrl.trim().length > 0;
 
   // Debug logs
   console.log('ImageUpload: Component rendered with imageUrl:', 
@@ -68,12 +69,17 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         onChange={handleFileChange}
       />
 
-      {/* Image element with styling matching SanJuanSection5.tsx */}
-      <img 
-        src={imageUrl || 'https://cdn.tourtovalencia.com/public/plazareina2.jpg'}
-        alt="Section content"
-        className="w-full h-full object-cover rounded-2xl transition-transform duration-700"
-      />
+      {hasImage ? (
+        <img 
+          src={imageUrl}
+          alt="Section content"
+          className="w-full h-full object-cover rounded-2xl transition-transform duration-700"
+        />
+      ) : (
+        <div className="w-full h-full rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/60 flex items-center justify-center px-4 text-center text-sm text-blue-700">
+          Sin imagen
+        </div>
+      )}
       
       {/* Overlay with buttons */}
       <div className={`absolute inset-0 bg-black/50 transition-opacity duration-300 rounded-2xl flex items-center justify-center z-10 ${
@@ -89,7 +95,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           >
             <Upload className="h-4 w-4" />
           </Button>
-          {imageUrl && (
+          {hasImage && (
             <Button
               variant="ghost"
               size="icon"

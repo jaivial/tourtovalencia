@@ -9,7 +9,7 @@ import { convertFileToBase64 } from "~/utils/image.client";
 type EditableSanJuanSection1Props = {
   width: number;
   data: sanJuanSection1Type;
-  onUpdate: (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => void;
+  onUpdate: (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string } | null) => void;
 };
 
 const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({ 
@@ -41,7 +41,7 @@ const EditableSanJuanSection1: React.FC<EditableSanJuanSection1Props> = ({
 
   const handleLocalImageRemove = () => {
     handleImageRemove();
-    onUpdate('backgroundImage', { preview: "" });
+    onUpdate('backgroundImage', null);
   };
 
   return (

@@ -48,7 +48,13 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
   
   const locale = currentLanguage === "es" ? es : undefined;
   
-  const tourPrice = selectedTour?.content?.en?.price || selectedTour?.tourPrice || 120;
+  const hasPrice =
+    selectedTour?.content?.en?.hasPrice ??
+    selectedTour?.content?.es?.hasPrice ??
+    selectedTour?.hasPrice ??
+    true;
+  const rawTourPrice = selectedTour?.content?.en?.price ?? selectedTour?.tourPrice ?? 0;
+  const tourPrice = hasPrice ? rawTourPrice : 0;
   const totalPrice = formData.partySize * tourPrice;
 
   const tourName = currentLanguage === "en" 
@@ -66,6 +72,7 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
   const priceCalculation = bookingStepThreeText.priceCalculation
     .replace('{partySize}', formData.partySize.toString())
     .replace('{price}', tourPrice.toString());
+  const noPriceText = currentLanguage === "en" ? "No price" : "Sin precio";
 
   const formatDate = (dateString: string) => {
     try {
@@ -198,9 +205,13 @@ export const BookingStepThree = ({ bookingStepThreeText }: BookingStepThreeProps
               <Receipt className="h-5 w-5" />
               {bookingStepThreeText.labels.totalPrice}
             </span>
-            <span className="text-2xl font-bold text-center sm:text-left">{totalPrice}€</span>
+            <span className="text-2xl font-bold text-center sm:text-left">
+              {hasPrice ? `${totalPrice}€` : noPriceText}
+            </span>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground text-center sm:text-left">{priceCalculation}</p>
+          {hasPrice && (
+            <p className="mt-2 text-sm text-muted-foreground text-center sm:text-left">{priceCalculation}</p>
+          )}
         </div>
       </Card>
 

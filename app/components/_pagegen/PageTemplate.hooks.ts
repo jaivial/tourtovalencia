@@ -78,10 +78,16 @@ export const usePageCreation = () => {
     
     try {
       const processedContent = await processImages(pageData.content);
+      const normalizedHasPrice = typeof processedContent.hasPrice === 'boolean' ? processedContent.hasPrice : true;
+      const normalizedPrice =
+        typeof processedContent.price === 'number' && Number.isFinite(processedContent.price) && processedContent.price >= 0
+          ? processedContent.price
+          : 0;
       
       const contentWithPrice = {
         ...processedContent,
-        price: typeof processedContent.price === 'number' ? processedContent.price : 0,
+        hasPrice: normalizedHasPrice,
+        price: normalizedHasPrice ? normalizedPrice : 0,
       };
 
       const serializedContent = JSON.stringify(contentWithPrice);

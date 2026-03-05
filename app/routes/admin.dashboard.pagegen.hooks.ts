@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { 
+  EditableCardType,
+  InfoRequestContactType,
   IndexSection5Type, 
   sanJuanSection1Type, 
   sanJuanSection3Type, 
@@ -10,6 +12,7 @@ import {
 } from "~/data/data";
 import { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 import { convertFileToBase64 } from "~/utils/image.client";
+import { countries } from "~/data/countries";
 
 // Default data
 const DEFAULT_SECTION1_DATA: sanJuanSection1Type = {
@@ -40,7 +43,7 @@ const DEFAULT_SECTION2_DATA: sanJuansection2Type = {
 };
 
 const DEFAULT_SECTION3_DATA: sanJuanSection3Type = {
-  images: Array(8).fill({ source: "", alt: "Gallery image" })
+  images: Array.from({ length: 8 }, () => ({ source: null, alt: "Gallery image" }))
 };
 
 const DEFAULT_SECTION4_DATA: sanJuansection4Type = {
@@ -92,6 +95,35 @@ const DEFAULT_TIMELINE_DATA: TimelineDataType = {
   ]
 };
 
+const DEFAULT_CARD_DATA: EditableCardType = {
+  title: "",
+  duration: "",
+  description: "",
+  additionalInfo: "",
+  quote: "",
+  image: null,
+};
+
+const DEFAULT_INFO_REQUEST_CONTACT: InfoRequestContactType = {
+  countryCode: "ES",
+  dialCode: "+34",
+  phoneNumber: "",
+  message: "Hola, me gustaría pedir información sobre este servicio.",
+};
+
+function getDialCodeByCountryCode(countryCode: string): string {
+  const country = countries.find((item) => item.code === countryCode);
+  return country?.dialCode || "+34";
+}
+
+function normalizePriceValue(value: number): number {
+  if (Number.isFinite(value) && value >= 0) {
+    return value;
+  }
+
+  return 0;
+}
+
 export const usePageGenerator = () => {
   const [step, setStep] = useState<'name' | 'create' | 'template'>('name');
   const [pageName, setPageName] = useState('');
@@ -106,10 +138,13 @@ export const usePageGenerator = () => {
   const [section6Data, setSection6Data] = useState<SanJuanSection6Type>(DEFAULT_SECTION6_DATA);
   const [indexSection5Data, setIndexSection5Data] = useState<IndexSection5Type>(DEFAULT_INDEX_SECTION5_DATA);
   const [timelineData, setTimelineData] = useState<TimelineDataType>(DEFAULT_TIMELINE_DATA);
+  const [cardData, setCardData] = useState<EditableCardType>(DEFAULT_CARD_DATA);
   const [price, setPrice] = useState<number>(0);
+  const [hasPrice, setHasPrice] = useState<boolean>(true);
+  const [infoRequestContact, setInfoRequestContact] = useState<InfoRequestContactType>(DEFAULT_INFO_REQUEST_CONTACT);
 
   // Section 1 handlers
-  const handleSection1Update = (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
+  const handleSection1Update = (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string } | null) => {
     setSection1Data(prev => ({
       ...prev,
       [field]: value
@@ -131,12 +166,12 @@ export const usePageGenerator = () => {
   const handleSection1ImageRemove = () => {
     setSection1Data(prev => ({
       ...prev,
-      backgroundImage: { preview: 'https://cdn.tourtovalencia.com/public/olgaphoto3.jpeg' }
+      backgroundImage: null
     }));
   };
 
   // Section 2 handlers
-  const handleSection2Update = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => {
+  const handleSection2Update = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string } | null) => {
     setSection2Data(prev => ({
       ...prev,
       [field]: value
@@ -158,7 +193,7 @@ export const usePageGenerator = () => {
   const handleSection2ImageRemove = () => {
     setSection2Data(prev => ({
       ...prev,
-      sectionImage: { preview: 'https://cdn.tourtovalencia.com/public/olgaphoto3.jpeg' }
+      sectionImage: null
     }));
   };
 
@@ -181,7 +216,7 @@ export const usePageGenerator = () => {
     setSection3Data(prev => ({
       ...prev,
       images: prev.images.map((img, i) => 
-        i === index ? { source: "", alt: "Gallery image" } : img
+        i === index ? { source: null, alt: "Gallery image" } : img
       )
     }));
   };
@@ -195,7 +230,7 @@ export const usePageGenerator = () => {
   };
 
   // Section 5 handler
-  const handleSection5Update = (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string }) => {
+  const handleSection5Update = (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string } | null) => {
     setSection5Data(prev => ({
       ...prev,
       [field]: value
@@ -230,7 +265,7 @@ export const usePageGenerator = () => {
   const handleSection5ImageRemove = () => {
     setSection5Data(prev => ({
       ...prev,
-      image: "https://cdn.tourtovalencia.com/public/plazareina2.jpg" // Reset to default image
+      image: null
     }));
   };
 
@@ -266,14 +301,53 @@ export const usePageGenerator = () => {
     }));
   };
 
+  const handleCardUpdate = (field: keyof EditableCardType, value: string | { file?: File; preview: string } | null) => {
+    setCardData(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
   // Price handler
   const handlePriceChange = (value: number) => {
-    setPrice(value);
+    const normalizedPrice = normalizePriceValue(value);
+    setPrice(normalizedPrice);
     
-    // Update the price display in section6
+    if (hasPrice) {
+      setSection6Data(prev => ({
+        ...prev,
+        secondH4span: `${normalizedPrice}€ por persona`
+      }));
+    }
+  };
+
+  const handleHasPriceChange = (checked: boolean) => {
+    setHasPrice(checked);
     setSection6Data(prev => ({
       ...prev,
-      secondH4span: `${value}€ por persona`
+      secondH4span: checked ? `${price}€ por persona` : "Sin precio",
+    }));
+  };
+
+  const handleInfoRequestCountryChange = (countryCode: string) => {
+    setInfoRequestContact((prev) => ({
+      ...prev,
+      countryCode,
+      dialCode: getDialCodeByCountryCode(countryCode),
+    }));
+  };
+
+  const handleInfoRequestPhoneChange = (phoneNumber: string) => {
+    setInfoRequestContact((prev) => ({
+      ...prev,
+      phoneNumber,
+    }));
+  };
+
+  const handleInfoRequestMessageChange = (message: string) => {
+    setInfoRequestContact((prev) => ({
+      ...prev,
+      message,
     }));
   };
 
@@ -312,7 +386,10 @@ export const usePageGenerator = () => {
     section6Data,
     indexSection5Data,
     timelineData,
+    cardData,
     price,
+    hasPrice,
+    infoRequestContact,
 
     // Setters
     setPageName,
@@ -336,7 +413,12 @@ export const usePageGenerator = () => {
     handleSection6Update,
     handleIndexSection5Update,
     handleTimelineUpdate,
+    handleCardUpdate,
     handleStatusChange,
     handlePriceChange,
+    handleHasPriceChange,
+    handleInfoRequestCountryChange,
+    handleInfoRequestPhoneChange,
+    handleInfoRequestMessageChange,
   };
 };

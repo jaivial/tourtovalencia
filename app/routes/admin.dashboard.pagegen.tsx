@@ -23,7 +23,10 @@ export default function PageGeneratorRoute() {
     section6Data,
     indexSection5Data,
     timelineData,
+    cardData,
     price,
+    hasPrice,
+    infoRequestContact,
     setPageName,
     handleNext,
     handleBack,
@@ -39,7 +42,12 @@ export default function PageGeneratorRoute() {
     handleSection6Update,
     handleIndexSection5Update,
     handleTimelineUpdate,
+    handleCardUpdate,
     handlePriceChange,
+    handleHasPriceChange,
+    handleInfoRequestCountryChange,
+    handleInfoRequestPhoneChange,
+    handleInfoRequestMessageChange,
     setStep,
   } = usePageGenerator();
 
@@ -156,7 +164,13 @@ export default function PageGeneratorRoute() {
                 onStatusChange={handleStatusChange}
                 pageName={pageName}
                 price={price}
+                hasPrice={hasPrice}
+                infoRequestContact={infoRequestContact}
                 onPriceChange={handlePriceChange}
+                onHasPriceChange={handleHasPriceChange}
+                onInfoRequestCountryChange={handleInfoRequestCountryChange}
+                onInfoRequestPhoneChange={handleInfoRequestPhoneChange}
+                onInfoRequestMessageChange={handleInfoRequestMessageChange}
                 indexSection5Data={indexSection5Data}
                 onIndexSection5Update={handleIndexSection5Update}
                 section1Data={section1Data}
@@ -176,6 +190,8 @@ export default function PageGeneratorRoute() {
                 onSection6Update={handleSection6Update}
                 timelineData={timelineData}
                 onTimelineUpdate={handleTimelineUpdate}
+                cardData={cardData}
+                onCardUpdate={handleCardUpdate}
               />
             </div>
           </motion.div>

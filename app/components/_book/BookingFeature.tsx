@@ -3,6 +3,7 @@ import { useBookingActions } from "~/hooks/book.hooks";
 import BookingStepOne from "./BookingStepOne";
 import { BookingStepTwo } from "./BookingStepTwo";
 import { BookingStepThree } from "./BookingStepThree";
+import { BookingStepInfoRequest } from "./BookingStepInfoRequest";
 import { BookingDateFeature } from "../features/BookingDateFeature";
 import { BookingNavigation } from "./BookingNavigation";
 import { BookingProgress } from "./BookingProgress";
@@ -20,9 +21,28 @@ export const BookingFeature = () => {
   const bookingProgressSteps = state.booking.progress.steps;
   const bookingStepOneText = state.booking.bookingStepOne;
   const bookingStepThreeText = state.booking.bookingStepThree;
+  const bookingInfoRequestStepText = state.booking.infoRequestStep;
 
   const context = useBooking();
   const actions = useBookingActions(context);
+  const selectedTourHasPrice =
+    context.selectedTour?.content?.en?.hasPrice ??
+    context.selectedTour?.content?.es?.hasPrice ??
+    context.selectedTour?.hasPrice ??
+    true;
+  const isInfoRequestOnlyTour = !selectedTourHasPrice;
+
+  const infoRequestProgressSteps = [
+    bookingProgressSteps[0],
+    {
+      number: 5,
+      label: bookingInfoRequestStepText.progressLabel,
+    },
+  ];
+
+  const currentProgressSteps = isInfoRequestOnlyTour
+    ? infoRequestProgressSteps
+    : bookingProgressSteps;
   
   // Set the current language in the form data
   useEffect(() => {
@@ -58,6 +78,15 @@ export const BookingFeature = () => {
         return <BookingStepOne bookingStepOneText={bookingStepOneText} />;
       case 4:
         return <BookingStepThree bookingStepThreeText={bookingStepThreeText} />;
+      case 5:
+        return (
+          <BookingStepInfoRequest
+            text={{
+              description: bookingInfoRequestStepText.description,
+              missingContact: bookingInfoRequestStepText.missingContact,
+            }}
+          />
+        );
       default:
         return null;
     }
@@ -84,7 +113,7 @@ export const BookingFeature = () => {
         </Alert>
       )}
 
-      <BookingProgress currentStep={context.currentStep} steps={bookingProgressSteps} />
+      <BookingProgress currentStep={context.currentStep} steps={currentProgressSteps} />
 
       <div className="relative">
         {context.isSubmitting && (

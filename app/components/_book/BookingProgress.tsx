@@ -9,16 +9,22 @@ interface BookingProgressProps {
 }
 
 export const BookingProgress = ({ currentStep, steps }: BookingProgressProps) => {
+  const currentIndex = Math.max(
+    0,
+    steps.findIndex((step) => step.number === currentStep),
+  );
+  const progressWidth = steps.length > 1 ? (currentIndex / (steps.length - 1)) * 100 : 0;
+
   return (
     <div className="relative">
       <div className="absolute top-5 left-14 right-[2.85rem] h-0.5 bg-muted-foreground/20">
-        <div className="absolute h-full bg-primary transition-all duration-500" style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }} />
+        <div className="absolute h-full bg-primary transition-all duration-500" style={{ width: `${progressWidth}%` }} />
       </div>
 
       <div className="relative flex justify-between">
-        {steps.map((step) => {
-          const isCompleted = currentStep > step.number;
-          const isCurrent = currentStep === step.number;
+        {steps.map((step, index) => {
+          const isCompleted = index < currentIndex;
+          const isCurrent = index === currentIndex;
 
           return (
             <div key={step.number} className="flex flex-col items-center gap-2">
@@ -29,7 +35,7 @@ export const BookingProgress = ({ currentStep, steps }: BookingProgressProps) =>
                   ${isCompleted ? "border-primary bg-primary text-primary-foreground" : isCurrent ? "border-primary text-primary bg-white" : "border-muted-foreground/20 text-muted-foreground/40 bg-white"}
                 `}
               >
-                {isCompleted ? <Check className="w-5 h-5" /> : <span className="text-sm font-medium">{step.number}</span>}
+                {isCompleted ? <Check className="w-5 h-5" /> : <span className="text-sm font-medium">{index + 1}</span>}
               </div>
               <span
                 className={`

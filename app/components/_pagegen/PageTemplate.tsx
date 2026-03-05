@@ -12,11 +12,13 @@ import EditableSanJuanSection5 from "./EditableSanJuanSection5";
 import EditableSanJuanSection6 from "./EditableSanJuanSection6";
 import EditableCard from "~/components/_cards/EditableCard";
 import { EditableTimelineFeature, TimelineDataType } from "~/components/_index/EditableTimelineFeature";
-import { EditableCardType, IndexSection5Type, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
+import { EditableCardType, IndexSection5Type, InfoRequestContactType, sanJuanSection1Type, sanJuanSection3Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 import { PublishModal } from "./PublishModal";
 import { usePublishModal, usePageCreation } from "./PageTemplate.hooks";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
+import { CountrySelect } from "~/components/ui/CountrySelect";
+import { Textarea } from "~/components/ui/textarea";
 
 export type PageTemplateProps = {
   status: "active" | "upcoming";
@@ -24,16 +26,16 @@ export type PageTemplateProps = {
   indexSection5Data?: IndexSection5Type;
   onIndexSection5Update?: (field: keyof IndexSection5Type, value: string) => void;
   section1Data?: sanJuanSection1Type;
-  onSection1Update: (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => void | Promise<void>;
+  onSection1Update: (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string } | null) => void | Promise<void>;
   section2Data?: sanJuansection2Type;
-  onSection2Update: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => void | Promise<void>;
+  onSection2Update: (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string } | null) => void | Promise<void>;
   section3Data?: sanJuanSection3Type;
   onSection3ImageUpdate: (index: number, file: File) => void | Promise<void>;
   onSection3ImageRemove: (index: number) => void;
   section4Data?: sanJuansection4Type;
   onSection4Update: (field: keyof sanJuansection4Type, value: string | { enabled: boolean; src: string }) => void;
   section5Data?: sanJuanSection5Type;
-  onSection5Update: (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string }) => void;
+  onSection5Update: (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string } | null) => void;
   onSection5ImageUpdate?: (file: File) => void | Promise<void>;
   onSection5ImageRemove?: () => void | Promise<void>;
   section6Data?: SanJuanSection6Type;
@@ -41,10 +43,16 @@ export type PageTemplateProps = {
   timelineData?: TimelineDataType;
   onTimelineUpdate?: (field: keyof TimelineDataType, value: string | Array<{title: string, description: string}>) => void;
   cardData?: EditableCardType;
-  onCardUpdate?: (field: keyof EditableCardType, value: string | { file?: File; preview: string }) => void | Promise<void>;
+  onCardUpdate?: (field: keyof EditableCardType, value: string | { file?: File; preview: string } | null) => void | Promise<void>;
   pageName: string;
   price: number;
+  hasPrice: boolean;
+  infoRequestContact: InfoRequestContactType;
   onPriceChange: (value: number) => void;
+  onHasPriceChange: (checked: boolean) => void;
+  onInfoRequestCountryChange: (countryCode: string) => void;
+  onInfoRequestPhoneChange: (phoneNumber: string) => void;
+  onInfoRequestMessageChange: (message: string) => void;
   isEditMode?: boolean;
 };
 
@@ -74,7 +82,13 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   onCardUpdate,
   pageName, 
   price, 
+  hasPrice,
+  infoRequestContact,
   onPriceChange, 
+  onHasPriceChange,
+  onInfoRequestCountryChange,
+  onInfoRequestPhoneChange,
+  onInfoRequestMessageChange,
   isEditMode = false 
 }) => {
   const size = useWindowSize();
@@ -84,10 +98,14 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   const [loadingMessage, setLoadingMessage] = useState("Creando página...");
 
   // Add wrapper functions to handle async updates
-  const handleSection1Update = async (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string }) => {
+  const handleSection1Update = async (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string } | null) => {
     try {
       console.log(`PageTemplate: Processing section1 update for field ${String(field)}:`, 
-        typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+        typeof value === 'string'
+          ? value
+          : value && typeof value === 'object'
+            ? `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`
+            : 'null');
       
       // Call the original onSection1Update
       await onSection1Update(field, value);
@@ -96,18 +114,20 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
     }
   };
 
-  const handleSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => {
+  const handleSection2Update = async (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string } | null) => {
     try {
       if (typeof value === 'string') {
         console.log(`PageTemplate: Processing section2 update for field ${String(field)}:`, value);
-      } else if ('file' in value || 'preview' in value) {
+      } else if (value && ('file' in value || 'preview' in value)) {
         const imgObj = value as { file?: File; preview: string };
         console.log(`PageTemplate: Processing section2 update for field ${String(field)}:`, 
           `File: ${imgObj.file?.name || 'none'}, Preview: ${imgObj.preview.substring(0, 30)}...`);
-      } else if ('enabled' in value && 'src' in value) {
+      } else if (value && 'enabled' in value && 'src' in value) {
         const lottieObj = value as { enabled: boolean; src: string };
         console.log(`PageTemplate: Processing section2 update for field ${String(field)}:`, 
           `Lottie: enabled=${lottieObj.enabled}, src=${lottieObj.src.substring(0, 30)}...`);
+      } else {
+        console.log(`PageTemplate: Processing section2 update for field ${String(field)}: null`);
       }
       
       // Call the original onSection2Update
@@ -158,10 +178,14 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   };
 
   // Add a wrapper function for card updates
-  const handleCardUpdate = async (field: keyof EditableCardType, value: string | { file?: File; preview: string }) => {
+  const handleCardUpdate = async (field: keyof EditableCardType, value: string | { file?: File; preview: string } | null) => {
     try {
       console.log(`PageTemplate: Processing card update for field ${String(field)}:`, 
-        typeof value === 'string' ? value : `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`);
+        typeof value === 'string'
+          ? value
+          : value && typeof value === 'object'
+            ? `File: ${value.file?.name || 'none'}, Preview: ${value.preview.substring(0, 30)}...`
+            : 'null');
       
       // Call the original onCardUpdate if provided
       if (onCardUpdate) {
@@ -187,11 +211,13 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   };
 
   // Add a wrapper function for section5 updates
-  const handleSection5Update = (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string }) => {
+  const handleSection5Update = (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string } | null) => {
     try {
       console.log(`PageTemplate: Processing section5 update for field ${String(field)}:`, 
         typeof value === 'string' ? value : 
-        `Lottie: enabled=${value.enabled}, src=${value.src.substring(0, 30)}...`);
+        value
+          ? `Lottie: enabled=${value.enabled}, src=${value.src.substring(0, 30)}...`
+          : 'null');
       
       // Call the original onSection5Update
       onSection5Update(field, value);
@@ -215,6 +241,13 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   }, [isCreating]);
 
   const handleCreatePageClick = () => {
+    const section6Content = hasPrice || !section6Data
+      ? section6Data
+      : {
+          ...section6Data,
+          button: "Solicitar información",
+        };
+
     const content = {
       indexSection5: indexSection5Data,
       section1: section1Data,
@@ -222,10 +255,12 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
       section3: section3Data,
       section4: section4Data,
       section5: section5Data,
-      section6: section6Data,
+      section6: section6Content,
       timeline: timelineData,
       card: cardData,
-      price: price
+      price: hasPrice ? price : 0,
+      hasPrice,
+      infoRequestContact,
     };
 
     handleCreatePage({
@@ -256,6 +291,13 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
               </div>
               
               <div className="flex flex-col w-full sm:w-auto items-center">
+                <Label htmlFor="has-price" className="text-sm font-medium text-gray-700 mb-1 text-center">
+                  {hasPrice ? "Con precio" : "Sin precio"}
+                </Label>
+                <Switch id="has-price" checked={hasPrice} onCheckedChange={onHasPriceChange} />
+              </div>
+
+              <div className="flex flex-col w-full sm:w-auto items-center">
                 <Label htmlFor="price" className="text-sm font-medium text-gray-700 mb-1 text-center">
                   Precio
                 </Label>
@@ -265,14 +307,74 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
                     type="number"
                     min="0"
                     step="0.01"
-                    value={price.toString()}
-                    onChange={(e) => onPriceChange(parseFloat(e.target.value))}
+                    value={Number.isFinite(price) ? price.toString() : "0"}
+                    onChange={(e) => {
+                      const parsed = Number.parseFloat(e.target.value);
+                      onPriceChange(Number.isFinite(parsed) && parsed >= 0 ? parsed : 0);
+                    }}
+                    disabled={!hasPrice}
                     className="w-full sm:w-32 pl-3 pr-7 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
                     placeholder="0.00"
                   />
                   <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">€</span>
                 </div>
               </div>
+
+              {!hasPrice && (
+                <div className="w-full max-w-xl rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3">
+                  <p className="text-sm font-medium text-amber-800">
+                    Este tour no se podrá reservar. Solo se podrá solicitar información.
+                  </p>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="info-country" className="text-sm font-medium text-gray-700">
+                      País / prefijo
+                    </Label>
+                    <CountrySelect
+                      value={infoRequestContact.countryCode}
+                      onChange={({ countryCode }) => onInfoRequestCountryChange(countryCode)}
+                      placeholder="Selecciona un país"
+                      language="es"
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="info-phone" className="text-sm font-medium text-gray-700">
+                      Número de WhatsApp
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="info-dial-code"
+                        type="text"
+                        readOnly
+                        value={infoRequestContact.dialCode}
+                        className="w-24 bg-gray-100 text-center"
+                      />
+                      <Input
+                        id="info-phone"
+                        type="tel"
+                        value={infoRequestContact.phoneNumber}
+                        onChange={(e) => onInfoRequestPhoneChange(e.target.value.replace(/\D/g, ""))}
+                        placeholder="Número"
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="info-message" className="text-sm font-medium text-gray-700">
+                      Mensaje predefinido de WhatsApp
+                    </Label>
+                    <Textarea
+                      id="info-message"
+                      value={infoRequestContact.message}
+                      onChange={(e) => onInfoRequestMessageChange(e.target.value)}
+                      placeholder="Escribe el mensaje que se abrirá en WhatsApp"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -297,7 +399,13 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
             />
           )}
 
-          {section6Data && <EditableSanJuanSection6 width={width} data={section6Data} onUpdate={onSection6Update} />}
+          {section6Data && (
+            <EditableSanJuanSection6
+              width={width}
+              data={hasPrice ? section6Data : { ...section6Data, button: "Solicitar información" }}
+              onUpdate={onSection6Update}
+            />
+          )}
           
           {/* Editable Card Section */}
           {cardData && onCardUpdate && (
@@ -312,6 +420,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
                       width={width}
                       data={cardData}
                       price={price}
+                      hasPrice={hasPrice}
                       status={status}
                       onUpdate={handleCardUpdate}
                       isEditMode={isEditMode}

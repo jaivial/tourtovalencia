@@ -10,7 +10,7 @@ export const useEditableSanJuanSection5 = (initialData: sanJuanSection5Type) => 
     setSectionData(initialData);
   }, [initialData]);
 
-  const handleTextUpdate = (field: keyof sanJuanSection5Type, value: string) => {
+  const handleTextUpdate = (field: keyof sanJuanSection5Type, value: string | null) => {
     console.log(`useEditableSanJuanSection5: updating ${String(field)} to:`, value);
     setSectionData(prev => ({
       ...prev,
@@ -18,7 +18,7 @@ export const useEditableSanJuanSection5 = (initialData: sanJuanSection5Type) => 
     }));
   };
 
-  const handleImageUpdate = (imageBase64: string) => {
+  const handleImageUpdate = (imageBase64: string | null) => {
     console.log("useEditableSanJuanSection5: updating image to:", 
       imageBase64 ? (imageBase64.length > 30 ? imageBase64.substring(0, 30) + '...' : imageBase64) : 'none');
     setSectionData(prev => ({

@@ -3,6 +3,8 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { PaymentModal } from "~/components/ui/PaymentModal";
 import PaymentOptions from "~/components/ui/paypalpaymentoptions";
+import { buildWhatsAppUrl } from "~/utils/whatsapp";
+import { useLanguageContext } from "~/providers/LanguageContext";
 import { useBooking } from "~/context/BookingContext";
 
 interface BookingNavigationProps {
@@ -16,6 +18,7 @@ interface BookingNavigationProps {
     bookNow: string;
     completeBooking: string;
     totalAmount: string;
+    sendMessage?: string;
   };
 }
 
@@ -27,12 +30,21 @@ export const BookingNavigation = ({
   bookingNavigationText 
 }: BookingNavigationProps) => {
   const isLastStep = currentStep === 4;
+  const isInfoRequestStep = currentStep === 5;
   const [isOpen, setIsOpen] = useState(false);
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const { formData, selectedTour } = useBooking();
+  const { state } = useLanguageContext();
+  const noPriceLabel = state.currentLanguage === "English" ? "No price" : "Sin precio";
+  const infoRequestUrl = buildWhatsAppUrl(selectedTour?.infoRequestContact);
 
-  // Calculate price based on selected tour price or use a default price
-  const tourPrice = selectedTour?.content?.en?.price || selectedTour?.tourPrice || 120;
+  const hasPrice =
+    selectedTour?.content?.en?.hasPrice ??
+    selectedTour?.content?.es?.hasPrice ??
+    selectedTour?.hasPrice ??
+    true;
+  const rawTourPrice = selectedTour?.content?.en?.price ?? selectedTour?.tourPrice ?? 0;
+  const tourPrice = hasPrice ? rawTourPrice : 0;
   const totalPrice = formData.partySize * tourPrice;
 
   const handleOpen = () => setIsOpen(true);
@@ -43,6 +55,13 @@ export const BookingNavigation = ({
 
   // Handle action for the main button based on current step
   const handleAction = () => {
+    if (isInfoRequestStep) {
+      if (infoRequestUrl) {
+        window.open(infoRequestUrl, "_blank", "noopener,noreferrer");
+      }
+      return;
+    }
+
     if (isLastStep) {
       // Instead of submitting, open the PayPal payment modal
       handleOpen();
@@ -60,22 +79,32 @@ export const BookingNavigation = ({
       ) : (
         <div /> // Empty div for spacing
       )}
-      <Button onClick={handleAction} className="bg-primary hover:bg-primary/90 text-white" disabled={isSubmitting}>
-        {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-        <span>{isLastStep ? bookingNavigationText.bookNow : bookingNavigationText.next}</span>
-      </Button>
+      {( !isInfoRequestStep || infoRequestUrl) && (
+        <Button onClick={handleAction} className="bg-primary hover:bg-primary/90 text-white" disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+          <span>
+            {isInfoRequestStep
+              ? (bookingNavigationText.sendMessage || "Enviar mensaje")
+              : isLastStep
+                ? bookingNavigationText.bookNow
+                : bookingNavigationText.next}
+          </span>
+        </Button>
+      )}
 
-      <PaymentModal isOpen={isOpen} onClose={handleClose} disableClose={isPaymentProcessing}>
-        <div className="space-y-6">
-          <div className="text-center">
-            <h2 className="text-3xl font-semibold">{bookingNavigationText.completeBooking}</h2>
-            <p className="text-muted-foreground text-xl mt-2">
-              {bookingNavigationText.totalAmount} {totalPrice}€
-            </p>
+      {!isInfoRequestStep && (
+        <PaymentModal isOpen={isOpen} onClose={handleClose} disableClose={isPaymentProcessing}>
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-3xl font-semibold">{bookingNavigationText.completeBooking}</h2>
+              <p className="text-muted-foreground text-xl mt-2">
+                {bookingNavigationText.totalAmount} {hasPrice ? `${totalPrice}€` : noPriceLabel}
+              </p>
+            </div>
+            <PaymentOptions onProcessingChange={setIsPaymentProcessing} />
           </div>
-          <PaymentOptions onProcessingChange={setIsPaymentProcessing} />
-        </div>
-      </PaymentModal>
+        </PaymentModal>
+      )}
 
       {/* <Button onClick={isLastStep ? onSubmit : onNext} className="flex items-center gap-2" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}

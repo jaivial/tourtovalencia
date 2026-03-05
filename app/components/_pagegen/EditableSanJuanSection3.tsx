@@ -22,6 +22,12 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   const [isTouchDevice, setIsTouchDevice] = React.useState(false);
+  const visibleImages = React.useMemo(
+    () => data.images
+      .map((img, index) => ({ index, source: img.source }))
+      .filter((img): img is { index: number; source: string } => typeof img.source === "string" && img.source.trim().length > 0),
+    [data.images],
+  );
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
@@ -29,11 +35,17 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
   }, []);
 
   const handleImageClick = (index: number) => {
+    const source = data.images[index]?.source;
+    if (typeof source !== "string" || source.trim().length === 0) {
+      return;
+    }
+
     if (isTouchDevice) {
       return;
     }
 
-    setSelectedImageIndex(index);
+    const visibleIndex = visibleImages.findIndex((img) => img.index === index);
+    setSelectedImageIndex(visibleIndex >= 0 ? visibleIndex : 0);
     setModalOpen(true);
   };
 
@@ -179,7 +191,7 @@ const EditableSanJuanSection3: React.FC<EditableSanJuanSection3Props> = ({
       <ImageGalleryModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        images={data.images.map(img => img.source)}
+        images={visibleImages.map((img) => img.source)}
         initialIndex={selectedImageIndex}
       />
     </>

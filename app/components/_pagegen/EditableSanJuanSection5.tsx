@@ -37,7 +37,7 @@ import {
 interface EditableSanJuanSection5Props {
   width: number;
   data?: sanJuanSection5Type;
-  onUpdate: (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string }) => void;
+  onUpdate: (field: keyof sanJuanSection5Type, value: string | { enabled: boolean; src: string } | null) => void;
   onImageUpdate?: (file: File) => void | Promise<void>;
   onImageRemove?: () => void | Promise<void>;
 }
@@ -48,7 +48,7 @@ const DEFAULT_SECTION5_DATA: sanJuanSection5Type = {
   thirdH3: "Disfrutaremos de un día de playa y relax",
   fourthH3: "Podremos practicar snorkel y ver los peces",
   fifthH3: "Tendremos tiempo libre para explorar el pueblo",
-  image: "/plazareina2.jpg", // Default fallback image
+  image: null,
   lottieAnimation: {
     enabled: true,
     src: "https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie"
@@ -223,7 +223,7 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
   // Debug logs
   console.log("EditableSanJuanSection5: data received:", data);
   console.log("EditableSanJuanSection5: sectionData:", sectionData);
-  console.log("EditableSanJuanSection5: image URL:", sectionData.image || "/plazareina2.jpg");
+  console.log("EditableSanJuanSection5: image URL:", sectionData.image || "none");
 
   // Common text styles for h3 elements
   const commonH3Styles = `
@@ -234,6 +234,8 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
 
   const getResponsiveTextSize = (small: string, semismall: string, medium: string, semilarge: string, large: string) => 
     `${width <= 350 ? small : width <= 450 ? semismall : width <= 580 ? medium : width <= 768 ? semilarge : large}`;  
+
+  const section5ImageUrl = sectionData.image === null ? null : (sectionData.image || "/plazareina2.jpg");
 
   const handleLottieToggleChange = (checked: boolean) => {
     setIsLottieEnabled(checked);
@@ -395,8 +397,8 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
       }
     } else {
       // If no remove handler is provided, just update the local state
-      handleTextUpdate("image", "/plazareina2.jpg");
-      onUpdate("image", "/plazareina2.jpg");
+      handleTextUpdate("image", null);
+      onUpdate("image", null);
     }
   };
 
@@ -604,7 +606,7 @@ const EditableSanJuanSection5: React.FC<EditableSanJuanSection5Props> = ({
             "
           >
             <ImageUpload
-              imageUrl={sectionData.image || "/plazareina2.jpg"}
+              imageUrl={section5ImageUrl}
               onImageChange={handleImageChange}
               onImageRemove={handleImageRemove}
               className="w-full h-full"

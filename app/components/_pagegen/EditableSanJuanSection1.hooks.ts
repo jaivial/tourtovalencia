@@ -30,7 +30,7 @@ export const useEditableSanJuanSection1 = (initialData: sanJuanSection1Type) => 
     console.log("useEditableSanJuanSection1: removing backgroundImage");
     setSectionData(prev => ({
       ...prev,
-      backgroundImage: { preview: "" }
+      backgroundImage: null
     }));
   };
 

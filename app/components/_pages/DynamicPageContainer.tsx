@@ -10,6 +10,7 @@ import IndexSection5 from "../_index/IndexSection5";
 import TimelineSection from "./TimelineSection";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import type { Page } from "~/utils/db.schema.server";
+import { buildWhatsAppUrl, normalizeInfoRequestContact } from "~/utils/whatsapp";
 
 interface DynamicPageContainerProps {
   page: Page;
@@ -33,6 +34,15 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
 
    // Get content based on current language, fallback to Spanish
    const content = (page.content[languageCode as keyof typeof page.content] || page.content.es) as any;
+  const hasPrice = typeof content?.hasPrice === "boolean" ? content.hasPrice : true;
+  const fallbackContent = page.content.es as Record<string, unknown>;
+  const infoRequestContact = normalizeInfoRequestContact(content?.infoRequestContact ?? fallbackContent?.infoRequestContact);
+  const infoRequestUrl = buildWhatsAppUrl(infoRequestContact);
+  const infoRequestLabel = languageCode === "en" ? "Request information" : "Solicitar información";
+  const missingInfoContactText =
+    languageCode === "en"
+      ? "Information requests are temporarily unavailable for this service."
+      : "La solicitud de información no está disponible temporalmente para este servicio.";
 
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
@@ -50,7 +60,20 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
 
       {content.section5 && <SanJuanSection5 width={width} SanJuanSection5Text={content.section5} />}
 
-      {content.section6 && (page.status === "upcoming" ? <ComingSoonCard width={width} /> : <SanJuanSection6 width={width} SanJuanSection6Text={content.section6} />)}
+      {content.section6 && (
+        page.status === "upcoming" ? (
+          <ComingSoonCard width={width} />
+        ) : (
+          <SanJuanSection6
+            width={width}
+            SanJuanSection6Text={content.section6}
+            isInfoRequestOnly={!hasPrice}
+            infoRequestUrl={infoRequestUrl}
+            infoRequestLabel={infoRequestLabel}
+            missingInfoContactText={missingInfoContactText}
+          />
+        )
+      )}
     </div>
   );
 };

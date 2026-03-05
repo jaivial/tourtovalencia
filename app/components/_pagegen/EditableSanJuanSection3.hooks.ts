@@ -23,7 +23,7 @@ export const useEditableSanJuanSection3 = (initialData: sanJuanSection3Type) => 
     setSectionData(prev => ({
       ...prev,
       images: prev.images.map((img, i) => 
-        i === index ? { ...img, source: "" } : img
+        i === index ? { ...img, source: null } : img
       )
     }));
   };

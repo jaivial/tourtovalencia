@@ -18,15 +18,16 @@ export type EditableCardDataType = {
   image: {
     preview: string;
     file?: File;
-  };
+  } | null;
 };
 
 type EditableCardProps = {
   width: number;
   data: EditableCardDataType;
   price: number;
+  hasPrice: boolean;
   status: "active" | "upcoming";
-  onUpdate: (field: keyof EditableCardDataType, value: string | { file?: File; preview: string }) => void;
+  onUpdate: (field: keyof EditableCardDataType, value: string | { file?: File; preview: string } | null) => void;
   isEditMode?: boolean;
 };
 
@@ -34,6 +35,7 @@ const EditableCard: React.FC<EditableCardProps> = ({
   width, 
   data, 
   price, 
+  hasPrice,
   status,
   onUpdate,
   isEditMode = false
@@ -62,6 +64,10 @@ const EditableCard: React.FC<EditableCardProps> = ({
     reader.readAsDataURL(file);
   };
 
+  const handleImageRemove = () => {
+    onUpdate('image', null);
+  };
+
   // Define button styles to prevent underlines
   const linkButtonStyle = {
     textDecoration: 'none'
@@ -81,6 +87,7 @@ const EditableCard: React.FC<EditableCardProps> = ({
   
   // Get text based on current language
   const currentComingSoonText = comingSoonTexts[language as keyof typeof comingSoonTexts] || comingSoonTexts.es;
+  const normalizedPrice = Number.isFinite(price) ? price : 0;
 
   // If status is "upcoming" and not in edit mode, display as ComingSoonCard
   if (status === "upcoming" && !isEditMode) {
@@ -107,11 +114,11 @@ const EditableCard: React.FC<EditableCardProps> = ({
             className="w-full"
           >
             <Card className="backdrop-blur-md bg-white/80 border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
-              {data.image.preview && (
+              {data.image?.preview && (
                 <div className="relative h-56 w-full overflow-hidden">
                   <div className="absolute inset-0 bg-gray-500 opacity-50 z-10"></div>
                   <img 
-                    src={data.image.preview} 
+                    src={data.image?.preview} 
                     alt="Coming soon" 
                     className="w-full h-full object-cover grayscale"
                   />
@@ -158,20 +165,22 @@ const EditableCard: React.FC<EditableCardProps> = ({
                 >
                   {data.description || currentComingSoonText.description}
                 </motion.p>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={isInView ? 
-                    { opacity: 1, y: 0 } : 
-                    { opacity: 0, y: 20 }
-                  }
-                  transition={{ duration: 0.5, delay: 0.5 }}
-                  className="mt-6"
-                >
-                  <div className="flex items-center justify-center bg-blue-50 py-3 px-4 rounded-lg">
-                    <span className="text-2xl font-bold text-blue-800">{Math.round(price)}€</span>
-                    <span className="text-sm text-blue-600 ml-1">{perPersonText}</span>
-                  </div>
-                </motion.div>
+                {hasPrice && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={isInView ? 
+                      { opacity: 1, y: 0 } : 
+                      { opacity: 0, y: 20 }
+                    }
+                    transition={{ duration: 0.5, delay: 0.5 }}
+                    className="mt-6"
+                  >
+                    <div className="flex items-center justify-center bg-blue-50 py-3 px-4 rounded-lg">
+                      <span className="text-2xl font-bold text-blue-800">{Math.round(normalizedPrice)}€</span>
+                      <span className="text-sm text-blue-600 ml-1">{perPersonText}</span>
+                    </div>
+                  </motion.div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -194,26 +203,29 @@ const EditableCard: React.FC<EditableCardProps> = ({
       `}
     >
       {/* Tour Image */}
-      <div 
-        className="h-56 overflow-hidden relative"
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-      >
-        {isEditMode ? (
-          <ImageUploader
-            currentImage={data.image.preview}
-            onImageChange={handleImageUpdate}
-            isHovering={isHovering}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <img 
-            src={data.image.preview} 
-            alt={data.title} 
-            className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-          />
-        )}
-      </div>
+      {(isEditMode || data.image?.preview) && (
+        <div 
+          className="h-56 overflow-hidden relative"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+        >
+          {isEditMode ? (
+            <ImageUploader
+              currentImage={data.image?.preview}
+              onImageChange={handleImageUpdate}
+              onImageRemove={handleImageRemove}
+              isHovering={isHovering}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <img 
+              src={data.image?.preview} 
+              alt={data.title} 
+              className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+            />
+          )}
+        </div>
+      )}
 
       {/* Tour Content */}
       <div className="p-6 flex flex-col flex-grow">
@@ -283,10 +295,12 @@ const EditableCard: React.FC<EditableCardProps> = ({
         
         <div className="mt-auto">
           <div className="flex flex-col space-y-4">
-            <div className="flex items-center justify-center bg-blue-50 py-3 px-4 rounded-lg">
-              <span className="text-2xl font-bold text-blue-800">{Math.round(price)}€</span>
-              <span className="text-sm text-blue-600 ml-1">{perPersonText}</span>
-            </div>
+            {hasPrice && (
+              <div className="flex items-center justify-center bg-blue-50 py-3 px-4 rounded-lg">
+                <span className="text-2xl font-bold text-blue-800">{Math.round(normalizedPrice)}€</span>
+                <span className="text-sm text-blue-600 ml-1">{perPersonText}</span>
+              </div>
+            )}
             
             {!isEditMode && (
               <>

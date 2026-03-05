@@ -1,12 +1,13 @@
 import { Button } from "../ui/button";
-import { Camera } from "lucide-react";
+import { Camera, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const SUPPORTED_IMAGE_ACCEPT = "image/*,.jpg,.jpeg,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff,.svg,.jfif";
 
 type ImageUploaderProps = {
-  currentImage: string;
+  currentImage?: string | null;
   onImageChange: (file: File) => void;
+  onImageRemove?: () => void;
   isHovering?: boolean;
   className?: string;
 };
@@ -14,11 +15,13 @@ type ImageUploaderProps = {
 export const ImageUploader: React.FC<ImageUploaderProps> = ({
   currentImage,
   onImageChange,
+  onImageRemove,
   isHovering = false,
   className = ""
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const hasImage = typeof currentImage === "string" && currentImage.trim().length > 0;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -51,11 +54,17 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       />
 
       {/* Image display */}
-      <img 
-        src={currentImage || 'https://cdn.tourtovalencia.com/public/plazareina2.jpg'}
-        alt="Tour"
-        className="w-full h-full object-cover"
-      />
+      {hasImage ? (
+        <img 
+          src={currentImage}
+          alt="Tour"
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full border-2 border-dashed border-blue-300 bg-blue-50/60 flex items-center justify-center text-sm text-blue-700 text-center px-4">
+          Sin imagen
+        </div>
+      )}
       
       {/* Overlay with camera icon that appears on hover */}
       <div 
@@ -63,16 +72,34 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           isTouchDevice || isHovering ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-12 w-12 rounded-full bg-white/90 hover:bg-white text-blue-600"
-          onClick={handleUploadClick}
-          aria-label="Upload image"
-          data-upload-control="true"
-        >
-          <Camera className="h-6 w-6" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-12 w-12 rounded-full bg-white/90 hover:bg-white text-blue-600"
+            onClick={handleUploadClick}
+            aria-label="Upload image"
+            data-upload-control="true"
+          >
+            <Camera className="h-6 w-6" />
+          </Button>
+          {hasImage && onImageRemove && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-12 w-12 rounded-full bg-white/90 hover:bg-white text-red-600"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onImageRemove();
+              }}
+              aria-label="Remove image"
+              data-upload-control="true"
+            >
+              <X className="h-6 w-6" />
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

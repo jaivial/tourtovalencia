@@ -2,6 +2,7 @@ import { json } from "@remix-run/server-runtime";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/server-runtime";
 import { createPage } from "~/utils/page.server";
 import { requireAdminSession } from "~/utils/admin-session.server";
+import { normalizeInfoRequestContact } from "~/utils/whatsapp";
 
 type CreatePageJob = {
   status: "pending" | "processing" | "completed" | "failed";
@@ -45,8 +46,7 @@ function startCreatePageBackgroundJob(
         message: "Procesando contenido e imágenes",
       });
 
-      const normalizedPrice = normalizeTourPrice(content.price);
-      content.price = normalizedPrice;
+      normalizeTourContent(content);
 
       const page = await createPage(name, content, status, "tour");
 
@@ -84,6 +84,27 @@ function normalizeTourPrice(rawPrice: unknown): number {
   }
 
   return 0;
+}
+
+function normalizeHasPrice(rawHasPrice: unknown): boolean {
+  if (typeof rawHasPrice === "boolean") {
+    return rawHasPrice;
+  }
+
+  return true;
+}
+
+function normalizeTourContent(content: Record<string, unknown>) {
+  const normalizedPrice = normalizeTourPrice(content.price);
+  const normalizedHasPrice = normalizeHasPrice(content.hasPrice);
+
+  content.hasPrice = normalizedHasPrice;
+  content.price = normalizedHasPrice ? normalizedPrice : 0;
+  content.infoRequestContact = normalizeInfoRequestContact(content.infoRequestContact);
+
+  return {
+    normalizedHasPrice,
+  };
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -165,10 +186,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     // This endpoint is used by the tour page generator.
     // Always mark the page as a tour and keep the price normalized.
-    const normalizedPrice = normalizeTourPrice(content.price);
-    content.price = normalizedPrice;
+    const { normalizedHasPrice } = normalizeTourContent(content);
     const template = "tour";
-    console.log(`Creating page "${name}" as a tour with price ${normalizedPrice}€`);
+    console.log(`Creating page "${name}" as a tour with price ${content.price}€ (hasPrice=${normalizedHasPrice})`);
 
     // Create page with the content (images are already base64)
     const page = await createPage(name, content, status as "active" | "upcoming", template);

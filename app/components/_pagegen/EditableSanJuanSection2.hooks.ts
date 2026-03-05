@@ -4,7 +4,7 @@ import { sanJuansection2Type } from "~/data/data";
 export const useEditableSanJuanSection2 = (initialData: sanJuansection2Type) => {
   const [sectionData, setSectionData] = useState<sanJuansection2Type>(initialData);
 
-  const handleTextUpdate = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string }) => {
+  const handleTextUpdate = (field: keyof sanJuansection2Type, value: string | { file?: File; preview: string } | { enabled: boolean; src: string } | null) => {
     setSectionData(prev => ({
       ...prev,
       [field]: value
@@ -16,7 +16,7 @@ export const useEditableSanJuanSection2 = (initialData: sanJuansection2Type) => 
   };
 
   const handleImageRemove = () => {
-    handleTextUpdate('sectionImage', { preview: '' });
+    handleTextUpdate('sectionImage', null);
   };
 
   const handleLottieToggle = (enabled: boolean) => {

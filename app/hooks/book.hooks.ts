@@ -140,14 +140,26 @@ export function useBookingActions(context: BookingContextState): BookingActions 
     const errors: Partial<Record<keyof BookingFormData, string>> = {};
 
     if (context.currentStep === 1) {
-      if (!context.formData.date) {
-        errors.date = "Please select a date";
+      if (!context.formData.tourSlug) {
+        errors.tourSlug = "Please select a tour";
         context.setErrors(errors);
         return;
       }
-      
-      if (!context.formData.tourSlug) {
-        errors.tourSlug = "Please select a tour";
+
+      const selectedTourHasPrice =
+        context.selectedTour?.content?.en?.hasPrice ??
+        context.selectedTour?.content?.es?.hasPrice ??
+        context.selectedTour?.hasPrice ??
+        true;
+
+      if (!selectedTourHasPrice) {
+        context.setErrors({});
+        context.setCurrentStep(5);
+        return;
+      }
+
+      if (!context.formData.date) {
+        errors.date = "Please select a date";
         context.setErrors(errors);
         return;
       }
@@ -193,6 +205,11 @@ export function useBookingActions(context: BookingContextState): BookingActions 
   };
 
   const handlePreviousStep = () => {
+    if (context.currentStep === 5) {
+      context.setCurrentStep(1);
+      return;
+    }
+
     context.setCurrentStep(context.currentStep - 1);
   };
 

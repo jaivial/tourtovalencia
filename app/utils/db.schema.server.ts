@@ -1,5 +1,7 @@
 import { getDb } from "./db.server";
 import { 
+  EditableCardType,
+  InfoRequestContactType,
   IndexSection5Type, 
   sanJuanSection1Type, 
   sanJuanSection3Type, 
@@ -36,7 +38,10 @@ export interface Page {
       section5?: sanJuanSection5Type;
       section6?: SanJuanSection6Type;
       timeline?: TimelineDataType;
+      card?: EditableCardType;
       price?: number;
+      hasPrice?: boolean;
+      infoRequestContact?: InfoRequestContactType;
       title?: string;
       description?: string;
       duration?: string;
@@ -53,7 +58,10 @@ export interface Page {
       section5?: sanJuanSection5Type;
       section6?: SanJuanSection6Type;
       timeline?: TimelineDataType;
+      card?: EditableCardType;
       price?: number;
+      hasPrice?: boolean;
+      infoRequestContact?: InfoRequestContactType;
       title?: string;
       description?: string;
       duration?: string;
@@ -76,6 +84,8 @@ export interface Tour {
     es: string;
   };
   tourPrice: number;
+  hasPrice?: boolean;
+  infoRequestContact?: InfoRequestContactType;
   status: 'active' | 'upcoming';
   description: {
     en: string;

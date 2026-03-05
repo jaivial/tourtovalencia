@@ -13,6 +13,7 @@ type SerializableTour = {
   slug: string;
   tourName: { en: string; es: string };
   tourPrice: number;
+  hasPrice?: boolean;
   status: string;
   duration: { en: string; es: string };
   heroImage?: string;
@@ -72,6 +73,7 @@ export const loader = async () => {
         slug: 1,
         tourName: 1,
         tourPrice: 1,
+        hasPrice: 1,
         status: 1,
         duration: 1,
         heroImage: 1,
@@ -84,7 +86,8 @@ export const loader = async () => {
       _id: doc._id?.toString(),
       slug: doc.slug || '',
       tourName: doc.tourName || { en: '', es: '' },
-      tourPrice: doc.tourPrice || 0,
+      tourPrice: typeof doc.tourPrice === "number" ? doc.tourPrice : 0,
+      hasPrice: typeof doc.hasPrice === "boolean" ? doc.hasPrice : true,
       status: doc.status || 'upcoming',
       duration: doc.duration || { en: '', es: '' },
       heroImage: doc.heroImage,

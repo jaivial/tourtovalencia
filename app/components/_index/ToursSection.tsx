@@ -23,6 +23,11 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
   const language = state.currentLanguage === "English" ? "en" : "es";
   const perPersonText = language === "en" ? "per person" : "por persona";
 
+  type TourImageResult = {
+    url: string | null;
+    hideBlock: boolean;
+  };
+
   // Mock data for tours if none provided
   const mockTours: any[] = [
     {
@@ -151,14 +156,68 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
   });
 
   // Function to get the base64 image for a tour - completely defensive
-  const getTourImage = (tour: any) => {
+  const getTourImage = (tour: any): TourImageResult => {
+    const evaluateCardImage = (card: Record<string, unknown> | undefined): TourImageResult => {
+      if (!card || !Object.prototype.hasOwnProperty.call(card, "image")) {
+        return { url: null, hideBlock: false };
+      }
+
+      const imageValue = card.image;
+      if (imageValue === null || imageValue === "") {
+        return { url: null, hideBlock: true };
+      }
+
+      if (typeof imageValue === "string") {
+        return imageValue.trim().length > 0
+          ? { url: imageValue, hideBlock: false }
+          : { url: null, hideBlock: true };
+      }
+
+      if (typeof imageValue === "object") {
+        const preview = (imageValue as Record<string, unknown>)?.preview;
+        if (preview === null || preview === "") {
+          return { url: null, hideBlock: true };
+        }
+
+        if (typeof preview === "string" && preview.trim().length > 0) {
+          return { url: preview, hideBlock: false };
+        }
+      }
+
+      return { url: null, hideBlock: false };
+    };
+
+    const evaluateSectionImage = (section1: Record<string, unknown> | undefined): TourImageResult => {
+      if (!section1 || !Object.prototype.hasOwnProperty.call(section1, "backgroundImage")) {
+        return { url: null, hideBlock: false };
+      }
+
+      const bgValue = section1.backgroundImage;
+      if (bgValue === null || bgValue === "") {
+        return { url: null, hideBlock: true };
+      }
+
+      if (typeof bgValue === "object") {
+        const preview = (bgValue as Record<string, unknown>)?.preview;
+        if (preview === null || preview === "") {
+          return { url: null, hideBlock: true };
+        }
+
+        if (typeof preview === "string" && preview.trim().length > 0) {
+          return { url: preview, hideBlock: false };
+        }
+      }
+
+      return { url: null, hideBlock: false };
+    };
+
     // Return null immediately if no pages provided
-    if (!pages || pages.length === 0) return null;
+    if (!pages || pages.length === 0) return { url: null, hideBlock: false };
 
     // Find the page that corresponds to this tour
     const page = pages.find((p) => p._id === tour.pageId || p.slug === tour.slug);
     
-    if (!page?.content) return null;
+    if (!page?.content) return { url: null, hideBlock: false };
 
     const content = page.content as Record<string, unknown>;
     const esData = content?.es as Record<string, unknown> | undefined;
@@ -167,30 +226,61 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
     // First try to get the card image if it exists - safe access with type assertions
     const langCardImage = (langData as Record<string, unknown> | undefined)?.card as Record<string, unknown> | undefined;
     const esCardImage = (esData as Record<string, unknown> | undefined)?.card as Record<string, unknown> | undefined;
-    
-    const langCardImgObj = langCardImage?.image as Record<string, unknown> | undefined;
-    const esCardImgObj = esCardImage?.image as Record<string, unknown> | undefined;
-    
-    if (langCardImgObj?.preview) {
-      return String(langCardImgObj.preview);
-    } else if (esCardImgObj?.preview) {
-      return String(esCardImgObj.preview);
+
+    const langCardResult = evaluateCardImage(langCardImage);
+    if (langCardResult.hideBlock || langCardResult.url) {
+      return langCardResult;
+    }
+
+    const esCardResult = evaluateCardImage(esCardImage);
+    if (esCardResult.hideBlock || esCardResult.url) {
+      return esCardResult;
     }
 
     // Fallback to section1 background image
     const langSection1 = (langData as Record<string, unknown> | undefined)?.section1 as Record<string, unknown> | undefined;
     const esSection1 = (esData as Record<string, unknown> | undefined)?.section1 as Record<string, unknown> | undefined;
-    
-    const langBgImage = langSection1?.backgroundImage as Record<string, unknown> | undefined;
-    const esBgImage = esSection1?.backgroundImage as Record<string, unknown> | undefined;
 
-    if (langBgImage?.preview) {
-      return String(langBgImage.preview);
-    } else if (esBgImage?.preview) {
-      return String(esBgImage.preview);
+    const langSectionResult = evaluateSectionImage(langSection1);
+    if (langSectionResult.hideBlock || langSectionResult.url) {
+      return langSectionResult;
     }
 
-    return null;
+    const esSectionResult = evaluateSectionImage(esSection1);
+    if (esSectionResult.hideBlock || esSectionResult.url) {
+      return esSectionResult;
+    }
+
+    return { url: null, hideBlock: false };
+  };
+
+  const getTourHasPrice = (tour: any): boolean => {
+    if (typeof tour?.hasPrice === "boolean") {
+      return tour.hasPrice;
+    }
+
+    if (!pages || pages.length === 0) {
+      return true;
+    }
+
+    const page = pages.find((p) => p._id === tour.pageId || p.slug === tour.slug);
+    if (!page?.content) {
+      return true;
+    }
+
+    const content = page.content as Record<string, unknown>;
+    const esData = content?.es as Record<string, unknown> | undefined;
+    const langData = content?.[language] as Record<string, unknown> | undefined;
+
+    if (typeof langData?.hasPrice === "boolean") {
+      return langData.hasPrice;
+    }
+
+    if (typeof esData?.hasPrice === "boolean") {
+      return esData.hasPrice;
+    }
+
+    return true;
   };
 
   // Function to get card data from the page - completely defensive
@@ -282,6 +372,9 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
           {displayTours.map((tour, index) => {
             const tourImage = getTourImage(tour);
             const cardData = getCardData(tour);
+            const shouldShowImageBlock = !tourImage.hideBlock;
+            const hasPrice = getTourHasPrice(tour);
+            const tourPrice = Number.isFinite(Number(tour.tourPrice)) ? Number(tour.tourPrice) : 0;
 
             return (
               <motion.div
@@ -297,30 +390,27 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
                   w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-[380px]
                 `}
               >
-                 {/* Tour Image */}
-                 <div className="h-56 overflow-hidden">
-                   {/* Default fallback image for tours */}
-                   {(() => {
-                     const defaultImage = "https://images.unsplash.com/photo-1583265101492-bfe6ef35cef8?q=80&w=1000&auto=format&fit=crop";
-                     return (
-                       <>
+                 {shouldShowImageBlock && (
+                   <div className="h-56 overflow-hidden">
+                     {(() => {
+                       const defaultImage = "https://images.unsplash.com/photo-1583265101492-bfe6ef35cef8?q=80&w=1000&auto=format&fit=crop";
+                       return (
                          <img
-                           src={tourImage || defaultImage}
+                           src={tourImage.url || defaultImage}
                            alt={cardData.title}
                            className={`w-full h-full object-cover transition-transform duration-500 hover:scale-110 ${tour.status === "upcoming" ? "grayscale" : ""}`}
                            loading="lazy"
                            onError={(e) => {
                              const target = e.currentTarget as HTMLImageElement;
-                             // Try fallback image if primary fails
                              if (target.src !== defaultImage) {
                                target.src = defaultImage;
                              }
                            }}
                          />
-                       </>
-                     );
-                   })()}
-                 </div>
+                       );
+                     })()}
+                   </div>
+                 )}
 
                 {/* Tour Content */}
                 <div className="p-6 flex flex-col flex-grow">
@@ -341,10 +431,12 @@ const ToursSection: React.FC<ToursSectionProps> = ({ width, toursText, tours = [
 
                   <div className="mt-auto">
                     <div className="flex flex-col space-y-4">
-                      <div className="flex items-center justify-center bg-blue-50 py-3 px-4 rounded-lg">
-                        <span className="text-2xl font-bold text-blue-800">{Math.round(tour.tourPrice)}€</span>
-                        <span className="text-sm text-blue-600 ml-1">{perPersonText}</span>
-                      </div>
+                      {hasPrice && (
+                        <div className="flex items-center justify-center bg-blue-50 py-3 px-4 rounded-lg">
+                          <span className="text-2xl font-bold text-blue-800">{Math.round(tourPrice)}€</span>
+                          <span className="text-sm text-blue-600 ml-1">{perPersonText}</span>
+                        </div>
+                      )}
 
                       {/* View More Button */}
                       <div className="w-full">

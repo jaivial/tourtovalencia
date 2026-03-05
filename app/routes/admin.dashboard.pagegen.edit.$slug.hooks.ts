@@ -3,6 +3,7 @@ import { useNavigate } from "@remix-run/react";
 import type { Page } from "~/utils/db.schema.server";
 import type { 
   EditableCardType,
+  InfoRequestContactType,
   IndexSection5Type, 
   sanJuanSection1Type, 
   sanJuanSection3Type, 
@@ -12,6 +13,8 @@ import type {
   SanJuanSection6Type 
 } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
+import { countries } from "~/data/countries";
+import { normalizeInfoRequestContact } from "~/utils/whatsapp";
 
 const JOB_POLL_INTERVAL_MS = 3000;
 const JOB_POLL_RETRY_MS = 5000;
@@ -26,6 +29,34 @@ function getPayloadSizeBytes(payload: string): number {
   }
 
   return payload.length;
+}
+
+function normalizePriceValue(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number.parseFloat(value);
+    if (Number.isFinite(parsed) && parsed >= 0) {
+      return parsed;
+    }
+  }
+
+  return 0;
+}
+
+function normalizeHasPriceValue(value: unknown, fallback: boolean = true): boolean {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  return fallback;
+}
+
+function getDialCodeByCountryCode(countryCode: string): string {
+  const country = countries.find((item) => item.code === countryCode);
+  return country?.dialCode || "+34";
 }
 
 // Helper function to deserialize JSON content
@@ -47,7 +78,7 @@ const deserializeContent = (page: Record<string, unknown>): Page => {
     
     // Handle section1 backgroundImage
     const section1 = esContent.section1 as Record<string, unknown> | undefined;
-    if (section1 && typeof section1 === 'object' && section1.backgroundImage) {
+    if (section1 && typeof section1 === 'object' && section1.backgroundImage && typeof section1.backgroundImage === 'object') {
       section1.backgroundImage = {
         preview: (section1.backgroundImage as Record<string, string>)?.preview || '',
         file: undefined // File objects can't be serialized, so we set to undefined
@@ -56,7 +87,7 @@ const deserializeContent = (page: Record<string, unknown>): Page => {
     
     // Handle section2 sectionImage
     const section2 = esContent.section2 as Record<string, unknown> | undefined;
-    if (section2 && typeof section2 === 'object' && section2.sectionImage) {
+    if (section2 && typeof section2 === 'object' && section2.sectionImage && typeof section2.sectionImage === 'object') {
       section2.sectionImage = {
         preview: (section2.sectionImage as Record<string, string>)?.preview || '',
         file: undefined
@@ -68,10 +99,18 @@ const deserializeContent = (page: Record<string, unknown>): Page => {
     if (section3 && typeof section3 === 'object' && section3.images) {
       if (Array.isArray(section3.images)) {
         section3.images = section3.images.map((img: unknown) => ({
-          source: (img as Record<string, string>)?.source || '',
+          source: (img as Record<string, string | null>)?.source ?? null,
           alt: (img as Record<string, string>)?.alt || 'Gallery image'
         }));
       }
+    }
+
+    const card = esContent.card as Record<string, unknown> | undefined;
+    if (card && typeof card === 'object' && card.image && typeof card.image === 'object') {
+      card.image = {
+        preview: (card.image as Record<string, string>)?.preview || '',
+        file: undefined,
+      };
     }
   }
   
@@ -130,10 +169,23 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
   // Page data states
   const [pageName, setPageName] = useState<string>(deserializedPage.name || '');
   const [status, setStatus] = useState<'active' | 'upcoming'>(deserializedPage.status || 'upcoming');
-  const [price, setPrice] = useState<number>(
-    (deserializedPage.content?.es?.price as number) || 
-    (deserializedPage.content?.en?.price as number) || 
-    49.99
+  const initialPrice = normalizePriceValue(
+    (deserializedPage.content?.es?.price as number | undefined) ?? (deserializedPage.content?.en?.price as number | undefined) ?? 0,
+  );
+  const [price, setPrice] = useState<number>(initialPrice);
+  const [hasPrice, setHasPrice] = useState<boolean>(
+    normalizeHasPriceValue(
+      (deserializedPage.content?.es as Record<string, unknown> | undefined)?.hasPrice ??
+        (deserializedPage.content?.en as Record<string, unknown> | undefined)?.hasPrice,
+      true,
+    ),
+  );
+  const [infoRequestContact, setInfoRequestContact] = useState<InfoRequestContactType>(
+    normalizeInfoRequestContact(
+      (deserializedPage.content?.es as Record<string, unknown> | undefined)?.infoRequestContact ??
+        (deserializedPage.content?.en as Record<string, unknown> | undefined)?.infoRequestContact,
+      { message: "Hola, me gustaría pedir información sobre este servicio." },
+    ),
   );
   
   // Section data states
@@ -223,9 +275,7 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
       description: '',
       additionalInfo: '',
       quote: '',
-      image: {
-        preview: ''
-      }
+      image: null
     }
   );
 
@@ -236,7 +286,45 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
 
   // Price change handler
   const handlePriceChange = (newPrice: number) => {
-    setPrice(newPrice);
+    const normalizedPrice = normalizePriceValue(newPrice);
+    setPrice(normalizedPrice);
+
+    if (hasPrice) {
+      setSection6Data((prev) => ({
+        ...prev,
+        secondH4span: `${normalizedPrice}€ por persona`,
+      }));
+    }
+  };
+
+  const handleHasPriceChange = (checked: boolean) => {
+    setHasPrice(checked);
+    setSection6Data((prev) => ({
+      ...prev,
+      secondH4span: checked ? `${price}€ por persona` : "Sin precio",
+    }));
+  };
+
+  const handleInfoRequestCountryChange = (countryCode: string) => {
+    setInfoRequestContact((prev) => ({
+      ...prev,
+      countryCode,
+      dialCode: getDialCodeByCountryCode(countryCode),
+    }));
+  };
+
+  const handleInfoRequestPhoneChange = (phoneNumber: string) => {
+    setInfoRequestContact((prev) => ({
+      ...prev,
+      phoneNumber,
+    }));
+  };
+
+  const handleInfoRequestMessageChange = (message: string) => {
+    setInfoRequestContact((prev) => ({
+      ...prev,
+      message,
+    }));
   };
 
   // Section update handlers
@@ -262,7 +350,10 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
   const handleSection3ImageRemove = (index: number) => {
     const updatedData = { ...section3Data };
     if (updatedData.images && updatedData.images.length > index) {
-      updatedData.images.splice(index, 1);
+      updatedData.images[index] = {
+        ...updatedData.images[index],
+        source: null,
+      };
       setSection3Data(updatedData);
     }
   };
@@ -301,7 +392,7 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
   const handleSection5ImageRemove = () => {
     setSection5Data(prev => ({
       ...prev,
-      image: "https://cdn.tourtovalencia.com/public/plazareina2.jpg" // Reset to default image
+      image: null
     }));
   };
 
@@ -356,17 +447,26 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
       updateLoadingStep(0, "processing");
       
       // Prepare content object
+      const section6Content = hasPrice || !section6Data
+        ? section6Data
+        : {
+            ...section6Data,
+            button: "Solicitar información",
+          };
+
       const content = {
         section1: section1Data,
         section2: section2Data,
         section3: section3Data,
         section4: section4Data,
         section5: section5Data,
-        section6: section6Data,
+        section6: section6Content,
         indexSection5: indexSection5Data,
         timeline: timelineData,
         card: cardData,
-        price
+        price: hasPrice ? normalizePriceValue(price) : 0,
+        hasPrice,
+        infoRequestContact,
       };
 
       const serializedContent = JSON.stringify(content);
@@ -608,6 +708,8 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
     pageName,
     status,
     price,
+    hasPrice,
+    infoRequestContact,
     section1Data,
     section2Data,
     section3Data,
@@ -627,6 +729,10 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
     setPageName,
     handleStatusChange,
     handlePriceChange,
+    handleHasPriceChange,
+    handleInfoRequestCountryChange,
+    handleInfoRequestPhoneChange,
+    handleInfoRequestMessageChange,
     handleSection1Update,
     handleSection2Update,
     handleSection3ImageUpdate,

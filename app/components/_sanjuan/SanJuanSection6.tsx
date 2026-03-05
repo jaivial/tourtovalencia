@@ -12,11 +12,27 @@ import { Link } from "@remix-run/react";
 type ChildProps = {
   width: number;
   SanJuanSection6Text: SanJuanSection6Type;
+  isInfoRequestOnly?: boolean;
+  infoRequestUrl?: string | null;
+  infoRequestLabel?: string;
+  missingInfoContactText?: string;
 };
 
-const SanJuanSection6: React.FC<ChildProps> = ({ width, SanJuanSection6Text }) => {
+const SanJuanSection6: React.FC<ChildProps> = ({
+  width,
+  SanJuanSection6Text,
+  isInfoRequestOnly = false,
+  infoRequestUrl,
+  infoRequestLabel,
+  missingInfoContactText,
+}) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-100px" });
+  const ctaLabel = isInfoRequestOnly ? (infoRequestLabel || "Solicitar información") : SanJuanSection6Text.button;
+  const shouldShowButton = isInfoRequestOnly ? Boolean(infoRequestUrl) : true;
+  const missingContactMessage =
+    missingInfoContactText ||
+    "La solicitud de información no está disponible temporalmente.";
 
   // Handle case where list might be a JSON string instead of an array
   const getList = () => {
@@ -178,15 +194,33 @@ const SanJuanSection6: React.FC<ChildProps> = ({ width, SanJuanSection6Text }) =
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.5, delay: 0.9 }}
               >
-                <Link to="/book">
-                  <Button className={`
-                    bg-blue-800 hover:bg-blue-700 text-white rounded-full 
-                    shadow-lg hover:shadow-xl transition-all duration-300
-                    ${width <= 350 ? "px-6 py-5 text-base" : "px-8 py-6 text-lg"}
-                  `}>
-                    {SanJuanSection6Text.button}
-                  </Button>
-                </Link>
+                {isInfoRequestOnly && !infoRequestUrl && (
+                  <p className="text-sm text-amber-700 text-center mb-3">{missingContactMessage}</p>
+                )}
+
+                {shouldShowButton && (
+                  isInfoRequestOnly && infoRequestUrl ? (
+                    <a href={infoRequestUrl} target="_blank" rel="noopener noreferrer">
+                      <Button className={`
+                        bg-blue-800 hover:bg-blue-700 text-white rounded-full 
+                        shadow-lg hover:shadow-xl transition-all duration-300
+                        ${width <= 350 ? "px-6 py-5 text-base" : "px-8 py-6 text-lg"}
+                      `}>
+                        {ctaLabel}
+                      </Button>
+                    </a>
+                  ) : (
+                    <Link to="/book">
+                      <Button className={`
+                        bg-blue-800 hover:bg-blue-700 text-white rounded-full 
+                        shadow-lg hover:shadow-xl transition-all duration-300
+                        ${width <= 350 ? "px-6 py-5 text-base" : "px-8 py-6 text-lg"}
+                      `}>
+                        {ctaLabel}
+                      </Button>
+                    </Link>
+                  )
+                )}
               </motion.div>
             </CardFooter>
           </Card>

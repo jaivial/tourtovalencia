@@ -74,14 +74,23 @@ interface TourDocument {
   slug?: string;
   name?: string;
   status?: string;
+  hasPrice?: boolean;
+  infoRequestContact?: {
+    countryCode?: string;
+    dialCode?: string;
+    phoneNumber?: string;
+    message?: string;
+  };
   content?: {
     en?: {
       title?: string;
       price?: number;
+      hasPrice?: boolean;
     };
     es?: {
       title?: string;
       price?: number;
+      hasPrice?: boolean;
     };
   };
   template?: string;
@@ -260,16 +269,20 @@ export async function loader() {
         _id: tour._id.toString(),
         slug: tour.slug || "",
         name: tour.name || tour.slug || "",
+        hasPrice: typeof tour.hasPrice === "boolean" ? tour.hasPrice : true,
+        infoRequestContact: tour.infoRequestContact,
         tourName: tour.tourName,
         tourPrice: tour.tourPrice,
         content: {
           en: {
             title: "",
-            price: 0
+            price: 0,
+            hasPrice: true,
           },
           es: {
             title: "",
-            price: 0
+            price: 0,
+            hasPrice: true,
           }
         }
       };
@@ -278,19 +291,29 @@ export async function loader() {
       if (tour.content) {
         if (tour.content.en) {
           tourData.content.en.title = tour.content.en.title || "";
-          tourData.content.en.price = tour.content.en.price || 0;
+          tourData.content.en.price = tour.content.en.price ?? 0;
+          tourData.content.en.hasPrice =
+            typeof tour.content.en.hasPrice === "boolean"
+              ? tour.content.en.hasPrice
+              : (typeof tour.hasPrice === "boolean" ? tour.hasPrice : true);
         }
         if (tour.content.es) {
           tourData.content.es.title = tour.content.es.title || "";
-          tourData.content.es.price = tour.content.es.price || 0;
+          tourData.content.es.price = tour.content.es.price ?? 0;
+          tourData.content.es.hasPrice =
+            typeof tour.content.es.hasPrice === "boolean"
+              ? tour.content.es.hasPrice
+              : (typeof tour.hasPrice === "boolean" ? tour.hasPrice : true);
         }
       } 
       // Use tourName and tourPrice if available from tours collection format
       else if (tour.tourName) {
         tourData.content.en.title = tour.tourName.en || "";
         tourData.content.es.title = tour.tourName.es || "";
-        tourData.content.en.price = tour.tourPrice || 0;
-        tourData.content.es.price = tour.tourPrice || 0;
+        tourData.content.en.price = tour.tourPrice ?? 0;
+        tourData.content.es.price = tour.tourPrice ?? 0;
+        tourData.content.en.hasPrice = typeof tour.hasPrice === "boolean" ? tour.hasPrice : true;
+        tourData.content.es.hasPrice = typeof tour.hasPrice === "boolean" ? tour.hasPrice : true;
       }
       
       return tourData as Tour;

@@ -3,6 +3,11 @@ import type { sanJuanSection1Type } from "~/data/data";
 
 export const useSanJuanSection1 = (sanJuanSection1Text: sanJuanSection1Type) => {
   const backgroundStyle = useMemo(() => {
+    const removedImage = sanJuanSection1Text.backgroundImage === null || sanJuanSection1Text.backgroundImage?.preview === "";
+    if (removedImage) {
+      return null;
+    }
+
     const base64Image = sanJuanSection1Text.backgroundImage?.preview;
     const defaultImage = "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/public/olgaphoto3.jpeg";
 
@@ -12,9 +17,10 @@ export const useSanJuanSection1 = (sanJuanSection1Text: sanJuanSection1Type) => 
     return {
       backgroundImage: `url(${imageUrl})`,
     };
-  }, [sanJuanSection1Text.backgroundImage?.preview]);
+  }, [sanJuanSection1Text.backgroundImage]);
 
   return {
     backgroundStyle,
+    hasBackgroundImage: Boolean(backgroundStyle),
   };
 };

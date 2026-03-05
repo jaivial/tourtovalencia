@@ -40,13 +40,15 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       dateLabel: "Date",
       selectDateError: "Please select a date",
       selectTourError: "Please select a tour first",
-      dateUnavailable: "Sorry, this date is no longer available for booking."
+      dateUnavailable: "Sorry, this date is no longer available for booking.",
+      infoOnlyTour: "This service cannot be booked online. Continue to request information."
     },
     es: {
       dateLabel: "Fecha",
       selectDateError: "Por favor, selecciona una fecha",
       selectTourError: "Por favor, selecciona un tour primero",
-      dateUnavailable: "Lo sentimos, esta fecha ya no está disponible para reservar."
+      dateUnavailable: "Lo sentimos, esta fecha ya no está disponible para reservar.",
+      infoOnlyTour: "Este servicio no se puede reservar online. Continúa para solicitar información."
     }
   };
 
@@ -54,6 +56,13 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
   const [isTourSelected, setIsTourSelected] = useState(!!formData.tourSlug);
   // State to track errors
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const selectedTour = tours.find((tour) => tour.slug === formData.tourSlug);
+  const selectedTourHasPrice =
+    selectedTour?.content?.en?.hasPrice ??
+    selectedTour?.content?.es?.hasPrice ??
+    selectedTour?.hasPrice ??
+    true;
+  const showCalendar = isTourSelected && selectedTourHasPrice;
   
   // Get today's date for min value
   const todayDate = today(getLocalTimeZone());
@@ -201,9 +210,19 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
     
     if (selectedTour) {
       setSelectedTour(selectedTour);
-      // Set tour as selected to show the calendar
-      setIsTourSelected(true);
+      const hasPrice =
+        selectedTour.content?.en?.hasPrice ??
+        selectedTour.content?.es?.hasPrice ??
+        selectedTour.hasPrice ??
+        true;
+
+      setSelectedDateAvailability(undefined);
+      setIsTourSelected(hasPrice);
+      return;
     }
+
+    setSelectedDateAvailability(undefined);
+    setIsTourSelected(false);
   };
 
   // Determine which messages to show
@@ -228,13 +247,13 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
       <motion.div
         initial={{ opacity: 0, height: 0 }}
         animate={{ 
-          opacity: isTourSelected ? 1 : 0,
-          height: isTourSelected ? "auto" : 0
+          opacity: showCalendar ? 1 : 0,
+          height: showCalendar ? "auto" : 0
         }}
         transition={{ duration: 0.3 }}
         className="space-y-2 overflow-hidden"
       >
-        {isTourSelected && (
+        {showCalendar && (
           <>
             <Label htmlFor="date">{localizedText[currentLanguage].dateLabel}</Label>
 
@@ -281,6 +300,14 @@ export const BookingDateStep = ({ tourSelectorText }: BookingDateStepProps) => {
           </>
         )}
       </motion.div>
+
+      {formData.tourSlug && !selectedTourHasPrice && (
+        <Alert className="bg-blue-50 border-blue-200">
+          <AlertDescription className="text-blue-700">
+            {localizedText[currentLanguage].infoOnlyTour}
+          </AlertDescription>
+        </Alert>
+      )}
       
       {/* Error message */}
       {showError && (

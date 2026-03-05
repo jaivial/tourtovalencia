@@ -14,6 +14,7 @@ import SanJuanSection5Dynamic from "~/components/_sanjuan/SanJuanSection5Dynamic
 import type { Page } from "~/utils/db.schema.server";
 import type { IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuanSection3Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
+import { buildWhatsAppUrl, normalizeInfoRequestContact } from "~/utils/whatsapp";
 
 // Error boundary component
 export function ErrorBoundary() {
@@ -121,6 +122,21 @@ export default function DynamicPage() {
   // Get the "Book Now" text from the language context
   const bookNowText = state.common.bookNow;
 
+  const fallbackContent = page.content.es as Record<string, unknown>;
+  const hasPrice = typeof content?.hasPrice === "boolean" ? content.hasPrice : true;
+  const infoRequestContact = normalizeInfoRequestContact(
+    (content as Record<string, unknown>)?.infoRequestContact ?? fallbackContent?.infoRequestContact,
+  );
+  const infoRequestUrl = buildWhatsAppUrl(infoRequestContact);
+  const infoRequestButtonText = languageCode === "en" ? "Request information" : "Solicitar información";
+  const missingInfoContactText =
+    languageCode === "en"
+      ? "Information requests are temporarily unavailable for this service."
+      : "La solicitud de información no está disponible temporalmente para este servicio.";
+  const floatingButtonText = hasPrice ? bookNowText : infoRequestButtonText;
+  const floatingButtonHref = hasPrice ? "/book" : (infoRequestUrl || undefined);
+  const hideFloatingButton = !hasPrice && !infoRequestUrl;
+
   // Ensure width is a number (not null)
   const safeWidth = width || 0;
   const safeHeight = height || 0;
@@ -130,7 +146,12 @@ export default function DynamicPage() {
     return (
       <>
         <DynamicPageContainer page={page as unknown as Page} />
-        <FloatingButton text={bookNowText} />
+        <FloatingButton
+          text={floatingButtonText}
+          href={floatingButtonHref}
+          external={!hasPrice}
+          isHidden={hideFloatingButton}
+        />
       </>
     );
   }
@@ -202,11 +223,20 @@ export default function DynamicPage() {
           : <DynamicPageContainer.Section6 
               width={safeWidth} 
               SanJuanSection6Text={castSection<SanJuanSection6Type>(content.section6)} 
+              isInfoRequestOnly={!hasPrice}
+              infoRequestUrl={infoRequestUrl}
+              infoRequestLabel={infoRequestButtonText}
+              missingInfoContactText={missingInfoContactText}
             />
       )}
       
       {/* Add the floating button */}
-      <FloatingButton text={bookNowText} />
+      <FloatingButton
+        text={floatingButtonText}
+        href={floatingButtonHref}
+        external={!hasPrice}
+        isHidden={hideFloatingButton}
+      />
     </div>
   );
 }
