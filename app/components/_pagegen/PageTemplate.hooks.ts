@@ -107,6 +107,12 @@ export const usePageCreation = () => {
         credentials: 'same-origin',
       });
 
+      if (response.status === 413) {
+        throw new Error(
+          'El servidor rechazó la creación por tamaño (413). Reduce el tamaño o número de imágenes e inténtalo de nuevo.',
+        );
+      }
+
       const data = await parseJsonResponse<CreatePageStartResponse>(response);
       if (!response.ok || data.success === false) {
         throw new Error(data.error || 'No se pudo iniciar la creación del tour.');

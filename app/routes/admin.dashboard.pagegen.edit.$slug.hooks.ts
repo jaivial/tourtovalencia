@@ -411,6 +411,12 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
         clearTimeout(timeoutId);
         
         if (!response.ok) {
+          if (response.status === 413) {
+            throw new Error(
+              "El servidor rechazó la subida por tamaño (413). Reduce el tamaño o número de imágenes e inténtalo de nuevo.",
+            );
+          }
+
           const contentType = response.headers.get("content-type");
           
           if (contentType && contentType.includes("application/json")) {

@@ -4,7 +4,6 @@ import axios from "axios";
 import sharp from "sharp";
 import dotenv from "dotenv";
 import { generateTranslationFiles } from "./i18n/file-generator";
-import FtpClientModule from "ftp";
 
 // Initialize dotenv
 dotenv.config();
@@ -23,46 +22,25 @@ if (!BUNNY_CONFIG.password || !BUNNY_CONFIG.user) {
   console.warn("[BUNNY_CONFIG] WARNING: BUNNY_STORAGE_PASSWORD and BUNNY_STORAGE_USER must be set in environment variables");
 }
 
-// FTP client singleton
-let ftpClient: FtpClientModule | null = null;
-
-function getFtpClient(): FtpClientModule {
-  if (!ftpClient) {
-    ftpClient = new FtpClientModule();
-    ftpClient.on("error", (err: Error) => {
-      console.error("FTP Error:", err);
-    });
+function normalizeStorageHost(host: string): string {
+  const trimmedHost = host.trim().replace(/\/+$/, "");
+  if (!trimmedHost) {
+    throw new Error("BUNNY_STORAGE_HOST is empty");
   }
-  return ftpClient;
+
+  return /^https?:\/\//i.test(trimmedHost) ? trimmedHost : `https://${trimmedHost}`;
 }
 
-async function connectFtp(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const client = getFtpClient();
-    client.connect({
-      host: BUNNY_CONFIG.host,
-      user: BUNNY_CONFIG.user,
-      password: BUNNY_CONFIG.password,
-    });
-    client.on("ready", () => {
-      console.log("FTP connected to Bunny Storage");
-      resolve();
-    });
-    client.on("error", (err) => {
-      console.error("FTP connection error:", err);
-      reject(err);
-    });
-  });
-}
+function buildBunnyStorageUploadUrl(storagePath: string): string {
+  const storageHost = normalizeStorageHost(BUNNY_CONFIG.host);
+  const storageZone = BUNNY_CONFIG.user?.trim();
 
-async function disconnectFtp(): Promise<void> {
-  return new Promise((resolve) => {
-    const client = getFtpClient();
-    client.end();
-    ftpClient = null;
-    console.log("FTP disconnected");
-    resolve();
-  });
+  if (!storageZone) {
+    throw new Error("BUNNY_STORAGE_USER is required to build Bunny upload URL");
+  }
+
+  const normalizedStoragePath = storagePath.startsWith("/") ? storagePath : `/${storagePath}`;
+  return `${storageHost}/${storageZone}${normalizedStoragePath}`;
 }
 
 const MIME_EXTENSION_MAP: Record<string, string> = {
@@ -243,24 +221,23 @@ async function uploadToBunnyCDN(base64Data: string, imagePath: string): Promise<
     const randomSuffix = Math.random().toString(36).substring(2, 8);
     const extension = getExtensionFromMimeType(mimeType);
     const filename = `${imagePath.replace(/[^a-zA-Z0-9]/g, "-")}-${timestamp}-${randomSuffix}.${extension}`;
-    const fullPath = `${BUNNY_CONFIG.basePath}/${filename}`;
+    const fullPath = `${BUNNY_CONFIG.basePath.replace(/\/+$/, "")}/${filename}`;
+    const uploadUrl = buildBunnyStorageUploadUrl(fullPath);
 
-    // Connect to FTP and upload
-    await connectFtp();
-
-    return new Promise((resolve, reject) => {
-      const client = getFtpClient();
-      client.put(buffer, fullPath, (err) => {
-        if (err) {
-          console.error("FTP upload error:", err);
-          reject(err);
-          return;
-        }
-        console.log(`Image uploaded to Bunny CDN: ${fullPath}`);
-        const cdnUrl = `${BUNNY_CONFIG.cdnBaseUrl}/${filename}`;
-        resolve(cdnUrl);
-      });
+    await axios.put(uploadUrl, buffer, {
+      headers: {
+        AccessKey: BUNNY_CONFIG.password || "",
+        "Content-Type": mimeType,
+        "Content-Length": buffer.length,
+      },
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+      timeout: 60000,
     });
+
+    console.log(`Image uploaded to Bunny Storage API: ${fullPath}`);
+    const cdnUrl = `${BUNNY_CONFIG.cdnBaseUrl}/${filename}`;
+    return cdnUrl;
   } catch (error) {
     console.error("Error uploading to Bunny CDN:", error);
     throw error;
