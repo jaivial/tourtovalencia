@@ -334,48 +334,53 @@ export default function EditPageRoute() {
       />
       
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center p-6">
-          <Link to="/admin/dashboard/pagegen/editpage" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-            <ArrowLeftIcon className="h-4 w-4" />
-            <span>Volver</span>
-          </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Editar Tour</h1>
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              onClick={handleCancel}
-              className="flex items-center gap-2"
-            >
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleSavePage}
-              disabled={isSaving}
-              className="flex items-center gap-2"
-            >
-              {isSaving ? (
-                <>
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                <>
-                  <SaveIcon className="h-4 w-4" />
-                  Guardar Cambios
-                </>
-              )}
-            </Button>
+        <div className="p-4 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+              <Link to="/admin/dashboard/pagegen/editpage" className="inline-flex w-fit items-center gap-2 text-gray-600 hover:text-gray-900">
+                <ArrowLeftIcon className="h-4 w-4" />
+                <span>Volver</span>
+              </Link>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Editar Tour</h1>
+            </div>
+
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:gap-3">
+              <Button 
+                variant="outline" 
+                onClick={handleCancel}
+                className="w-full sm:w-auto flex items-center justify-center gap-2"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleSavePage}
+                disabled={isSaving}
+                className="w-full sm:w-auto flex items-center justify-center gap-2"
+              >
+                {isSaving ? (
+                  <>
+                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <SaveIcon className="h-4 w-4" />
+                    Guardar Cambios
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
 
         {saveError && (
-          <Alert variant="destructive" className="mb-4 mx-6">
+          <Alert variant="destructive" className="mb-4 mx-4 sm:mx-6">
             <AlertDescription>{saveError}</AlertDescription>
           </Alert>
         )}
 
         {saveSuccess && (
-          <Alert className="mb-4 mx-6 bg-green-50 text-green-800 border-green-200">
+          <Alert className="mb-4 mx-4 sm:mx-6 bg-green-50 text-green-800 border-green-200">
             <AlertDescription>
               {saveError 
                 ? "La actualización está en proceso. Por favor, espere hasta que se complete la traducción y el procesamiento de imágenes."
@@ -384,7 +389,7 @@ export default function EditPageRoute() {
           </Alert>
         )}
 
-        <div className="p-6 bg-white rounded-lg shadow mb-6 mx-6">
+        <div className="p-4 sm:p-6 bg-white rounded-lg shadow mb-6 mx-4 sm:mx-6">
           <div className="mb-4">
             <Label htmlFor="page-name" className="text-lg font-medium text-gray-700">
               Nombre del Tour

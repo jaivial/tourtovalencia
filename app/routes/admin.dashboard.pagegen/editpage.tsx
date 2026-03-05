@@ -34,15 +34,14 @@ export default function EditPageRoute() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-100 p-6">
+    <div className="w-full min-h-screen bg-gray-100 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <Link to="/admin/dashboard/pagegen" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+        <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+          <Link to="/admin/dashboard/pagegen" className="inline-flex w-fit items-center gap-2 text-gray-600 hover:text-gray-900">
             <ArrowLeftIcon className="h-4 w-4" />
             <span>Volver</span>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Tours</h1>
-          <div className="w-24"></div> {/* Spacer for alignment */}
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestión de Tours</h1>
         </div>
 
         <motion.div
@@ -53,7 +52,7 @@ export default function EditPageRoute() {
           className="bg-white rounded-lg shadow-lg overflow-hidden"
         >
           <div className="p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-6">Tours Existentes</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-6">Tours Existentes</h2>
             
             {pages.length === 0 ? (
               <div className="text-center py-12">

@@ -65,22 +65,66 @@ async function disconnectFtp(): Promise<void> {
   });
 }
 
+const MIME_EXTENSION_MAP: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/pjpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+  "image/avif": "avif",
+  "image/heic": "heic",
+  "image/heif": "heif",
+  "image/bmp": "bmp",
+  "image/x-ms-bmp": "bmp",
+  "image/tiff": "tiff",
+  "image/svg+xml": "svg",
+  "image/x-icon": "ico",
+  "image/vnd.microsoft.icon": "ico",
+  "image/jfif": "jpg",
+};
+
+function getExtensionFromMimeType(mimeType: string): string {
+  const normalizedMimeType = mimeType.toLowerCase();
+  const mappedExtension = MIME_EXTENSION_MAP[normalizedMimeType];
+
+  if (mappedExtension) {
+    return mappedExtension;
+  }
+
+  const subtype = normalizedMimeType.split("/")[1] || "img";
+  return (
+    subtype
+      .replace(/^vnd\./, "")
+      .replace(/\+xml$/, "")
+      .replace(/[^a-z0-9]/g, "") || "img"
+  );
+}
+
+function parseBase64DataUrl(base64Data: string): { mimeType: string; buffer: Buffer } {
+  const matches = base64Data.match(/^data:([^;]+)(?:;[^,]+)*;base64,(.+)$/);
+  if (!matches) {
+    throw new Error("Invalid base64 image data");
+  }
+
+  const mimeType = matches[1] || "image/webp";
+  const buffer = Buffer.from(matches[2], "base64");
+
+  return {
+    mimeType,
+    buffer,
+  };
+}
+
 // Helper function to upload image to Bunny CDN
 async function uploadToBunnyCDN(base64Data: string, imagePath: string): Promise<string> {
   try {
-    // Extract the actual base64 data
-    const mimeType = base64Data.split(";")[0].split(":")[1] || "image/webp";
-    const base64Image = base64Data.split(";base64,").pop();
-    if (!base64Image) {
-      throw new Error("Invalid base64 image data");
-    }
-
-    const buffer = Buffer.from(base64Image, "base64");
+    const { mimeType, buffer } = parseBase64DataUrl(base64Data);
 
     // Generate unique filename
     const timestamp = Date.now();
     const randomSuffix = Math.random().toString(36).substring(2, 8);
-    const extension = mimeType.split("/")[1] || "webp";
+    const extension = getExtensionFromMimeType(mimeType);
     const filename = `${imagePath.replace(/[^a-zA-Z0-9]/g, "-")}-${timestamp}-${randomSuffix}.${extension}`;
     const fullPath = `${BUNNY_CONFIG.basePath}/${filename}`;
 
@@ -351,97 +395,104 @@ export function generateSlug(name: string): string {
 
 // Helper function to optimize images to WebP format
 async function optimizeImage(base64Data: string, keyPath: string = "unknown"): Promise<string> {
+  let mimeType = "unknown";
+
   try {
-    // Extract the actual base64 data (remove data:image/xxx;base64, prefix)
-    const mimeType = base64Data.split(";")[0].split(":")[1] || "unknown";
-    const base64Image = base64Data.split(";base64,").pop();
-    if (!base64Image) {
-      throw new Error("Invalid base64 image data");
+    const parsedImage = parseBase64DataUrl(base64Data);
+    mimeType = parsedImage.mimeType;
+    const buffer = parsedImage.buffer;
+
+    if (!mimeType.toLowerCase().startsWith("image/")) {
+      throw new Error(`Unsupported file type: ${mimeType}`);
     }
 
-    const buffer = Buffer.from(base64Image, "base64");
+    if (mimeType.toLowerCase() === "image/gif" || mimeType.toLowerCase() === "image/svg+xml") {
+      console.log(`📎 [${keyPath}] Keeping original ${mimeType} format`);
+      return uploadToBunnyCDN(base64Data, keyPath);
+    }
+
     const originalSize = buffer.length;
-    
-    // Get original image dimensions
-    const metadata = await sharp(buffer).metadata();
-    const originalWidth = metadata.width || 1200;
-    const originalHeight = metadata.height || 800;
-    const aspectRatio = originalWidth / originalHeight;
-    
-    // Start with a reasonable size reduction if the image is large
-    let width = originalWidth;
-    let height = originalHeight;
-    
-    // If image is very large, reduce dimensions first
-    if (width > 1600 || height > 1600) {
-      width = Math.min(width, 1600);
-      height = Math.round(width / aspectRatio);
-    }
-    
-    // Convert to WebP with progressive quality reduction until size is under limit
-    let quality = 80;
-    let optimizedBuffer: Buffer;
-    let currentSize = buffer.length;
 
-    // First attempt: try with initial dimensions and quality
-    optimizedBuffer = await sharp(buffer)
-      .resize(width, height, { fit: 'inside' })
-      .webp({ quality })
-      .toBuffer();
-    currentSize = optimizedBuffer.length;
-    
-    // If still too large, progressively reduce quality
-    while (currentSize > MAX_IMAGE_SIZE && quality > 15) {
-      quality -= 10;
+    try {
+      const metadata = await sharp(buffer).metadata();
+      const originalWidth = metadata.width || 1200;
+      const originalHeight = metadata.height || 800;
+      const aspectRatio = originalWidth / originalHeight;
+
+      let width = originalWidth;
+      let height = originalHeight;
+
+      if (width > 1600 || height > 1600) {
+        width = Math.min(width, 1600);
+        height = Math.round(width / aspectRatio);
+      }
+
+      let quality = 80;
+      let optimizedBuffer: Buffer;
+      let currentSize = buffer.length;
+
       optimizedBuffer = await sharp(buffer)
-        .resize(width, height, { fit: 'inside' })
+        .resize(width, height, { fit: "inside" })
         .webp({ quality })
         .toBuffer();
       currentSize = optimizedBuffer.length;
-    }
-    
-    // If reducing quality wasn't enough, also reduce dimensions
-    while (currentSize > MAX_IMAGE_SIZE && (width > 400 || height > 400)) {
-      width = Math.floor(width * 0.8);
-      height = Math.floor(height * 0.8);
-      
-      optimizedBuffer = await sharp(buffer)
-        .resize(width, height, { fit: 'inside' })
-        .webp({ quality })
-        .toBuffer();
-      currentSize = optimizedBuffer.length;
-    }
-    
-    // Final fallback: extreme compression if still too large
-    if (currentSize > MAX_IMAGE_SIZE) {
-      width = Math.floor(width * 0.7);
-      height = Math.floor(height * 0.7);
-      quality = 10;
-      
-      optimizedBuffer = await sharp(buffer)
-        .resize(width, height, { fit: 'inside' })
-        .webp({ quality })
-        .toBuffer();
-      currentSize = optimizedBuffer.length;
-    }
-    
-    // Detailed logging of image optimization
-    console.log(`📸 [${keyPath}] Image optimized:
+
+      while (currentSize > MAX_IMAGE_SIZE && quality > 15) {
+        quality -= 10;
+        optimizedBuffer = await sharp(buffer)
+          .resize(width, height, { fit: "inside" })
+          .webp({ quality })
+          .toBuffer();
+        currentSize = optimizedBuffer.length;
+      }
+
+      while (currentSize > MAX_IMAGE_SIZE && (width > 400 || height > 400)) {
+        width = Math.floor(width * 0.8);
+        height = Math.floor(height * 0.8);
+
+        optimizedBuffer = await sharp(buffer)
+          .resize(width, height, { fit: "inside" })
+          .webp({ quality })
+          .toBuffer();
+        currentSize = optimizedBuffer.length;
+      }
+
+      if (currentSize > MAX_IMAGE_SIZE) {
+        width = Math.floor(width * 0.7);
+        height = Math.floor(height * 0.7);
+        quality = 10;
+
+        optimizedBuffer = await sharp(buffer)
+          .resize(width, height, { fit: "inside" })
+          .webp({ quality })
+          .toBuffer();
+      }
+
+      console.log(`📸 [${keyPath}] Image optimized:
       Original: ${(originalSize / 1024).toFixed(2)}KB (${originalWidth}x${originalHeight}) ${mimeType}
       Final: ${(optimizedBuffer.length / 1024).toFixed(2)}KB (${width}x${height}) webp
       Reduction: ${((1 - optimizedBuffer.length / originalSize) * 100).toFixed(2)}%
       Quality: ${quality}
     `);
 
-    // Upload to Bunny CDN and return the URL
-    const optimizedBase64 = `data:image/webp;base64,${optimizedBuffer.toString("base64")}`;
-    const cdnUrl = await uploadToBunnyCDN(optimizedBase64, keyPath);
-    console.log(`🚀 [${keyPath}] Image uploaded to Bunny CDN: ${cdnUrl}`);
-    return cdnUrl;
+      const optimizedBase64 = `data:image/webp;base64,${optimizedBuffer.toString("base64")}`;
+      const cdnUrl = await uploadToBunnyCDN(optimizedBase64, keyPath);
+      console.log(`🚀 [${keyPath}] Image uploaded to Bunny CDN: ${cdnUrl}`);
+      return cdnUrl;
+    } catch (optimizationError) {
+      console.warn(
+        `[ImageUpload] Falling back to original format for "${keyPath}" (${mimeType}):`,
+        optimizationError,
+      );
+
+      const fallbackUrl = await uploadToBunnyCDN(base64Data, keyPath);
+      console.log(`🚀 [${keyPath}] Original image uploaded to Bunny CDN without optimization: ${fallbackUrl}`);
+      return fallbackUrl;
+    }
   } catch (error) {
     console.error(`Error optimizing image at ${keyPath}:`, error);
     throw new Error(
-      `[ImageUpload] Could not optimize/upload image at "${keyPath}" to Bunny CDN: ${
+      `[ImageUpload] Could not optimize/upload image at "${keyPath}" (${mimeType}): ${
         error instanceof Error ? error.message : String(error)
       }`
     );

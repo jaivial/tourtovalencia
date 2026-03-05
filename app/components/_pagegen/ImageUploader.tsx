@@ -1,6 +1,8 @@
 import { Button } from "../ui/button";
 import { Camera } from "lucide-react";
 
+const SUPPORTED_IMAGE_ACCEPT = "image/*,.jpg,.jpeg,.png,.webp,.gif,.avif,.heic,.heif,.bmp,.tif,.tiff,.svg,.jfif";
+
 type ImageUploaderProps = {
   currentImage: string;
   onImageChange: (file: File) => void;
@@ -19,7 +21,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     e.stopPropagation();
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*';
+    input.accept = SUPPORTED_IMAGE_ACCEPT;
     input.onchange = (e) => {
       const target = e.target as HTMLInputElement;
       if (target.files?.[0]) {

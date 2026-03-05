@@ -64,9 +64,9 @@ export default function PageGeneratorRoute() {
             initial="hidden" 
             animate="visible" 
             exit="exit" 
-            className="max-w-4xl w-full mx-auto p-8"
+            className="max-w-4xl w-full mx-auto p-4 sm:p-8"
           >
-            <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Gestión de Tours</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 sm:mb-12 text-center">Gestión de Tours</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Crear Nuevo Tour Card */}
@@ -76,9 +76,9 @@ export default function PageGeneratorRoute() {
                 className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer"
                 onClick={() => setStep("create")}
               >
-                <div className="p-8 flex flex-col items-center justify-center h-64">
+                <div className="p-6 sm:p-8 flex flex-col items-center justify-center h-64">
                   <PlusCircleIcon className="h-16 w-16 text-blue-500 mb-4" />
-                  <h3 className="text-2xl font-semibold text-gray-800 mb-2">Crear Nuevo Tour</h3>
+                  <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2 text-center">Crear Nuevo Tour</h3>
                   <p className="text-gray-600 text-center">Diseña y publica un nuevo tour en tu sitio web</p>
                 </div>
               </motion.div>
@@ -90,9 +90,9 @@ export default function PageGeneratorRoute() {
                   whileTap={{ scale: 0.98 }}
                   className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer h-full"
                 >
-                  <div className="p-8 flex flex-col items-center justify-center h-64">
+                  <div className="p-6 sm:p-8 flex flex-col items-center justify-center h-64">
                     <EditIcon className="h-16 w-16 text-green-500 mb-4" />
-                    <h3 className="text-2xl font-semibold text-gray-800 mb-2">Editar Tour</h3>
+                    <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2 text-center">Editar Tour</h3>
                     <p className="text-gray-600 text-center">Modifica tours existentes en tu sitio web</p>
                   </div>
                 </motion.div>
@@ -108,7 +108,7 @@ export default function PageGeneratorRoute() {
             initial="hidden" 
             animate="visible" 
             exit="exit" 
-            className="max-w-3xl w-full mx-auto bg-white rounded-lg shadow-lg p-8"
+            className="max-w-3xl w-full mx-auto bg-white rounded-lg shadow-lg p-4 sm:p-8"
           >
             <div className="flex justify-start items-center mb-6">
               <Button onClick={() => setStep("name")} variant="outline" className="flex items-center gap-2">
@@ -117,13 +117,13 @@ export default function PageGeneratorRoute() {
               </Button>
             </div>
             
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Crear Nuevo Tour</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">Crear Nuevo Tour</h2>
             <div className="space-y-6">
               <div>
-                <Label htmlFor="page-name" className="block text-lg font-medium text-gray-700 mb-2">
+                <Label htmlFor="page-name" className="block text-base sm:text-lg font-medium text-gray-700 mb-2">
                   Nombre del Tour
                 </Label>
-                <Input id="page-name" value={pageName} onChange={(e) => setPageName(e.target.value)} className="mt-1 block w-full text-lg p-3" placeholder="Ingrese el nombre del tour..." />
+                <Input id="page-name" value={pageName} onChange={(e) => setPageName(e.target.value)} className="mt-1 block w-full text-base sm:text-lg p-3" placeholder="Ingrese el nombre del tour..." />
               </div>
               <div className="flex justify-end mt-8">
                 <Button onClick={handleNext} disabled={!pageName.trim()} className="text-lg px-6 py-3">
@@ -143,7 +143,7 @@ export default function PageGeneratorRoute() {
             exit="exit" 
             className="w-full"
           >
-            <div className="flex justify-start items-center mb-6 px-8 mt-8">
+            <div className="flex justify-start items-center mb-4 mt-4 px-4 sm:mb-6 sm:mt-8 sm:px-8">
               <Button onClick={handleBack} variant="outline" className="flex items-center gap-2">
                 <ArrowLeftIcon className="h-4 w-4" />
                 Atrás
