@@ -4,6 +4,7 @@ import BookingStepOne from "./BookingStepOne";
 import { BookingStepTwo } from "./BookingStepTwo";
 import { BookingStepThree } from "./BookingStepThree";
 import { BookingStepInfoRequest } from "./BookingStepInfoRequest";
+import { BookingStepInfoRequestSuccess } from "./BookingStepInfoRequestSuccess";
 import { BookingDateFeature } from "../features/BookingDateFeature";
 import { BookingNavigation } from "./BookingNavigation";
 import { BookingProgress } from "./BookingProgress";
@@ -31,14 +32,30 @@ export const BookingFeature = () => {
     context.selectedTour?.hasPrice ??
     true;
   const isInfoRequestOnlyTour = !selectedTourHasPrice;
+  const infoRequestContact = context.selectedTour?.infoRequestContact;
+  const isEmailChannelEnabled = infoRequestContact?.enableEmail ?? true;
+  const isPhoneChannelEnabled = infoRequestContact?.enablePhone ?? true;
+  const requiresInfoRequestSuccessStep = isInfoRequestOnlyTour && isEmailChannelEnabled && !isPhoneChannelEnabled;
 
-  const infoRequestProgressSteps = [
-    bookingProgressSteps[0],
-    {
-      number: 5,
-      label: bookingInfoRequestStepText.progressLabel,
-    },
-  ];
+  const infoRequestProgressSteps = requiresInfoRequestSuccessStep
+    ? [
+        bookingProgressSteps[0],
+        {
+          number: 5,
+          label: bookingInfoRequestStepText.progressLabel,
+        },
+        {
+          number: 6,
+          label: bookingInfoRequestStepText.successProgressLabel,
+        },
+      ]
+    : [
+        bookingProgressSteps[0],
+        {
+          number: 5,
+          label: bookingInfoRequestStepText.progressLabel,
+        },
+      ];
 
   const currentProgressSteps = isInfoRequestOnlyTour
     ? infoRequestProgressSteps
@@ -84,6 +101,23 @@ export const BookingFeature = () => {
             text={{
               description: bookingInfoRequestStepText.description,
               missingContact: bookingInfoRequestStepText.missingContact,
+              fullName: bookingInfoRequestStepText.fullName,
+              email: bookingInfoRequestStepText.email,
+              phoneNumber: bookingInfoRequestStepText.phoneNumber,
+              placeholders: {
+                fullName: bookingInfoRequestStepText.placeholders.fullName,
+                email: bookingInfoRequestStepText.placeholders.email,
+                phoneNumber: bookingInfoRequestStepText.placeholders.phoneNumber,
+              },
+            }}
+          />
+        );
+      case 6:
+        return (
+          <BookingStepInfoRequestSuccess
+            text={{
+              title: bookingInfoRequestStepText.successTitle,
+              description: bookingInfoRequestStepText.successDescription,
             }}
           />
         );
@@ -124,13 +158,15 @@ export const BookingFeature = () => {
 
         <div className="mt-8">{renderStep()}</div>
 
-        <BookingNavigation 
-          bookingNavigationText={bookingNavigationText} 
-          currentStep={context.currentStep} 
-          onNext={actions.handleNextStep} 
-          onPrevious={actions.handlePreviousStep} 
-          isSubmitting={context.isSubmitting}
-        />
+        {context.currentStep !== 6 && (
+          <BookingNavigation 
+            bookingNavigationText={bookingNavigationText} 
+            currentStep={context.currentStep} 
+            onNext={actions.handleNextStep} 
+            onPrevious={actions.handlePreviousStep} 
+            isSubmitting={context.isSubmitting}
+          />
+        )}
       </div>
     </div>
   );

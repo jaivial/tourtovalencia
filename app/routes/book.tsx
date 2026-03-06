@@ -12,6 +12,7 @@ import { BookingAdminEmail } from "~/components/emails/BookingAdminEmail";
 import { useEffect, useState, useRef } from "react";
 import { getPayPalTransactionDetails } from "~/utils/paypal.server";
 import type { InfoRequestContactType } from "~/data/data";
+import { normalizeInfoRequestContact } from "~/utils/whatsapp";
 
 // PayPal order type
 interface PayPalOrder {
@@ -140,7 +141,7 @@ export async function loader() {
         slug: tour.slug || "",
         name: tour.tourName?.en || tour.slug || "",
         hasPrice: typeof tour.hasPrice === "boolean" ? tour.hasPrice : true,
-        infoRequestContact: tour.infoRequestContact,
+        infoRequestContact: normalizeInfoRequestContact(tour.infoRequestContact),
         tourName: tour.tourName || { en: "", es: "" },
         tourPrice: typeof tour.tourPrice === "number" ? tour.tourPrice : 0,
         content: {

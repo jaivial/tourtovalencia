@@ -76,6 +76,9 @@ export default function EditPageRoute() {
     handleInfoRequestCountryChange,
     handleInfoRequestPhoneChange,
     handleInfoRequestMessageChange,
+    handleInfoRequestEmailChange,
+    handleInfoRequestEnablePhoneChange,
+    handleInfoRequestEnableEmailChange,
     handleSection1Update,
     handleSection2Update,
     handleSection3ImageUpdate,
@@ -440,6 +443,9 @@ export default function EditPageRoute() {
               onInfoRequestCountryChange={handleInfoRequestCountryChange}
               onInfoRequestPhoneChange={handleInfoRequestPhoneChange}
               onInfoRequestMessageChange={handleInfoRequestMessageChange}
+              onInfoRequestEmailChange={handleInfoRequestEmailChange}
+              onInfoRequestEnablePhoneChange={handleInfoRequestEnablePhoneChange}
+              onInfoRequestEnableEmailChange={handleInfoRequestEnableEmailChange}
               indexSection5Data={indexSection5Data}
               onIndexSection5Update={adaptIndexSection5Update}
               section1Data={section1Data}

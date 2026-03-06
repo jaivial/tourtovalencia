@@ -48,6 +48,9 @@ export default function PageGeneratorRoute() {
     handleInfoRequestCountryChange,
     handleInfoRequestPhoneChange,
     handleInfoRequestMessageChange,
+    handleInfoRequestEmailChange,
+    handleInfoRequestEnablePhoneChange,
+    handleInfoRequestEnableEmailChange,
     setStep,
   } = usePageGenerator();
 
@@ -171,6 +174,9 @@ export default function PageGeneratorRoute() {
                 onInfoRequestCountryChange={handleInfoRequestCountryChange}
                 onInfoRequestPhoneChange={handleInfoRequestPhoneChange}
                 onInfoRequestMessageChange={handleInfoRequestMessageChange}
+                onInfoRequestEmailChange={handleInfoRequestEmailChange}
+                onInfoRequestEnablePhoneChange={handleInfoRequestEnablePhoneChange}
+                onInfoRequestEnableEmailChange={handleInfoRequestEnableEmailChange}
                 indexSection5Data={indexSection5Data}
                 onIndexSection5Update={handleIndexSection5Update}
                 section1Data={section1Data}

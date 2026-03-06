@@ -53,6 +53,9 @@ export type PageTemplateProps = {
   onInfoRequestCountryChange: (countryCode: string) => void;
   onInfoRequestPhoneChange: (phoneNumber: string) => void;
   onInfoRequestMessageChange: (message: string) => void;
+  onInfoRequestEmailChange: (email: string) => void;
+  onInfoRequestEnablePhoneChange: (enabled: boolean) => void;
+  onInfoRequestEnableEmailChange: (enabled: boolean) => void;
   isEditMode?: boolean;
 };
 
@@ -89,6 +92,9 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   onInfoRequestCountryChange,
   onInfoRequestPhoneChange,
   onInfoRequestMessageChange,
+  onInfoRequestEmailChange,
+  onInfoRequestEnablePhoneChange,
+  onInfoRequestEnableEmailChange,
   isEditMode = false 
 }) => {
   const size = useWindowSize();
@@ -326,53 +332,96 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
                     Este tour no se podrá reservar. Solo se podrá solicitar información.
                   </p>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="info-country" className="text-sm font-medium text-gray-700">
-                      País / prefijo
-                    </Label>
-                    <CountrySelect
-                      value={infoRequestContact.countryCode}
-                      onChange={({ countryCode }) => onInfoRequestCountryChange(countryCode)}
-                      placeholder="Selecciona un país"
-                      language="es"
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="info-phone" className="text-sm font-medium text-gray-700">
-                      Número de WhatsApp
-                    </Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="info-dial-code"
-                        type="text"
-                        readOnly
-                        value={infoRequestContact.dialCode}
-                        className="w-24 bg-gray-100 text-center"
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between rounded-md border border-amber-200 bg-white px-3 py-2">
+                      <Label htmlFor="enable-info-phone" className="text-sm text-gray-700">
+                        Canal teléfono/WhatsApp
+                      </Label>
+                      <Switch
+                        id="enable-info-phone"
+                        checked={infoRequestContact.enablePhone}
+                        onCheckedChange={onInfoRequestEnablePhoneChange}
                       />
-                      <Input
-                        id="info-phone"
-                        type="tel"
-                        value={infoRequestContact.phoneNumber}
-                        onChange={(e) => onInfoRequestPhoneChange(e.target.value.replace(/\D/g, ""))}
-                        placeholder="Número"
-                        className="flex-1"
+                    </div>
+                    <div className="flex items-center justify-between rounded-md border border-amber-200 bg-white px-3 py-2">
+                      <Label htmlFor="enable-info-email" className="text-sm text-gray-700">
+                        Canal email
+                      </Label>
+                      <Switch
+                        id="enable-info-email"
+                        checked={infoRequestContact.enableEmail}
+                        onCheckedChange={onInfoRequestEnableEmailChange}
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="info-message" className="text-sm font-medium text-gray-700">
-                      Mensaje predefinido de WhatsApp
-                    </Label>
-                    <Textarea
-                      id="info-message"
-                      value={infoRequestContact.message}
-                      onChange={(e) => onInfoRequestMessageChange(e.target.value)}
-                      placeholder="Escribe el mensaje que se abrirá en WhatsApp"
-                    />
-                  </div>
+                  {infoRequestContact.enableEmail && (
+                    <div className="space-y-2">
+                      <Label htmlFor="info-email" className="text-sm font-medium text-gray-700">
+                        Email para solicitudes
+                      </Label>
+                      <Input
+                        id="info-email"
+                        type="email"
+                        value={infoRequestContact.email}
+                        onChange={(e) => onInfoRequestEmailChange(e.target.value)}
+                        placeholder="tourtovalencia@gmail.com"
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+
+                  {infoRequestContact.enablePhone && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="info-country" className="text-sm font-medium text-gray-700">
+                          País / prefijo
+                        </Label>
+                        <CountrySelect
+                          value={infoRequestContact.countryCode}
+                          onChange={({ countryCode }) => onInfoRequestCountryChange(countryCode)}
+                          placeholder="Selecciona un país"
+                          language="es"
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="info-phone" className="text-sm font-medium text-gray-700">
+                          Número de WhatsApp
+                        </Label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            id="info-dial-code"
+                            type="text"
+                            readOnly
+                            value={infoRequestContact.dialCode}
+                            className="w-24 bg-gray-100 text-center"
+                          />
+                          <Input
+                            id="info-phone"
+                            type="tel"
+                            value={infoRequestContact.phoneNumber}
+                            onChange={(e) => onInfoRequestPhoneChange(e.target.value.replace(/\D/g, ""))}
+                            placeholder="Número"
+                            className="flex-1"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="info-message" className="text-sm font-medium text-gray-700">
+                          Mensaje predefinido de WhatsApp
+                        </Label>
+                        <Textarea
+                          id="info-message"
+                          value={infoRequestContact.message}
+                          onChange={(e) => onInfoRequestMessageChange(e.target.value)}
+                          placeholder="Escribe el mensaje que se abrirá en WhatsApp"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>

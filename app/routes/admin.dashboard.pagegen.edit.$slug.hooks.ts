@@ -184,7 +184,12 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
     normalizeInfoRequestContact(
       (deserializedPage.content?.es as Record<string, unknown> | undefined)?.infoRequestContact ??
         (deserializedPage.content?.en as Record<string, unknown> | undefined)?.infoRequestContact,
-      { message: "Hola, me gustaría pedir información sobre este servicio." },
+      {
+        message: "Hola, me gustaría pedir información sobre este servicio.",
+        email: "tourtovalencia@gmail.com",
+        enablePhone: true,
+        enableEmail: true,
+      },
     ),
   );
   
@@ -325,6 +330,37 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
       ...prev,
       message,
     }));
+  };
+
+  const handleInfoRequestEmailChange = (email: string) => {
+    setInfoRequestContact((prev) => ({
+      ...prev,
+      email,
+    }));
+  };
+
+  const handleInfoRequestEnablePhoneChange = (enabled: boolean) => {
+    setInfoRequestContact((prev) => {
+      const nextEnableEmail = enabled ? prev.enableEmail : (prev.enableEmail || true);
+
+      return {
+        ...prev,
+        enablePhone: enabled,
+        enableEmail: nextEnableEmail,
+      };
+    });
+  };
+
+  const handleInfoRequestEnableEmailChange = (enabled: boolean) => {
+    setInfoRequestContact((prev) => {
+      const nextEnablePhone = enabled ? prev.enablePhone : (prev.enablePhone || true);
+
+      return {
+        ...prev,
+        enableEmail: enabled,
+        enablePhone: nextEnablePhone,
+      };
+    });
   };
 
   // Section update handlers
@@ -733,6 +769,9 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
     handleInfoRequestCountryChange,
     handleInfoRequestPhoneChange,
     handleInfoRequestMessageChange,
+    handleInfoRequestEmailChange,
+    handleInfoRequestEnablePhoneChange,
+    handleInfoRequestEnableEmailChange,
     handleSection1Update,
     handleSection2Update,
     handleSection3ImageUpdate,

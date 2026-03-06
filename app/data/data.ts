@@ -152,6 +152,9 @@ export type SanJuanSection6Type = {
 };
 
 export type InfoRequestContactType = {
+  enablePhone: boolean;
+  enableEmail: boolean;
+  email: string;
   countryCode: string;
   dialCode: string;
   phoneNumber: string;

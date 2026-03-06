@@ -128,14 +128,18 @@ export default function DynamicPage() {
     (content as Record<string, unknown>)?.infoRequestContact ?? fallbackContent?.infoRequestContact,
   );
   const infoRequestUrl = buildWhatsAppUrl(infoRequestContact);
+  const useBookFlowForInfoRequest = infoRequestContact.enableEmail;
+  const isInfoRequestWhatsAppOnly = !hasPrice && infoRequestContact.enablePhone && !infoRequestContact.enableEmail;
   const infoRequestButtonText = languageCode === "en" ? "Request information" : "Solicitar información";
   const missingInfoContactText =
     languageCode === "en"
       ? "Information requests are temporarily unavailable for this service."
       : "La solicitud de información no está disponible temporalmente para este servicio.";
   const floatingButtonText = hasPrice ? bookNowText : infoRequestButtonText;
-  const floatingButtonHref = hasPrice ? "/book" : (infoRequestUrl || undefined);
-  const hideFloatingButton = !hasPrice && !infoRequestUrl;
+  const floatingButtonHref = hasPrice
+    ? "/book"
+    : (useBookFlowForInfoRequest ? "/book" : (infoRequestUrl || undefined));
+  const hideFloatingButton = !hasPrice && !useBookFlowForInfoRequest && !infoRequestUrl;
 
   // Ensure width is a number (not null)
   const safeWidth = width || 0;
@@ -149,7 +153,7 @@ export default function DynamicPage() {
         <FloatingButton
           text={floatingButtonText}
           href={floatingButtonHref}
-          external={!hasPrice}
+          external={!hasPrice && !useBookFlowForInfoRequest}
           isHidden={hideFloatingButton}
         />
       </>
@@ -223,7 +227,7 @@ export default function DynamicPage() {
           : <DynamicPageContainer.Section6 
               width={safeWidth} 
               SanJuanSection6Text={castSection<SanJuanSection6Type>(content.section6)} 
-              isInfoRequestOnly={!hasPrice}
+              isInfoRequestOnly={isInfoRequestWhatsAppOnly}
               infoRequestUrl={infoRequestUrl}
               infoRequestLabel={infoRequestButtonText}
               missingInfoContactText={missingInfoContactText}
@@ -234,7 +238,7 @@ export default function DynamicPage() {
       <FloatingButton
         text={floatingButtonText}
         href={floatingButtonHref}
-        external={!hasPrice}
+        external={!hasPrice && !useBookFlowForInfoRequest}
         isHidden={hideFloatingButton}
       />
     </div>

@@ -10,6 +10,9 @@ export default function PageCreationRoute() {
   const [price, setPrice] = useState(0);
   const [hasPrice, setHasPrice] = useState(true);
   const [infoRequestContact, setInfoRequestContact] = useState<InfoRequestContactType>({
+    enablePhone: true,
+    enableEmail: true,
+    email: "tourtovalencia@gmail.com",
     countryCode: "ES",
     dialCode: "+34",
     phoneNumber: "",
@@ -147,6 +150,26 @@ export default function PageCreationRoute() {
           setInfoRequestContact((prev) => ({
             ...prev,
             message,
+          }))
+        }
+        onInfoRequestEmailChange={(email) =>
+          setInfoRequestContact((prev) => ({
+            ...prev,
+            email,
+          }))
+        }
+        onInfoRequestEnablePhoneChange={(enablePhone) =>
+          setInfoRequestContact((prev) => ({
+            ...prev,
+            enablePhone,
+            enableEmail: !enablePhone && !prev.enableEmail ? true : prev.enableEmail,
+          }))
+        }
+        onInfoRequestEnableEmailChange={(enableEmail) =>
+          setInfoRequestContact((prev) => ({
+            ...prev,
+            enableEmail,
+            enablePhone: !enableEmail && !prev.enablePhone ? true : prev.enablePhone,
           }))
         }
       />

@@ -105,6 +105,9 @@ const DEFAULT_CARD_DATA: EditableCardType = {
 };
 
 const DEFAULT_INFO_REQUEST_CONTACT: InfoRequestContactType = {
+  enablePhone: true,
+  enableEmail: true,
+  email: "tourtovalencia@gmail.com",
   countryCode: "ES",
   dialCode: "+34",
   phoneNumber: "",
@@ -351,6 +354,37 @@ export const usePageGenerator = () => {
     }));
   };
 
+  const handleInfoRequestEmailChange = (email: string) => {
+    setInfoRequestContact((prev) => ({
+      ...prev,
+      email,
+    }));
+  };
+
+  const handleInfoRequestEnablePhoneChange = (enabled: boolean) => {
+    setInfoRequestContact((prev) => {
+      const nextEnableEmail = enabled ? prev.enableEmail : (prev.enableEmail || true);
+
+      return {
+        ...prev,
+        enablePhone: enabled,
+        enableEmail: nextEnableEmail,
+      };
+    });
+  };
+
+  const handleInfoRequestEnableEmailChange = (enabled: boolean) => {
+    setInfoRequestContact((prev) => {
+      const nextEnablePhone = enabled ? prev.enablePhone : (prev.enablePhone || true);
+
+      return {
+        ...prev,
+        enableEmail: enabled,
+        enablePhone: nextEnablePhone,
+      };
+    });
+  };
+
   // Status handler
   const handleStatusChange = (checked: boolean) => {
     setStatus(checked ? 'active' : 'upcoming');
@@ -420,5 +454,8 @@ export const usePageGenerator = () => {
     handleInfoRequestCountryChange,
     handleInfoRequestPhoneChange,
     handleInfoRequestMessageChange,
+    handleInfoRequestEmailChange,
+    handleInfoRequestEnablePhoneChange,
+    handleInfoRequestEnableEmailChange,
   };
 };

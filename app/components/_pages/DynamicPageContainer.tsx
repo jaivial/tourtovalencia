@@ -38,6 +38,7 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
   const fallbackContent = page.content.es as Record<string, unknown>;
   const infoRequestContact = normalizeInfoRequestContact(content?.infoRequestContact ?? fallbackContent?.infoRequestContact);
   const infoRequestUrl = buildWhatsAppUrl(infoRequestContact);
+  const isInfoRequestWhatsAppOnly = !hasPrice && infoRequestContact.enablePhone && !infoRequestContact.enableEmail;
   const infoRequestLabel = languageCode === "en" ? "Request information" : "Solicitar información";
   const missingInfoContactText =
     languageCode === "en"
@@ -67,7 +68,7 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
           <SanJuanSection6
             width={width}
             SanJuanSection6Text={content.section6}
-            isInfoRequestOnly={!hasPrice}
+            isInfoRequestOnly={isInfoRequestWhatsAppOnly}
             infoRequestUrl={infoRequestUrl}
             infoRequestLabel={infoRequestLabel}
             missingInfoContactText={missingInfoContactText}

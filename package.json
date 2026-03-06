@@ -21,7 +21,8 @@
     "typecheck": "tsc",
     "delete-old-pages": "tsx scripts/delete-old-pages.ts",
     "migrate-null-removed-images": "tsx scripts/migrate-null-removed-images.ts",
-    "migrate-price-mode": "tsx scripts/migrate-price-mode.ts"
+    "migrate-price-mode": "tsx scripts/migrate-price-mode.ts",
+    "migrate-info-request-contact-defaults": "tsx scripts/migrate-info-request-contact-defaults.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1002.0",

@@ -9,6 +9,15 @@ import { ObjectId } from "mongodb";
 import { getToursCollection, getCollection } from "~/utils/db.server";
 import type { Tour } from "./book";
 import { localDateToUTCMidnight } from "~/utils/date";
+import type { InfoRequestContactType } from "~/data/data";
+import {
+  DEFAULT_INFO_REQUEST_EMAIL,
+  hasValidEmailInfoRequestContact,
+  isValidEmail,
+  normalizeInfoRequestContact,
+} from "~/utils/whatsapp";
+import { sendEmail } from "~/utils/email.server";
+import { InfoRequestAdminEmail } from "~/components/emails/InfoRequestAdminEmail";
 
 // ClientOnly component to avoid SSR hydration issues with heroui/theme
 function ClientOnly({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) {
@@ -75,12 +84,7 @@ interface TourDocument {
   name?: string;
   status?: string;
   hasPrice?: boolean;
-  infoRequestContact?: {
-    countryCode?: string;
-    dialCode?: string;
-    phoneNumber?: string;
-    message?: string;
-  };
+  infoRequestContact?: Partial<InfoRequestContactType>;
   content?: {
     en?: {
       title?: string;
@@ -115,6 +119,7 @@ export type ActionData = {
   booking?: Booking;
   redirectUrl?: string;
   sessionId?: string;
+  emailSent?: boolean;
 };
 
 export async function loader() {
@@ -270,7 +275,7 @@ export async function loader() {
         slug: tour.slug || "",
         name: tour.name || tour.slug || "",
         hasPrice: typeof tour.hasPrice === "boolean" ? tour.hasPrice : true,
-        infoRequestContact: tour.infoRequestContact,
+        infoRequestContact: normalizeInfoRequestContact(tour.infoRequestContact),
         tourName: tour.tourName,
         tourPrice: tour.tourPrice,
         content: {
@@ -380,6 +385,88 @@ export async function action({ request }: { request: Request }) {
       // }
 
       // return json<ActionData>({ success: true, redirectUrl: url, sessionId });
+    }
+
+    if (intent === "send-info-request-email") {
+      const rawInfoRequest = formData.get("infoRequest");
+      if (typeof rawInfoRequest !== "string" || !rawInfoRequest.trim()) {
+        return json<ActionData>({
+          success: false,
+          error: "Missing info request payload",
+        }, { status: 400 });
+      }
+
+      let parsedPayload: Record<string, unknown>;
+      try {
+        parsedPayload = JSON.parse(rawInfoRequest) as Record<string, unknown>;
+      } catch {
+        return json<ActionData>({
+          success: false,
+          error: "Invalid info request payload",
+        }, { status: 400 });
+      }
+
+      const fullName = typeof parsedPayload.fullName === "string" ? parsedPayload.fullName.trim() : "";
+      const email = typeof parsedPayload.email === "string" ? parsedPayload.email.trim() : "";
+      const phoneNumber = typeof parsedPayload.phoneNumber === "string" ? parsedPayload.phoneNumber.trim() : "";
+      const tourSlug = typeof parsedPayload.tourSlug === "string" ? parsedPayload.tourSlug.trim() : "";
+      const tourName = typeof parsedPayload.tourName === "string" ? parsedPayload.tourName.trim() : "";
+      const language = parsedPayload.language === "en" ? "en" : "es";
+      const countryCode = typeof parsedPayload.countryCode === "string" ? parsedPayload.countryCode.trim() : "";
+
+      if (!fullName || !email || !phoneNumber) {
+        return json<ActionData>({
+          success: false,
+          error: language === "en"
+            ? "Name, email and phone are required"
+            : "Nombre, email y teléfono son obligatorios",
+        }, { status: 400 });
+      }
+
+      if (!isValidEmail(email)) {
+        return json<ActionData>({
+          success: false,
+          error: language === "en" ? "Invalid email" : "Email no válido",
+        }, { status: 400 });
+      }
+
+      const infoRequestContact = normalizeInfoRequestContact(parsedPayload.infoRequestContact);
+
+      if (!hasValidEmailInfoRequestContact(infoRequestContact)) {
+        return json<ActionData>({
+          success: false,
+          error: language === "en"
+            ? "This tour has no valid destination email configured"
+            : "Este tour no tiene un email de destino válido configurado",
+        }, { status: 400 });
+      }
+
+      const destinationEmail = infoRequestContact.email || DEFAULT_INFO_REQUEST_EMAIL;
+      const emailSubject =
+        language === "en"
+          ? `New info request - ${tourName || tourSlug || "Tour"}`
+          : `Nueva solicitud de información - ${tourName || tourSlug || "Tour"}`;
+
+      await sendEmail({
+        to: destinationEmail,
+        subject: emailSubject,
+        component: (
+          <InfoRequestAdminEmail
+            fullName={fullName}
+            email={email}
+            phoneNumber={phoneNumber}
+            countryCode={countryCode}
+            tourName={tourName || tourSlug || "Tour to Valencia"}
+            tourSlug={tourSlug || "unknown-tour"}
+            language={language}
+          />
+        ),
+      });
+
+      return json<ActionData>({
+        success: true,
+        emailSent: true,
+      });
     }
 
     return json<ActionData>({ success: false, error: "Invalid intent" }, { status: 400 });
