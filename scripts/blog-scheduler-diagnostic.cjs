@@ -3,11 +3,31 @@
 /**
  * Blog Scheduler Diagnostic Script
  * 
- * Run with: node scripts/blog-scheduler-diagnostic.js
- * Or with environment: MONGODB_URI=mongodb://localhost:27017/tourtovalencia node scripts/blog-scheduler-diagnostic.js
+ * Run with: node scripts/blog-scheduler-diagnostic.cjs
+ * Or with environment: MONGODB_URI=mongodb://localhost:27017/tourtovalencia node scripts/blog-scheduler-diagnostic.cjs
  */
 
 const { MongoClient } = require('mongodb');
+const fs = require('fs');
+const path = require('path');
+
+// Load .env file if exists
+const envPath = path.join(__dirname, '..', '.env');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf-8');
+  envContent.split('\n').forEach(line => {
+    const match = line.match(/^([^=]+)=(.*)$/);
+    if (match) {
+      // Remove quotes from value if present
+      let value = match[2].trim();
+      if ((value.startsWith('"') && value.endsWith('"')) || 
+          (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
+      }
+      process.env[match[1].trim()] = value;
+    }
+  });
+}
 
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/tourtovalencia';
 const DB_NAME = MONGO_URI.includes('/') ? MONGO_URI.split('/').pop().split('?')[0] : 'tourtovalencia';
@@ -114,6 +134,18 @@ async function runDiagnostics() {
     console.log('========================================\n');
     
     const issues = [];
+    let isLocked = false;
+    let isOverdue = false;
+    let lockedUntil = null;
+    let nextRunAt = null;
+    const now = new Date();
+    
+    if (settings) {
+      nextRunAt = settings.nextRunAt ? new Date(settings.nextRunAt) : null;
+      lockedUntil = settings.lockedUntil ? new Date(settings.lockedUntil) : null;
+      isLocked = lockedUntil && lockedUntil > now;
+      isOverdue = nextRunAt && nextRunAt <= now;
+    }
     
     if (!settings) issues.push('No blog settings found');
     if (toursCount === 0) issues.push('No active tours');
