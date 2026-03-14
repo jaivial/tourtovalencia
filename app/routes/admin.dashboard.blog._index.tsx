@@ -119,6 +119,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const settings = await getBlogSettings();
   const toursCollection = await getToursCollection();
   const tours = await toursCollection.find({ status: "active" }).toArray();
+  
+  // Calculate scheduler status
+  const now = new Date();
+  const isLocked = settings.lockedUntil ? new Date(settings.lockedUntil) > now : false;
+  const isOverdue = settings.nextRunAt ? new Date(settings.nextRunAt) <= now : false;
+  
+  // Count total posts
+  const postsCollection = await getBlogSettingsCollection();
+  // Get the blog posts collection properly
+  const { getBlogPostsCollection } = await import("~/utils/db.server");
+  const blogPostsCollection = await getBlogPostsCollection();
+  const postsCount = await blogPostsCollection.countDocuments();
 
   return json({
     settings,
@@ -126,6 +138,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       slug: tour.slug,
       name: tour.tourName?.es || tour.tourName?.en || tour.slug,
     })),
+    diagnostic: {
+      isLocked,
+      isOverdue,
+      lockedUntil: settings.lockedUntil,
+      nextRunAt: settings.nextRunAt,
+      lastRunAt: settings.lastRunAt,
+      lastError: settings.lastError,
+      postsCount,
+      activeToursCount: tours.length,
+      hasGoogleAIKey: !!process.env.GOOGLE_AI_API_KEY,
+    },
   });
 };
 
@@ -133,6 +156,88 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   await requireAdminSession(request);
   const formData = await request.formData();
   const intent = String(formData.get("intent") || "save");
+
+  // Force run - bypasses schedule and clears any lock
+  if (intent === "force-run") {
+    const collection = await getBlogSettingsCollection();
+    
+    // Clear any existing lock
+    await collection.updateOne(
+      { key: "default" },
+      { $unset: { lockedUntil: "" } }
+    );
+    
+    const settings = await getBlogSettings();
+    const now = new Date();
+    
+    try {
+      const post = await generateBlogPostFromSettings(settings);
+      const nextRunAt = calculateNextRunAt(settings, now);
+      await collection.updateOne(
+        { key: "default" },
+        {
+          $set: {
+            lastRunAt: now,
+            nextRunAt,
+            updatedAt: new Date(),
+          },
+          $unset: {
+            lastError: "",
+            lockedUntil: "",
+          },
+        }
+      );
+      return json({ success: true, generated: true, slug: post.slug, message: "Post generado correctamente" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      await collection.updateOne(
+        { key: "default" },
+        {
+          $set: {
+            lastError: message,
+            updatedAt: new Date(),
+          },
+          $unset: {
+            lockedUntil: "",
+          },
+        }
+      );
+      return json({ success: false, error: message }, { status: 500 });
+    }
+  }
+
+  // Clear lock only - doesn't generate a post
+  if (intent === "clear-lock") {
+    const collection = await getBlogSettingsCollection();
+    await collection.updateOne(
+      { key: "default" },
+      { $unset: { lockedUntil: "" } }
+    );
+    return json({ success: true, message: "Lock cleared successfully" });
+  }
+
+  // Reset scheduler - clears lock and resets nextRunAt to now
+  if (intent === "reset-scheduler") {
+    const collection = await getBlogSettingsCollection();
+    const settings = await getBlogSettings();
+    const now = new Date();
+    const nextRunAt = calculateNextRunAt(settings, now);
+    
+    await collection.updateOne(
+      { key: "default" },
+      {
+        $set: {
+          nextRunAt,
+          updatedAt: new Date(),
+        },
+        $unset: {
+          lockedUntil: "",
+          lastError: "",
+        },
+      }
+    );
+    return json({ success: true, message: "Scheduler reset successfully" });
+  }
 
   if (intent === "generate-status") {
     const jobId = String(formData.get("jobId") || "");
@@ -259,7 +364,7 @@ type GenerateActionResponse = {
 };
 
 export default function AdminBlogSettingsRoute() {
-  const { settings, tours } = useLoaderData<typeof loader>();
+  const { settings, tours, diagnostic } = useLoaderData<typeof loader>();
   const [frequency, setFrequency] = useState(settings.frequency);
   const [publishHour, setPublishHour] = useState(String(settings.publishHour));
   const [selectedWeekdays, setSelectedWeekdays] = useState<number[]>(settings.selectedWeekdays || [3]);
@@ -304,6 +409,10 @@ export default function AdminBlogSettingsRoute() {
 
     if (data.generated && typeof data.slug === "string") {
       setCompletedSlug(data.slug);
+      // Show success message if provided (from force-run)
+      if (data.message) {
+        setGenerationMessage(data.message);
+      }
     }
   }, [generateFetcher.data]);
 
@@ -665,6 +774,15 @@ export default function AdminBlogSettingsRoute() {
                 >
                   Generar ahora
                 </Button>
+                <Button
+                  type="submit"
+                  name="intent"
+                  value="force-run"
+                  variant="destructive"
+                  disabled={isGenerating}
+                >
+                  Forzar ejecución
+                </Button>
                 <Button type="submit" name="intent" value="save">
                   Guardar cambios
                 </Button>
@@ -688,6 +806,74 @@ export default function AdminBlogSettingsRoute() {
                     : "Sin ejecuciones"}
                 </span>
               </p>
+            </div>
+
+            {/* Diagnostic Panel */}
+            <div className="mt-6 p-4 rounded-lg bg-gray-50 border text-sm">
+              <h3 className="font-semibold text-gray-700 mb-3">Diagnóstico del Programador</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-gray-500">Estado del bloqueo:</span>
+                  <span className={`ml-2 font-medium ${diagnostic.isLocked ? "text-red-600" : "text-green-600"}`}>
+                    {diagnostic.isLocked ? "Bloqueado" : "Activo"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500">¿Atrasado?</span>
+                  <span className={`ml-2 font-medium ${diagnostic.isOverdue ? "text-red-600" : "text-green-600"}`}>
+                    {diagnostic.isOverdue ? "Sí" : "No"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Posts publicados:</span>
+                  <span className="ml-2 font-medium">{diagnostic.postsCount}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Tours activos:</span>
+                  <span className="ml-2 font-medium">{diagnostic.activeToursCount}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">API Key configurada:</span>
+                  <span className={`ml-2 font-medium ${diagnostic.hasGoogleAIKey ? "text-green-600" : "text-red-600"}`}>
+                    {diagnostic.hasGoogleAIKey ? "Sí" : "NO"}
+                  </span>
+                </div>
+                {diagnostic.lastError && (
+                  <div className="col-span-2 mt-2 p-2 bg-red-50 border border-red-200 rounded">
+                    <span className="text-red-600 font-medium">Último error: </span>
+                    <span className="text-red-700">{diagnostic.lastError}</span>
+                  </div>
+                )}
+                {diagnostic.lockedUntil && diagnostic.isLocked && (
+                  <div className="col-span-2 mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                    <span className="text-yellow-700">
+                      El bloqueo expira: {new Date(diagnostic.lockedUntil).toLocaleString("es-ES", { timeZone: "Europe/Madrid" })}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Diagnostic Actions */}
+              <div className="mt-4 pt-4 border-t flex gap-2 flex-wrap">
+                <Button
+                  type="submit"
+                  name="intent"
+                  value="clear-lock"
+                  variant="outline"
+                  size="sm"
+                >
+                  Desbloquear
+                </Button>
+                <Button
+                  type="submit"
+                  name="intent"
+                  value="reset-scheduler"
+                  variant="outline"
+                  size="sm"
+                >
+                  Reiniciar programador
+                </Button>
+              </div>
             </div>
           </Form>
         </CardContent>

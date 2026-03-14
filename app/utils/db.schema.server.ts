@@ -254,6 +254,7 @@ export async function ensureDbIndexes() {
   // Create indexes for blogsettings collection
   await db.collection("blogsettings").createIndexes([
     { key: { key: 1 }, unique: true },
-    { key: { nextRunAt: 1 } }
+    { key: { nextRunAt: 1 } },
+    { key: { lockedUntil: 1 } }
   ]);
 }
