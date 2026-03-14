@@ -384,7 +384,9 @@ export default function AdminBlogSettingsRoute() {
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [completedSlug, setCompletedSlug] = useState<string | null>(null);
 
-  const isGenerating = generateFetcher.state !== "idle" || Boolean(generationJobId);
+  // Only check generationJobId for the loading state - don't rely on fetcher.state
+  // because the fetcher returns immediately with a jobId while the job runs in background
+  const isGenerating = Boolean(generationJobId);
 
   useEffect(() => {
     const data = generateFetcher.data as GenerateActionResponse | undefined;
