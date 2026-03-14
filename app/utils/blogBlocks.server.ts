@@ -21,26 +21,30 @@ function formatParagraph(value: string): string {
   return escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
 }
 
+/**
+ * Parse HTML content from AI and convert to Gutenberg blocks
+ */
 export function paragraphsToBlocks(paragraphs: string[]): GutenbergBlock[] {
   return paragraphs
     .map((paragraph) => paragraph.trim())
     .filter(Boolean)
     .map((paragraph) => {
-      const content = formatParagraph(paragraph);
       return {
         name: "core/paragraph",
-        attributes: { content },
+        attributes: { content: paragraph },
         innerBlocks: [],
-        innerHTML: `<p>${content}</p>`,
-        innerContent: [`<p>${content}</p>`],
+        innerHTML: paragraph,
+        innerContent: [paragraph],
       } satisfies GutenbergBlock;
     });
 }
 
+/**
+ * Convert paragraphs to Gutenberg HTML (legacy function, now just joins paragraphs)
+ */
 export function paragraphsToGutenbergHtml(paragraphs: string[]): string {
   return paragraphs
     .map((p) => p.trim())
     .filter(Boolean)
-    .map((p) => `<!-- wp:paragraph -->\n<p>${formatParagraph(p)}</p>\n<!-- /wp:paragraph -->`)
     .join("\n\n");
 }

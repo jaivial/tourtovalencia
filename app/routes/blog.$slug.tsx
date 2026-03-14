@@ -65,7 +65,7 @@ function estimateReadingTime(wordCount: number): number {
   return Math.max(1, Math.round(wordCount / 200));
 }
 
-/** Convert markdown bold (**text**) to <strong> tags in plain text */
+/** Convert markdown bold (**text**) to <strong> tags in plain text (legacy, kept for backwards compatibility) */
 function markdownBoldToHtml(text: string): string {
   return text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
 }
@@ -163,8 +163,12 @@ export default function BlogPostRoute() {
               prose-strong:text-gray-900
               prose-img:rounded-xl prose-img:shadow-md
               prose-blockquote:border-l-amber-400 prose-blockquote:bg-amber-50/50 prose-blockquote:py-1 prose-blockquote:rounded-r-lg
-              prose-li:text-gray-700"
-            dangerouslySetInnerHTML={{ __html: markdownBoldToHtml(html) }}
+              prose-li:text-gray-700
+              prose-table:border-collapse prose-table:w-full prose-table:my-6
+              prose-table:th:bg-gray-100 prose-table:th:px-4 prose-table:th:py-3 prose-table:th:text-left prose-table:th:font-semibold prose-table:th:text-gray-900
+              prose-table:td:px-4 prose-table:td:py-3 prose-table:td:text-gray-700 prose-table:td:border-b prose-table:td:border-gray-200
+              prose-table:tr:hover:bg-gray-50"
+            dangerouslySetInnerHTML={{ __html: html }}
           />
         ) : (
           <div className="space-y-6">

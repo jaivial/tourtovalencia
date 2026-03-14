@@ -10,7 +10,73 @@ const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
 const GOOGLE_AI_MODEL = "gemini-2.0-flash-lite";
 const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/v1/models/${GOOGLE_AI_MODEL}:generateContent`;
 
-const DEFAULT_FEATURED_IMAGE = "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp";
+// Curated Unsplash photos — Valencia, Spain, Mediterranean travel
+const VALENCIA_IMAGES = [
+  { keyword: "default", url: "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp" },
+  { keyword: "playa", url: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "mar", url: "https://images.unsplash.com/photo-1562883676-8c7feb83f09b?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "ciudad", url: "https://images.unsplash.com/photo-1599998372649-3e01b1c2d5be?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "arts", url: "https://images.unsplash.com/photo-1599998372649-3e01b1c2d5be?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "ciencia", url: "https://images.unsplash.com/photo-1599998372649-3e01b1c2d5be?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "gastronomia", url: "https://images.unsplash.com/photo-1539037116277-4db20889f2d7?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "comida", url: "https://images.unsplash.com/photo-1539037116277-4db20889f2d7?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "paella", url: "https://images.unsplash.com/photo-1539037116277-4db20889f2d7?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "historia", url: "https://images.unsplash.com/photo-1504019347908-b45f9b0b8dd5?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "old town", url: "https://images.unsplash.com/photo-1504019347908-b45f9b0b8dd5?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "casco", url: "https://images.unsplash.com/photo-1504019347908-b45f9b0b8dd5?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "fallas", url: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "festa", url: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "jardin", url: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "parque", url: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "albufera", url: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "naturaleza", url: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "mercado", url: "https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "compras", url: "https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "arquitectura", url: "https://images.unsplash.com/photo-1512753360435-329c4535a9a7?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "modernista", url: "https://images.unsplash.com/photo-1512753360435-329c4535a9a7?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "noche", url: "https://images.unsplash.com/photo-1509840841025-9088ba78a826?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "nocturna", url: "https://images.unsplash.com/photo-1509840841025-9088ba78a826?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "atardecer", url: "https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "sunset", url: "https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "barrio", url: "https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "cabanyal", url: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "marino", url: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "deporte", url: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "bicicleta", url: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "bike", url: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "horchata", url: "https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "dulce", url: "https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "ninos", url: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "familia", url: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "semana santa", url: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "semana", url: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "clima", url: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "estacion", url: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "sostenible", url: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "ecologico", url: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "pueblo", url: "https://images.unsplash.com/photo-1504019347908-b45f9b0b8dd5?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "cerca", url: "https://images.unsplash.com/photo-1504019347908-b45f9b0b8dd5?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "arte", url: "https://images.unsplash.com/photo-1512753360435-329c4535a9a7?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "museo", url: "https://images.unsplash.com/photo-1512753360435-329c4535a9a7?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "vida", url: "https://images.unsplash.com/photo-1509840841025-9088ba78a826?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "nocturna", url: "https://images.unsplash.com/photo-1509840841025-9088ba78a826?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "puerto", url: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=1600&h=900&fit=crop&q=80" },
+  { keyword: "marina", url: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=1600&h=900&fit=crop&q=80" },
+];
+
+function selectImageForTopic(topic: string): string {
+  const topicLower = topic.toLowerCase();
+  
+  // Find the first matching keyword
+  for (const img of VALENCIA_IMAGES) {
+    if (topicLower.includes(img.keyword)) {
+      return img.url;
+    }
+  }
+  
+  // Default image
+  return VALENCIA_IMAGES[0].url;
+}
 
 type TourPromptData = {
   slug: string;
@@ -152,9 +218,15 @@ INSTRUCCIONES IMPORTANTES:
 - Solo al final del artículo, incluye UNA frase sutil mencionando que para conocer Valencia de forma especial se puede considerar una visita guiada, sin ser comercial ni agresivo.
 - No inventes datos factuales específicos (precios, horarios exactos).
 
-Formato:
+Formato ESTRUCTURADO (MUY IMPORTANTE):
 - Longitud: entre ${settings.wordCountMin} y ${settings.wordCountMax} palabras POR IDIOMA.
-- Párrafos: entre ${settings.paragraphsMin} y ${settings.paragraphsMax}.
+- Usa una estructura rica con:
+  * Encabezados (## Título de sección) para organizar el contenido
+  * Viñetas o listas con guiones (-) para enumerar elementos
+  * Negritas (**texto**) para destacar información importante
+  *tablas simples con | columna1 | columna2 | cuando sea relevante (ej: comparación de meses, precios aproximados, horarios)
+  * Citas o blockquotes (>) para información destacada o testimonios
+- Cada "paragraph" en el JSON puede contener HTML básico: <h2>, <h3>, <ul>, <li>, <strong>, <blockquote>, <table>, <tr>, <td>
 - Tono: ${settings.tone}.
 - Produce contenido en ESPAÑOL y en INGLÉS (no traduzcas literalmente, adapta cada versión al idioma).
 
@@ -171,7 +243,7 @@ Devuelve SOLO un JSON válido con esta estructura exacta:
   "es": {
     "title": "...",
     "excerpt": "...",
-    "paragraphs": ["...","..."],
+    "paragraphs": ["<p>...</p>", "<h2>Título</h2><p>...</p><ul><li>...</li></ul>", "..."],
     "seoTitle": "...",
     "seoDescription": "...",
     "seoKeywords": ["...","..."]
@@ -179,12 +251,14 @@ Devuelve SOLO un JSON válido con esta estructura exacta:
   "en": {
     "title": "...",
     "excerpt": "...",
-    "paragraphs": ["...","..."],
+    "paragraphs": ["<p>...</p>", "<h2>Title</h2><p>...</p><ul><li>...</li></ul>", "..."],
     "seoTitle": "...",
     "seoDescription": "...",
     "seoKeywords": ["...","..."]
   }
 }
+
+NOTA: Los párrafos pueden contener HTML. Usa <h2> para subtítulos principales, <h3> para subsecciones, <ul><li> para listas, <strong> para negritas, <blockquote> para citas, <table> para tablas.
 `.trim();
 }
 
@@ -302,6 +376,9 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
   const now = new Date();
   const titleForSlug = parsed.es.title || parsed.en.title || "blog-post";
   const slug = generateSlug(`${titleForSlug}-${now.getTime()}`);
+  
+  // Select image based on topic
+  const featuredImageUrl = selectImageForTopic(topic);
 
   const blogPost: BlogPost = {
     slug,
@@ -309,7 +386,7 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
     publishedAt: now,
     createdAt: now,
     updatedAt: now,
-    featuredImageUrl: DEFAULT_FEATURED_IMAGE,
+    featuredImageUrl,
     relatedTourSlugs: tours.map((tour) => tour.slug),
     content: {
       es: {
