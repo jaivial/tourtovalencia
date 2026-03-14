@@ -2,6 +2,7 @@ import { json, redirect } from "@remix-run/server-runtime";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/server-runtime";
 import { useLoaderData, Form, useFetcher, useNavigate } from "@remix-run/react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { requireAdminSession } from "~/utils/admin-session.server";
 import { getBlogSettings, updateBlogSettings } from "~/models/blogSettings.server";
 import { generateBlogPostFromSettings } from "~/utils/blogGenerator.server";
@@ -398,6 +399,7 @@ export default function AdminBlogSettingsRoute() {
       setGenerationError(data.error || "Error al generar el post");
       setGenerationMessage(null);
       setGenerationJobId(null);
+      toast.error(data.error || "Error al generar el post");
       return;
     }
 
@@ -415,6 +417,7 @@ export default function AdminBlogSettingsRoute() {
       if (data.message) {
         setGenerationMessage(data.message);
       }
+      toast.success("Blog generado y publicado correctamente");
     }
   }, [generateFetcher.data]);
 
@@ -458,6 +461,7 @@ export default function AdminBlogSettingsRoute() {
         if (data.status === "completed") {
           setGenerationJobId(null);
           setGenerationMessage(null);
+          toast.success("Blog generado y publicado correctamente");
 
           if (typeof data.slug === "string" && data.slug) {
             setCompletedSlug(data.slug);
@@ -472,6 +476,7 @@ export default function AdminBlogSettingsRoute() {
           setGenerationJobId(null);
           setGenerationMessage(null);
           setGenerationError(data.error || data.message || "Error al generar el post.");
+          toast.error(data.error || "Error al generar el blog");
           return;
         }
 
@@ -776,15 +781,6 @@ export default function AdminBlogSettingsRoute() {
                 >
                   Generar ahora
                 </Button>
-                <Button
-                  type="submit"
-                  name="intent"
-                  value="force-run"
-                  variant="destructive"
-                  disabled={isGenerating}
-                >
-                  Forzar ejecución
-                </Button>
                 <Button type="submit" name="intent" value="save">
                   Guardar cambios
                 </Button>
@@ -808,74 +804,6 @@ export default function AdminBlogSettingsRoute() {
                     : "Sin ejecuciones"}
                 </span>
               </p>
-            </div>
-
-            {/* Diagnostic Panel */}
-            <div className="mt-6 p-4 rounded-lg bg-gray-50 border text-sm">
-              <h3 className="font-semibold text-gray-700 mb-3">Diagnóstico del Programador</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-gray-500">Estado del bloqueo:</span>
-                  <span className={`ml-2 font-medium ${diagnostic.isLocked ? "text-red-600" : "text-green-600"}`}>
-                    {diagnostic.isLocked ? "Bloqueado" : "Activo"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-500">¿Atrasado?</span>
-                  <span className={`ml-2 font-medium ${diagnostic.isOverdue ? "text-red-600" : "text-green-600"}`}>
-                    {diagnostic.isOverdue ? "Sí" : "No"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Posts publicados:</span>
-                  <span className="ml-2 font-medium">{diagnostic.postsCount}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Tours activos:</span>
-                  <span className="ml-2 font-medium">{diagnostic.activeToursCount}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">API Key configurada:</span>
-                  <span className={`ml-2 font-medium ${diagnostic.hasGoogleAIKey ? "text-green-600" : "text-red-600"}`}>
-                    {diagnostic.hasGoogleAIKey ? "Sí" : "NO"}
-                  </span>
-                </div>
-                {diagnostic.lastError && (
-                  <div className="col-span-2 mt-2 p-2 bg-red-50 border border-red-200 rounded">
-                    <span className="text-red-600 font-medium">Último error: </span>
-                    <span className="text-red-700">{diagnostic.lastError}</span>
-                  </div>
-                )}
-                {diagnostic.lockedUntil && diagnostic.isLocked && (
-                  <div className="col-span-2 mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                    <span className="text-yellow-700">
-                      El bloqueo expira: {new Date(diagnostic.lockedUntil).toLocaleString("es-ES", { timeZone: "Europe/Madrid" })}
-                    </span>
-                  </div>
-                )}
-              </div>
-              
-              {/* Diagnostic Actions */}
-              <div className="mt-4 pt-4 border-t flex gap-2 flex-wrap">
-                <Button
-                  type="submit"
-                  name="intent"
-                  value="clear-lock"
-                  variant="outline"
-                  size="sm"
-                >
-                  Desbloquear
-                </Button>
-                <Button
-                  type="submit"
-                  name="intent"
-                  value="reset-scheduler"
-                  variant="outline"
-                  size="sm"
-                >
-                  Reiniciar programador
-                </Button>
-              </div>
             </div>
           </Form>
         </CardContent>
