@@ -47,6 +47,7 @@ function startBlogGenerationJob(settings: BlogSettings): string {
   });
 
   setTimeout(async () => {
+    console.log("[BLOG-JOB] Starting job:", jobId);
     const collection = await getBlogSettingsCollection();
     const now = new Date();
 
@@ -57,7 +58,9 @@ function startBlogGenerationJob(settings: BlogSettings): string {
         message: "Generando contenido del blog",
       });
 
+      console.log("[BLOG-JOB] Calling generateBlogPostFromSettings");
       const post = await generateBlogPostFromSettings(settings);
+      console.log("[BLOG-JOB] Post generated:", post.slug);
       const nextRunAt = calculateNextRunAt(settings, now);
 
       await collection.updateOne(
@@ -82,6 +85,7 @@ function startBlogGenerationJob(settings: BlogSettings): string {
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
+      console.error("[BLOG-JOB] Error generating post:", message);
 
       blogGenerationJobs.set(jobId, {
         ...blogGenerationJobs.get(jobId)!,
@@ -262,10 +266,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   if (intent === "generate") {
+    console.log("[BLOG-ACTION] Received generate intent, background:", formData.get("background"));
     const settings = await getBlogSettings();
     const background = formData.get("background");
 
     if (background === "true") {
+      console.log("[BLOG-ACTION] Starting background job");
       const jobId = startBlogGenerationJob(settings);
       return json({
         success: true,
@@ -446,12 +452,15 @@ export default function AdminBlogSettingsRoute() {
           credentials: "same-origin",
         });
 
+        console.log("[BLOG-POLL] Response status:", response.status);
         const contentType = response.headers.get("content-type") || "";
         if (!contentType.includes("application/json")) {
+          console.error("[BLOG-POLL] Non-JSON response:", contentType);
           throw new Error("La sesión expiró o el servidor respondió de forma inesperada.");
         }
 
         const data = await response.json() as GenerateActionResponse;
+        console.log("[BLOG-POLL] Response data:", data);
         if (!response.ok || data.success === false) {
           throw new Error(data.error || "No se pudo verificar el estado de generación.");
         }
@@ -523,16 +532,21 @@ export default function AdminBlogSettingsRoute() {
   }, [completedSlug, navigate]);
 
   const handleGenerateNow = () => {
+    console.log("[BLOG] handleGenerateNow called");
     setShowSuccess(false);
     setCompletedSlug(null);
     setGenerationError(null);
     setGenerationMessage("Iniciando generación...");
+    console.log("[BLOG] Submitting generateFetcher with intent=generate");
 
     generateFetcher.submit(
       { intent: "generate", background: "true" },
       { method: "post" },
     );
   };
+
+  // Debug fetcher state changes
+  console.log("[BLOG] Fetcher state:", generateFetcher.state, "data:", generateFetcher.data);
 
   return (
     <div className="relative">
