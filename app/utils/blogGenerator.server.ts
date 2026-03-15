@@ -10,6 +10,69 @@ const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
 const GOOGLE_AI_MODEL = "gemini-2.0-flash";
 const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GOOGLE_AI_MODEL}:generateContent`;
 
+// Bunny CDN Configuration
+const BUNNY_CONFIG = {
+  host: process.env.BUNNY_STORAGE_HOST || "storage.bunnycdn.com",
+  user: process.env.BUNNY_STORAGE_USER,
+  password: process.env.BUNNY_STORAGE_PASSWORD,
+  basePath: process.env.BUNNY_STORAGE_BASE_PATH || "/public/blog",
+  cdnBaseUrl: process.env.BUNNY_CDN_BASE_URL || "https://cdn.tourtovalencia.com/public/blog"
+};
+
+// Function to generate image with Google AI (nano banana 2) and upload to Bunny CDN
+async function generateAndUploadBlogImage(title: string, slug: string): Promise<string> {
+  try {
+    // Generate image using Google AI Image Generation API (imagen 3)
+    const prompt = `Genera una imagen para este tema: ${title}. Estilo: Fotografía de viaje profesional, colores vibrantes de Valencia España, luz dorada mediterránea, composition enmarcando el tema principal. No texto, no personas, no watermark.`;
+    
+    const generationUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-flash-001:_predict?key=${GOOGLE_AI_API_KEY}`;
+    
+    const response = await axios.post(generationUrl, {
+      prompt: prompt,
+      number_of_images: 1,
+      aspect_ratio: "16:9",
+      safety_filter_level: "block_low_and_above",
+      person_generation: "dont_allow",
+    }, {
+      headers: { "Content-Type": "application/json" }
+    });
+    
+    if (response.data?.predictions?.[0]?.baseImage?.imageBytes) {
+      const imageBytes = response.data.predictions[0].baseImage.imageBytes;
+      const base64Data = `data:image/png;base64,${imageBytes}`;
+      
+      // Upload to Bunny CDN
+      const timestamp = Date.now();
+      const filename = `${slug}-${timestamp}.png`;
+      const fullPath = `${BUNNY_CONFIG.basePath}/${filename}`;
+      
+      // Parse base64 and upload
+      const base64Content = base64Data.replace(/^data:image\/\w+;base64,/, "");
+      const buffer = Buffer.from(base64Content, "base64");
+      
+      const uploadUrl = `https://${BUNNY_CONFIG.host}/${BUNNY_CONFIG.user}${fullPath}`;
+      
+      await axios.put(uploadUrl, buffer, {
+        headers: {
+          AccessKey: BUNNY_CONFIG.password,
+          "Content-Type": "image/png",
+          "Content-Length": buffer.length,
+        },
+        timeout: 60000,
+      });
+      
+      const cdnUrl = `${BUNNY_CONFIG.cdnBaseUrl}/${filename}`;
+      console.log(`[BLOG-GENERATOR] Image uploaded to Bunny CDN: ${cdnUrl}`);
+      return cdnUrl;
+    }
+  } catch (error) {
+    console.error("[BLOG-GENERATOR] Error generating/uploading blog image:", error instanceof Error ? error.message : "Unknown error");
+  }
+  
+  // Fallback to default image
+  return "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp";
+}
+
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
 
 // Fallback images if Pexels is not configured
@@ -413,9 +476,8 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
   const titleForSlug = parsed.es.title || parsed.en.title || "blog-post";
   const slug = generateSlug(`${titleForSlug}-${now.getTime()}`);
   
-  // Search for image based on first 4 words of title using Pexels API
-  const searchTitle = parsed.es.title || parsed.en.title || topic;
-  const featuredImageUrl = await searchPexelsImage(searchTitle);
+  // Generate image using Google AI (nano banana 2) and upload to Bunny CDN
+  const featuredImageUrl = await generateAndUploadBlogImage(titleForSlug, slug);
 
   const blogPost: BlogPost = {
     slug,
