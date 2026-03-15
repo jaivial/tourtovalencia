@@ -70,6 +70,11 @@ function markdownBoldToHtml(text: string): string {
   return text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
 }
 
+/** Convert double asterisks (**text**) to single asterisks (*text*) */
+function sanitizeBoldAsterisks(text: string): string {
+  return text.replace(/\*\*(.+?)\*\*/g, "*$1*");
+}
+
 function renderBlocks(blocks: any[]): React.ReactNode[] {
   if (!blocks || blocks.length === 0) return [];
   
@@ -87,38 +92,41 @@ function renderBlocks(blocks: any[]): React.ReactNode[] {
     
     switch (name) {
       case 'core/paragraph':
+        const paraContent = sanitizeBoldAsterisks(attributes?.content || '');
         return (
           <p 
             key={index} 
-            className="text-lg text-gray-700 leading-[1.9] text-justify mb-6"
-            dangerouslySetInnerHTML={{ __html: attributes?.content || '' }}
+            className="text-xl text-gray-800 leading-[2.0] text-justify mb-8 font-serif"
+            dangerouslySetInnerHTML={{ __html: paraContent }}
           />
         );
         
       case 'core/heading':
         const level = attributes?.level || 2;
         const Tag = `h${level}` as keyof JSX.IntrinsicElements;
+        const headingContent = sanitizeBoldAsterisks(attributes?.content || '');
         const headingClasses: Record<number, string> = {
-          1: 'text-4xl font-bold text-gray-900 mt-12 mb-6 tracking-tight',
-          2: 'text-3xl font-bold text-gray-900 mt-14 mb-6 pb-3 border-b-2 border-amber-400 tracking-tight',
-          3: 'text-xl font-semibold text-gray-800 mt-10 mb-4',
-          4: 'text-lg font-semibold text-gray-800 mt-8 mb-3',
+          1: 'text-5xl font-extrabold text-gray-900 mt-16 mb-8 tracking-tight leading-[1.2]',
+          2: 'text-4xl font-bold text-gray-900 mt-16 mb-8 pb-4 border-b-4 border-amber-500 tracking-tight leading-[1.3]',
+          3: 'text-2xl font-bold text-gray-800 mt-12 mb-5 tracking-tight',
+          4: 'text-xl font-semibold text-gray-800 mt-8 mb-4',
         };
         return (
           <Tag 
             key={index} 
             className={headingClasses[level] || headingClasses[2]}
-            dangerouslySetInnerHTML={{ __html: attributes?.content || '' }}
+            dangerouslySetInnerHTML={{ __html: headingContent }}
           />
         );
         
       case 'core/list':
       case 'core/list-item':
+        const listContent = sanitizeBoldAsterisks(attributes?.content || '');
         return (
           <li 
             key={index} 
-            className="text-gray-700 text-lg leading-8 mb-2 pl-2 marker:text-amber-500"
-            dangerouslySetInnerHTML={{ __html: attributes?.content || '' }}
+            className="text-xl text-gray-800 leading-[2.0] mb-4 pl-2 marker:text-amber-500 marker:font-bold"
+            dangerouslySetInnerHTML={{ __html: listContent }}
           />
         );
         
@@ -126,7 +134,7 @@ function renderBlocks(blocks: any[]): React.ReactNode[] {
         return (
           <blockquote 
             key={index} 
-            className="border-l-4 border-amber-500 bg-gradient-to-r from-amber-50 to-white py-4 px-6 rounded-r-lg not-italic text-gray-700 font-medium my-8"
+            className="border-l-6 border-amber-500 bg-gradient-to-r from-amber-50 to-white py-6 px-8 rounded-r-lg not-italic text-gray-700 font-medium my-10 text-lg leading-relaxed"
             dangerouslySetInnerHTML={{ __html: attributes?.value || attributes?.content || '' }}
           />
         );
@@ -278,30 +286,30 @@ export default function BlogPostRoute() {
           <div
             className="prose prose-xl prose-gray max-w-none text-justify
               prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900 prose-headings:text-left
-              prose-h1:text-4xl prose-h1:font-bold prose-h1:mt-12 prose-h1:mb-6 prose-h1:tracking-tight
-              prose-h2:text-3xl prose-h2:mt-14 prose-h2:mb-6 prose-h2:border-b-2 prose-h2:border-amber-400 prose-h2:pb-3
-              prose-h3:text-xl prose-h3:mt-10 prose-h3:mb-4 prose-h3:text-gray-800
-              prose-p:text-gray-700 prose-p:leading-[1.9] prose-p:mb-6 prose-p:text-lg prose-p:text-justify
+              prose-h1:text-5xl prose-h1:font-extrabold prose-h1:mt-16 prose-h1:mb-8 prose-h1:tracking-tight prose-h1:leading-[1.2]
+              prose-h2:text-4xl prose-h2:font-bold prose-h2:mt-16 prose-h2:mb-8 prose-h2:border-b-4 prose-h2:border-amber-500 prose-h2:pb-4 prose-h2:tracking-tight prose-h2:leading-[1.3]
+              prose-h3:text-2xl prose-h3:font-bold prose-h3:mt-12 prose-h3:mb-5 prose-h3:text-gray-800
+              prose-p:text-xl prose-p:text-gray-800 prose-p:leading-[2.0] prose-p:mb-8 prose-p:text-justify prose-p:font-serif
               prose-a:text-amber-600 prose-a:no-underline hover:prose-a:underline
               prose-strong:text-gray-900 prose-strong:font-semibold
               prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8
-              prose-blockquote:border-l-4 prose-blockquote:border-amber-500 prose-blockquote:bg-gradient-to-r prose-blockquote:from-amber-50 prose-blockquote:to-white prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-gray-700 prose-blockquote:font-medium
-              prose-li:text-gray-700 prose-li:text-lg prose-li:leading-8 prose-li:mb-2 prose-li:marker:text-amber-500
-              prose-ul:my-6 prose-ul:pl-2
-              prose-ol:my-6 prose-ol:pl-2
+              prose-blockquote:border-l-6 prose-blockquote:border-amber-500 prose-blockquote:bg-gradient-to-r prose-blockquote:from-amber-50 prose-blockquote:to-white prose-blockquote:py-6 prose-blockquote:px-8 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-gray-700 prose-blockquote:font-medium prose-blockquote:text-lg prose-blockquote:leading-relaxed
+              prose-li:text-xl prose-li:text-gray-800 prose-li:leading-[2.0] prose-li:mb-4 prose-li:marker:text-amber-500 prose-li:marker:font-bold
+              prose-ul:my-8 prose-ul:pl-2
+              prose-ol:my-8 prose-ol:pl-2
               prose-table:border-collapse prose-table:w-full prose-table:my-8 prose-table:shadow-lg prose-table:rounded-xl prose-table:overflow-hidden
               prose-table:th:bg-amber-400 prose-table:th:px-6 prose-table:th:py-4 prose-table:th:text-left prose-table:th:font-bold prose-table:th:text-gray-900
               prose-table:td:px-6 prose-table:td:py-4 prose-table:td:text-gray-700 prose-table:td:border-b prose-table:td:border-gray-100
               prose-table:tr:hover:bg-amber-50 prose-table:transition-colors"
-            dangerouslySetInnerHTML={{ __html: html }}
+            dangerouslySetInnerHTML={{ __html: html.replace(/\*\*(.+?)\*\*/g, "*$1*") }}
           />
         ) : (
           <div className="space-y-6">
             {content.paragraphs.map((paragraph: string, index: number) => (
               <p
                 key={index}
-                className="text-lg text-gray-700 leading-[1.8] text-justify"
-                dangerouslySetInnerHTML={{ __html: markdownBoldToHtml(paragraph) }}
+                className="text-xl text-gray-800 leading-[2.0] text-justify mb-8 font-serif"
+                dangerouslySetInnerHTML={{ __html: sanitizeBoldAsterisks(paragraph) }}
               />
             ))}
           </div>
