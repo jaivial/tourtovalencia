@@ -75,6 +75,48 @@ function sanitizeBoldAsterisks(text: string): string {
   return text.replace(/\*\*(.+?)\*\*/g, "*$1*");
 }
 
+/** Check if content contains list items (lines starting with - or •) */
+function containsListItems(html: string): boolean {
+  return /^[\s]*[-•]\s/m.test(html);
+}
+
+/** Convert lines starting with - or • into proper HTML lists */
+function convertToHtmlLists(html: string): string {
+  const lines = html.split('\n');
+  let result = '';
+  let inList = false;
+  let listType = 'ul';
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    
+    // Check if this line is a list item
+    if (/^[-•]\s+/.test(trimmed)) {
+      if (!inList) {
+        // Start a new list with inline styles for bullet visibility
+        result += `<${listType} style="list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1.5rem;">`;
+        inList = true;
+      }
+      const itemContent = trimmed.replace(/^[-•]\s+/, '');
+      result += `<li style="margin-bottom: 0.5rem;">${itemContent}</li>`;
+    } else {
+      if (inList) {
+        // Close the list
+        result += `</${listType}>`;
+        inList = false;
+      }
+      result += line;
+    }
+  }
+  
+  // Close any open list at the end
+  if (inList) {
+    result += `</${listType}>`;
+  }
+  
+  return result;
+}
+
 function renderBlocks(blocks: any[]): React.ReactNode[] {
   if (!blocks || blocks.length === 0) return [];
   
@@ -128,8 +170,8 @@ function renderBlocks(blocks: any[]): React.ReactNode[] {
         renderedBlocks.push(
           <ListTag 
             key={i} 
-            className={`${isOrdered ? 'list-decimal' : 'list-disc'} my-8 ml-8 space-y-3 text-xl text-gray-800 leading-[2.0]`}
-            style={{ listStyleType: isOrdered ? 'decimal' : 'disc' }}
+            className={`${isOrdered ? 'list-decimal' : 'list-disc'} my-8 ml-8 space-y-3 text-xl text-gray-800 leading-[2.0] marker:text-black`}
+            style={{ listStyleType: isOrdered ? 'decimal' : 'disc', color: 'black' }}
             dangerouslySetInnerHTML={{ __html: innerHTML }}
           />
         );
@@ -154,11 +196,18 @@ function renderBlocks(blocks: any[]): React.ReactNode[] {
     
     switch (name) {
       case 'core/paragraph':
-        const paraContent = sanitizeBoldAsterisks(attributes?.content || '');
+        let paraContent = sanitizeBoldAsterisks(attributes?.content || '');
+        // Convert dash/bullet items to HTML lists
+        if (containsListItems(paraContent)) {
+          paraContent = convertToHtmlLists(paraContent);
+        }
         renderedBlocks.push(
           <p 
             key={i} 
             className="text-xl text-gray-800 leading-[2.0] text-justify mb-8 font-serif"
+            style={{ 
+              display: 'block',
+            }}
             dangerouslySetInnerHTML={{ __html: paraContent }}
           />
         );
@@ -355,7 +404,7 @@ export default function BlogPostRoute() {
               prose-strong:text-gray-900 prose-strong:font-semibold
               prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8
               prose-blockquote:border-l-6 prose-blockquote:border-amber-500 prose-blockquote:bg-gradient-to-r prose-blockquote:from-amber-50 prose-blockquote:to-white prose-blockquote:py-6 prose-blockquote:px-8 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-gray-700 prose-blockquote:font-medium prose-blockquote:text-lg prose-blockquote:leading-relaxed
-              prose-li:text-xl prose-li:text-gray-800 prose-li:leading-[2.0] prose-li:mb-4 prose-li:marker:text-amber-500 prose-li:marker:font-bold
+              prose-li:text-xl prose-li:text-gray-800 prose-li:leading-[2.0] prose-li:mb-4 prose-li:marker:text-black prose-li:marker:font-bold
               prose-ul:my-8 prose-ul:pl-2
               prose-ol:my-8 prose-ol:pl-2
               prose-table:border-collapse prose-table:w-full prose-table:my-8 prose-table:shadow-lg prose-table:rounded-xl prose-table:overflow-hidden
@@ -366,13 +415,20 @@ export default function BlogPostRoute() {
           />
         ) : (
           <div className="space-y-6">
-            {content.paragraphs.map((paragraph: string, index: number) => (
-              <p
-                key={index}
-                className="text-xl text-gray-800 leading-[2.0] text-justify mb-8 font-serif"
-                dangerouslySetInnerHTML={{ __html: sanitizeBoldAsterisks(paragraph) }}
-              />
-            ))}
+            {content.paragraphs.map((paragraph: string, index: number) => {
+              let processedPara = sanitizeBoldAsterisks(paragraph);
+              // Convert dash/bullet items to HTML lists
+              if (containsListItems(processedPara)) {
+                processedPara = convertToHtmlLists(processedPara);
+              }
+              return (
+                <p
+                  key={index}
+                  className="text-xl text-gray-800 leading-[2.0] text-justify mb-8 font-serif"
+                  dangerouslySetInnerHTML={{ __html: processedPara }}
+                />
+              );
+            })}
           </div>
         )}
 
