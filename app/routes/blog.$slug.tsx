@@ -78,28 +78,90 @@ function sanitizeBoldAsterisks(text: string): string {
 function renderBlocks(blocks: any[]): React.ReactNode[] {
   if (!blocks || blocks.length === 0) return [];
   
-  return blocks.map((block, index) => {
+  const renderedBlocks: React.ReactNode[] = [];
+  
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
     const { name, attributes, innerBlocks, innerHTML } = block;
+    
+    // Handle list blocks - group list items together
+    if (name === 'core/list') {
+      const isOrdered = attributes?.ordered || false;
+      const ListTag = isOrdered ? 'ol' : 'ul';
+      
+      // Get all list items that follow this list block
+      const listItems: any[] = [];
+      for (let j = i + 1; j < blocks.length; j++) {
+        if (blocks[j].name === 'core/list-item') {
+          listItems.push(blocks[j]);
+        } else {
+          break;
+        }
+      }
+      
+      // Skip the list items we already processed
+      if (listItems.length > 0) {
+        renderedBlocks.push(
+          <ListTag 
+            key={i} 
+            className={`${isOrdered ? 'list-decimal' : 'list-disc'} my-8 ml-8 space-y-3 text-xl text-gray-800 leading-[2.0]`}
+          >
+            {listItems.map((item, itemIndex) => {
+              const content = sanitizeBoldAsterisks(item.attributes?.content || '');
+              return (
+                <li 
+                  key={itemIndex} 
+                  className="text-gray-800 leading-[2.0] mb-3 pl-2 marker:text-amber-500 marker:font-bold"
+                  dangerouslySetInnerHTML={{ __html: content }}
+                />
+              );
+            })}
+          </ListTag>
+        );
+        // Skip the list items since we already rendered them
+        i += listItems.length;
+        continue;
+      }
+      
+      // If no list items found, render as regular list with innerHTML
+      if (innerHTML) {
+        renderedBlocks.push(
+          <ListTag 
+            key={i} 
+            className={`${isOrdered ? 'list-decimal' : 'list-disc'} my-8 ml-8 space-y-3 text-xl text-gray-800 leading-[2.0]`}
+            dangerouslySetInnerHTML={{ __html: innerHTML }}
+          />
+        );
+      }
+      continue;
+    }
+    
+    // Skip individual list-items since they're handled in the list block above
+    if (name === 'core/list-item') {
+      continue;
+    }
     
     // Handle nested blocks recursively
     if (innerBlocks && innerBlocks.length > 0) {
-      return (
-        <div key={index} className="nested-blocks">
+      renderedBlocks.push(
+        <div key={i} className="nested-blocks">
           {renderBlocks(innerBlocks)}
         </div>
       );
+      continue;
     }
     
     switch (name) {
       case 'core/paragraph':
         const paraContent = sanitizeBoldAsterisks(attributes?.content || '');
-        return (
+        renderedBlocks.push(
           <p 
-            key={index} 
+            key={i} 
             className="text-xl text-gray-800 leading-[2.0] text-justify mb-8 font-serif"
             dangerouslySetInnerHTML={{ __html: paraContent }}
           />
         );
+        break;
         
       case 'core/heading':
         const level = attributes?.level || 2;
@@ -111,40 +173,31 @@ function renderBlocks(blocks: any[]): React.ReactNode[] {
           3: 'text-2xl font-bold text-gray-800 mt-12 mb-5 tracking-tight',
           4: 'text-xl font-semibold text-gray-800 mt-8 mb-4',
         };
-        return (
+        renderedBlocks.push(
           <Tag 
-            key={index} 
+            key={i} 
             className={headingClasses[level] || headingClasses[2]}
             dangerouslySetInnerHTML={{ __html: headingContent }}
           />
         );
-        
-      case 'core/list':
-      case 'core/list-item':
-        const listContent = sanitizeBoldAsterisks(attributes?.content || '');
-        return (
-          <li 
-            key={index} 
-            className="text-xl text-gray-800 leading-[2.0] mb-4 pl-2 marker:text-amber-500 marker:font-bold"
-            dangerouslySetInnerHTML={{ __html: listContent }}
-          />
-        );
+        break;
         
       case 'core/quote':
-        return (
+        renderedBlocks.push(
           <blockquote 
-            key={index} 
+            key={i} 
             className="border-l-6 border-amber-500 bg-gradient-to-r from-amber-50 to-white py-6 px-8 rounded-r-lg not-italic text-gray-700 font-medium my-10 text-lg leading-relaxed"
             dangerouslySetInnerHTML={{ __html: attributes?.value || attributes?.content || '' }}
           />
         );
+        break;
         
       case 'core/image':
       case 'core/cover':
         const imageUrl = attributes?.url || attributes?.src || '';
         const altText = attributes?.alt || attributes?.caption || 'Blog image';
-        return (
-          <figure key={index} className="my-8">
+        renderedBlocks.push(
+          <figure key={i} className="my-8">
             <img 
               src={imageUrl} 
               alt={altText} 
@@ -157,14 +210,16 @@ function renderBlocks(blocks: any[]): React.ReactNode[] {
             )}
           </figure>
         );
+        break;
         
       case 'core/separator':
-        return <hr key={index} className="my-10 border-gray-200" />;
+        renderedBlocks.push(<hr key={i} className="my-10 border-gray-200" />);
+        break;
         
       case 'core/button':
       case 'core/buttons':
-        return (
-          <div key={index} className="my-6">
+        renderedBlocks.push(
+          <div key={i} className="my-6">
             <a 
               href={attributes?.url || '#'} 
               className="inline-block bg-amber-400 hover:bg-amber-500 text-gray-900 font-semibold px-6 py-3 rounded-full transition-colors"
@@ -172,44 +227,49 @@ function renderBlocks(blocks: any[]): React.ReactNode[] {
             />
           </div>
         );
+        break;
         
       case 'core/html':
-        return (
+        renderedBlocks.push(
           <div 
-            key={index} 
+            key={i} 
             className="my-6 custom-html-block"
             dangerouslySetInnerHTML={{ __html: attributes?.content || '' }}
           />
         );
+        break;
         
       case 'core/preformatted':
-        return (
+        renderedBlocks.push(
           <pre 
-            key={index} 
+            key={i} 
             className="bg-gray-100 p-4 rounded-lg overflow-x-auto my-6 text-sm font-mono"
             dangerouslySetInnerHTML={{ __html: attributes?.content || '' }}
           />
         );
+        break;
         
       case 'core/code':
-        return (
+        renderedBlocks.push(
           <code 
-            key={index} 
+            key={i} 
             className="bg-gray-100 px-2 py-1 rounded text-sm font-mono"
             dangerouslySetInnerHTML={{ __html: attributes?.content || '' }}
           />
         );
+        break;
         
       default:
         // Render any block as HTML if it has innerHTML
         if (innerHTML) {
-          return (
-            <div key={index} className="my-4" dangerouslySetInnerHTML={{ __html: innerHTML }} />
+          renderedBlocks.push(
+            <div key={i} className="my-4" dangerouslySetInnerHTML={{ __html: innerHTML }} />
           );
         }
-        return null;
     }
-  });
+  }
+  
+  return renderedBlocks;
 }
 
 export default function BlogPostRoute() {
