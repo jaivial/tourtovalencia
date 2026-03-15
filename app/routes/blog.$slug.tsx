@@ -101,14 +101,14 @@ export default function BlogPostRoute() {
         {/* Title overlay */}
         <div className="absolute bottom-0 left-0 right-0 z-10">
           <div className="container mx-auto px-6 max-w-4xl pb-10">
-            <div className="flex items-center gap-3 text-white/80 text-sm mb-4">
+            <div className="flex items-center gap-3 text-white/80 text-sm mb-4 font-medium">
               <time dateTime={new Date(post.publishedAt).toISOString()}>{formattedDate}</time>
               <span className="w-1 h-1 rounded-full bg-white/60" />
               <span>
                 {readingTime} min {texts.post.readingTimeLabel}
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight drop-shadow-lg">
               {content.title}
             </h1>
           </div>
@@ -131,27 +131,28 @@ export default function BlogPostRoute() {
       {/* Content Body */}
       <div className="container mx-auto px-6 max-w-3xl">
         {/* Excerpt / Lead */}
-        <p className="text-xl sm:text-2xl text-gray-600 leading-relaxed font-light mt-10 mb-10 border-l-4 border-amber-400 pl-6">
+        <p className="text-2xl sm:text-3xl text-gray-600 leading-relaxed font-light mt-12 mb-12 border-l-4 border-amber-400 pl-6 font-serif italic">
           {content.excerpt}
         </p>
 
         {/* Article Content */}
         {html ? (
           <div
-            className="prose prose-lg prose-gray max-w-none text-justify
+            className="prose prose-xl prose-gray max-w-none text-justify
               prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900 prose-headings:text-left
-              prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4
-              prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
-              prose-p:text-gray-700 prose-p:leading-[1.8] prose-p:mb-6
+              prose-h2:text-3xl prose-h2:mt-14 prose-h2:mb-6 prose-h2:border-b-2 prose-h2:border-amber-400 prose-h2:pb-3
+              prose-h3:text-xl prose-h3:mt-10 prose-h3:mb-4 prose-h3:text-gray-800
+              prose-p:text-gray-700 prose-p:leading-8 prose-p:mb-8 prose-p:text-lg
               prose-a:text-amber-600 prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-gray-900
-              prose-img:rounded-xl prose-img:shadow-md
-              prose-blockquote:border-l-amber-400 prose-blockquote:bg-amber-50/50 prose-blockquote:py-1 prose-blockquote:rounded-r-lg
-              prose-li:text-gray-700
-              prose-table:border-collapse prose-table:w-full prose-table:my-6
-              prose-table:th:bg-gray-100 prose-table:th:px-4 prose-table:th:py-3 prose-table:th:text-left prose-table:th:font-semibold prose-table:th:text-gray-900
-              prose-table:td:px-4 prose-table:td:py-3 prose-table:td:text-gray-700 prose-table:td:border-b prose-table:td:border-gray-200
-              prose-table:tr:hover:bg-gray-50"
+              prose-strong:text-gray-900 prose-strong:font-semibold
+              prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8
+              prose-blockquote:border-l-4 prose-blockquote:border-amber-500 prose-blockquote:bg-gradient-to-r prose-blockquote:from-amber-50 prose-blockquote:to-white prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-gray-700 prose-blockquote:font-medium
+              prose-li:text-gray-700 prose-li:leading-7 prose-li:mb-2
+              prose-ul:my-6 prose-ul:pl-2
+              prose-table:border-collapse prose-table:w-full prose-table:my-8 prose-table:shadow-lg prose-table:rounded-xl prose-table:overflow-hidden
+              prose-table:th:bg-amber-400 prose-table:th:px-6 prose-table:th:py-4 prose-table:th:text-left prose-table:th:font-bold prose-table:th:text-gray-900
+              prose-table:td:px-6 prose-table:td:py-4 prose-table:td:text-gray-700 prose-table:td:border-b prose-table:td:border-gray-100
+              prose-table:tr:hover:bg-amber-50 prose-table:transition-colors"
             dangerouslySetInnerHTML={{ __html: html }}
           />
         ) : (
