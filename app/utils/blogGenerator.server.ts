@@ -5,10 +5,10 @@ import { getBlogPostsCollection, getToursCollection } from "~/utils/db.server";
 import type { BlogPost, BlogSettings } from "~/utils/db.schema.server";
 import { generateSlug } from "~/utils/page.server";
 import { paragraphsToBlocks, paragraphsToGutenbergHtml } from "~/utils/blogBlocks.server";
+import { GoogleGenAI } from "@google/genai";
 
 const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
-const GOOGLE_AI_MODEL = "gemini-2.0-flash";
-const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GOOGLE_AI_MODEL}:generateContent`;
+const ai = new GoogleGenAI({ apiKey: GOOGLE_AI_API_KEY });
 
 // Bunny CDN Configuration
 const BUNNY_CONFIG = {
@@ -19,31 +19,35 @@ const BUNNY_CONFIG = {
   cdnBaseUrl: process.env.BUNNY_CDN_BASE_URL || "https://cdn.tourtovalencia.com/public/blog"
 };
 
-// Function to generate image with Google AI (nano banana 2) and upload to Bunny CDN
+// Function to generate image with Google AI (gemini-3.1-flash-image-preview) and upload to Bunny CDN
 async function generateAndUploadBlogImage(title: string, slug: string): Promise<string> {
   try {
-    // Generate image using Google AI Image Generation API (imagen 3)
-    const prompt = `Genera una imagen para este tema: ${title}. Estilo: Fotografía de viaje profesional, colores vibrantes de Valencia España, luz dorada mediterránea, composition enmarcando el tema principal. No texto, no personas, no watermark.`;
+    const prompt = `Genera una imagen para este tema: ${title}. Estilo: Fotografía de viaje profesional, colores vibrantes de Valencia España, luz dorada mediterránea, composición enmarcando el tema principal. No texto, no personas, no watermark. Aspect ratio 16:9.`;
     
-    const generationUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-flash-001:_predict?key=${GOOGLE_AI_API_KEY}`;
-    
-    const response = await axios.post(generationUrl, {
-      prompt: prompt,
-      number_of_images: 1,
-      aspect_ratio: "16:9",
-      safety_filter_level: "block_low_and_above",
-      person_generation: "dont_allow",
-    }, {
-      headers: { "Content-Type": "application/json" }
+    const response = await ai.models.generateContent({
+      model: "gemini-3.1-flash-image-preview",
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      config: {
+        responseModalities: ["IMAGE", "TEXT"],
+        imageConfig: {
+          aspectRatio: "16:9",
+        }
+      }
     });
     
-    if (response.data?.predictions?.[0]?.baseImage?.imageBytes) {
-      const imageBytes = response.data.predictions[0].baseImage.imageBytes;
-      const base64Data = `data:image/png;base64,${imageBytes}`;
+    // Check for inline data (image) in the response
+    const candidate = response.candidates?.[0];
+    const part = candidate?.content?.parts?.[0];
+    
+    if (part?.inlineData?.data) {
+      const imageBytes = part.inlineData.data;
+      const mimeType = part.inlineData.mimeType || "image/png";
+      const extension = mimeType.split("/")[1] || "png";
+      const base64Data = `data:${mimeType};base64,${imageBytes}`;
       
       // Upload to Bunny CDN
       const timestamp = Date.now();
-      const filename = `${slug}-${timestamp}.png`;
+      const filename = `${slug}-${timestamp}.${extension}`;
       const fullPath = `${BUNNY_CONFIG.basePath}/${filename}`;
       
       // Parse base64 and upload
@@ -55,7 +59,7 @@ async function generateAndUploadBlogImage(title: string, slug: string): Promise<
       await axios.put(uploadUrl, buffer, {
         headers: {
           AccessKey: BUNNY_CONFIG.password,
-          "Content-Type": "image/png",
+          "Content-Type": mimeType,
           "Content-Length": buffer.length,
         },
         timeout: 60000,
@@ -65,6 +69,9 @@ async function generateAndUploadBlogImage(title: string, slug: string): Promise<
       console.log(`[BLOG-GENERATOR] Image uploaded to Bunny CDN: ${cdnUrl}`);
       return cdnUrl;
     }
+    
+    // If no image in response, try alternative API
+    console.log("[BLOG-GENERATOR] No image in response, trying alternative method");
   } catch (error) {
     console.error("[BLOG-GENERATOR] Error generating/uploading blog image:", error instanceof Error ? error.message : "Unknown error");
   }
@@ -417,23 +424,15 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
 
   let responseText = "";
   try {
-    const response = await axios.post(
-      `${GOOGLE_AI_API_URL}?key=${GOOGLE_AI_API_KEY}`,
-      {
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: prompt }],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 4096,
-        },
-      },
-      { headers: { "Content-Type": "application/json" } }
-    );
-    responseText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      config: {
+        temperature: 0.7,
+        maxOutputTokens: 4096,
+      }
+    });
+    responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
   } catch (error) {
     const axiosMessage = getAxiosErrorMessage(error);
     if (axiosMessage) {
