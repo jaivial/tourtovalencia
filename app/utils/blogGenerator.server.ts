@@ -7,7 +7,7 @@ import { generateSlug } from "~/utils/page.server";
 import { paragraphsToBlocks, paragraphsToGutenbergHtml } from "~/utils/blogBlocks.server";
 
 const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
-const GOOGLE_AI_MODEL = "gemini-3.1-flash-lite-preview-05-20";
+const GOOGLE_AI_MODEL = "gemini-1.5-flash";
 const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/v1/models/${GOOGLE_AI_MODEL}:generateContent`;
 
 // Curated Unsplash photos — Valencia, Spain, Mediterranean travel
