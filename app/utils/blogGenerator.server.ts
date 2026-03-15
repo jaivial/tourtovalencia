@@ -269,7 +269,6 @@ REQUISITOS DE ESTRUCTURA Y LONGITUD:
   * Negritas (**texto**) para destacar información importante
   * tablas simples con | columna1 | columna2 | cuando sea relevante
   * Citas o blockquotes (>) para información destacada
-- Cada "paragraph" en el JSON puede contener HTML básico: <h2>, <h3>, <ul>, <li>, <strong>, <blockquote>, <table>, <tr>, <td>
 - Tono: ${settings.tone}.
 - Produce contenido en ESPAÑOL y en INGLÉS (no traduzcas literalmente, adapta cada versión al idioma).
 
@@ -301,7 +300,7 @@ Devuelve SOLO un JSON válido con esta estructura exacta:
   }
 }
 
-NOTA: Los párrafos pueden contener HTML. Usa <h2> para subtítulos principales, <h3> para subsecciones, <ul><li> para listas, <strong> para negritas, <blockquote> para citas, <table> para tablas.
+NOTA: Los párrafos pueden contener HTML básico: <h2>, <h3>, <ul>, <li>, <strong>, <blockquote>, <table>. No uses custom HTML como <div>, <span>, <button>, etc.
 `.trim();
 }
 
