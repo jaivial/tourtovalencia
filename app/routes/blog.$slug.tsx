@@ -70,6 +70,140 @@ function markdownBoldToHtml(text: string): string {
   return text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
 }
 
+function renderBlocks(blocks: any[]): React.ReactNode[] {
+  if (!blocks || blocks.length === 0) return [];
+  
+  return blocks.map((block, index) => {
+    const { name, attributes, innerBlocks, innerHTML } = block;
+    
+    // Handle nested blocks recursively
+    if (innerBlocks && innerBlocks.length > 0) {
+      return (
+        <div key={index} className="nested-blocks">
+          {renderBlocks(innerBlocks)}
+        </div>
+      );
+    }
+    
+    switch (name) {
+      case 'core/paragraph':
+        return (
+          <p 
+            key={index} 
+            className="text-lg text-gray-700 leading-[1.9] text-justify mb-6"
+            dangerouslySetInnerHTML={{ __html: attributes?.content || '' }}
+          />
+        );
+        
+      case 'core/heading':
+        const level = attributes?.level || 2;
+        const Tag = `h${level}` as keyof JSX.IntrinsicElements;
+        const headingClasses: Record<number, string> = {
+          1: 'text-4xl font-bold text-gray-900 mt-12 mb-6 tracking-tight',
+          2: 'text-3xl font-bold text-gray-900 mt-14 mb-6 pb-3 border-b-2 border-amber-400 tracking-tight',
+          3: 'text-xl font-semibold text-gray-800 mt-10 mb-4',
+          4: 'text-lg font-semibold text-gray-800 mt-8 mb-3',
+        };
+        return (
+          <Tag 
+            key={index} 
+            className={headingClasses[level] || headingClasses[2]}
+            dangerouslySetInnerHTML={{ __html: attributes?.content || '' }}
+          />
+        );
+        
+      case 'core/list':
+      case 'core/list-item':
+        return (
+          <li 
+            key={index} 
+            className="text-gray-700 text-lg leading-8 mb-2 pl-2 marker:text-amber-500"
+            dangerouslySetInnerHTML={{ __html: attributes?.content || '' }}
+          />
+        );
+        
+      case 'core/quote':
+        return (
+          <blockquote 
+            key={index} 
+            className="border-l-4 border-amber-500 bg-gradient-to-r from-amber-50 to-white py-4 px-6 rounded-r-lg not-italic text-gray-700 font-medium my-8"
+            dangerouslySetInnerHTML={{ __html: attributes?.value || attributes?.content || '' }}
+          />
+        );
+        
+      case 'core/image':
+      case 'core/cover':
+        const imageUrl = attributes?.url || attributes?.src || '';
+        const altText = attributes?.alt || attributes?.caption || 'Blog image';
+        return (
+          <figure key={index} className="my-8">
+            <img 
+              src={imageUrl} 
+              alt={altText} 
+              className="w-full rounded-xl shadow-lg"
+            />
+            {attributes?.caption && (
+              <figcaption className="text-center text-gray-500 text-sm mt-2">
+                {attributes.caption}
+              </figcaption>
+            )}
+          </figure>
+        );
+        
+      case 'core/separator':
+        return <hr key={index} className="my-10 border-gray-200" />;
+        
+      case 'core/button':
+      case 'core/buttons':
+        return (
+          <div key={index} className="my-6">
+            <a 
+              href={attributes?.url || '#'} 
+              className="inline-block bg-amber-400 hover:bg-amber-500 text-gray-900 font-semibold px-6 py-3 rounded-full transition-colors"
+              dangerouslySetInnerHTML={{ __html: attributes?.text || 'Botón' }}
+            />
+          </div>
+        );
+        
+      case 'core/html':
+        return (
+          <div 
+            key={index} 
+            className="my-6 custom-html-block"
+            dangerouslySetInnerHTML={{ __html: attributes?.content || '' }}
+          />
+        );
+        
+      case 'core/preformatted':
+        return (
+          <pre 
+            key={index} 
+            className="bg-gray-100 p-4 rounded-lg overflow-x-auto my-6 text-sm font-mono"
+            dangerouslySetInnerHTML={{ __html: attributes?.content || '' }}
+          />
+        );
+        
+      case 'core/code':
+        return (
+          <code 
+            key={index} 
+            className="bg-gray-100 px-2 py-1 rounded text-sm font-mono"
+            dangerouslySetInnerHTML={{ __html: attributes?.content || '' }}
+          />
+        );
+        
+      default:
+        // Render any block as HTML if it has innerHTML
+        if (innerHTML) {
+          return (
+            <div key={index} className="my-4" dangerouslySetInnerHTML={{ __html: innerHTML }} />
+          );
+        }
+        return null;
+    }
+  });
+}
+
 export default function BlogPostRoute() {
   const { post, language: loaderLanguage, relatedTours } = useLoaderData<typeof loader>();
   const { state } = useLanguageContext();
@@ -136,19 +270,25 @@ export default function BlogPostRoute() {
         </p>
 
         {/* Article Content */}
-        {html ? (
+        {content.blocks && content.blocks.length > 0 ? (
+          <div className="space-y-2">
+            {renderBlocks(content.blocks)}
+          </div>
+        ) : html ? (
           <div
             className="prose prose-xl prose-gray max-w-none text-justify
               prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900 prose-headings:text-left
+              prose-h1:text-4xl prose-h1:font-bold prose-h1:mt-12 prose-h1:mb-6 prose-h1:tracking-tight
               prose-h2:text-3xl prose-h2:mt-14 prose-h2:mb-6 prose-h2:border-b-2 prose-h2:border-amber-400 prose-h2:pb-3
               prose-h3:text-xl prose-h3:mt-10 prose-h3:mb-4 prose-h3:text-gray-800
-              prose-p:text-gray-700 prose-p:leading-8 prose-p:mb-8 prose-p:text-lg
+              prose-p:text-gray-700 prose-p:leading-[1.9] prose-p:mb-6 prose-p:text-lg prose-p:text-justify
               prose-a:text-amber-600 prose-a:no-underline hover:prose-a:underline
               prose-strong:text-gray-900 prose-strong:font-semibold
               prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8
               prose-blockquote:border-l-4 prose-blockquote:border-amber-500 prose-blockquote:bg-gradient-to-r prose-blockquote:from-amber-50 prose-blockquote:to-white prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-gray-700 prose-blockquote:font-medium
-              prose-li:text-gray-700 prose-li:leading-7 prose-li:mb-2
+              prose-li:text-gray-700 prose-li:text-lg prose-li:leading-8 prose-li:mb-2 prose-li:marker:text-amber-500
               prose-ul:my-6 prose-ul:pl-2
+              prose-ol:my-6 prose-ol:pl-2
               prose-table:border-collapse prose-table:w-full prose-table:my-8 prose-table:shadow-lg prose-table:rounded-xl prose-table:overflow-hidden
               prose-table:th:bg-amber-400 prose-table:th:px-6 prose-table:th:py-4 prose-table:th:text-left prose-table:th:font-bold prose-table:th:text-gray-900
               prose-table:td:px-6 prose-table:td:py-4 prose-table:td:text-gray-700 prose-table:td:border-b prose-table:td:border-gray-100
