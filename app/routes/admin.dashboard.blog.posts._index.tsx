@@ -77,17 +77,17 @@ export default function AdminBlogPostsRoute() {
                   className="rounded-2xl border bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden"
                 >
                   <div className="flex flex-col md:flex-row">
-                    {/* Image */}
-                    <div className="w-full md:w-40 h-36 md:h-auto flex-shrink-0 bg-gray-100">
+                    {/* Image - larger and improved */}
+                    <div className="w-full md:w-56 h-44 md:h-auto flex-shrink-0 bg-gray-100 relative overflow-hidden">
                       {imageUrl ? (
                         <img
                           src={imageUrl}
                           alt={title}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-cover hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-gray-300">
-                          <ImageIcon className="h-10 w-10" />
+                          <ImageIcon className="h-12 w-12" />
                         </div>
                       )}
                     </div>

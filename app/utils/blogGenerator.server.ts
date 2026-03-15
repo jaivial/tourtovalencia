@@ -7,10 +7,12 @@ import { generateSlug } from "~/utils/page.server";
 import { paragraphsToBlocks, paragraphsToGutenbergHtml } from "~/utils/blogBlocks.server";
 
 const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
-const GOOGLE_AI_MODEL = "gemini-2.0-flash";
-const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/v1/models/${GOOGLE_AI_MODEL}:generateContent`;
+const GOOGLE_AI_MODEL = "gemini-3.1-flash-lite-preview-05-20";
+const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GOOGLE_AI_MODEL}:generateContent`;
 
-// Curated Unsplash photos — Valencia, Spain, Mediterranean travel
+const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
+
+// Fallback images if Pexels is not configured
 const VALENCIA_IMAGES = [
   { keyword: "default", url: "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp" },
   { keyword: "playa", url: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1600&h=900&fit=crop&q=80" },
@@ -64,7 +66,46 @@ const VALENCIA_IMAGES = [
   { keyword: "marina", url: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=1600&h=900&fit=crop&q=80" },
 ];
 
-function selectImageForTopic(topic: string): string {
+// Search Pexels for images related to the topic
+async function searchPexelsImage(topic: string): Promise<string> {
+  // Extract key search terms from the topic
+  const searchTerms = topic
+    .toLowerCase()
+    .replace(/valencia|valencia,|de |el |la |los |las /g, "")
+    .split(/[,:]/)
+    .map(s => s.trim())
+    .filter(s => s.length > 2)
+    .slice(0, 3);
+  
+  // Add Valencia as primary search term
+  const query = `Valencia ${searchTerms.join(" ")}`.trim();
+  
+  try {
+    const response = await axios.get("https://api.pexels.com/v1/search", {
+      headers: {
+        Authorization: PEXELS_API_KEY,
+      },
+      params: {
+        query,
+        per_page: 1,
+        orientation: "landscape",
+      },
+    });
+    
+    if (response.data?.photos?.[0]?.src?.large2x) {
+      console.log(`[BLOG-GENERATOR] Pexels image found for query: "${query}"`);
+      return response.data.photos[0].src.large2x;
+    }
+  } catch (error) {
+    console.error("[BLOG-GENERATOR] Pexels API error:", error instanceof Error ? error.message : "Unknown error");
+  }
+  
+  // Fallback to curated images if Pexels fails
+  console.log("[BLOG-GENERATOR] Falling back to curated images");
+  return selectImageFromFallback(topic);
+}
+
+function selectImageFromFallback(topic: string): string {
   const topicLower = topic.toLowerCase();
   
   // Find the first matching keyword
@@ -218,14 +259,16 @@ INSTRUCCIONES IMPORTANTES:
 - Solo al final del artículo, incluye UNA frase sutil mencionando que para conocer Valencia de forma especial se puede considerar una visita guiada, sin ser comercial ni agresivo.
 - No inventes datos factuales específicos (precios, horarios exactos).
 
-Formato ESTRUCTURADO (MUY IMPORTANTE):
-- Longitud: entre ${settings.wordCountMin} y ${settings.wordCountMax} palabras POR IDIOMA.
+REQUISITOS DE ESTRUCTURA Y LONGITUD:
+- **OBLIGATORIO**: Exactamente 4 encabezados (##) en el artículo.
+- Longitud: entre 300 y 500 palabras POR IDIOMA.
+- Cada encabezado debe introducir una sección diferente del contenido.
 - Usa una estructura rica con:
   * Encabezados (## Título de sección) para organizar el contenido
   * Viñetas o listas con guiones (-) para enumerar elementos
   * Negritas (**texto**) para destacar información importante
-  *tablas simples con | columna1 | columna2 | cuando sea relevante (ej: comparación de meses, precios aproximados, horarios)
-  * Citas o blockquotes (>) para información destacada o testimonios
+  * tablas simples con | columna1 | columna2 | cuando sea relevante
+  * Citas o blockquotes (>) para información destacada
 - Cada "paragraph" en el JSON puede contener HTML básico: <h2>, <h3>, <ul>, <li>, <strong>, <blockquote>, <table>, <tr>, <td>
 - Tono: ${settings.tone}.
 - Produce contenido en ESPAÑOL y en INGLÉS (no traduzcas literalmente, adapta cada versión al idioma).
@@ -377,8 +420,8 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
   const titleForSlug = parsed.es.title || parsed.en.title || "blog-post";
   const slug = generateSlug(`${titleForSlug}-${now.getTime()}`);
   
-  // Select image based on topic
-  const featuredImageUrl = selectImageForTopic(topic);
+  // Search for image based on topic using Pexels API
+  const featuredImageUrl = await searchPexelsImage(topic);
 
   const blogPost: BlogPost = {
     slug,
