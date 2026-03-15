@@ -340,7 +340,15 @@ export default function BlogPostRoute() {
   const heroImage = post.featuredImageUrl || "https://cdn.tourtovalencia.com/public/tourtovalenciablackbg.webp";
 
   return (
-    <article className="w-full min-h-screen bg-white">
+    <>
+      <style>{`
+        .blog-list ul { list-style-type: disc !important; -webkit-list-style-type: disc !important; }
+        .blog-list ol { list-style-type: decimal !important; -webkit-list-style-type: decimal !important; }
+        .blog-list ul, .blog-list ol { margin-left: 1.5rem; margin-bottom: 1.5rem; }
+        .blog-list ul li, .blog-list ol li { margin-bottom: 0.5rem; display: list-item; padding-left: 0.5rem; }
+        .blog-list ul li::marker, .blog-list ol li::marker { color: black !important; }
+      `}</style>
+      <article className="w-full min-h-screen bg-white">
       {/* Hero Section */}
       <div className="relative w-full h-[50vh] min-h-[400px] max-h-[600px]">
         <img
@@ -389,12 +397,11 @@ export default function BlogPostRoute() {
 
         {/* Article Content */}
         {content.blocks && content.blocks.length > 0 ? (
-          <div className="space-y-2">
+          <div className="blog-list space-y-2">
             {renderBlocks(content.blocks)}
           </div>
         ) : html ? (
-          <div
-            className="prose prose-xl prose-gray max-w-none text-justify
+          <div className="blog-list prose prose-xl prose-gray max-w-none text-justify
               prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900 prose-headings:text-left
               prose-h1:text-5xl prose-h1:font-extrabold prose-h1:mt-16 prose-h1:mb-8 prose-h1:tracking-tight prose-h1:leading-[1.2]
               prose-h2:text-4xl prose-h2:font-bold prose-h2:mt-16 prose-h2:mb-8 prose-h2:border-b-4 prose-h2:border-amber-500 prose-h2:pb-4 prose-h2:tracking-tight prose-h2:leading-[1.3]
@@ -547,5 +554,6 @@ export default function BlogPostRoute() {
         </Link>
       </div>
     </article>
+    </>
   );
 }

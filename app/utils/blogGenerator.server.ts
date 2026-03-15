@@ -325,11 +325,12 @@ INSTRUCCIONES IMPORTANTES:
 
 REQUISITOS DE ESTRUCTURA Y LONGITUD:
 - **OBLIGATORIO**: Exactamente 4 encabezados (##) en el artículo.
+- **OBLIGATORIO**: Al menos 2 listas con guiones (-) en el artículo. Cada lista debe tener al menos 3 elementos.
 - Longitud: entre 300 y 500 palabras POR IDIOMA.
 - Cada encabezado debe introducir una sección diferente del contenido.
 - Usa una estructura rica con:
   * Encabezados (## Título de sección) para organizar el contenido
-  * Viñetas o listas con guiones (-) para enumerar elementos
+  * Viñetas o listas con guiones (-) para enumerar elementos - **OBLIGATORIO**
   * Negritas (**texto**) para destacar información importante
   * tablas simples con | columna1 | columna2 | cuando sea relevante
   * Citas o blockquotes (>) para información destacada
