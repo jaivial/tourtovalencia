@@ -7,7 +7,7 @@ import { generateSlug } from "~/utils/page.server";
 import { paragraphsToBlocks, paragraphsToGutenbergHtml } from "~/utils/blogBlocks.server";
 
 const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
-const GOOGLE_AI_MODEL = "gemini-3.1-flash-lite-preview-05-20";
+const GOOGLE_AI_MODEL = "gemini-2.0-flash";
 const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GOOGLE_AI_MODEL}:generateContent`;
 
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
