@@ -66,19 +66,13 @@ const VALENCIA_IMAGES = [
   { keyword: "marina", url: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=1600&h=900&fit=crop&q=80" },
 ];
 
-// Search Pexels for images related to the topic
-async function searchPexelsImage(topic: string): Promise<string> {
-  // Extract key search terms from the topic
-  const searchTerms = topic
-    .toLowerCase()
-    .replace(/valencia|valencia,|de |el |la |los |las /g, "")
-    .split(/[,:]/)
-    .map(s => s.trim())
-    .filter(s => s.length > 2)
-    .slice(0, 3);
+// Search Pexels for images based on first 4 words of the title
+async function searchPexelsImage(title: string): Promise<string> {
+  // Extract first 4 words from the title
+  const words = title.split(/\s+/).slice(0, 4).join(" ");
   
   // Add Valencia as primary search term
-  const query = `Valencia ${searchTerms.join(" ")}`.trim();
+  const query = `Valencia ${words}`;
   
   try {
     const response = await axios.get("https://api.pexels.com/v1/search", {
@@ -419,8 +413,9 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
   const titleForSlug = parsed.es.title || parsed.en.title || "blog-post";
   const slug = generateSlug(`${titleForSlug}-${now.getTime()}`);
   
-  // Search for image based on topic using Pexels API
-  const featuredImageUrl = await searchPexelsImage(topic);
+  // Search for image based on first 4 words of title using Pexels API
+  const searchTitle = parsed.es.title || parsed.en.title || topic;
+  const featuredImageUrl = await searchPexelsImage(searchTitle);
 
   const blogPost: BlogPost = {
     slug,
