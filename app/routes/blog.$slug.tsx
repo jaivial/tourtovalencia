@@ -111,7 +111,7 @@ function renderBlocks(blocks: any[]): React.ReactNode[] {
               return (
                 <li 
                   key={itemIndex} 
-                  className="text-gray-800 leading-[2.0] mb-3 pl-2 marker:text-amber-500 marker:font-bold"
+                  className="text-gray-800 leading-[2.0] mb-3 pl-2 marker:text-black"
                   dangerouslySetInnerHTML={{ __html: content }}
                 />
               );
@@ -129,6 +129,7 @@ function renderBlocks(blocks: any[]): React.ReactNode[] {
           <ListTag 
             key={i} 
             className={`${isOrdered ? 'list-decimal' : 'list-disc'} my-8 ml-8 space-y-3 text-xl text-gray-800 leading-[2.0]`}
+            style={{ listStyleType: isOrdered ? 'decimal' : 'disc' }}
             dangerouslySetInnerHTML={{ __html: innerHTML }}
           />
         );
