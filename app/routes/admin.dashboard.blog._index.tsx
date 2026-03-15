@@ -532,15 +532,15 @@ export default function AdminBlogSettingsRoute() {
   }, [completedSlug, navigate]);
 
   const handleGenerateNow = () => {
-    console.log("[BLOG] handleGenerateNow called");
+    console.log("[BLOG] handleGenerateNow called - using synchronous generation");
     setShowSuccess(false);
     setCompletedSlug(null);
     setGenerationError(null);
-    setGenerationMessage("Iniciando generación...");
-    console.log("[BLOG] Submitting generateFetcher with intent=generate");
+    setGenerationMessage("Generando post del blog...");
 
+    // Use synchronous generation (not background) to avoid polling issues
     generateFetcher.submit(
-      { intent: "generate", background: "true" },
+      { intent: "generate", background: "false" },
       { method: "post" },
     );
   };
