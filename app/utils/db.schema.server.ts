@@ -49,6 +49,8 @@ export interface Page {
       includes?: string;
       meetingPoint?: string;
       sectionOrder?: SectionOrderItem[];
+      minPeople?: number;
+      maxPeople?: number;
       [key: string]: any;
     };
     en: {
@@ -70,6 +72,8 @@ export interface Page {
       includes?: string;
       meetingPoint?: string;
       sectionOrder?: SectionOrderItem[];
+      minPeople?: number;
+      maxPeople?: number;
       [key: string]: any;
     };
   };
@@ -88,6 +92,8 @@ export interface Tour {
   };
   tourPrice: number;
   hasPrice?: boolean;
+  minPeople: number;
+  maxPeople: number;
   infoRequestContact?: InfoRequestContactType;
   status: 'active' | 'upcoming';
   description: {
