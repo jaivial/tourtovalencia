@@ -181,22 +181,34 @@ export default function DynamicPage() {
     section6: DynamicPageContainer.Section6,
   };
 
-  const renderSection = (sectionId: string, Component: React.ComponentType<any>, sectionContent: any, width: number, height: number) => {
+  const renderSection = (sectionId: string, Component: React.ComponentType<any>, content: any, width: number, height: number) => {
     switch (sectionId) {
       case 'section3':
-        return <Component width={width} images={sectionContent?.images?.filter((img: any) => img.enabled !== false) || []} />;
+        return <Component width={width} images={content?.images?.filter((img: any) => img.enabled !== false) || []} />;
       case 'section6':
         return <Component
           width={width}
           SanJuanSection6Text={{
-            ...sectionContent,
-            list: sectionContent?.list?.filter((item: any) => item.enabled !== false) || []
+            ...content,
+            list: content?.list?.filter((item: any) => item.enabled !== false) || []
           }}
           isInfoRequestOnly={isInfoRequestWhatsAppOnly}
           infoRequestUrl={infoRequestUrl}
           infoRequestLabel={infoRequestButtonText}
           missingInfoContactText={missingInfoContactText}
         />;
+      case 'section1':
+        return <Component width={width} sanJuanSection1Text={content} />;
+      case 'section2':
+        return <Component width={width} height={height} SanJuanSection2Text={content} />;
+      case 'section4':
+        return <Component width={width} SanJuanSection4Text={content} />;
+      case 'section5':
+        return <Component width={width} SanJuanSection5Text={content} />;
+      case 'timeline':
+        return <Component width={width} timelineData={content} />;
+      case 'indexSection5':
+        return <Component width={width} indexSection5Text={content} />;
       default:
         return null;
     }
