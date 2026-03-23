@@ -139,6 +139,7 @@ export type sanJuanSection5Type = {
 export type SanJuanSection6listType = {
   li: string;
   index: number;
+  enabled?: boolean;
 };
 
 export type SanJuanSection6Type = {
@@ -174,11 +175,19 @@ export type FooterType = {
   termsofservice: string;
 };
 
+export type SectionOrderItem = {
+  id: string;
+  enabled: boolean;
+  order: number;
+};
+
+export type PageSectionsConfig = {
+  sections: SectionOrderItem[];
+};
+
 export type sanJuanSection3Type = {
-  images: {
-    source: string | null;
-    alt: string;
-  }[];
+  images: Array<{ source: string | null; alt: string; enabled?: boolean }>;
+  enabled?: boolean;
 };
 
 export type AdminType = {
