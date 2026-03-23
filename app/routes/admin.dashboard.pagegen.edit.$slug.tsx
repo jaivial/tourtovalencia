@@ -49,6 +49,12 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 export default function EditPageRoute() {
   const { page } = useLoaderData<typeof loader>();
+
+  const initialSectionOrder: SectionOrderItem[] = (page.content?.es?.sectionOrder?.length ?? 0) > 0 
+    ? page.content.es.sectionOrder!
+    : defaultSectionOrder;
+  const [sectionOrderData, setSectionOrderData] = useState<SectionOrderItem[]>(initialSectionOrder);
+
   const {
     pageName,
     status,
@@ -95,13 +101,7 @@ export default function EditPageRoute() {
     handleSavePage,
     handleCancel,
     isBackgroundProcess
-  } = useEditPage(page);
-
-  // Section order state - load from page content if available, otherwise use defaults
-  const initialSectionOrder: SectionOrderItem[] = (page.content?.es?.sectionOrder?.length ?? 0) > 0 
-    ? page.content.es.sectionOrder!
-    : defaultSectionOrder;
-  const [sectionOrderData, setSectionOrderData] = useState<SectionOrderItem[]>(initialSectionOrder);
+  } = useEditPage(page, sectionOrderData);
 
   const handleSectionOrderChange = (sections: SectionOrderItem[]) => {
     setSectionOrderData(sections);

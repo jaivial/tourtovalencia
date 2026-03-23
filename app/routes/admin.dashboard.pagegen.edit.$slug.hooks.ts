@@ -10,7 +10,8 @@ import type {
   sanJuansection2Type, 
   sanJuansection4Type, 
   sanJuanSection5Type, 
-  SanJuanSection6Type 
+  SanJuanSection6Type,
+  SectionOrderItem 
 } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 import { countries } from "~/data/countries";
@@ -117,7 +118,7 @@ const deserializeContent = (page: Record<string, unknown>): Page => {
   return deserializedPage;
 };
 
-export const useEditPage = (initialPage: Record<string, unknown>) => {
+export const useEditPage = (initialPage: Record<string, unknown>, sectionOrderData: SectionOrderItem[]) => {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -503,6 +504,7 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
         price: hasPrice ? normalizePriceValue(price) : 0,
         hasPrice,
         infoRequestContact,
+        sectionOrder: sectionOrderData,
       };
 
       const serializedContent = JSON.stringify(content);
