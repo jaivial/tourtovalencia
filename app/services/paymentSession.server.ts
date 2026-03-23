@@ -176,8 +176,8 @@ async function resolveTourMetadata(bookingDraft: PaymentBookingDraft): Promise<{
   // Get minPeople/maxPeople from tour or content, with defaults
   const tourMinPeople = typeof tour.minPeople === "number" ? tour.minPeople : 1;
   const tourMaxPeople = typeof tour.maxPeople === "number" ? tour.maxPeople : 10;
-  const contentMinPeople = tour.content?.en?.minPeople ?? tour.content?.es?.minPeople;
-  const contentMaxPeople = tour.content?.en?.maxPeople ?? tour.content?.es?.maxPeople;
+  const contentMinPeople = tour.content?.es?.minPeople ?? tour.content?.en?.minPeople;
+  const contentMaxPeople = tour.content?.es?.maxPeople ?? tour.content?.en?.maxPeople;
 
   const minPeople = typeof contentMinPeople === "number" ? contentMinPeople : tourMinPeople;
   const maxPeople = typeof contentMaxPeople === "number" ? contentMaxPeople : tourMaxPeople;
