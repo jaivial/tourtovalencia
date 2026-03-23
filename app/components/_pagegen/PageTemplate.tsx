@@ -19,6 +19,8 @@ import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { CountrySelect } from "~/components/ui/CountrySelect";
 import { Textarea } from "~/components/ui/textarea";
+import { SectionOrderEditor } from "./SectionOrderEditor";
+import { SectionOrderItem } from "~/data/data";
 
 export type PageTemplateProps = {
   status: "active" | "upcoming";
@@ -57,6 +59,9 @@ export type PageTemplateProps = {
   onInfoRequestEnablePhoneChange: (enabled: boolean) => void;
   onInfoRequestEnableEmailChange: (enabled: boolean) => void;
   isEditMode?: boolean;
+  sectionOrderData?: SectionOrderItem[];
+  onSectionOrderChange?: (sections: SectionOrderItem[]) => void;
+  availableSections?: Array<{ id: string; label: string; items?: Array<{ id: string; label: string }> }>;
 };
 
 const PageTemplate: React.FC<PageTemplateProps> = ({ 
@@ -95,7 +100,10 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   onInfoRequestEmailChange,
   onInfoRequestEnablePhoneChange,
   onInfoRequestEnableEmailChange,
-  isEditMode = false 
+  isEditMode = false,
+  sectionOrderData,
+  onSectionOrderChange,
+  availableSections
 }) => {
   const size = useWindowSize();
   const { isModalOpen, closeModal } = usePublishModal();
@@ -280,6 +288,15 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
     <div className="space-y-6">
       <div className="w-full min-h-screen bg-gray-100 overflow-x-hidden">
         <div className="w-full mx-auto p-4 mb-8">
+          {sectionOrderData && onSectionOrderChange && availableSections && (
+            <div className="mb-6">
+              <SectionOrderEditor
+                sections={sectionOrderData}
+                onSectionsChange={onSectionOrderChange}
+                availableSections={availableSections}
+              />
+            </div>
+          )}
           <div className="flex flex-col items-center justify-center gap-6 p-8 bg-white rounded-lg shadow-sm">
             <h2 className="text-3xl font-bold text-gray-900">{pageName}</h2>
 
