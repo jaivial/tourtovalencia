@@ -8,7 +8,8 @@ import {
   sanJuansection2Type, 
   sanJuansection4Type, 
   sanJuanSection5Type, 
-  SanJuanSection6Type
+  SanJuanSection6Type,
+  SectionOrderItem
 } from "~/data/data";
 import { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 
@@ -47,6 +48,7 @@ export interface Page {
       duration?: string;
       includes?: string;
       meetingPoint?: string;
+      sectionOrder?: SectionOrderItem[];
       [key: string]: any;
     };
     en: {
@@ -67,6 +69,7 @@ export interface Page {
       duration?: string;
       includes?: string;
       meetingPoint?: string;
+      sectionOrder?: SectionOrderItem[];
       [key: string]: any;
     };
   };
