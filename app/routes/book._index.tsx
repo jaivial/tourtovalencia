@@ -318,9 +318,9 @@ export async function loader() {
               ? tour.content.es.hasPrice
               : (typeof tour.hasPrice === "boolean" ? tour.hasPrice : true);
         }
-        // Use content minPeople/maxPeople if available, otherwise use tour-level values
-        if (typeof tour.content.en?.minPeople === "number") {
-          tourData.minPeople = tour.content.en.minPeople;
+        // Use consistent language content for minPeople and maxPeople
+        if (typeof tour.content.es?.minPeople === "number") {
+          tourData.minPeople = tour.content.es.minPeople;
         }
         if (typeof tour.content.es?.maxPeople === "number") {
           tourData.maxPeople = tour.content.es.maxPeople;
