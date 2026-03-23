@@ -53,43 +53,60 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
 
   const orderedSections = getOrderedSections(content.sectionOrder);
 
-  if (content.sectionOrder && orderedSections.length > 0) {
-    const renderSection = (section: SectionOrderItem) => {
-      const { id } = section;
-      switch (id) {
-        case 'indexSection5':
-          return <IndexSection5 key={id} width={width} indexSection5Text={content.indexSection5} />;
-        case 'section1':
-          return <SanJuanSection1 key={id} width={width} sanJuanSection1Text={content.section1} />;
-        case 'section2':
-          return <SanJuanSection2 key={id} width={width} height={height} SanJuanSection2Text={content.section2} />;
-        case 'section3':
-          return <SanJuanSection3 key={id} width={width} />;
-        case 'section4':
-          return <SanJuanSection4 key={id} width={width} SanJuanSection4Text={content.section4} />;
-        case 'section5':
-          return <SanJuanSection5 key={id} width={width} SanJuanSection5Text={content.section5} />;
-        case 'section6':
-          return page.status === "upcoming" ? (
-            <ComingSoonCard key={id} width={width} />
-          ) : (
-            <SanJuanSection6
-              key={id}
-              width={width}
-              SanJuanSection6Text={{ ...content.section6, list: content.section6?.list?.filter((item: any) => item.enabled !== false) || [] }}
-              isInfoRequestOnly={isInfoRequestWhatsAppOnly}
-              infoRequestUrl={infoRequestUrl}
-              infoRequestLabel={infoRequestLabel}
-              missingInfoContactText={missingInfoContactText}
-            />
-          );
-        case 'timeline':
-          return <TimelineSection key={id} width={width} timelineData={content.timeline} />;
-        default:
-          return null;
-      }
-    };
+  const getSectionProps = (sectionId: string, content: any, width: number, height: number) => {
+    switch (sectionId) {
+      case 'section3':
+        return { width, images: content.section3?.images?.filter((img: any) => img.enabled !== false) || [] };
+      case 'section6':
+        return {
+          width,
+          SanJuanSection6Text: {
+            ...content.section6,
+            list: content.section6?.list?.filter((item: any) => item.enabled !== false) || []
+          },
+        };
+      default:
+        return { width };
+    }
+  };
 
+  const renderSection = (section: SectionOrderItem) => {
+    const { id } = section;
+    const sectionProps = getSectionProps(id, content, width, height);
+    switch (id) {
+      case 'indexSection5':
+        return <IndexSection5 key={id} {...sectionProps} indexSection5Text={content.indexSection5} />;
+      case 'section1':
+        return <SanJuanSection1 key={id} {...sectionProps} sanJuanSection1Text={content.section1} />;
+      case 'section2':
+        return <SanJuanSection2 key={id} {...sectionProps} height={height} SanJuanSection2Text={content.section2} />;
+      case 'section3':
+        return <SanJuanSection3 key={id} {...sectionProps} />;
+      case 'section4':
+        return <SanJuanSection4 key={id} {...sectionProps} SanJuanSection4Text={content.section4} />;
+      case 'section5':
+        return <SanJuanSection5 key={id} {...sectionProps} SanJuanSection5Text={content.section5} />;
+      case 'section6':
+        return page.status === "upcoming" ? (
+          <ComingSoonCard key={id} width={sectionProps.width} />
+        ) : (
+          <SanJuanSection6
+            key={id}
+            {...(sectionProps as any)}
+            isInfoRequestOnly={isInfoRequestWhatsAppOnly}
+            infoRequestUrl={infoRequestUrl}
+            infoRequestLabel={infoRequestLabel}
+            missingInfoContactText={missingInfoContactText}
+          />
+        );
+      case 'timeline':
+        return <TimelineSection key={id} {...sectionProps} timelineData={content.timeline} />;
+      default:
+        return null;
+    }
+  };
+
+  if (content.sectionOrder && orderedSections.length > 0) {
     return (
       <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
         {orderedSections.filter(s => s.enabled).map(renderSection)}
