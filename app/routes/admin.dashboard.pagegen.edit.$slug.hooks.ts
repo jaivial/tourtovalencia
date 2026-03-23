@@ -452,8 +452,13 @@ export const useEditPage = (initialPage: Record<string, unknown>, sectionOrderDa
     setCardData(data);
   };
 
-  const handleMinPeopleChange = (value: number) => setMinPeople(value);
-  const handleMaxPeopleChange = (value: number) => setMaxPeople(value);
+  const handleMinPeopleChange = (value: number) => {
+    setMinPeople(Math.min(maxPeople, Math.max(1, value)));
+  };
+
+  const handleMaxPeopleChange = (value: number) => {
+    setMaxPeople(Math.max(minPeople, value));
+  };
 
   const handleSavePage = async () => {
     if (!pageName.trim()) {
