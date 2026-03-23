@@ -11,11 +11,39 @@ import TimelineSection from "./TimelineSection";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import type { Page } from "~/utils/db.schema.server";
 import { buildWhatsAppUrl, normalizeInfoRequestContact } from "~/utils/whatsapp";
-import type { SectionOrderItem } from "~/data/data";
+import type { SectionOrderItem, sanJuanSection3Type, SanJuanSection6Type } from "~/data/data";
 
 interface DynamicPageContainerProps {
   page: Page;
 }
+
+interface Section3Image {
+  source: string | null;
+  alt: string;
+  enabled?: boolean;
+}
+
+interface Section6ListItem {
+  li: string;
+  index: number;
+  enabled?: boolean;
+}
+
+interface Section3Props {
+  width: number;
+  images: Section3Image[];
+}
+
+interface Section6Props {
+  width: number;
+  SanJuanSection6Text: SanJuanSection6Type;
+}
+
+interface DefaultSectionProps {
+  width: number;
+}
+
+type SectionProps = Section3Props | Section6Props | DefaultSectionProps;
 
 const getOrderedSections = (sectionOrder?: SectionOrderItem[]): SectionOrderItem[] => {
   if (!sectionOrder) return [];
@@ -53,18 +81,23 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
 
   const orderedSections = getOrderedSections(content.sectionOrder);
 
-  const getSectionProps = (sectionId: string, content: any, width: number, height: number) => {
+  const getSectionProps = (sectionId: string, pageContent: sanJuanSection3Type | SanJuanSection6Type | undefined, width: number): SectionProps => {
     switch (sectionId) {
-      case 'section3':
-        return { width, images: content.section3?.images?.filter((img: any) => img.enabled !== false) || [] };
-      case 'section6':
+      case 'section3': {
+        const section3Content = pageContent as sanJuanSection3Type | undefined;
+        const images = section3Content?.images?.filter((img: Section3Image) => img.enabled !== false) || [];
+        return { width, images };
+      }
+      case 'section6': {
+        const section6Content = pageContent as SanJuanSection6Type | undefined;
         return {
           width,
           SanJuanSection6Text: {
-            ...content.section6,
-            list: content.section6?.list?.filter((item: any) => item.enabled !== false) || []
-          },
+            ...section6Content,
+            list: section6Content?.list?.filter((item: Section6ListItem) => item.enabled !== false) || []
+          } as SanJuanSection6Type,
         };
+      }
       default:
         return { width };
     }
@@ -72,7 +105,9 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
 
   const renderSection = (section: SectionOrderItem) => {
     const { id } = section;
-    const sectionProps = getSectionProps(id, content, width, height);
+    const sectionContent = id === 'section3' ? content.section3 :
+                           id === 'section6' ? content.section6 : undefined;
+    const sectionProps = getSectionProps(id, sectionContent, width);
     switch (id) {
       case 'indexSection5':
         return <IndexSection5 key={id} {...sectionProps} indexSection5Text={content.indexSection5} />;
@@ -92,7 +127,7 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
         ) : (
           <SanJuanSection6
             key={id}
-            {...(sectionProps as any)}
+            {...(sectionProps as Section6Props)}
             isInfoRequestOnly={isInfoRequestWhatsAppOnly}
             infoRequestUrl={infoRequestUrl}
             infoRequestLabel={infoRequestLabel}
