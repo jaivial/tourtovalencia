@@ -62,6 +62,10 @@ export type PageTemplateProps = {
   sectionOrderData?: SectionOrderItem[];
   onSectionOrderChange?: (sections: SectionOrderItem[]) => void;
   availableSections?: Array<{ id: string; label: string; items?: Array<{ id: string; label: string }> }>;
+  minPeople?: number;
+  maxPeople?: number;
+  onMinPeopleChange?: (value: number) => void;
+  onMaxPeopleChange?: (value: number) => void;
 };
 
 const PageTemplate: React.FC<PageTemplateProps> = ({ 
@@ -103,7 +107,11 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   isEditMode = false,
   sectionOrderData,
   onSectionOrderChange,
-  availableSections
+  availableSections,
+  minPeople = 1,
+  maxPeople = 10,
+  onMinPeopleChange,
+  onMaxPeopleChange
 }) => {
   const size = useWindowSize();
   const { isModalOpen, closeModal } = usePublishModal();
@@ -274,6 +282,8 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
       card: cardData,
       price: hasPrice ? price : 0,
       hasPrice,
+      minPeople,
+      maxPeople,
       infoRequestContact,
     };
 
@@ -341,6 +351,36 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
                   />
                   <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">€</span>
                 </div>
+              </div>
+
+              <div className="flex flex-col w-full sm:w-auto items-center">
+                <Label htmlFor="min-people" className="text-sm font-medium text-gray-700 mb-1 text-center">
+                  Mín. personas
+                </Label>
+                <Input
+                  id="min-people"
+                  type="number"
+                  min="1"
+                  max={maxPeople}
+                  value={minPeople.toString()}
+                  onChange={(e) => onMinPeopleChange?.(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-full sm:w-20"
+                />
+              </div>
+
+              <div className="flex flex-col w-full sm:w-auto items-center">
+                <Label htmlFor="max-people" className="text-sm font-medium text-gray-700 mb-1 text-center">
+                  Máx. personas
+                </Label>
+                <Input
+                  id="max-people"
+                  type="number"
+                  min={minPeople}
+                  max="100"
+                  value={maxPeople.toString()}
+                  onChange={(e) => onMaxPeopleChange?.(Math.max(minPeople, parseInt(e.target.value) || 10))}
+                  className="w-full sm:w-20"
+                />
               </div>
 
               {!hasPrice && (

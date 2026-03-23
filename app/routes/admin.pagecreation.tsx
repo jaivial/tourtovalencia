@@ -10,6 +10,8 @@ export default function PageCreationRoute() {
   const [pageName, setPageName] = useState("");
   const [price, setPrice] = useState(0);
   const [hasPrice, setHasPrice] = useState(true);
+  const [minPeople, setMinPeople] = useState(1);
+  const [maxPeople, setMaxPeople] = useState(10);
   const [infoRequestContact, setInfoRequestContact] = useState<InfoRequestContactType>({
     enablePhone: true,
     enableEmail: true,
@@ -190,6 +192,10 @@ export default function PageCreationRoute() {
             enablePhone: !enableEmail && !prev.enablePhone ? true : prev.enablePhone,
           }))
         }
+        minPeople={minPeople}
+        maxPeople={maxPeople}
+        onMinPeopleChange={setMinPeople}
+        onMaxPeopleChange={setMaxPeople}
         sectionOrderData={sectionOrderData}
         onSectionOrderChange={handleSectionOrderChange}
         availableSections={availableSections}
