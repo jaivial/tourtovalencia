@@ -236,6 +236,8 @@ export default function DynamicPage() {
     );
   }
 
+  // Fallback path: pages without sectionOrder don't have enabled flags,
+  // so we render all items without filtering (backward compatibility)
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
       {content.indexSection5 && (
