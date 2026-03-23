@@ -7,6 +7,8 @@ interface BookingStepTwoUIProps {
   partySize: number;
   errors: Partial<Record<keyof BookingFormData, string>>;
   availablePlaces: number;
+  minPeople?: number;
+  maxPeople?: number;
   onPartySizeChange: (value: string) => void;
   bookingStepTwoText: {
     numberOfPeople: string;
@@ -16,11 +18,11 @@ interface BookingStepTwoUIProps {
   };
 }
 
-export const BookingStepTwoUI = ({ partySize, errors, availablePlaces, onPartySizeChange, bookingStepTwoText }: BookingStepTwoUIProps) => {
-  // Generate options from 1 to available places
-  // The availablePlaces value already accounts for existing bookings
-  // as it's calculated as (maxBookings - totalPartySize) in the API
-  const options = Array.from({ length: availablePlaces }, (_, i) => i + 1);
+export const BookingStepTwoUI = ({ partySize, errors, availablePlaces, minPeople, maxPeople, onPartySizeChange, bookingStepTwoText }: BookingStepTwoUIProps) => {
+  // Generate options from minPeople to min(maxPeople, availablePlaces)
+  const min = minPeople || 1;
+  const max = Math.min(maxPeople || 10, availablePlaces);
+  const options = Array.from({ length: Math.max(0, max - min + 1) }, (_, i) => min + i);
 
   return (
     <div className="space-y-6">

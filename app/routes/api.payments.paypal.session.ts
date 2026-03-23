@@ -4,6 +4,7 @@ import {
   createPayPalPaymentSession,
   markPayPalSessionAsFailed,
   resolvePaymentDraftPricing,
+  validateBookingRange,
   type PaymentBookingDraft,
 } from "~/services/paymentSession.server";
 import { createPayPalOrder } from "~/utils/paypal.server";
@@ -53,6 +54,7 @@ export async function action({ request }: { request: Request }) {
   try {
     const payload = (await request.json()) as CreateSessionPayload;
     const bookingDraft = parseBookingDraft(payload.booking);
+    await validateBookingRange(bookingDraft);
     const pricing = await resolvePaymentDraftPricing(bookingDraft);
 
     const session = await createPayPalPaymentSession({

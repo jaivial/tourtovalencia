@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export const BookingStepTwo = () => {
-  const { formData, setFormData, errors, selectedDateAvailability, setSelectedDateAvailability } = useBooking();
+  const { formData, setFormData, errors, selectedDateAvailability, setSelectedDateAvailability, tours } = useBooking();
   const { state } = useLanguageContext();
   const bookingStepTwoText = state.booking.bookingStepTwo;
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -85,10 +85,16 @@ export const BookingStepTwo = () => {
     setFormData({ ...formData, partySize: safePartySize });
   };
 
+  const selectedTour = tours.find(t => t.slug === formData.tourSlug);
+  const minPeople = selectedTour?.minPeople;
+  const maxPeople = selectedTour?.maxPeople;
+
   return <BookingStepTwoUI 
     partySize={formData.partySize} 
     errors={errors} 
-    availablePlaces={selectedDateAvailability.availablePlaces} 
+    availablePlaces={selectedDateAvailability.availablePlaces}
+    minPeople={minPeople}
+    maxPeople={maxPeople}
     onPartySizeChange={handlePartySizeChange} 
     bookingStepTwoText={bookingStepTwoText} 
   />;

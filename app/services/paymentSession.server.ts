@@ -83,9 +83,11 @@ interface TourRecord {
   name?: string;
   tourName?: { en?: string; es?: string };
   tourPrice?: number;
+  minPeople?: number;
+  maxPeople?: number;
   content?: {
-    en?: { title?: string; price?: number };
-    es?: { title?: string; price?: number };
+    en?: { title?: string; price?: number; minPeople?: number; maxPeople?: number };
+    es?: { title?: string; price?: number; minPeople?: number; maxPeople?: number };
   };
 }
 
@@ -146,7 +148,7 @@ function sanitizeLanguage(language?: string): "en" | "es" {
   return language === "en" ? "en" : "es";
 }
 
-async function resolveTourMetadata(bookingDraft: PaymentBookingDraft): Promise<{ tourName: string; tourPrice: number }> {
+async function resolveTourMetadata(bookingDraft: PaymentBookingDraft): Promise<{ tourName: string; tourPrice: number; minPeople: number; maxPeople: number }> {
   const language = sanitizeLanguage(bookingDraft.language);
   const toursCollection = await getCollection<TourRecord>(TOURS_COLLECTION);
 
@@ -158,6 +160,8 @@ async function resolveTourMetadata(bookingDraft: PaymentBookingDraft): Promise<{
     return {
       tourName: bookingDraft.tourName || bookingDraft.tourSlug || "Tour to Valencia",
       tourPrice: 0,
+      minPeople: 1,
+      maxPeople: 10,
     };
   }
 
@@ -169,7 +173,16 @@ async function resolveTourMetadata(bookingDraft: PaymentBookingDraft): Promise<{
   const tourName = localizedTitle || fallbackTitle;
   const tourPrice = Number(tour.content?.en?.price ?? tour.content?.es?.price ?? tour.tourPrice ?? 0);
 
-  return { tourName, tourPrice };
+  // Get minPeople/maxPeople from tour or content, with defaults
+  const tourMinPeople = typeof tour.minPeople === "number" ? tour.minPeople : 1;
+  const tourMaxPeople = typeof tour.maxPeople === "number" ? tour.maxPeople : 10;
+  const contentMinPeople = tour.content?.en?.minPeople ?? tour.content?.es?.minPeople;
+  const contentMaxPeople = tour.content?.en?.maxPeople ?? tour.content?.es?.maxPeople;
+
+  const minPeople = typeof contentMinPeople === "number" ? contentMinPeople : tourMinPeople;
+  const maxPeople = typeof contentMaxPeople === "number" ? contentMaxPeople : tourMaxPeople;
+
+  return { tourName, tourPrice, minPeople, maxPeople };
 }
 
 export async function resolvePaymentDraftPricing(bookingDraft: PaymentBookingDraft): Promise<{ tourName: string; amount: number }> {
@@ -181,6 +194,20 @@ export async function resolvePaymentDraftPricing(bookingDraft: PaymentBookingDra
 
   const amount = normalizeAmount(bookingDraft.partySize * tourPrice);
   return { tourName, amount };
+}
+
+export async function validateBookingRange(bookingDraft: PaymentBookingDraft): Promise<{ minPeople: number; maxPeople: number }> {
+  const { minPeople, maxPeople } = await resolveTourMetadata(bookingDraft);
+
+  if (bookingDraft.partySize < minPeople) {
+    throw new Error(`Party size must be at least ${minPeople} people`);
+  }
+
+  if (bookingDraft.partySize > maxPeople) {
+    throw new Error(`Party size cannot exceed ${maxPeople} people`);
+  }
+
+  return { minPeople, maxPeople };
 }
 
 function parseBookingDate(dateValue: string): Date {
