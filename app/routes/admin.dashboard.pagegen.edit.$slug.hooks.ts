@@ -285,6 +285,9 @@ export const useEditPage = (initialPage: Record<string, unknown>, sectionOrderDa
     }
   );
 
+  const [minPeople, setMinPeople] = useState(deserializedPage.content.es.minPeople || 1);
+  const [maxPeople, setMaxPeople] = useState(deserializedPage.content.es.maxPeople || 10);
+
   // Status change handler
   const handleStatusChange = (newStatus: 'active' | 'upcoming') => {
     setStatus(newStatus);
@@ -449,6 +452,9 @@ export const useEditPage = (initialPage: Record<string, unknown>, sectionOrderDa
     setCardData(data);
   };
 
+  const handleMinPeopleChange = (value: number) => setMinPeople(value);
+  const handleMaxPeopleChange = (value: number) => setMaxPeople(value);
+
   const handleSavePage = async () => {
     if (!pageName.trim()) {
       setSaveError("El nombre del tour es obligatorio");
@@ -505,6 +511,8 @@ export const useEditPage = (initialPage: Record<string, unknown>, sectionOrderDa
         hasPrice,
         infoRequestContact,
         sectionOrder: sectionOrderData,
+        minPeople,
+        maxPeople,
       };
 
       const serializedContent = JSON.stringify(content);
@@ -757,6 +765,8 @@ export const useEditPage = (initialPage: Record<string, unknown>, sectionOrderDa
     indexSection5Data,
     timelineData,
     cardData,
+    minPeople,
+    maxPeople,
     isSaving,
     saveError,
     saveSuccess,
@@ -786,6 +796,8 @@ export const useEditPage = (initialPage: Record<string, unknown>, sectionOrderDa
     handleIndexSection5Update,
     handleTimelineUpdate,
     handleCardUpdate,
+    handleMinPeopleChange,
+    handleMaxPeopleChange,
     handleSavePage,
     handleCancel
   };

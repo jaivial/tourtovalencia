@@ -70,6 +70,8 @@ export default function EditPageRoute() {
     indexSection5Data,
     timelineData,
     cardData,
+    minPeople,
+    maxPeople,
     isSaving,
     saveError,
     saveSuccess,
@@ -98,6 +100,8 @@ export default function EditPageRoute() {
     handleIndexSection5Update,
     handleTimelineUpdate,
     handleCardUpdate,
+    handleMinPeopleChange,
+    handleMaxPeopleChange,
     handleSavePage,
     handleCancel,
     isBackgroundProcess
@@ -482,6 +486,10 @@ export default function EditPageRoute() {
               sectionOrderData={sectionOrderData}
               onSectionOrderChange={handleSectionOrderChange}
               availableSections={availableSections}
+              minPeople={minPeople}
+              maxPeople={maxPeople}
+              onMinPeopleChange={handleMinPeopleChange}
+              onMaxPeopleChange={handleMaxPeopleChange}
             />
           </Suspense>
         </div>
