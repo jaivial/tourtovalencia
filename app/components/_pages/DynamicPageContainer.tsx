@@ -11,10 +11,44 @@ import TimelineSection from "./TimelineSection";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import type { Page } from "~/utils/db.schema.server";
 import { buildWhatsAppUrl, normalizeInfoRequestContact } from "~/utils/whatsapp";
-import type { SectionOrderItem, sanJuanSection3Type, SanJuanSection6Type } from "~/data/data";
+import type {
+  EditableCardType,
+  IndexSection5Type,
+  InfoRequestContactType,
+  sanJuanSection1Type,
+  sanJuanSection3Type,
+  sanJuansection2Type,
+  sanJuansection4Type,
+  sanJuanSection5Type,
+  SanJuanSection6Type,
+  SectionOrderItem,
+} from "~/data/data";
+import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 
 interface DynamicPageContainerProps {
   page: Page;
+}
+
+export interface PageContent {
+  indexSection5?: IndexSection5Type;
+  section1?: sanJuanSection1Type;
+  section2?: sanJuansection2Type;
+  section3?: sanJuanSection3Type;
+  section4?: sanJuansection4Type;
+  section5?: sanJuanSection5Type;
+  section6?: SanJuanSection6Type;
+  timeline?: TimelineDataType;
+  card?: EditableCardType;
+  price?: number;
+  hasPrice?: boolean;
+  infoRequestContact?: InfoRequestContactType;
+  title?: string;
+  description?: string;
+  duration?: string;
+  includes?: string;
+  meetingPoint?: string;
+  sectionOrder?: SectionOrderItem[];
+  [key: string]: unknown;
 }
 
 interface Section3Image {
@@ -67,7 +101,7 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
   const languageCode = languageMap[state.currentLanguage] || "es";
 
    // Get content based on current language, fallback to Spanish
-   const content = (page.content[languageCode as keyof typeof page.content] || page.content.es) as any;
+   const content = (page.content[languageCode as keyof typeof page.content] || page.content.es) as PageContent;
   const hasPrice = typeof content?.hasPrice === "boolean" ? content.hasPrice : true;
   const fallbackContent = page.content.es as Record<string, unknown>;
   const infoRequestContact = normalizeInfoRequestContact(content?.infoRequestContact ?? fallbackContent?.infoRequestContact);
@@ -110,17 +144,17 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
     const sectionProps = getSectionProps(id, sectionContent, width);
     switch (id) {
       case 'indexSection5':
-        return <IndexSection5 key={id} {...sectionProps} indexSection5Text={content.indexSection5} />;
+        return <IndexSection5 key={id} {...sectionProps} indexSection5Text={content.indexSection5!} />;
       case 'section1':
-        return <SanJuanSection1 key={id} {...sectionProps} sanJuanSection1Text={content.section1} />;
+        return <SanJuanSection1 key={id} {...sectionProps} sanJuanSection1Text={content.section1!} />;
       case 'section2':
-        return <SanJuanSection2 key={id} {...sectionProps} height={height} SanJuanSection2Text={content.section2} />;
+        return <SanJuanSection2 key={id} {...sectionProps} height={height} SanJuanSection2Text={content.section2!} />;
       case 'section3':
         return <SanJuanSection3 key={id} {...sectionProps} />;
       case 'section4':
-        return <SanJuanSection4 key={id} {...sectionProps} SanJuanSection4Text={content.section4} />;
+        return <SanJuanSection4 key={id} {...sectionProps} SanJuanSection4Text={content.section4!} />;
       case 'section5':
-        return <SanJuanSection5 key={id} {...sectionProps} SanJuanSection5Text={content.section5} />;
+        return <SanJuanSection5 key={id} {...sectionProps} SanJuanSection5Text={content.section5!} />;
       case 'section6':
         return page.status === "upcoming" ? (
           <ComingSoonCard key={id} width={sectionProps.width} />
@@ -135,7 +169,7 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
           />
         );
       case 'timeline':
-        return <TimelineSection key={id} {...sectionProps} timelineData={content.timeline} />;
+        return <TimelineSection key={id} {...sectionProps} timelineData={content.timeline!} />;
       default:
         return null;
     }
