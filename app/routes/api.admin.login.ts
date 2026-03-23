@@ -18,8 +18,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     const body = await request.json();
+    console.log("[API-ADMIN-LOGIN] Raw body:", JSON.stringify(body));
     
     const validationResult = adminLoginSchema.safeParse(body);
+    console.log("[API-ADMIN-LOGIN] Validation result:", validationResult.success ? "passed" : "failed", validationResult.success ? "" : validationResult.error.flatten());
     if (!validationResult.success) {
       logger.warn("Invalid login input data", { 
         errors: validationResult.error.flatten(),

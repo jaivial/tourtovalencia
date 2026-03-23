@@ -11,10 +11,16 @@ import TimelineSection from "./TimelineSection";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import type { Page } from "~/utils/db.schema.server";
 import { buildWhatsAppUrl, normalizeInfoRequestContact } from "~/utils/whatsapp";
+import type { SectionOrderItem } from "~/data/data";
 
 interface DynamicPageContainerProps {
   page: Page;
 }
+
+const getOrderedSections = (sectionOrder?: SectionOrderItem[]): SectionOrderItem[] => {
+  if (!sectionOrder) return [];
+  return [...sectionOrder].sort((a, b) => a.order - b.order);
+};
 
 // Create a component with named exports
 const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
@@ -44,6 +50,52 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
     languageCode === "en"
       ? "Information requests are temporarily unavailable for this service."
       : "La solicitud de información no está disponible temporalmente para este servicio.";
+
+  const orderedSections = getOrderedSections(content.sectionOrder);
+
+  if (content.sectionOrder && orderedSections.length > 0) {
+    const renderSection = (section: SectionOrderItem) => {
+      const { id } = section;
+      switch (id) {
+        case 'indexSection5':
+          return <IndexSection5 key={id} width={width} indexSection5Text={content.indexSection5} />;
+        case 'section1':
+          return <SanJuanSection1 key={id} width={width} sanJuanSection1Text={content.section1} />;
+        case 'section2':
+          return <SanJuanSection2 key={id} width={width} height={height} SanJuanSection2Text={content.section2} />;
+        case 'section3':
+          return <SanJuanSection3 key={id} width={width} />;
+        case 'section4':
+          return <SanJuanSection4 key={id} width={width} SanJuanSection4Text={content.section4} />;
+        case 'section5':
+          return <SanJuanSection5 key={id} width={width} SanJuanSection5Text={content.section5} />;
+        case 'section6':
+          return page.status === "upcoming" ? (
+            <ComingSoonCard key={id} width={width} />
+          ) : (
+            <SanJuanSection6
+              key={id}
+              width={width}
+              SanJuanSection6Text={{ ...content.section6, list: content.section6?.list?.filter((item: any) => item.enabled !== false) || [] }}
+              isInfoRequestOnly={isInfoRequestWhatsAppOnly}
+              infoRequestUrl={infoRequestUrl}
+              infoRequestLabel={infoRequestLabel}
+              missingInfoContactText={missingInfoContactText}
+            />
+          );
+        case 'timeline':
+          return <TimelineSection key={id} width={width} timelineData={content.timeline} />;
+        default:
+          return null;
+      }
+    };
+
+    return (
+      <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
+        {orderedSections.filter(s => s.enabled).map(renderSection)}
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
