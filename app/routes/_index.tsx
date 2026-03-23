@@ -80,6 +80,8 @@ export const loader = async () => {
         duration: 1,
         heroImage: 1,
         pageId: 1,
+        minPeople: 1,
+        maxPeople: 1,
       })
       .limit(5)
       .toArray();
