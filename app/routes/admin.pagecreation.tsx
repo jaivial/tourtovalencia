@@ -194,7 +194,7 @@ export default function PageCreationRoute() {
         }
         minPeople={minPeople}
         maxPeople={maxPeople}
-        onMinPeopleChange={setMinPeople}
+        onMinPeopleChange={(val) => setMinPeople(Math.min(maxPeople, Math.max(1, val)))}
         onMaxPeopleChange={setMaxPeople}
         sectionOrderData={sectionOrderData}
         onSectionOrderChange={handleSectionOrderChange}

@@ -363,7 +363,10 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
                   min="1"
                   max={maxPeople}
                   value={minPeople.toString()}
-                  onChange={(e) => onMinPeopleChange?.(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) => {
+                    const val = Math.max(1, parseInt(e.target.value) || 1);
+                    onMinPeopleChange?.(Math.min(val, maxPeople));
+                  }}
                   className="w-full sm:w-20"
                 />
               </div>
