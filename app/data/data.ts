@@ -179,6 +179,7 @@ export type SectionOrderItem = {
   id: string;
   enabled: boolean;
   order: number;
+  items?: Array<{ id: string; enabled: boolean }>;
 };
 
 export type PageSectionsConfig = {

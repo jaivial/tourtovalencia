@@ -61,7 +61,29 @@ export const SectionOrderEditor: React.FC<SectionOrderEditorProps> = ({
   const handleAddSection = (sectionId: string) => {
     if (sections.some((s) => s.id === sectionId)) return;
     const maxOrder = sections.reduce((max, s) => Math.max(max, s.order), -1);
-    onSectionsChange([...sections, { id: sectionId, enabled: true, order: maxOrder + 1 }]);
+    const sectionInfo = availableSections.find((as) => as.id === sectionId);
+    const items = sectionInfo?.items?.map((item) => ({ id: item.id, enabled: true })) || [];
+    onSectionsChange([...sections, { id: sectionId, enabled: true, order: maxOrder + 1, items }]);
+  };
+
+  const handleItemToggle = (sectionId: string, itemId: string, enabled: boolean) => {
+    onSectionsChange(
+      sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        const existingItem = s.items?.find((i) => i.id === itemId);
+        if (existingItem) {
+          return {
+            ...s,
+            items: s.items?.map((i) => (i.id === itemId ? { ...i, enabled } : i)),
+          };
+        } else {
+          return {
+            ...s,
+            items: [...(s.items || []), { id: itemId, enabled }],
+          };
+        }
+      })
+    );
   };
 
   const sortedSections = [...sections].sort((a, b) => a.order - b.order);
@@ -160,12 +182,21 @@ export const SectionOrderEditor: React.FC<SectionOrderEditorProps> = ({
 
                 {isSectionExpanded && sectionInfo?.items && sectionInfo.items.length > 0 && (
                   <div className="mt-3 pl-8 space-y-2">
-                    {sectionInfo.items.map((item) => (
-                      <div key={item.id} className="flex items-center gap-2 text-sm text-gray-600">
-                        <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
-                        <span>{item.label}</span>
-                      </div>
-                    ))}
+                    {sectionInfo.items.map((item) => {
+                      const itemState = section.items?.find((i) => i.id === item.id);
+                      const isEnabled = itemState?.enabled ?? true;
+                      return (
+                        <div key={item.id} className="flex items-center gap-3 text-sm text-gray-600">
+                          <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+                          <span className="flex-1">{item.label}</span>
+                          <Switch
+                            id={`item-${section.id}-${item.id}`}
+                            checked={isEnabled}
+                            onCheckedChange={(enabled) => handleItemToggle(section.id, item.id, enabled)}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
