@@ -81,6 +81,8 @@ export type Tour = {
   slug: string;
   name?: string;
   hasPrice?: boolean;
+  minPeople?: number;
+  maxPeople?: number;
   infoRequestContact?: InfoRequestContactType;
   tourName?: {
     en: string;
@@ -141,6 +143,8 @@ export async function loader() {
         slug: tour.slug || "",
         name: tour.tourName?.en || tour.slug || "",
         hasPrice: typeof tour.hasPrice === "boolean" ? tour.hasPrice : true,
+        minPeople: typeof tour.minPeople === "number" ? tour.minPeople : 1,
+        maxPeople: typeof tour.maxPeople === "number" ? tour.maxPeople : 10,
         infoRequestContact: normalizeInfoRequestContact(tour.infoRequestContact),
         tourName: tour.tourName || { en: "", es: "" },
         tourPrice: typeof tour.tourPrice === "number" ? tour.tourPrice : 0,
