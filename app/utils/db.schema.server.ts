@@ -83,6 +83,10 @@ export interface Page {
 }
 
 // Tour interface for MongoDB
+// Note: minPeople/maxPeople are required on Tour because tours must have a valid booking range.
+// Defaults are enforced at the app level (e.g., validation when creating/updating tours).
+// In contrast, Page content fields are optional because old pages may not have them;
+// a migration added these fields with defaults, so existing pages don't need them.
 export interface Tour {
   _id?: string;
   slug: string;
