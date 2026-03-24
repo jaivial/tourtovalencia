@@ -18,6 +18,8 @@ type SerializableTour = {
   duration: { en: string; es: string };
   heroImage?: string;
   pageId?: string;
+  minPeople: number;
+  maxPeople: number;
 };
 
 // Define a serializable version of the Page type for use with JSON
@@ -78,6 +80,8 @@ export const loader = async () => {
         duration: 1,
         heroImage: 1,
         pageId: 1,
+        minPeople: 1,
+        maxPeople: 1,
       })
       .limit(5)
       .toArray();
@@ -92,6 +96,8 @@ export const loader = async () => {
       duration: doc.duration || { en: '', es: '' },
       heroImage: doc.heroImage,
       pageId: doc.pageId,
+      minPeople: doc.minPeople ?? 1,
+      maxPeople: doc.maxPeople ?? 10,
     }));
 
     // Fetch pages - ONLY essential fields (OPTIMIZED)

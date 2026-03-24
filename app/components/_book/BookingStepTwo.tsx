@@ -3,12 +3,15 @@ import { BookingStepTwoUI } from "../ui/BookingStepTwoUI";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { validatePartySize } from "~/utils/partySizeValidation";
 
 export const BookingStepTwo = () => {
-  const { formData, setFormData, errors, selectedDateAvailability, setSelectedDateAvailability } = useBooking();
+  const { formData, setFormData, errors, selectedDateAvailability, setSelectedDateAvailability, tours } = useBooking();
   const { state } = useLanguageContext();
   const bookingStepTwoText = state.booking.bookingStepTwo;
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const selectedTour = tours.find(t => t.slug === formData.tourSlug);
 
   // Refresh availability data when component mounts
   useEffect(() => {
@@ -43,6 +46,22 @@ export const BookingStepTwo = () => {
     
     refreshAvailabilityData();
   }, [formData.date, formData.tourSlug, setSelectedDateAvailability]);
+
+  // Validate partySize against tour limits when tour or availability changes
+  useEffect(() => {
+    if (selectedTour && formData.partySize) {
+      const availablePlaces = selectedDateAvailability?.availablePlaces ?? Infinity;
+      const validated = validatePartySize(
+        formData.partySize,
+        selectedTour.minPeople,
+        selectedTour.maxPeople,
+        availablePlaces
+      );
+      if (validated !== formData.partySize) {
+        setFormData({ ...formData, partySize: validated });
+      }
+    }
+  }, [selectedTour, formData.partySize, selectedDateAvailability?.availablePlaces]);
 
   // Check if a date has been selected but availability data is not yet loaded
   if (!selectedDateAvailability || isRefreshing) {
@@ -85,10 +104,15 @@ export const BookingStepTwo = () => {
     setFormData({ ...formData, partySize: safePartySize });
   };
 
+  const minPeople = selectedTour?.minPeople;
+  const maxPeople = selectedTour?.maxPeople;
+
   return <BookingStepTwoUI 
     partySize={formData.partySize} 
     errors={errors} 
-    availablePlaces={selectedDateAvailability.availablePlaces} 
+    availablePlaces={selectedDateAvailability.availablePlaces}
+    minPeople={minPeople}
+    maxPeople={maxPeople}
     onPartySizeChange={handlePartySizeChange} 
     bookingStepTwoText={bookingStepTwoText} 
   />;

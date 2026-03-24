@@ -10,7 +10,8 @@ import type {
   sanJuansection2Type, 
   sanJuansection4Type, 
   sanJuanSection5Type, 
-  SanJuanSection6Type 
+  SanJuanSection6Type,
+  SectionOrderItem 
 } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 import { countries } from "~/data/countries";
@@ -117,7 +118,7 @@ const deserializeContent = (page: Record<string, unknown>): Page => {
   return deserializedPage;
 };
 
-export const useEditPage = (initialPage: Record<string, unknown>) => {
+export const useEditPage = (initialPage: Record<string, unknown>, sectionOrderData: SectionOrderItem[]) => {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -284,6 +285,9 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
     }
   );
 
+  const [minPeople, setMinPeople] = useState(deserializedPage.content.es.minPeople || 1);
+  const [maxPeople, setMaxPeople] = useState(deserializedPage.content.es.maxPeople || 10);
+
   // Status change handler
   const handleStatusChange = (newStatus: 'active' | 'upcoming') => {
     setStatus(newStatus);
@@ -448,6 +452,14 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
     setCardData(data);
   };
 
+  const handleMinPeopleChange = (value: number) => {
+    setMinPeople(Math.min(maxPeople, Math.max(1, value)));
+  };
+
+  const handleMaxPeopleChange = (value: number) => {
+    setMaxPeople(Math.max(minPeople, value));
+  };
+
   const handleSavePage = async () => {
     if (!pageName.trim()) {
       setSaveError("El nombre del tour es obligatorio");
@@ -503,6 +515,9 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
         price: hasPrice ? normalizePriceValue(price) : 0,
         hasPrice,
         infoRequestContact,
+        sectionOrder: sectionOrderData,
+        minPeople,
+        maxPeople,
       };
 
       const serializedContent = JSON.stringify(content);
@@ -740,6 +755,40 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
     navigate("/admin/dashboard/pagegen/editpage", { replace: true });
   };
 
+  // Save settings handler (lightweight save for status, price, people settings)
+  const saveSettings = async () => {
+    setIsSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
+
+    try {
+      const formData = new FormData();
+      formData.append("status", status);
+      formData.append("hasPrice", hasPrice.toString());
+      formData.append("price", price.toString());
+      formData.append("minPeople", minPeople.toString());
+      formData.append("maxPeople", maxPeople.toString());
+
+      const response = await fetch(`/api/pages/settings/${deserializedPage._id}`, {
+        method: "PATCH",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save settings");
+      }
+
+      setSaveSuccess(true);
+      setIsSaving(false);
+      return { success: true };
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      setSaveError(error instanceof Error ? error.message : "Failed to save settings");
+      setIsSaving(false);
+      return { success: false, error };
+    }
+  };
+
   return {
     pageName,
     status,
@@ -755,6 +804,8 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
     indexSection5Data,
     timelineData,
     cardData,
+    minPeople,
+    maxPeople,
     isSaving,
     saveError,
     saveSuccess,
@@ -784,7 +835,10 @@ export const useEditPage = (initialPage: Record<string, unknown>) => {
     handleIndexSection5Update,
     handleTimelineUpdate,
     handleCardUpdate,
+    handleMinPeopleChange,
+    handleMaxPeopleChange,
     handleSavePage,
-    handleCancel
+    handleCancel,
+    saveSettings
   };
 }; 

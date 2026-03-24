@@ -9,14 +9,15 @@ if (!sessionSecret || sessionSecret.length < 32) {
   );
 }
 
-// Create session storage using Remix's built-in createCookieSessionStorage
+const isDev = process.env.NODE_ENV !== "production";
+
 const adminSessionStorage = createCookieSessionStorage({
   cookie: {
     name: "admin-session",
     httpOnly: true,
     maxAge: 60 * 60 * 8, // 8 hours
     path: "/",
-    domain: ".tourtovalencia.com",
+    domain: isDev ? undefined : ".tourtovalencia.com",
     sameSite: "lax",
     secrets: [sessionSecret],
     secure: process.env.NODE_ENV === "production",

@@ -90,11 +90,15 @@ interface TourDocument {
       title?: string;
       price?: number;
       hasPrice?: boolean;
+      minPeople?: number;
+      maxPeople?: number;
     };
     es?: {
       title?: string;
       price?: number;
       hasPrice?: boolean;
+      minPeople?: number;
+      maxPeople?: number;
     };
   };
   template?: string;
@@ -103,6 +107,8 @@ interface TourDocument {
     es?: string;
   };
   tourPrice?: number;
+  minPeople?: number;
+  maxPeople?: number;
 }
 
 export type LoaderData = {
@@ -278,6 +284,8 @@ export async function loader() {
         infoRequestContact: normalizeInfoRequestContact(tour.infoRequestContact),
         tourName: tour.tourName,
         tourPrice: tour.tourPrice,
+        minPeople: typeof tour.minPeople === "number" ? tour.minPeople : 1,
+        maxPeople: typeof tour.maxPeople === "number" ? tour.maxPeople : 10,
         content: {
           en: {
             title: "",
@@ -309,6 +317,13 @@ export async function loader() {
             typeof tour.content.es.hasPrice === "boolean"
               ? tour.content.es.hasPrice
               : (typeof tour.hasPrice === "boolean" ? tour.hasPrice : true);
+        }
+        // Use consistent language content for minPeople and maxPeople
+        if (typeof tour.content.es?.minPeople === "number") {
+          tourData.minPeople = tour.content.es.minPeople;
+        }
+        if (typeof tour.content.es?.maxPeople === "number") {
+          tourData.maxPeople = tour.content.es.maxPeople;
         }
       } 
       // Use tourName and tourPrice if available from tours collection format

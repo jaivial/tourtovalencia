@@ -1,6 +1,6 @@
 import { json } from "@remix-run/server-runtime";
 import { useLoaderData, Link } from "@remix-run/react";
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, type ReactNode, useState } from "react";
 import { ArrowLeftIcon, SaveIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -11,8 +11,9 @@ import { getPageBySlug } from "~/utils/page.server";
 import type { LoaderFunctionArgs } from "@remix-run/server-runtime";
 import { convertFileToBase64 } from "~/utils/image.client";
 import { LoadingOverlay } from "~/components/ui/loading-overlay";
-import type { EditableCardType, IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
+import type { EditableCardType, IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type, SectionOrderItem } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
+import { availableSections, defaultSectionOrder } from "~/data/sectionConfig";
 
 // Lazy load heavy components
 const PageTemplate = lazy(() => import("~/components/_pagegen/PageTemplate"));
@@ -48,6 +49,13 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 export default function EditPageRoute() {
   const { page } = useLoaderData<typeof loader>();
+
+  const initialSectionOrder: SectionOrderItem[] = (page.content?.es?.sectionOrder?.length ?? 0) > 0 
+    ? page.content.es.sectionOrder!
+    : defaultSectionOrder;
+  const [sectionOrderData, setSectionOrderData] = useState<SectionOrderItem[]>(initialSectionOrder);
+  const [settingsDirty, setSettingsDirty] = useState(false);
+
   const {
     pageName,
     status,
@@ -63,6 +71,8 @@ export default function EditPageRoute() {
     indexSection5Data,
     timelineData,
     cardData,
+    minPeople,
+    maxPeople,
     isSaving,
     saveError,
     saveSuccess,
@@ -91,10 +101,17 @@ export default function EditPageRoute() {
     handleIndexSection5Update,
     handleTimelineUpdate,
     handleCardUpdate,
+    handleMinPeopleChange,
+    handleMaxPeopleChange,
     handleSavePage,
     handleCancel,
+    saveSettings,
     isBackgroundProcess
-  } = useEditPage(page);
+  } = useEditPage(page, sectionOrderData);
+
+  const handleSectionOrderChange = (sections: SectionOrderItem[]) => {
+    setSectionOrderData(sections);
+  };
 
   // Adapter functions to match PageTemplate prop types
   const adaptStatusChange = (checked: boolean) => {
@@ -468,6 +485,16 @@ export default function EditPageRoute() {
               cardData={cardData}
               onCardUpdate={adaptCardUpdate}
               isEditMode={true}
+              sectionOrderData={sectionOrderData}
+              onSectionOrderChange={handleSectionOrderChange}
+              availableSections={availableSections}
+              minPeople={minPeople}
+              maxPeople={maxPeople}
+              onMinPeopleChange={handleMinPeopleChange}
+              onMaxPeopleChange={handleMaxPeopleChange}
+              onSaveSettings={saveSettings}
+              settingsDirty={settingsDirty}
+              onSettingsDirtyChange={setSettingsDirty}
             />
           </Suspense>
         </div>

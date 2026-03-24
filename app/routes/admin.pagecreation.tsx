@@ -1,7 +1,8 @@
 import { useState } from "react";
 import PageTemplate from "~/components/_pagegen/PageTemplate";
-import { InfoRequestContactType, sanJuanSection5Type } from "~/data/data";
+import { InfoRequestContactType, sanJuanSection5Type, SectionOrderItem } from "~/data/data";
 import { countries } from "~/data/countries";
+import { availableSections } from "~/data/sectionConfig";
 
 export default function PageCreationRoute() {
   // State declarations would go here
@@ -9,6 +10,8 @@ export default function PageCreationRoute() {
   const [pageName, setPageName] = useState("");
   const [price, setPrice] = useState(0);
   const [hasPrice, setHasPrice] = useState(true);
+  const [minPeople, setMinPeople] = useState(1);
+  const [maxPeople, setMaxPeople] = useState(10);
   const [infoRequestContact, setInfoRequestContact] = useState<InfoRequestContactType>({
     enablePhone: true,
     enableEmail: true,
@@ -26,6 +29,19 @@ export default function PageCreationRoute() {
     fifthH3: "Tendremos tiempo libre para explorar el pueblo",
     image: null
   });
+
+  // Section order state
+  const [sectionOrderData, setSectionOrderData] = useState<SectionOrderItem[]>([
+    { id: 'indexSection5', enabled: true, order: 0 },
+    { id: 'section1', enabled: true, order: 1 },
+    { id: 'section2', enabled: true, order: 2 },
+    { id: 'section3', enabled: true, order: 3 },
+    { id: 'section4', enabled: true, order: 4 },
+    { id: 'section5', enabled: true, order: 5 },
+    { id: 'timeline', enabled: true, order: 6 },
+    { id: 'section6', enabled: true, order: 7 },
+    { id: 'card', enabled: true, order: 8 },
+  ]);
   
   // Other state declarations and handlers would be here
   const handleStatusChange = (checked: boolean) => {
@@ -109,6 +125,10 @@ export default function PageCreationRoute() {
     handleTimelineUpdate: () => {}
   };
 
+  const handleSectionOrderChange = (sections: SectionOrderItem[]) => {
+    setSectionOrderData(sections);
+  };
+
   return (
     <div className="w-full">
       <PageTemplate
@@ -172,6 +192,13 @@ export default function PageCreationRoute() {
             enablePhone: !enableEmail && !prev.enablePhone ? true : prev.enablePhone,
           }))
         }
+        minPeople={minPeople}
+        maxPeople={maxPeople}
+        onMinPeopleChange={(val) => setMinPeople(Math.min(maxPeople, Math.max(1, val)))}
+        onMaxPeopleChange={(val) => setMaxPeople(Math.max(minPeople, val))}
+        sectionOrderData={sectionOrderData}
+        onSectionOrderChange={handleSectionOrderChange}
+        availableSections={availableSections}
       />
     </div>
   );

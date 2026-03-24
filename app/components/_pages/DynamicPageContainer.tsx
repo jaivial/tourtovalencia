@@ -11,10 +11,78 @@ import TimelineSection from "./TimelineSection";
 import { useLanguageContext } from "~/providers/LanguageContext";
 import type { Page } from "~/utils/db.schema.server";
 import { buildWhatsAppUrl, normalizeInfoRequestContact } from "~/utils/whatsapp";
+import type {
+  EditableCardType,
+  IndexSection5Type,
+  InfoRequestContactType,
+  sanJuanSection1Type,
+  sanJuanSection3Type,
+  sanJuansection2Type,
+  sanJuansection4Type,
+  sanJuanSection5Type,
+  SanJuanSection6Type,
+  SectionOrderItem,
+} from "~/data/data";
+import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 
 interface DynamicPageContainerProps {
   page: Page;
 }
+
+export interface PageContent {
+  indexSection5?: IndexSection5Type;
+  section1?: sanJuanSection1Type;
+  section2?: sanJuansection2Type;
+  section3?: sanJuanSection3Type;
+  section4?: sanJuansection4Type;
+  section5?: sanJuanSection5Type;
+  section6?: SanJuanSection6Type;
+  timeline?: TimelineDataType;
+  card?: EditableCardType;
+  price?: number;
+  hasPrice?: boolean;
+  infoRequestContact?: InfoRequestContactType;
+  title?: string;
+  description?: string;
+  duration?: string;
+  includes?: string;
+  meetingPoint?: string;
+  sectionOrder?: SectionOrderItem[];
+  [key: string]: unknown;
+}
+
+interface Section3Image {
+  source: string | null;
+  alt: string;
+  enabled?: boolean;
+}
+
+interface Section6ListItem {
+  li: string;
+  index: number;
+  enabled?: boolean;
+}
+
+interface Section3Props {
+  width: number;
+  images: Section3Image[];
+}
+
+interface Section6Props {
+  width: number;
+  SanJuanSection6Text: SanJuanSection6Type;
+}
+
+interface DefaultSectionProps {
+  width: number;
+}
+
+type SectionProps = Section3Props | Section6Props | DefaultSectionProps;
+
+const getOrderedSections = (sectionOrder?: SectionOrderItem[]): SectionOrderItem[] => {
+  if (!sectionOrder) return [];
+  return [...sectionOrder].sort((a, b) => a.order - b.order);
+};
 
 // Create a component with named exports
 const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
@@ -33,7 +101,7 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
   const languageCode = languageMap[state.currentLanguage] || "es";
 
    // Get content based on current language, fallback to Spanish
-   const content = (page.content[languageCode as keyof typeof page.content] || page.content.es) as any;
+   const content = (page.content[languageCode as keyof typeof page.content] || page.content.es) as PageContent;
   const hasPrice = typeof content?.hasPrice === "boolean" ? content.hasPrice : true;
   const fallbackContent = page.content.es as Record<string, unknown>;
   const infoRequestContact = normalizeInfoRequestContact(content?.infoRequestContact ?? fallbackContent?.infoRequestContact);
@@ -44,6 +112,76 @@ const DynamicPageContainer = ({ page }: DynamicPageContainerProps) => {
     languageCode === "en"
       ? "Information requests are temporarily unavailable for this service."
       : "La solicitud de información no está disponible temporalmente para este servicio.";
+
+  const orderedSections = getOrderedSections(content.sectionOrder);
+
+  const getSectionProps = (sectionId: string, pageContent: sanJuanSection3Type | SanJuanSection6Type | undefined, width: number): SectionProps => {
+    switch (sectionId) {
+      case 'section3': {
+        const section3Content = pageContent as sanJuanSection3Type | undefined;
+        const images = section3Content?.images?.filter((img: Section3Image) => img.enabled !== false) || [];
+        return { width, images };
+      }
+      case 'section6': {
+        const section6Content = pageContent as SanJuanSection6Type | undefined;
+        return {
+          width,
+          SanJuanSection6Text: {
+            ...section6Content,
+            list: section6Content?.list?.filter((item: Section6ListItem) => item.enabled !== false) || []
+          } as SanJuanSection6Type,
+        };
+      }
+      default:
+        return { width };
+    }
+  };
+
+  const renderSection = (section: SectionOrderItem) => {
+    const { id } = section;
+    const sectionContent = id === 'section3' ? content.section3 :
+                           id === 'section6' ? content.section6 : undefined;
+    const sectionProps = getSectionProps(id, sectionContent, width);
+    switch (id) {
+      case 'indexSection5':
+        return <IndexSection5 key={id} {...sectionProps} indexSection5Text={content.indexSection5!} />;
+      case 'section1':
+        return <SanJuanSection1 key={id} {...sectionProps} sanJuanSection1Text={content.section1!} />;
+      case 'section2':
+        return <SanJuanSection2 key={id} {...sectionProps} height={height} SanJuanSection2Text={content.section2!} />;
+      case 'section3':
+        return <SanJuanSection3 key={id} {...sectionProps} />;
+      case 'section4':
+        return <SanJuanSection4 key={id} {...sectionProps} SanJuanSection4Text={content.section4!} />;
+      case 'section5':
+        return <SanJuanSection5 key={id} {...sectionProps} SanJuanSection5Text={content.section5!} />;
+      case 'section6':
+        return page.status === "upcoming" ? (
+          <ComingSoonCard key={id} width={sectionProps.width} />
+        ) : (
+          <SanJuanSection6
+            key={id}
+            {...(sectionProps as Section6Props)}
+            isInfoRequestOnly={isInfoRequestWhatsAppOnly}
+            infoRequestUrl={infoRequestUrl}
+            infoRequestLabel={infoRequestLabel}
+            missingInfoContactText={missingInfoContactText}
+          />
+        );
+      case 'timeline':
+        return <TimelineSection key={id} {...sectionProps} timelineData={content.timeline!} />;
+      default:
+        return null;
+    }
+  };
+
+  if (content.sectionOrder && orderedSections.length > 0) {
+    return (
+      <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
+        {orderedSections.filter(s => s.enabled).map(renderSection)}
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">

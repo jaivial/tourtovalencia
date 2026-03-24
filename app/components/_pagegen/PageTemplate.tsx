@@ -3,6 +3,7 @@ import { useWindowSize } from "@uidotdev/usehooks";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { Input } from "@heroui/input";
+import { CounterInput } from "~/components/ui/CounterInput";
 import EditableIndexSection5 from "./EditableIndexSection5";
 import EditableSanJuanSection1 from "./EditableSanJuanSection1";
 import EditableSanJuanSection2 from "./EditableSanJuanSection2";
@@ -19,6 +20,8 @@ import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { CountrySelect } from "~/components/ui/CountrySelect";
 import { Textarea } from "~/components/ui/textarea";
+import { SectionOrderEditor } from "./SectionOrderEditor";
+import { SectionOrderItem } from "~/data/data";
 
 export type PageTemplateProps = {
   status: "active" | "upcoming";
@@ -57,6 +60,16 @@ export type PageTemplateProps = {
   onInfoRequestEnablePhoneChange: (enabled: boolean) => void;
   onInfoRequestEnableEmailChange: (enabled: boolean) => void;
   isEditMode?: boolean;
+  sectionOrderData?: SectionOrderItem[];
+  onSectionOrderChange?: (sections: SectionOrderItem[]) => void;
+  availableSections?: Array<{ id: string; label: string; items?: Array<{ id: string; label: string }> }>;
+  minPeople?: number;
+  maxPeople?: number;
+  onMinPeopleChange?: (value: number) => void;
+  onMaxPeopleChange?: (value: number) => void;
+  onSaveSettings?: () => void;
+  settingsDirty?: boolean;
+  onSettingsDirtyChange?: (dirty: boolean) => void;
 };
 
 const PageTemplate: React.FC<PageTemplateProps> = ({ 
@@ -95,13 +108,47 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   onInfoRequestEmailChange,
   onInfoRequestEnablePhoneChange,
   onInfoRequestEnableEmailChange,
-  isEditMode = false 
+  isEditMode = false,
+  sectionOrderData,
+  onSectionOrderChange,
+  availableSections,
+  minPeople = 1,
+  maxPeople = 10,
+  onMinPeopleChange,
+  onMaxPeopleChange,
+  onSaveSettings,
+  settingsDirty: externalSettingsDirty,
+  onSettingsDirtyChange
 }) => {
   const size = useWindowSize();
   const { isModalOpen, closeModal } = usePublishModal();
   const { handleCreatePage, isCreating, error, statusMessage } = usePageCreation();
   const width = size.width ?? 0;
   const [loadingMessage, setLoadingMessage] = useState("Creando página...");
+
+  // Internal state for counter values (follows same pattern as settingsDirty)
+  const [internalMinPeople, setInternalMinPeople] = useState(minPeople ?? 1);
+  const [internalMaxPeople, setInternalMaxPeople] = useState(maxPeople ?? 10);
+
+  // Sync internal state when props change
+  useEffect(() => {
+    setInternalMinPeople(minPeople ?? 1);
+  }, [minPeople]);
+
+  useEffect(() => {
+    setInternalMaxPeople(maxPeople ?? 10);
+  }, [maxPeople]);
+
+  const [internalSettingsDirty, setInternalSettingsDirty] = useState(false);
+  const settingsDirty = externalSettingsDirty !== undefined ? externalSettingsDirty : internalSettingsDirty;
+  const setSettingsDirty = (dirty: boolean) => {
+    if (onSettingsDirtyChange) {
+      onSettingsDirtyChange(dirty);
+    } else {
+      setInternalSettingsDirty(dirty);
+    }
+  };
+  const markSettingsDirty = () => setSettingsDirty(true);
 
   // Add wrapper functions to handle async updates
   const handleSection1Update = async (field: keyof sanJuanSection1Type, value: string | { file?: File; preview: string } | null) => {
@@ -266,6 +313,8 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
       card: cardData,
       price: hasPrice ? price : 0,
       hasPrice,
+      minPeople,
+      maxPeople,
       infoRequestContact,
     };
 
@@ -280,75 +329,116 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
     <div className="space-y-6">
       <div className="w-full min-h-screen bg-gray-100 overflow-x-hidden">
         <div className="w-full mx-auto p-4 mb-8">
-          <div className="flex flex-col items-center justify-center gap-6 p-8 bg-white rounded-lg shadow-sm">
-            <h2 className="text-3xl font-bold text-gray-900">{pageName}</h2>
-
-            <div className="max-w-2xl text-center space-y-2 text-gray-600">
-              <p className="text-sm">Para editar el contenido, haz clic en cualquier texto que desees modificar.</p>
-              <p className="text-sm">Para cambiar las imágenes, pasa el cursor sobre ellas y haz clic en el icono de la cámara.</p>
+          {sectionOrderData && onSectionOrderChange && availableSections && (
+            <div className="mb-6">
+              <SectionOrderEditor
+                sections={sectionOrderData}
+                onSectionsChange={onSectionOrderChange}
+                availableSections={availableSections}
+              />
             </div>
-
-            <div className="flex flex-col items-center gap-6 w-full max-w-md">
-              <div className="flex flex-col items-center gap-3">
-                <Label htmlFor="status" className="text-sm font-medium text-gray-700">
+          )}
+          <div className="w-full mx-auto p-4 mb-8">
+            <div className="flex flex-wrap items-center justify-center gap-4 p-6 bg-white rounded-lg shadow-sm">
+              <div className="flex flex-col items-center gap-1">
+                <Label className="text-xs font-medium text-gray-500">
                   {status === "active" ? "Activo" : "Próximamente"}
                 </Label>
-                <Switch id="status" checked={status === "active"} onCheckedChange={onStatusChange} />
-              </div>
-              
-              <div className="flex flex-col w-full sm:w-auto items-center">
-                <Label htmlFor="has-price" className="text-sm font-medium text-gray-700 mb-1 text-center">
-                  {hasPrice ? "Con precio" : "Sin precio"}
-                </Label>
-                <Switch id="has-price" checked={hasPrice} onCheckedChange={onHasPriceChange} />
+                <Switch 
+                  checked={status === "active"} 
+                  onCheckedChange={(checked) => { 
+                    onStatusChange?.(checked); 
+                    markSettingsDirty();
+                  }} 
+                />
               </div>
 
-              <div className="flex flex-col w-full sm:w-auto items-center">
-                <Label htmlFor="price" className="text-sm font-medium text-gray-700 mb-1 text-center">
-                  Precio
+              <div className="flex flex-col items-center gap-1">
+                <Label className="text-xs font-medium text-gray-500">
+                  {hasPrice ? "Con precio" : "Sin precio"}
                 </Label>
-                <div className="relative flex justify-center">
-                  <Input
-                    id="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={Number.isFinite(price) ? price.toString() : "0"}
-                    onChange={(e) => {
-                      const parsed = Number.parseFloat(e.target.value);
-                      onPriceChange(Number.isFinite(parsed) && parsed >= 0 ? parsed : 0);
-                    }}
+                <Switch 
+                  checked={hasPrice} 
+                  onCheckedChange={(checked) => { 
+                    onHasPriceChange?.(checked); 
+                    markSettingsDirty();
+                  }} 
+                />
+              </div>
+
+              {hasPrice && (
+                <div className="flex flex-col items-center gap-1">
+                  <Label className="text-xs font-medium text-gray-500">Precio</Label>
+                  <div className="relative flex items-center">
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={price.toString()}
+                      onChange={(e) => { 
+                        onPriceChange(parseFloat(e.target.value) || 0); 
+                        markSettingsDirty();
+                      }}
+                      className="w-24 pl-3 pr-7 text-center"
+                    />
+                    <span className="absolute right-2 text-gray-500 text-sm">€</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-col items-center gap-1">
+                <Label className="text-xs font-medium text-gray-500">Personas</Label>
+                <div className="flex items-center gap-2">
+                  <CounterInput
+                    value={internalMinPeople}
+                    onChange={(val) => { setInternalMinPeople(val); onMinPeopleChange?.(val); markSettingsDirty(); }}
+                    min={1}
+                    max={internalMaxPeople}
                     disabled={!hasPrice}
-                    className="w-full sm:w-32 pl-3 pr-7 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
-                    placeholder="0.00"
                   />
-                  <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">€</span>
+                  <span className="text-gray-400">-</span>
+                  <CounterInput
+                    value={internalMaxPeople}
+                    onChange={(val) => { setInternalMaxPeople(val); onMaxPeopleChange?.(val); markSettingsDirty(); }}
+                    min={internalMinPeople}
+                    max={100}
+                    disabled={!hasPrice}
+                  />
                 </div>
               </div>
 
+              {settingsDirty && onSaveSettings && (
+                <Button
+                  onClick={onSaveSettings}
+                  size="sm"
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                >
+                  Guardar
+                </Button>
+              )}
+</div>
+
               {!hasPrice && (
-                <div className="w-full max-w-xl rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3">
+                <div className="w-full max-w-xl rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3 mt-4">
                   <p className="text-sm font-medium text-amber-800">
                     Este tour no se podrá reservar. Solo se podrá solicitar información.
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex items-center justify-between rounded-md border border-amber-200 bg-white px-3 py-2">
-                      <Label htmlFor="enable-info-phone" className="text-sm text-gray-700">
+                      <Label className="text-sm text-gray-700">
                         Canal teléfono/WhatsApp
                       </Label>
                       <Switch
-                        id="enable-info-phone"
                         checked={infoRequestContact.enablePhone}
                         onCheckedChange={onInfoRequestEnablePhoneChange}
                       />
                     </div>
                     <div className="flex items-center justify-between rounded-md border border-amber-200 bg-white px-3 py-2">
-                      <Label htmlFor="enable-info-email" className="text-sm text-gray-700">
+                      <Label className="text-sm text-gray-700">
                         Canal email
                       </Label>
                       <Switch
-                        id="enable-info-email"
                         checked={infoRequestContact.enableEmail}
                         onCheckedChange={onInfoRequestEnableEmailChange}
                       />
@@ -357,11 +447,10 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
 
                   {infoRequestContact.enableEmail && (
                     <div className="space-y-2">
-                      <Label htmlFor="info-email" className="text-sm font-medium text-gray-700">
+                      <Label className="text-sm font-medium text-gray-700">
                         Email para solicitudes
                       </Label>
                       <Input
-                        id="info-email"
                         type="email"
                         value={infoRequestContact.email}
                         onChange={(e) => onInfoRequestEmailChange(e.target.value)}
@@ -374,7 +463,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
                   {infoRequestContact.enablePhone && (
                     <>
                       <div className="space-y-2">
-                        <Label htmlFor="info-country" className="text-sm font-medium text-gray-700">
+                        <Label className="text-sm font-medium text-gray-700">
                           País / prefijo
                         </Label>
                         <CountrySelect
@@ -387,19 +476,17 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="info-phone" className="text-sm font-medium text-gray-700">
+                        <Label className="text-sm font-medium text-gray-700">
                           Número de WhatsApp
                         </Label>
                         <div className="flex items-center gap-2">
                           <Input
-                            id="info-dial-code"
                             type="text"
                             readOnly
                             value={infoRequestContact.dialCode}
                             className="w-24 bg-gray-100 text-center"
                           />
                           <Input
-                            id="info-phone"
                             type="tel"
                             value={infoRequestContact.phoneNumber}
                             onChange={(e) => onInfoRequestPhoneChange(e.target.value.replace(/\D/g, ""))}
@@ -410,11 +497,10 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="info-message" className="text-sm font-medium text-gray-700">
+                        <Label className="text-sm font-medium text-gray-700">
                           Mensaje predefinido de WhatsApp
                         </Label>
                         <Textarea
-                          id="info-message"
                           value={infoRequestContact.message}
                           onChange={(e) => onInfoRequestMessageChange(e.target.value)}
                           placeholder="Escribe el mensaje que se abrirá en WhatsApp"
@@ -426,7 +512,6 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
               )}
             </div>
           </div>
-        </div>
 
         <div className="w-full flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
           {indexSection5Data && onIndexSection5Update && <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />}

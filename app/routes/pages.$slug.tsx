@@ -12,9 +12,14 @@ import ComingSoonCard from "~/components/_cards/ComingSoonCard";
 import FloatingButton from "~/components/ui/FloatingButton";
 import SanJuanSection5Dynamic from "~/components/_sanjuan/SanJuanSection5Dynamic";
 import type { Page } from "~/utils/db.schema.server";
-import type { IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuanSection3Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type } from "~/data/data";
+import type { IndexSection5Type, sanJuanSection1Type, sanJuansection2Type, sanJuanSection3Type, sanJuansection4Type, sanJuanSection5Type, SanJuanSection6Type, SectionOrderItem } from "~/data/data";
 import type { TimelineDataType } from "~/components/_index/EditableTimelineFeature";
 import { buildWhatsAppUrl, normalizeInfoRequestContact } from "~/utils/whatsapp";
+
+const getOrderedSections = (sectionOrder?: SectionOrderItem[]): SectionOrderItem[] => {
+  if (!sectionOrder) return [];
+  return [...sectionOrder].sort((a, b) => a.order - b.order);
+};
 
 // Error boundary component
 export function ErrorBoundary() {
@@ -163,6 +168,76 @@ export default function DynamicPage() {
   // Helper function to safely cast content sections to their expected types
   const castSection = <T,>(section: unknown): T => section as T;
 
+  const orderedSections = getOrderedSections(content.sectionOrder);
+
+  const sectionComponents: Record<string, React.ComponentType<any>> = {
+    indexSection5: DynamicPageContainer.IndexSection,
+    section1: DynamicPageContainer.Section1,
+    section2: DynamicPageContainer.Section2,
+    section3: SanJuanSection3Dynamic,
+    section4: DynamicPageContainer.Section4,
+    section5: SanJuanSection5Dynamic,
+    timeline: DynamicPageContainer.Timeline,
+    section6: DynamicPageContainer.Section6,
+  };
+
+  const renderSection = (sectionId: string, Component: React.ComponentType<any>, content: any, width: number, height: number) => {
+    switch (sectionId) {
+      case 'section3':
+        return <Component width={width} images={content?.images?.filter((img: any) => img.enabled !== false) || []} />;
+      case 'section6':
+        return <Component
+          width={width}
+          SanJuanSection6Text={{
+            ...content,
+            list: content?.list?.filter((item: any) => item.enabled !== false) || []
+          }}
+          isInfoRequestOnly={isInfoRequestWhatsAppOnly}
+          infoRequestUrl={infoRequestUrl}
+          infoRequestLabel={infoRequestButtonText}
+          missingInfoContactText={missingInfoContactText}
+        />;
+      case 'section1':
+        return <Component width={width} sanJuanSection1Text={content} />;
+      case 'section2':
+        return <Component width={width} height={height} SanJuanSection2Text={content} />;
+      case 'section4':
+        return <Component width={width} SanJuanSection4Text={content} />;
+      case 'section5':
+        return <Component width={width} SanJuanSection5Text={content} />;
+      case 'timeline':
+        return <Component width={width} timelineData={content} />;
+      case 'indexSection5':
+        return <Component width={width} indexSection5Text={content} />;
+      default:
+        return null;
+    }
+  };
+
+  if (content.sectionOrder && orderedSections.length > 0) {
+    return (
+      <>
+        <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
+          {orderedSections
+            .filter(s => s.enabled)
+            .map(section => {
+              const Component = sectionComponents[section.id];
+              if (!Component) return null;
+              return renderSection(section.id, Component, content[section.id as keyof typeof content], safeWidth, safeHeight);
+            })}
+          <FloatingButton
+            text={floatingButtonText}
+            href={floatingButtonHref}
+            external={!hasPrice && !useBookFlowForInfoRequest}
+            isHidden={hideFloatingButton}
+          />
+        </div>
+      </>
+    );
+  }
+
+  // Fallback path: pages without sectionOrder don't have enabled flags,
+  // so we render all items without filtering (backward compatibility)
   return (
     <div className="w-full h-auto flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12 pt-[100px]">
       {content.indexSection5 && (

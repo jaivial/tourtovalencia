@@ -14,6 +14,18 @@ import { getAllPages } from "~/utils/page.server";
 import { ToastProvider } from "~/components/ui/toast-provider";
 import { getToursCollection } from "~/utils/db.server";
 import type { Tour } from "~/utils/db.schema.server";
+import { runMigrations } from "~/migrations";
+
+// Run migrations once on server startup
+let migrationsRun = false;
+async function ensureMigrations() {
+  if (!migrationsRun) {
+    console.log("[MIGRATIONS] Running pending migrations...");
+    await runMigrations();
+    migrationsRun = true;
+    console.log("[MIGRATIONS] Migrations complete.");
+  }
+}
 
 // Global error handler - supresses SSR hydration errors from heroui/theme
 if (typeof window !== 'undefined') {
@@ -35,6 +47,10 @@ if (typeof window !== 'undefined') {
     if (typeof message === 'string' && message.includes('Suspense boundary received an update before it finished hydrating')) {
       return true; // Suppress the error - React handles this gracefully
     }
+    // Ignore HeroUI inert attribute warning - library bug with React 18.3+
+    if (typeof message === 'string' && message.includes('Received `false` for a non-boolean attribute `inert`')) {
+      return true; // Suppress the warning - library issue
+    }
     if (originalOnerror) {
       return originalOnerror(message, source, lineno, colno, error);
     }
@@ -46,6 +62,15 @@ if (typeof window !== 'undefined') {
         loadingElement.style.display = 'none';
       }
     }, 100);
+  };
+
+  // Suppress HeroUI inert attribute warning - library bug with React 18.3+
+  const originalConsoleError = console.error;
+  console.error = (...args: unknown[]) => {
+    if (typeof args[0] === 'string' && args[0].includes('Received `false` for a non-boolean attribute `inert`')) {
+      return; // Suppress this warning
+    }
+    originalConsoleError.apply(console, args);
   };
 }
 
@@ -65,6 +90,9 @@ export interface RootLoaderData {
 export const loader = async ({ request }: { request: Request }) => {
   const loaderStartTime = Date.now();
   console.log(`[ROOT LOADER] Starting loader for root - ${new Date(loaderStartTime).toISOString()}`);
+
+  // Run pending migrations on first request
+  await ensureMigrations();
   
   const cookieHeader = request.headers.get("Cookie");
   const cookieLanguage = (await languageCookie.parse(cookieHeader)) || "en";

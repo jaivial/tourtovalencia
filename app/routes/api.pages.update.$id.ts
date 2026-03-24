@@ -283,7 +283,9 @@ async function processPageUpdateInBackground(
               },
               pageId: pageIdString,
               createdAt: new Date(),
-              updatedAt: new Date()
+              updatedAt: new Date(),
+              minPeople: 1,
+              maxPeople: 10
             };
             
             await toursCollection.insertOne(newTour);
@@ -615,7 +617,9 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
             },
             pageId: pageIdString,
             createdAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            minPeople: 1,
+            maxPeople: 10
           };
           
           await toursCollection.insertOne(newTour);

@@ -171,17 +171,25 @@ export function useBookingActions(context: BookingContextState): BookingActions 
         context.setErrors(errors);
         return;
       }
-      
-      // Validate party size against available places
-      if (context.selectedDateAvailability) {
-        const { availablePlaces } = context.selectedDateAvailability;
-        if (context.formData.partySize > availablePlaces) {
-          errors.partySize = `Maximum number of guests for this date is ${availablePlaces}`;
-          context.setErrors(errors);
-          return;
+
+      const selectedTour = context.selectedTour;
+      if (selectedTour) {
+        if (selectedTour.minPeople && context.formData.partySize < selectedTour.minPeople) {
+          errors.partySize = `Minimum number of guests for this tour is ${selectedTour.minPeople}`;
         }
-      } else {
-        // If availability data is not loaded, don't proceed
+        if (selectedTour.maxPeople && context.formData.partySize > selectedTour.maxPeople) {
+          errors.partySize = `Maximum number of guests for this tour is ${selectedTour.maxPeople}`;
+        }
+      }
+      const availablePlaces = context.selectedDateAvailability?.availablePlaces;
+      if (availablePlaces && context.formData.partySize > availablePlaces) {
+        errors.partySize = `Maximum number of guests for this date is ${availablePlaces}`;
+      }
+      if (Object.keys(errors).length > 0) {
+        context.setErrors(errors);
+        return;
+      }
+      if (!context.selectedDateAvailability) {
         errors.partySize = "Please wait for availability data to load";
         context.setErrors(errors);
         return;

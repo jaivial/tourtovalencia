@@ -658,7 +658,9 @@
         "numberOfPeople": "Number of People",
         "selectNumberOfPeople": "Select number of people",
         "person": "Person",
-        "people": "People"
+        "people": "People",
+        "minPeopleLimit": "For this tour the minimum number of people is {n}",
+        "maxPeopleLimit": "For this tour the maximum number of people is {n}"
       },
       "bookingStepOne": {
         "fullName": "Full Name",
@@ -1397,7 +1399,9 @@
         "numberOfPeople": "Número de Personas",
         "selectNumberOfPeople": "Selecciona número de personas",
         "person": "Persona",
-        "people": "Personas"
+        "people": "Personas",
+        "minPeopleLimit": "Para este tour el número mínimo de personas es {n}",
+        "maxPeopleLimit": "Para este tour el número máximo de personas es {n}"
       },
       "bookingStepOne": {
         "fullName": "Nombre Completo",
