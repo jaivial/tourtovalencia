@@ -1217,6 +1217,8 @@ async function createTourFromPage(page: Page): Promise<void> {
     pageId: page._id?.toString() || '',
     createdAt: now,
     updatedAt: now,
+    minPeople: 1,
+    maxPeople: 10,
   };
   
   await toursCollection.insertOne(tour);
