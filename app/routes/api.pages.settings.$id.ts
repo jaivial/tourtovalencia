@@ -17,18 +17,23 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const price = parseFloat(formData.get("price") as string) || 0;
   const minPeople = parseInt(formData.get("minPeople") as string) || 1;
   const maxPeople = parseInt(formData.get("maxPeople") as string) || 10;
+
+  console.log('[API:settings] Updating page:', id, 'with minPeople:', minPeople, 'maxPeople:', maxPeople);
   
   const pagesCollection = await getPagesCollection();
   const toursCollection = await getToursCollection();
   const objectId = new ObjectId(id);
-  const filter: Filter<Page> = { _id: objectId as unknown as string };
+  const filter = { _id: objectId } as unknown as Filter<Page>;
   
   // First, get the page to find the tour's slug
   const page = await pagesCollection.findOne(filter);
   
   if (!page) {
+    console.log('[API:settings] Page not found:', id);
     return json({ error: "Page not found" }, { status: 404 });
   }
+  
+  console.log('[API:settings] Found page:', page.slug, 'pageId:', page._id?.toString());
   
   // Update pages collection
   const result = await pagesCollection.updateOne(
@@ -47,11 +52,15 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     }
   );
   
+  console.log('[API:settings] Pages updated, result:', result.modifiedCount);
+  
   // Also update the corresponding tour's minPeople/maxPeople
   // Tours can be found by slug or by pageId
   const tourSlug = page.slug;
+  let toursUpdated = 0;
+  
   if (tourSlug) {
-    await toursCollection.updateOne(
+    const tourResult = await toursCollection.updateOne(
       { slug: tourSlug },
       {
         $set: {
@@ -65,12 +74,14 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
         }
       }
     );
+    toursUpdated += tourResult.modifiedCount;
+    console.log('[API:settings] Updated tour by slug:', tourSlug, 'result:', tourResult.modifiedCount);
   }
   
   // Also try to update by pageId
   const pageIdStr = page._id?.toString();
   if (pageIdStr) {
-    await toursCollection.updateOne(
+    const tourByPageIdResult = await toursCollection.updateOne(
       { pageId: pageIdStr },
       {
         $set: {
@@ -84,7 +95,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
         }
       }
     );
+    toursUpdated += tourByPageIdResult.modifiedCount;
+    console.log('[API:settings] Updated tour by pageId:', pageIdStr, 'result:', tourByPageIdResult.modifiedCount);
   }
   
-  return json({ success: true });
+  console.log('[API:settings] Total tours updated:', toursUpdated);
+  
+  return json({ success: true, toursUpdated });
 };

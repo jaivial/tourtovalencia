@@ -89,6 +89,12 @@ export const BookingStepTwo = () => {
   const minPeople = selectedTour?.minPeople;
   const maxPeople = selectedTour?.maxPeople;
 
+  // Debug logging for min/max people
+  console.log('[BookingStepTwo] tourSlug:', formData.tourSlug);
+  console.log('[BookingStepTwo] selectedTour:', selectedTour);
+  console.log('[BookingStepTwo] minPeople:', minPeople, 'maxPeople:', maxPeople);
+  console.log('[BookingStepTwo] availablePlaces:', selectedDateAvailability.availablePlaces);
+
   return <BookingStepTwoUI 
     partySize={formData.partySize} 
     errors={errors} 
