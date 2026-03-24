@@ -1,0 +1,140 @@
+{
+  "indexSection5": {
+    "firstH3": "Título principal",
+    "secondH3": ""
+  },
+  "section1": {
+    "firstH3": "",
+    "firstSquareH3": "",
+    "firstSquareP": "",
+    "secondSquareH3": "",
+    "secondSquareP": "",
+    "thirdSquareH3": "",
+    "thirdSquareP": "",
+    "button": "",
+    "backgroundImage": {
+      "preview": "https://cdn.tourtovalencia.com/public/olgaphoto3.jpeg"
+    }
+  },
+  "section2": {
+    "firstH3": "",
+    "secondH3": "",
+    "thirdH3": "",
+    "sectionImage": {
+      "preview": "https://cdn.tourtovalencia.com/public/olgaphoto3.jpeg"
+    },
+    "lottieAnimation": {
+      "enabled": false,
+      "src": "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie"
+    }
+  },
+  "section3": {
+    "images": [
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      }
+    ]
+  },
+  "section4": {
+    "firstH3": "¿Qué incluye la excursión en barco en San Juan?",
+    "secondH3": "Excursión de 6 horas",
+    "thirdH3": "Salida desde Valencia"
+  },
+  "section5": {
+    "firstH3": "¿Qué haremos en San Juan?",
+    "secondH3": "Nos bañaremos en las aguas cristalinas de la playa de San Juan",
+    "thirdH3": "Disfrutaremos de un día de playa y relax",
+    "fourthH3": "Podremos practicar snorkel y ver los peces",
+    "fifthH3": "Tendremos tiempo libre para explorar el pueblo"
+  },
+  "section6": {
+    "cardTitle": "Información importante",
+    "cardDescription": "Todo lo que necesitas saber sobre la excursión",
+    "firstH4": "Qué incluye",
+    "list": [
+      {
+        "li": "Transporte en barco",
+        "index": 0
+      },
+      {
+        "li": "Guía experto",
+        "index": 1
+      },
+      {
+        "li": "Equipo de snorkel",
+        "index": 2
+      },
+      {
+        "li": "Seguro de viaje",
+        "index": 3
+      }
+    ],
+    "secondH4": "Precio",
+    "secondH4span": "50€ por persona",
+    "button": "Reservar ahora"
+  },
+  "timeline": {
+    "title": "Cronología del Viaje",
+    "subtitle": "Descubre el itinerario paso a paso",
+    "steps": [
+      {
+        "title": "Salida",
+        "description": "Punto de encuentro y salida desde Valencia"
+      },
+      {
+        "title": "Llegada",
+        "description": "Llegada al destino y bienvenida"
+      }
+    ]
+  },
+  "card": {
+    "title": "",
+    "duration": "",
+    "description": "",
+    "additionalInfo": "",
+    "quote": "",
+    "image": null
+  },
+  "price": 0,
+  "hasPrice": true,
+  "minPeople": 1,
+  "maxPeople": 10,
+  "infoRequestContact": {
+    "enablePhone": true,
+    "enableEmail": true,
+    "email": "tourtovalencia@gmail.com",
+    "countryCode": "ES",
+    "dialCode": "+34",
+    "phoneNumber": "",
+    "message": "Hola, me gustaría pedir información sobre este servicio."
+  }
+}
