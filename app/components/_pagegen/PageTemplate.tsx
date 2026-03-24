@@ -402,9 +402,102 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
                   Guardar
                 </Button>
               )}
+</div>
+
+              {!hasPrice && (
+                <div className="w-full max-w-xl rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3 mt-4">
+                  <p className="text-sm font-medium text-amber-800">
+                    Este tour no se podrá reservar. Solo se podrá solicitar información.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between rounded-md border border-amber-200 bg-white px-3 py-2">
+                      <Label className="text-sm text-gray-700">
+                        Canal teléfono/WhatsApp
+                      </Label>
+                      <Switch
+                        checked={infoRequestContact.enablePhone}
+                        onCheckedChange={onInfoRequestEnablePhoneChange}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between rounded-md border border-amber-200 bg-white px-3 py-2">
+                      <Label className="text-sm text-gray-700">
+                        Canal email
+                      </Label>
+                      <Switch
+                        checked={infoRequestContact.enableEmail}
+                        onCheckedChange={onInfoRequestEnableEmailChange}
+                      />
+                    </div>
+                  </div>
+
+                  {infoRequestContact.enableEmail && (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">
+                        Email para solicitudes
+                      </Label>
+                      <Input
+                        type="email"
+                        value={infoRequestContact.email}
+                        onChange={(e) => onInfoRequestEmailChange(e.target.value)}
+                        placeholder="tourtovalencia@gmail.com"
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+
+                  {infoRequestContact.enablePhone && (
+                    <>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-gray-700">
+                          País / prefijo
+                        </Label>
+                        <CountrySelect
+                          value={infoRequestContact.countryCode}
+                          onChange={({ countryCode }) => onInfoRequestCountryChange(countryCode)}
+                          placeholder="Selecciona un país"
+                          language="es"
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-gray-700">
+                          Número de WhatsApp
+                        </Label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            readOnly
+                            value={infoRequestContact.dialCode}
+                            className="w-24 bg-gray-100 text-center"
+                          />
+                          <Input
+                            type="tel"
+                            value={infoRequestContact.phoneNumber}
+                            onChange={(e) => onInfoRequestPhoneChange(e.target.value.replace(/\D/g, ""))}
+                            placeholder="Número"
+                            className="flex-1"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-gray-700">
+                          Mensaje predefinido de WhatsApp
+                        </Label>
+                        <Textarea
+                          value={infoRequestContact.message}
+                          onChange={(e) => onInfoRequestMessageChange(e.target.value)}
+                          placeholder="Escribe el mensaje que se abrirá en WhatsApp"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        </div>
 
         <div className="w-full flex flex-col items-start z-0 bg-blue-50 overflow-x-hidden animate-fadeIn gap-12">
           {indexSection5Data && onIndexSection5Update && <EditableIndexSection5 width={width} data={indexSection5Data} onUpdate={onIndexSection5Update} />}
