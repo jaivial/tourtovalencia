@@ -125,6 +125,20 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   const { handleCreatePage, isCreating, error, statusMessage } = usePageCreation();
   const width = size.width ?? 0;
   const [loadingMessage, setLoadingMessage] = useState("Creando página...");
+
+  // Internal state for counter values (follows same pattern as settingsDirty)
+  const [internalMinPeople, setInternalMinPeople] = useState(minPeople ?? 1);
+  const [internalMaxPeople, setInternalMaxPeople] = useState(maxPeople ?? 10);
+
+  // Sync internal state when props change
+  useEffect(() => {
+    setInternalMinPeople(minPeople ?? 1);
+  }, [minPeople]);
+
+  useEffect(() => {
+    setInternalMaxPeople(maxPeople ?? 10);
+  }, [maxPeople]);
+
   const [internalSettingsDirty, setInternalSettingsDirty] = useState(false);
   const settingsDirty = externalSettingsDirty !== undefined ? externalSettingsDirty : internalSettingsDirty;
   const setSettingsDirty = (dirty: boolean) => {
@@ -376,17 +390,17 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
                 <Label className="text-xs font-medium text-gray-500">Personas</Label>
                 <div className="flex items-center gap-2">
                   <CounterInput
-                    value={minPeople}
-                    onChange={(val) => { onMinPeopleChange?.(val); markSettingsDirty(); }}
+                    value={internalMinPeople}
+                    onChange={(val) => { setInternalMinPeople(val); onMinPeopleChange?.(val); markSettingsDirty(); }}
                     min={1}
-                    max={maxPeople}
+                    max={internalMaxPeople}
                     disabled={!hasPrice}
                   />
                   <span className="text-gray-400">-</span>
                   <CounterInput
-                    value={maxPeople}
-                    onChange={(val) => { onMaxPeopleChange?.(val); markSettingsDirty(); }}
-                    min={minPeople}
+                    value={internalMaxPeople}
+                    onChange={(val) => { setInternalMaxPeople(val); onMaxPeopleChange?.(val); markSettingsDirty(); }}
+                    min={internalMinPeople}
                     max={100}
                     disabled={!hasPrice}
                   />
