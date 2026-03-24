@@ -14,6 +14,18 @@ import { getAllPages } from "~/utils/page.server";
 import { ToastProvider } from "~/components/ui/toast-provider";
 import { getToursCollection } from "~/utils/db.server";
 import type { Tour } from "~/utils/db.schema.server";
+import { runMigrations } from "~/migrations";
+
+// Run migrations once on server startup
+let migrationsRun = false;
+async function ensureMigrations() {
+  if (!migrationsRun) {
+    console.log("[MIGRATIONS] Running pending migrations...");
+    await runMigrations();
+    migrationsRun = true;
+    console.log("[MIGRATIONS] Migrations complete.");
+  }
+}
 
 // Global error handler - supresses SSR hydration errors from heroui/theme
 if (typeof window !== 'undefined') {
@@ -65,6 +77,9 @@ export interface RootLoaderData {
 export const loader = async ({ request }: { request: Request }) => {
   const loaderStartTime = Date.now();
   console.log(`[ROOT LOADER] Starting loader for root - ${new Date(loaderStartTime).toISOString()}`);
+
+  // Run pending migrations on first request
+  await ensureMigrations();
   
   const cookieHeader = request.headers.get("Cookie");
   const cookieLanguage = (await languageCookie.parse(cookieHeader)) || "en";
