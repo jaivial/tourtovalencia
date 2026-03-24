@@ -14,16 +14,20 @@ interface BookingStepTwoUIProps {
     selectNumberOfPeople: string;
     person: string;
     people: string;
+    minPeopleLimit: string;
+    maxPeopleLimit: string;
   };
 }
 
 export const BookingStepTwoUI = ({ partySize, errors, availablePlaces, minPeople, maxPeople, onPartySizeChange, bookingStepTwoText }: BookingStepTwoUIProps) => {
   const min = minPeople || 1;
   const max = Math.min(maxPeople || 10, availablePlaces);
+  const atMin = partySize === min;
+  const atMax = partySize === max;
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
+      <div className="space-y-2 flex flex-col items-center">
         <Label>{bookingStepTwoText.numberOfPeople}</Label>
         <div className="flex items-center gap-4">
           <CounterInput
@@ -32,10 +36,9 @@ export const BookingStepTwoUI = ({ partySize, errors, availablePlaces, minPeople
             min={min}
             max={max}
           />
-          <span className="text-gray-600">
-            {partySize} {partySize === 1 ? bookingStepTwoText.person : bookingStepTwoText.people}
-          </span>
         </div>
+        {atMin && <p className="text-sm text-muted-foreground">{bookingStepTwoText.minPeopleLimit.replace("{n}", min.toString())}</p>}
+        {atMax && <p className="text-sm text-muted-foreground">{bookingStepTwoText.maxPeopleLimit.replace("{n}", max.toString())}</p>}
         {errors.partySize && <p className="text-sm text-destructive">{errors.partySize}</p>}
       </div>
     </div>
