@@ -755,6 +755,40 @@ export const useEditPage = (initialPage: Record<string, unknown>, sectionOrderDa
     navigate("/admin/dashboard/pagegen/editpage", { replace: true });
   };
 
+  // Save settings handler (lightweight save for status, price, people settings)
+  const saveSettings = async () => {
+    setIsSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
+
+    try {
+      const formData = new FormData();
+      formData.append("status", status);
+      formData.append("hasPrice", hasPrice.toString());
+      formData.append("price", price.toString());
+      formData.append("minPeople", minPeople.toString());
+      formData.append("maxPeople", maxPeople.toString());
+
+      const response = await fetch(`/api/pages/settings/${deserializedPage._id}`, {
+        method: "PATCH",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save settings");
+      }
+
+      setSaveSuccess(true);
+      setIsSaving(false);
+      return { success: true };
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      setSaveError(error instanceof Error ? error.message : "Failed to save settings");
+      setIsSaving(false);
+      return { success: false, error };
+    }
+  };
+
   return {
     pageName,
     status,
@@ -804,6 +838,7 @@ export const useEditPage = (initialPage: Record<string, unknown>, sectionOrderDa
     handleMinPeopleChange,
     handleMaxPeopleChange,
     handleSavePage,
-    handleCancel
+    handleCancel,
+    saveSettings
   };
 }; 

@@ -1,6 +1,5 @@
 import { Label } from "./label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
-import { cn } from "~/lib/utils";
+import { CounterInput } from "~/components/ui/CounterInput";
 import type { BookingFormData } from "~/hooks/book.hooks";
 
 interface BookingStepTwoUIProps {
@@ -19,27 +18,24 @@ interface BookingStepTwoUIProps {
 }
 
 export const BookingStepTwoUI = ({ partySize, errors, availablePlaces, minPeople, maxPeople, onPartySizeChange, bookingStepTwoText }: BookingStepTwoUIProps) => {
-  // Generate options from minPeople to min(maxPeople, availablePlaces)
   const min = minPeople || 1;
   const max = Math.min(maxPeople || 10, availablePlaces);
-  const options = Array.from({ length: Math.max(0, max - min + 1) }, (_, i) => min + i);
 
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="partySize">{bookingStepTwoText.numberOfPeople}</Label>
-        <Select value={partySize.toString()} onValueChange={onPartySizeChange}>
-          <SelectTrigger id="partySize" className={cn(errors.partySize ? "border-destructive" : "")}>
-            <SelectValue placeholder={bookingStepTwoText.selectNumberOfPeople} />
-          </SelectTrigger>
-          <SelectContent>
-            {options.map((number) => (
-              <SelectItem key={number} value={number.toString()}>
-                {number} {number === 1 ? bookingStepTwoText.person : bookingStepTwoText.people}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Label>{bookingStepTwoText.numberOfPeople}</Label>
+        <div className="flex items-center gap-4">
+          <CounterInput
+            value={partySize}
+            onChange={(val) => onPartySizeChange(val.toString())}
+            min={min}
+            max={max}
+          />
+          <span className="text-gray-600">
+            {partySize} {partySize === 1 ? bookingStepTwoText.person : bookingStepTwoText.people}
+          </span>
+        </div>
         {errors.partySize && <p className="text-sm text-destructive">{errors.partySize}</p>}
       </div>
     </div>

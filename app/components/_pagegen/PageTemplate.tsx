@@ -25,7 +25,7 @@ import { SectionOrderItem } from "~/data/data";
 
 export type PageTemplateProps = {
   status: "active" | "upcoming";
-  onStatusChange?: (status: 'active' | 'upcoming') => void;
+  onStatusChange?: (checked: boolean) => void;
   indexSection5Data?: IndexSection5Type;
   onIndexSection5Update?: (field: keyof IndexSection5Type, value: string) => void;
   section1Data?: sanJuanSection1Type;
@@ -68,6 +68,8 @@ export type PageTemplateProps = {
   onMinPeopleChange?: (value: number) => void;
   onMaxPeopleChange?: (value: number) => void;
   onSaveSettings?: () => void;
+  settingsDirty?: boolean;
+  onSettingsDirtyChange?: (dirty: boolean) => void;
 };
 
 const PageTemplate: React.FC<PageTemplateProps> = ({ 
@@ -114,14 +116,24 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   maxPeople = 10,
   onMinPeopleChange,
   onMaxPeopleChange,
-  onSaveSettings
+  onSaveSettings,
+  settingsDirty: externalSettingsDirty,
+  onSettingsDirtyChange
 }) => {
   const size = useWindowSize();
   const { isModalOpen, closeModal } = usePublishModal();
   const { handleCreatePage, isCreating, error, statusMessage } = usePageCreation();
   const width = size.width ?? 0;
   const [loadingMessage, setLoadingMessage] = useState("Creando página...");
-  const [settingsDirty, setSettingsDirty] = useState(false);
+  const [internalSettingsDirty, setInternalSettingsDirty] = useState(false);
+  const settingsDirty = externalSettingsDirty !== undefined ? externalSettingsDirty : internalSettingsDirty;
+  const setSettingsDirty = (dirty: boolean) => {
+    if (onSettingsDirtyChange) {
+      onSettingsDirtyChange(dirty);
+    } else {
+      setInternalSettingsDirty(dirty);
+    }
+  };
   const markSettingsDirty = () => setSettingsDirty(true);
 
   // Add wrapper functions to handle async updates
@@ -321,7 +333,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
                 <Switch 
                   checked={status === "active"} 
                   onCheckedChange={(checked) => { 
-                    onStatusChange?.(checked ? 'active' : 'upcoming'); 
+                    onStatusChange?.(checked); 
                     markSettingsDirty();
                   }} 
                 />

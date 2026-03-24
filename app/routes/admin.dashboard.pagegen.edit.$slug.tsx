@@ -54,6 +54,7 @@ export default function EditPageRoute() {
     ? page.content.es.sectionOrder!
     : defaultSectionOrder;
   const [sectionOrderData, setSectionOrderData] = useState<SectionOrderItem[]>(initialSectionOrder);
+  const [settingsDirty, setSettingsDirty] = useState(false);
 
   const {
     pageName,
@@ -104,6 +105,7 @@ export default function EditPageRoute() {
     handleMaxPeopleChange,
     handleSavePage,
     handleCancel,
+    saveSettings,
     isBackgroundProcess
   } = useEditPage(page, sectionOrderData);
 
@@ -490,6 +492,9 @@ export default function EditPageRoute() {
               maxPeople={maxPeople}
               onMinPeopleChange={handleMinPeopleChange}
               onMaxPeopleChange={handleMaxPeopleChange}
+              onSaveSettings={saveSettings}
+              settingsDirty={settingsDirty}
+              onSettingsDirtyChange={setSettingsDirty}
             />
           </Suspense>
         </div>
