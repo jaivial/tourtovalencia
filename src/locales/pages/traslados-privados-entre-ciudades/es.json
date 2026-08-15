@@ -1,0 +1,132 @@
+{
+  "section1": {
+    "firstH3": "✨ Servicio Premium de Transporte",
+    "firstSquareH3": "Nuestra furgoneta está equipada para garantizar:",
+    "firstSquareP": "Asientos amplios y confortables Climatización independiente Espacio para equipaje Servicio privado y exclusivo Conductor profesional y discreto Recogida en hotel, aeropuerto o domicilio Nos adaptamos a tu itinerario y necesidades.",
+    "secondSquareH3": "🚗 Ideal para:",
+    "secondSquareP": "Viajes entre capitales (Madrid, Barcelona, Valencia, Sevilla, Málaga, etc.)\nRutas turísticas privadas\nFamilias y grupos pequeños\nEventos, congresos y reuniones de empresa\nClientes VIP y ejecutivos",
+    "thirdSquareH3": "⏱️ Sin esperas. Sin cambios. Sin estrés.",
+    "thirdSquareP": "✔️ Tú eliges la hora de salida\n✔️ Viajas directamente a tu destino\n✔️ Sin paradas innecesarias\n✔️ Sin compartir vehículo con desconocidos\nUn servicio cómodo y eficiente diseñado para viajeros que valoran su tiempo.",
+    "button": "Texto del botón",
+    "backgroundImage": {
+      "preview": "https://cdn.tourtovalencia.com/public/uploads/section1-backgroundImage-preview-1772730894196-8r00ru.webp"
+    }
+  },
+  "section2": {
+    "firstH3": "Seguridad y Profesionalidad",
+    "secondH3": "Conductores con experiencia",
+    "thirdH3": "Máxima puntualidad",
+    "sectionImage": {
+      "preview": "https://cdn.tourtovalencia.com/public/uploads/section2-sectionImage-preview-1772730894392-fge9oh.webp"
+    },
+    "lottieAnimation": {
+      "enabled": false,
+      "src": "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie"
+    }
+  },
+  "section3": {
+    "images": [
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-0--source-1772730894523-7oogpj.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-1--source-1772730894647-7k98k9.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-2--source-1772730894633-zzze3q.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-3--source-1772730894895-ebchhm.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-4--source-1772730894735-ncibha.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      }
+    ]
+  },
+  "section4": {
+    "firstH3": "📩 Solicita Presupuesto",
+    "secondH3": "Cuéntanos: Ciudad de origen y destino Fecha y hora Número de pasajeros Equipaje aproximado Te enviaremos un presupuesto cerrado sin compromiso.",
+    "thirdH3": "Consúltanos tu ruta personalizada.",
+    "lottieAnimation": {
+      "enabled": true,
+      "src": "https://cdn.tourtovalencia.com/public/images/giphy-animation-5.gif"
+    }
+  },
+  "section5": {
+    "firstH3": "",
+    "secondH3": "",
+    "thirdH3": "",
+    "fourthH3": "",
+    "fifthH3": "",
+    "image": "https://cdn.tourtovalencia.com/public/plazareina2.jpg"
+  },
+  "section6": {
+    "cardTitle": "",
+    "cardDescription": "",
+    "firstH4": "",
+    "list": [
+      {
+        "li": "Inherit",
+        "index": 0
+      },
+      {
+        "li": "Heir",
+        "index": 1
+      },
+      {
+        "li": "New",
+        "index": 2
+      }
+    ],
+    "secondH4": "Consultar Precio",
+    "secondH4span": "Sin precio",
+    "button": "Solicitar información"
+  },
+  "indexSection5": {
+    "firstH3": "Viaja con comodidad, puntualidad y total tranquilidad",
+    "secondH3": "Ofrecemos traslados privados puerta a puerta entre ciudades, en vehículo premium y con conductor profesional. Una alternativa cómoda, segura y flexible al tren, avión o alquiler de coche.\nViaja sin esperas, sin horarios cerrados y sin complicaciones."
+  },
+  "timeline": {
+    "title": "",
+    "subtitle": "",
+    "steps": []
+  },
+  "card": {
+    "title": "",
+    "duration": "",
+    "description": "",
+    "additionalInfo": "",
+    "quote": "",
+    "image": {
+      "preview": "https://cdn.tourtovalencia.com/public/uploads/card-image-preview-1772745795966-j6qd9a.webp"
+    }
+  },
+  "price": 0,
+  "hasPrice": false,
+  "infoRequestContact": {
+    "enablePhone": true,
+    "enableEmail": true,
+    "email": "tourtovalencia@gmail.com",
+    "countryCode": "ES",
+    "dialCode": "+34",
+    "phoneNumber": "625291391",
+    "message": "Hola, me gustaría pedir información sobre este servicio."
+  }
+}

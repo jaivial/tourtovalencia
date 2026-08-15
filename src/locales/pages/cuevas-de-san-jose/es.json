@@ -7,12 +7,54 @@
     "secondSquareP": "Navega por el río subterráneo más largo de Europa",
     "thirdSquareH3": "Guías Expertos",
     "thirdSquareP": "Irás acompañado de guías locales expertos en la zona",
-    "button": "RESERVAR YA"
+    "button": "RESERVAR YA",
+    "backgroundImage": {
+      "preview": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669586777-wcknd7k9w8f.jpg"
+    }
   },
   "section2": {
     "firstH3": "Disfruta de un relajante paseo en barca a través de uno de los ríos subterráneos más espectaculares.",
     "secondH3": "Viajarás 800 metros en barca.",
-    "thirdH3": "¿Sabías que es el río subterráneo navegable más largo de Europa?"
+    "thirdH3": "¿Sabías que es el río subterráneo navegable más largo de Europa?",
+    "sectionImage": {
+      "preview": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588057-c4zm8xx3nq9.jpg"
+    }
+  },
+  "section3": {
+    "images": [
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588991-2zjuqnf3nv2.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588991-boijahpc2zc.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588992-3jwh1689hya.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588992-29pob9w27k3.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588993-18ee3ns2c97.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588993-9vy0rojkw65.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588993-rqrctp210o.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588993-ssouf6jwu7a.jpg",
+        "alt": "Gallery image"
+      }
+    ]
   },
   "section4": {
     "firstH3": "TOUR GUIADO EXCLUSIVO",
@@ -30,7 +72,29 @@
     "cardTitle": "TOUR GUIADO",
     "cardDescription": "Paquete de viaje a las Cuevas de San José",
     "firstH4": "Qué incluye",
-    "secondH4": "120",
+    "list": [
+      {
+        "li": "Transporte privado.",
+        "index": 0
+      },
+      {
+        "li": "Recogida en Valencia y regreso a punto de partida.",
+        "index": 1
+      },
+      {
+        "li": "Tour guiado de las Cuevas de San José.",
+        "index": 2
+      },
+      {
+        "li": "Paseo en barca en las Cuevas de San José.",
+        "index": 3
+      },
+      {
+        "li": "Todos los impuestos y gastos incluidos.",
+        "index": 4
+      }
+    ],
+    "secondH4": "120€",
     "secondH4span": "Precio por persona",
     "button": "RESERVAR AHORA"
   },
@@ -40,11 +104,103 @@
   },
   "timeline": {
     "title": "¿Qué esperar?",
-    "subtitle": "Itinerario"
+    "subtitle": "Itinerario",
+    "steps": [
+      {
+        "title": "Punto de encuentro",
+        "description": "Saldremos desde Valencia (máximo 10 personas) desplazándonos en coche durante aproximadamente 40 minutos hasta la población de La Vall D'uixo (Castellón).",
+        "isActive": true
+      },
+      {
+        "title": "Llegada a las Cuevas",
+        "description": "Una vez allí empezaremos el recorrido dentro de la cueva que durará unos 40 minutos a una temperatura constante de 20°C.",
+        "isActive": false
+      },
+      {
+        "title": "Exploración",
+        "description": "El recorrido consta de 800 metros en barca y 250 metros a pie. No existe ningún riesgo ni situación peligrosa en la visita.",
+        "isActive": false
+      },
+      {
+        "title": "Experiencia única",
+        "description": "Atrévete a disfrutar algo diferente y especial. Siente la sensación de que el tiempo se ha parado en una atmósfera muy especial.",
+        "isActive": false
+      },
+      {
+        "title": "Regreso",
+        "description": "Al terminar la visita volveremos a Valencia al punto de partida.",
+        "isActive": false
+      }
+    ]
   },
   "card": {
     "title": "Cuevas de San José",
     "duration": "3.5 horas",
-    "description": "Descubre las Cuevas de San José en un mágico paseo en barca por el río subterráneo más largo de Europa. ¡Una experiencia única desde Valencia!"
-  }
+    "description": "Descubre las Cuevas de San José en un mágico paseo en barca por el río subterráneo más largo de Europa. ¡Una experiencia única desde Valencia!",
+    "additionalInfo": "",
+    "quote": "",
+    "image": {
+      "preview": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669593632-w987s9uotem.jpg"
+    }
+  },
+  "price": 120,
+  "hasPrice": true,
+  "infoRequestContact": {
+    "enablePhone": true,
+    "enableEmail": true,
+    "email": "tourtovalencia@gmail.com",
+    "countryCode": "ES",
+    "dialCode": "+34",
+    "phoneNumber": "",
+    "message": "Hola, me gustaría pedir información sobre este servicio."
+  },
+  "sectionOrder": [
+    {
+      "id": "indexSection5",
+      "enabled": true,
+      "order": 0
+    },
+    {
+      "id": "section1",
+      "enabled": true,
+      "order": 1
+    },
+    {
+      "id": "section2",
+      "enabled": true,
+      "order": 2
+    },
+    {
+      "id": "section3",
+      "enabled": true,
+      "order": 3
+    },
+    {
+      "id": "section4",
+      "enabled": true,
+      "order": 4
+    },
+    {
+      "id": "section5",
+      "enabled": true,
+      "order": 5
+    },
+    {
+      "id": "timeline",
+      "enabled": true,
+      "order": 6
+    },
+    {
+      "id": "section6",
+      "enabled": true,
+      "order": 7
+    },
+    {
+      "id": "card",
+      "enabled": true,
+      "order": 8
+    }
+  ],
+  "minPeople": 2,
+  "maxPeople": 11
 }

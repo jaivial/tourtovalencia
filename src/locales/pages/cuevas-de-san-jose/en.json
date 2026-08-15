@@ -1,50 +1,206 @@
 {
   "section1": {
-    "firstH3": "Boat trip in the San José Caves",
+    "firstH3": "Boat trip in the Caves of San José",
     "firstSquareH3": "3.5 hours",
     "firstSquareP": "Tour duration",
     "secondSquareH3": "Boat trip",
     "secondSquareP": "Navigate the longest underground river in Europe",
     "thirdSquareH3": "Expert Guides",
-    "thirdSquareP": "You will be accompanied by local guides who are experts in the area.",
-    "button": "Book now"
+    "thirdSquareP": "You will be accompanied by local guides who are experts in the area",
+    "button": "BOOK NOW",
+    "backgroundImage": {
+      "preview": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669586777-wcknd7k9w8f.jpg"
+    }
   },
   "section2": {
     "firstH3": "Enjoy a relaxing boat ride through one of the most spectacular underground rivers.",
     "secondH3": "You will travel 800 meters by boat.",
-    "thirdH3": "Did you know that it is the longest navigable underground river in Europe?"
+    "thirdH3": "Did you know it is the longest navigable underground river in Europe?",
+    "sectionImage": {
+      "preview": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588057-c4zm8xx3nq9.jpg"
+    }
+  },
+  "section3": {
+    "images": [
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588991-2zjuqnf3nv2.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588991-boijahpc2zc.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588992-3jwh1689hya.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588992-29pob9w27k3.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588993-18ee3ns2c97.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588993-9vy0rojkw65.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588993-rqrctp210o.jpg",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669588993-ssouf6jwu7a.jpg",
+        "alt": "Gallery image"
+      }
+    ]
   },
   "section4": {
     "firstH3": "EXCLUSIVE GUIDED TOUR",
-    "secondH3": "Small groups of maximum 10 people",
+    "secondH3": "(Small groups of maximum 10 people)",
     "thirdH3": "The experience takes place in the province of Castellón, a region we know perfectly and where we offer the best tourist routes."
   },
   "section5": {
     "firstH3": "DEPARTURE FROM VALENCIA",
-    "secondH3": "Departure from Plaza de la Reina in Valencia, corner of Calle del Mar.",
-    "thirdH3": "Private transportation to La Vall d'Uixó (Castellón)",
-    "fourthH3": "Guided tour: 3h 30m (approx.)",
-    "fifthH3": "Returning to Valencia by private transport"
+    "secondH3": "Departure from Plaza de La Reina in Valencia, corner of Calle del Mar.",
+    "thirdH3": "Private transport to La Vall d'Uixó (Castellón)",
+    "fourthH3": "Guided tour: 3h 30m (approx)",
+    "fifthH3": "Return to Valencia by private transport"
   },
   "section6": {
     "cardTitle": "GUIDED TOUR",
-    "cardDescription": "San Jose Caves Travel Package",
+    "cardDescription": "Travel package to the Caves of San José",
     "firstH4": "What's included",
-    "secondH4": "120",
+    "list": [
+      {
+        "li": "Private transport.",
+        "index": 0
+      },
+      {
+        "li": "Pick-up in Valencia and return to the starting point.",
+        "index": 1
+      },
+      {
+        "li": "Guided tour of the Caves of San José.",
+        "index": 2
+      },
+      {
+        "li": "Boat ride in the Caves of San José.",
+        "index": 3
+      },
+      {
+        "li": "All taxes and fees included.",
+        "index": 4
+      }
+    ],
+    "secondH4": "120€",
     "secondH4span": "Price per person",
-    "button": "Book now"
+    "button": "BOOK NOW"
   },
   "indexSection5": {
-    "firstH3": "Saint Joseph Caves",
-    "secondH3": "Explore the magical caves of San José and enjoy an unforgettable boat trip."
+    "firstH3": "Caves of San José",
+    "secondH3": "Explore the magical Caves of San José and enjoy an unforgettable boat ride"
   },
   "timeline": {
     "title": "What to expect?",
-    "subtitle": "Itinerary"
+    "subtitle": "Itinerary",
+    "steps": [
+      {
+        "title": "Meeting point",
+        "description": "We will depart from Valencia (maximum 10 people), traveling by car for approximately 40 minutes to the town of La Vall d'Uixó (Castellón).",
+        "isActive": true
+      },
+      {
+        "title": "Arrival at the Caves",
+        "description": "Once there, we will begin the tour inside the cave, which will last about 40 minutes at a constant temperature of 20°C.",
+        "isActive": false
+      },
+      {
+        "title": "Exploration",
+        "description": "The tour consists of 800 meters by boat and 250 meters on foot. There is no risk or dangerous situation during the visit.",
+        "isActive": false
+      },
+      {
+        "title": "Unique experience",
+        "description": "Dare to enjoy something different and special. Feel the sensation that time has stopped in a very special atmosphere.",
+        "isActive": false
+      },
+      {
+        "title": "Return",
+        "description": "At the end of the visit, we will return to Valencia to the starting point.",
+        "isActive": false
+      }
+    ]
   },
   "card": {
     "title": "Caves of San José",
     "duration": "3.5 hours",
-    "description": "Discover the San José Caves on a magical boat trip through Europe's longest subterranean river. A unique experience from Valencia!"
-  }
+    "description": "Discover the Caves of San José on a magical boat ride along the longest underground river in Europe. A unique experience from Valencia!",
+    "additionalInfo": "",
+    "quote": "",
+    "image": {
+      "preview": "https://pub-b33f26330e8542cbbcca76ef18d29dd0.r2.dev/tourtovalencia/67bf9bc7c6d687b88368f6a8/1768669593632-w987s9uotem.jpg"
+    }
+  },
+  "price": 120,
+  "hasPrice": true,
+  "infoRequestContact": {
+    "enablePhone": true,
+    "enableEmail": true,
+    "email": "tourtovalencia@gmail.com",
+    "countryCode": "ES",
+    "dialCode": "+34",
+    "phoneNumber": "",
+    "message": "Hello, I would like to request information about this service."
+  },
+  "sectionOrder": [
+    {
+      "id": "indexSection5",
+      "enabled": true,
+      "order": 0
+    },
+    {
+      "id": "section1",
+      "enabled": true,
+      "order": 1
+    },
+    {
+      "id": "section2",
+      "enabled": true,
+      "order": 2
+    },
+    {
+      "id": "section3",
+      "enabled": true,
+      "order": 3
+    },
+    {
+      "id": "section4",
+      "enabled": true,
+      "order": 4
+    },
+    {
+      "id": "section5",
+      "enabled": true,
+      "order": 5
+    },
+    {
+      "id": "timeline",
+      "enabled": true,
+      "order": 6
+    },
+    {
+      "id": "section6",
+      "enabled": true,
+      "order": 7
+    },
+    {
+      "id": "card",
+      "enabled": true,
+      "order": 8
+    }
+  ],
+  "minPeople": 2,
+  "maxPeople": 11
 }

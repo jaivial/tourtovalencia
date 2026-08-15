@@ -1,0 +1,219 @@
+{
+  "section1": {
+    "firstH3": "Características del Tour",
+    "firstSquareH3": "PortAventura es un parque temático dividido en 6 zonas: Mediterráneo, Far West, China, México,  Polinesia y SésamoAventura. Cada parte está diferenciada con distintas atracciones, gastronomía y productos típicos.",
+    "firstSquareP": "Disfruta de más de 40 atracciones, espectáculos, restaurantes y tiendas que ofrece cada una de las 6 zonas. ",
+    "secondSquareH3": "Que incluye nuestro tour ",
+    "secondSquareP": "- Transporte ida y vuelta desde Valencia hasta PortAventura. - Entrada a Port aventura Park y Ferrari Land - Pase Express 10",
+    "thirdSquareH3": "¿Qué incluye el Pase Express 10?",
+    "thirdSquareP": "  Los pases Express de PortAventura World sirven para acceder rápidamente a las principales atracciones, saltándose la mayor parte de la cola convencional.   El pase express 10 incluye 10 accesos rápidos a las atracciones de Port aventura Park con más adrenalina del parque. 1 acceso único por atracción. Shambhala, Furius Baco, Dragon Khan, Stampida, Templo del Fuego, Tutuki Splash, Grand Canyon Rapids, Silver River Flume, Angkor y El Diablo – Tren de la Mina.",
+    "button": "Texto del botón",
+    "backgroundImage": {
+      "preview": "https://cdn.tourtovalencia.com/public/uploads/section1-backgroundImage-preview-1774277755203-a46f3j.webp"
+    }
+  },
+  "section2": {
+    "firstH3": "",
+    "secondH3": "",
+    "thirdH3": "Como ir vestido a PortAventura?  Calzado: Imprescindible zapatillas deportivas cómodas y bien sujetas al pie; evita chanclas o tacones. Atracciones de agua: Lleva chubasquero, poncho o incluso una muda completa si vas en época de calor para no estar mojado todo el día. Verano: Ropa ligera, gorra, gafas de sol y protector solar de alta protección. Primavera/Otoño: Capas extra (sudadera, cortavientos), ya que puede refrescar por la tarde. Mochila: Ligera, para llevar lo necesario sin que pese mucho durante el día. ",
+    "sectionImage": {
+      "preview": "https://cdn.tourtovalencia.com/public/uploads/section2-sectionImage-preview-1774277755655-upypq9.webp"
+    },
+    "lottieAnimation": {
+      "enabled": false,
+      "src": "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie"
+    }
+  },
+  "section3": {
+    "images": [
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-0--source-1774277756397-s9zo27.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-1--source-1774277756739-2e4vzb.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-2--source-1774277756304-iv2l1x.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-3--source-1774277756204-e1kpw9.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-5--source-1774277756009-rau140.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-6--source-1774277756049-s9v67g.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-7--source-1774277757272-769rb0.webp",
+        "alt": "Gallery image"
+      }
+    ]
+  },
+  "section4": {
+    "firstH3": "Excursión de aproximadamente 15 horas",
+    "secondH3": "Información adicional ",
+    "thirdH3": "No recomiemda para viajeros con lesiones de la columna vertebral. No es recomendable para embarazadas. No se recomienda para viajeros con mala salud cardiovascular. Adecuado para todos los niveles de aptitud física.",
+    "lottieAnimation": {
+      "enabled": false,
+      "src": "https://lottie.host/f8570958-3acf-4c42-8ae6-2ad50fe220c7/N8q8bzQLK3.lottie"
+    }
+  },
+  "section5": {
+    "firstH3": "Términos Generales",
+    "secondH3": "El titular de la reserva deberá presentar un documento de identidad (DNI, Pasaporte i permiso de conducir) PortAventura World se reserva el derecho de organizar, programar, limitar y cerrar el acceso del público a PortAventura Park y/o PortAventura Caribe Aquatic Park y/o Ferrari Land, así como a sus diferentes áreas y servicios. El horario de los parques varía según la temporada. El transporte de ida y regreso a Valencia será siempre en el horario establecido, independientemente del horario del parque. Algunas instalaciones pueden hallarse fuera de funcionamiento, ser suspendidas o cerradas ya sea por motivos técnicos o por razones meteorológicas, seguridad u operativas que así lo aconsejen, con la posibilidad de que, por las expresadas razones, sea preciso o cerrar PortAventura Park y/o PortAventura Caribe Aquatic Park y/o Ferrari Land. Todo lo anterior no da derecho a la devolución del tour o a un cambio de fecha de la misma. La duración del tour incluye el tiempo de los traslados.",
+    "thirdH3": "Mínimo 4 personas para poder realizar el tour",
+    "fourthH3": "Cancelaciones. Las cancelaciones serán posible hasta 72 horas antes del tour. No habrá devoluciones después de las 72 horas.",
+    "fifthH3": "",
+    "image": null,
+    "lottieAnimation": {
+      "enabled": false,
+      "src": "https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie"
+    }
+  },
+  "section6": {
+    "cardTitle": "Información importante",
+    "cardDescription": "Todo lo que necesitas saber sobre la excursión",
+    "firstH4": "Qué incluye",
+    "list": [
+      {
+        "li": "Guía para el trayecto",
+        "index": 1
+      },
+      {
+        "li": "Entrada PortAventura Park y Ferrari Land",
+        "index": 2
+      },
+      {
+        "li": "Pase Adrenaline Express",
+        "index": 3
+      },
+      {
+        "li": "Transporte exclusivo",
+        "index": 4
+      },
+      {
+        "li": "Seguro de Viaje",
+        "index": 5
+      }
+    ],
+    "secondH4": "Precio",
+    "secondH4span": "295€ por persona",
+    "button": "Reservar ahora"
+  },
+  "indexSection5": {
+    "firstH3": "Excursión a PortAventura desde Valencia",
+    "secondH3": "Disfruta de un día de atracciones y espectáculos en el parque temático más grande de España."
+  },
+  "timeline": {
+    "title": "Cronología del Viaje",
+    "subtitle": "Descubre el itinerario paso a paso",
+    "steps": [
+      {
+        "title": "Plaza de la Reina esquina Calle del Mar. Valencia",
+        "description": "Quedaremos en la esquina de Chocolate Valor",
+        "isActive": true
+      },
+      {
+        "title": "Viajaremos hasta PortAventura ubicado en Salou (Tarragona)",
+        "description": "Viaje de 2 horas y 45 minutos. Haremos una pequeña parada para descansar",
+        "isActive": false
+      },
+      {
+        "title": "Llegada a PortAventura Park",
+        "description": "Entrada al parque 10:30 am y recogida del parque a las 18:30 pm",
+        "isActive": false
+      },
+      {
+        "title": "Regreso a Valencia",
+        "description": "Viaje de 2 horas y 45 minutos donde haremos una pequeña parada.",
+        "isActive": false
+      },
+      {
+        "title": "Llegada a Valencia en Plaza de la Reina",
+        "description": "Llegada sobre las 22:00 pm",
+        "isActive": false
+      }
+    ]
+  },
+  "card": {
+    "title": "Parque Temático PortAventura",
+    "duration": "Salida de Valencia a las 6:30 a.m. y llegada a Valencia a las 22:00 p.m.",
+    "description": "",
+    "additionalInfo": "",
+    "quote": "",
+    "image": {
+      "preview": "https://cdn.tourtovalencia.com/public/uploads/card-image-preview-1774285325604-s2f9px.webp"
+    }
+  },
+  "price": 295,
+  "hasPrice": true,
+  "infoRequestContact": {
+    "enablePhone": true,
+    "enableEmail": true,
+    "email": "tourtovalencia@gmail.com",
+    "countryCode": "ES",
+    "dialCode": "+34",
+    "phoneNumber": "",
+    "message": "Hola, me gustaría pedir información sobre este servicio."
+  },
+  "sectionOrder": [
+    {
+      "id": "indexSection5",
+      "enabled": true,
+      "order": 0
+    },
+    {
+      "id": "section1",
+      "enabled": true,
+      "order": 1
+    },
+    {
+      "id": "section2",
+      "enabled": true,
+      "order": 2
+    },
+    {
+      "id": "section3",
+      "enabled": true,
+      "order": 3
+    },
+    {
+      "id": "section4",
+      "enabled": true,
+      "order": 4
+    },
+    {
+      "id": "section5",
+      "enabled": true,
+      "order": 5
+    },
+    {
+      "id": "timeline",
+      "enabled": true,
+      "order": 6
+    },
+    {
+      "id": "section6",
+      "enabled": true,
+      "order": 7
+    },
+    {
+      "id": "card",
+      "enabled": true,
+      "order": 8
+    }
+  ],
+  "minPeople": 2,
+  "maxPeople": 14
+}

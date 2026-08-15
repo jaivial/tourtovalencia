@@ -1,0 +1,190 @@
+{
+  "section1": {
+    "firstH3": "Visit the place where so many movies and series have been filmed throughout history, such as \"El Cid Campeador\" or \"Game of Thrones\"",
+    "firstSquareH3": "Why this tour to Peñíscola is so special",
+    "firstSquareP": "We know that Peñíscola is one of those Mediterranean jewels that must be discovered at your own pace. Its cobbled streets, its walled old town surrounded by the Mediterranean Sea and crowned by the imposing Papa Luna Castle. It is a destination to explore at your leisure and without a set script. We know the importance of enjoying free time, the views, the incredible gastronomy, and being able to take so many wonderful photos to remember. That is why TOUR TO VALENCIA is committed to offering you a self-guided tour where you will have a link to an audio guide that we have created especially for you, for this very special tour. Enjoy your free time with all the information at your fingertips.",
+    "secondSquareH3": "Considered one of the most beautiful villages in Spain",
+    "secondSquareP": "Historic Center: A labyrinth of narrow cobbled streets, whitewashed houses, and flower-adorned balconies that contrast with the deep blue of the sea. Heritage and curiosities: Inside, it houses architectural jewels such as the Casa de las Conchas, the Artillery Park, and the Bufador, a curious natural crevice through which the sea snorts. Beaches and nature: It offers extensive fine sand beaches, such as Playa Norte, and is flanked to the south by the spectacular and unspoiled Sierra de Irta Natural Park, ideal for hiking. Gastronomy: Its fishing port supplies its restaurants with fresh seafood and exceptional rice dishes, highlighting the suquet de peix (seafood fish stew) and the classic Valencian paella.",
+    "thirdSquareH3": "Feature title",
+    "thirdSquareP": "",
+    "button": "",
+    "backgroundImage": {
+      "preview": "https://cdn.tourtovalencia.com/public/uploads/section1-backgroundImage-preview-1784508349285-x1vzd1.webp"
+    }
+  },
+  "section2": {
+    "firstH3": "Click to edit...",
+    "secondH3": "",
+    "thirdH3": "",
+    "sectionImage": null,
+    "lottieAnimation": {
+      "enabled": false,
+      "src": "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie"
+    }
+  },
+  "section3": {
+    "images": [
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-0--source-1784581877799-h1lvab.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-1--source-1784581877879-qo1ikh.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-2--source-1784581876824-alx6bz.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-3--source-1784581877107-z5f3as.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      }
+    ]
+  },
+  "section4": {
+    "firstH3": "What does the boat excursion in San Juan include?",
+    "secondH3": "6-hour excursion",
+    "thirdH3": "Departure from Valencia",
+    "lottieAnimation": {
+      "enabled": false,
+      "src": "https://lottie.host/f8570958-3acf-4c42-8ae6-2ad50fe220c7/N8q8bzQLK3.lottie"
+    }
+  },
+  "section5": {
+    "firstH3": "What will we do in San Juan?",
+    "secondH3": "We will swim in the crystal-clear waters of San Juan beach",
+    "thirdH3": "We will enjoy a day of beach and relaxation",
+    "fourthH3": "We will be able to snorkel and see the fish",
+    "fifthH3": "We will have free time to explore the town",
+    "image": null
+  },
+  "section6": {
+    "cardTitle": "Important information",
+    "cardDescription": "Everything you need to know about the excursion",
+    "firstH4": "What's included",
+    "list": [
+      {
+        "li": "Boat transport",
+        "index": 0
+      },
+      {
+        "li": "Expert guide",
+        "index": 1
+      },
+      {
+        "li": "Snorkeling equipment",
+        "index": 2
+      },
+      {
+        "li": "Travel insurance",
+        "index": 3
+      }
+    ],
+    "secondH4": "Price",
+    "secondH4span": "€170 per person",
+    "button": "Book now"
+  },
+  "indexSection5": {
+    "firstH3": "Tour to Peñíscola: the city of Papa Luna",
+    "secondH3": "Discover one of the most beautiful cities in the Mediterranean with our excursion to Peñíscola, a destination that combines history, crystal-clear beaches, and a charming old town."
+  },
+  "timeline": {
+    "title": "Trip Timeline",
+    "subtitle": "Discover the step-by-step itinerary",
+    "steps": [
+      {
+        "title": "Departure",
+        "description": "Meeting point and departure from Valencia"
+      },
+      {
+        "title": "Arrival",
+        "description": "Arrival at the destination and welcome"
+      }
+    ]
+  },
+  "card": {
+    "title": "",
+    "duration": "",
+    "description": "",
+    "additionalInfo": "",
+    "quote": "",
+    "image": null
+  },
+  "price": 170,
+  "hasPrice": true,
+  "infoRequestContact": {
+    "enablePhone": true,
+    "enableEmail": true,
+    "email": "tourtovalencia@gmail.com",
+    "countryCode": "ES",
+    "dialCode": "+34",
+    "phoneNumber": "",
+    "message": "Hello, I would like to request information about this service."
+  },
+  "sectionOrder": [
+    {
+      "id": "indexSection5",
+      "enabled": true,
+      "order": 0
+    },
+    {
+      "id": "section1",
+      "enabled": true,
+      "order": 1
+    },
+    {
+      "id": "section2",
+      "enabled": true,
+      "order": 2
+    },
+    {
+      "id": "section3",
+      "enabled": true,
+      "order": 3
+    },
+    {
+      "id": "section4",
+      "enabled": true,
+      "order": 4
+    },
+    {
+      "id": "section5",
+      "enabled": true,
+      "order": 5
+    },
+    {
+      "id": "timeline",
+      "enabled": true,
+      "order": 6
+    },
+    {
+      "id": "section6",
+      "enabled": true,
+      "order": 7
+    },
+    {
+      "id": "card",
+      "enabled": true,
+      "order": 8
+    }
+  ],
+  "minPeople": 1,
+  "maxPeople": 10
+}

@@ -1,0 +1,219 @@
+{
+  "section1": {
+    "firstH3": "Tour Features",
+    "firstSquareH3": "PortAventura is a theme park divided into 6 zones: Mediterranean, Far West, China, Mexico, Polynesia, and SésamoAventura. Each area is differentiated by distinct attractions, gastronomy, and typical products.",
+    "firstSquareP": "Enjoy more than 40 attractions, shows, restaurants, and shops offered in each of the 6 zones.",
+    "secondSquareH3": "What our tour includes",
+    "secondSquareP": "- Round-trip transportation from Valencia to PortAventura. - Entrance to PortAventura Park and Ferrari Land - Express 10 Pass",
+    "thirdSquareH3": "What does the Express 10 Pass include?",
+    "thirdSquareP": "PortAventura World Express passes are used to quickly access the main attractions, skipping most of the conventional queue. The Express 10 pass includes 10 fast accesses to the most adrenaline-pumping attractions in PortAventura Park. 1 single access per attraction. Shambhala, Furius Baco, Dragon Khan, Stampida, Templo del Fuego, Tutuki Splash, Grand Canyon Rapids, Silver River Flume, Angkor, and El Diablo - Tren de la Mina.",
+    "button": "Button text",
+    "backgroundImage": {
+      "preview": "https://cdn.tourtovalencia.com/public/uploads/section1-backgroundImage-preview-1774277755203-a46f3j.webp"
+    }
+  },
+  "section2": {
+    "firstH3": "",
+    "secondH3": "",
+    "thirdH3": "How to dress for PortAventura? Footwear: Comfortable sneakers that are well secured to the foot are essential; avoid flip-flops or heels. Water attractions: Bring a raincoat, poncho, or even a complete change of clothes if you go in hot weather so you are not wet all day. Summer: Light clothing, hat, sunglasses, and high-protection sunscreen. Spring/Autumn: Extra layers (sweatshirt, windbreaker), as it can get chilly in the afternoon. Backpack: Light, to carry what you need without it weighing too much during the day.",
+    "sectionImage": {
+      "preview": "https://cdn.tourtovalencia.com/public/uploads/section2-sectionImage-preview-1774277755655-upypq9.webp"
+    },
+    "lottieAnimation": {
+      "enabled": false,
+      "src": "https://lottie.host/c75de82a-9932-4b71-b021-22934b5e5b17/QbeG97Ss7A.lottie"
+    }
+  },
+  "section3": {
+    "images": [
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-0--source-1774277756397-s9zo27.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-1--source-1774277756739-2e4vzb.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-2--source-1774277756304-iv2l1x.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-3--source-1774277756204-e1kpw9.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": null,
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-5--source-1774277756009-rau140.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-6--source-1774277756049-s9v67g.webp",
+        "alt": "Gallery image"
+      },
+      {
+        "source": "https://cdn.tourtovalencia.com/public/uploads/section3-images-7--source-1774277757272-769rb0.webp",
+        "alt": "Gallery image"
+      }
+    ]
+  },
+  "section4": {
+    "firstH3": "Excursion of approximately 15 hours",
+    "secondH3": "Additional information",
+    "thirdH3": "Not recommended for travelers with spinal injuries. Not recommended for pregnant women. Not recommended for travelers with poor cardiovascular health. Suitable for all physical fitness levels.",
+    "lottieAnimation": {
+      "enabled": false,
+      "src": "https://lottie.host/f8570958-3acf-4c42-8ae6-2ad50fe220c7/N8q8bzQLK3.lottie"
+    }
+  },
+  "section5": {
+    "firstH3": "General Terms",
+    "secondH3": "The reservation holder must present an identity document (ID card, Passport, or driver's license). PortAventura World reserves the right to organize, schedule, limit, and close public access to PortAventura Park and/or PortAventura Caribe Aquatic Park and/or Ferrari Land, as well as to its different areas and services. Park hours vary by season. Round-trip transportation to Valencia will always be at the established time, regardless of the park's schedule. Some facilities may be out of operation, suspended, or closed due to technical, meteorological, safety, or operational reasons that advise it, with the possibility that, for the stated reasons, it may be necessary to close PortAventura Park and/or PortAventura Caribe Aquatic Park and/or Ferrari Land. All of the above does not entitle you to a refund of the tour or a change of date for it. The duration of the tour includes transfer times.",
+    "thirdH3": "Minimum of 4 people to carry out the tour",
+    "fourthH3": "Cancellations. Cancellations will be possible up to 72 hours before the tour. There will be no refunds after 72 hours.",
+    "fifthH3": "",
+    "image": null,
+    "lottieAnimation": {
+      "enabled": false,
+      "src": "https://lottie.host/e422824f-429d-4dcd-86ba-b35f3d467061/jgsDOnfLdH.lottie"
+    }
+  },
+  "section6": {
+    "cardTitle": "Important information",
+    "cardDescription": "Everything you need to know about the excursion",
+    "firstH4": "What is included",
+    "list": [
+      {
+        "li": "Guide for the journey",
+        "index": 1
+      },
+      {
+        "li": "Entrance to PortAventura Park and Ferrari Land",
+        "index": 2
+      },
+      {
+        "li": "Adrenaline Express Pass",
+        "index": 3
+      },
+      {
+        "li": "Exclusive transportation",
+        "index": 4
+      },
+      {
+        "li": "Travel Insurance",
+        "index": 5
+      }
+    ],
+    "secondH4": "Price",
+    "secondH4span": "€295 per person",
+    "button": "Book now"
+  },
+  "indexSection5": {
+    "firstH3": "Excursion to PortAventura from Valencia",
+    "secondH3": "Enjoy a day of attractions and shows at the largest theme park in Spain."
+  },
+  "timeline": {
+    "title": "Trip Timeline",
+    "subtitle": "Discover the step-by-step itinerary",
+    "steps": [
+      {
+        "title": "Plaza de la Reina corner of Calle del Mar. Valencia",
+        "description": "We will meet at the corner of Chocolate Valor",
+        "isActive": true
+      },
+      {
+        "title": "We will travel to PortAventura located in Salou (Tarragona)",
+        "description": "2 hour and 45 minute journey. We will make a short stop to rest",
+        "isActive": false
+      },
+      {
+        "title": "Arrival at PortAventura Park",
+        "description": "Park entry at 10:30 am and pick-up from the park at 6:30 pm",
+        "isActive": false
+      },
+      {
+        "title": "Return to Valencia",
+        "description": "2 hour and 45 minute journey where we will make a short stop.",
+        "isActive": false
+      },
+      {
+        "title": "Arrival in Valencia at Plaza de la Reina",
+        "description": "Arrival around 10:00 pm",
+        "isActive": false
+      }
+    ]
+  },
+  "card": {
+    "title": "PortAventura Theme Park",
+    "duration": "Departure from Valencia at 6:30 a.m. and arrival in Valencia at 10:00 p.m.",
+    "description": "",
+    "additionalInfo": "",
+    "quote": "",
+    "image": {
+      "preview": "https://cdn.tourtovalencia.com/public/uploads/card-image-preview-1774285325604-s2f9px.webp"
+    }
+  },
+  "price": 295,
+  "hasPrice": true,
+  "infoRequestContact": {
+    "enablePhone": true,
+    "enableEmail": true,
+    "email": "tourtovalencia@gmail.com",
+    "countryCode": "ES",
+    "dialCode": "+34",
+    "phoneNumber": "",
+    "message": "Hello, I would like to request information about this service."
+  },
+  "sectionOrder": [
+    {
+      "id": "indexSection5",
+      "enabled": true,
+      "order": 0
+    },
+    {
+      "id": "section1",
+      "enabled": true,
+      "order": 1
+    },
+    {
+      "id": "section2",
+      "enabled": true,
+      "order": 2
+    },
+    {
+      "id": "section3",
+      "enabled": true,
+      "order": 3
+    },
+    {
+      "id": "section4",
+      "enabled": true,
+      "order": 4
+    },
+    {
+      "id": "section5",
+      "enabled": true,
+      "order": 5
+    },
+    {
+      "id": "timeline",
+      "enabled": true,
+      "order": 6
+    },
+    {
+      "id": "section6",
+      "enabled": true,
+      "order": 7
+    },
+    {
+      "id": "card",
+      "enabled": true,
+      "order": 8
+    }
+  ],
+  "minPeople": 2,
+  "maxPeople": 14
+}
