@@ -51,26 +51,32 @@ async function connect() {
     monitorCommands: process.env.NODE_ENV !== "production"
   };
 
-  dbPromise = process.env.NODE_ENV === "production" 
-    ? MongoClient.connect(mongoUri, mongoClientOptions)
-    : (async () => {
-        if (!global.__db) {
-          global.__db = await MongoClient.connect(mongoUri, mongoClientOptions);
-        }
-        return global.__db;
-      })();
+  try {
+    dbPromise = process.env.NODE_ENV === "production" 
+      ? MongoClient.connect(mongoUri, mongoClientOptions)
+      : (async () => {
+          if (!global.__db) {
+            global.__db = await MongoClient.connect(mongoUri, mongoClientOptions);
+          }
+          return global.__db;
+        })();
 
-  db = await dbPromise;
-  
-  const connectTime = Date.now() - connectStartTime;
-  console.log(`[DB] MongoDB connection established in ${connectTime}ms`);
+    db = await dbPromise;
 
-  // Ensure database indexes are set up correctly
-  const indexesStart = Date.now();
-  await ensureDbIndexes();
-  console.log(`[DB] Database indexes verified in ${Date.now() - indexesStart}ms`);
+    const connectTime = Date.now() - connectStartTime;
+    console.log(`[DB] MongoDB connection established in ${connectTime}ms`);
 
-  return db;
+    // Ensure database indexes are set up correctly
+    const indexesStart = Date.now();
+    await ensureDbIndexes();
+    console.log(`[DB] Database indexes verified in ${Date.now() - indexesStart}ms`);
+
+    return db;
+  } catch (error) {
+    dbPromise = null;
+    throw error;
+  }
+
 }
 
 export async function getDb() {
