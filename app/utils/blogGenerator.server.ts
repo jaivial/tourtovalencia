@@ -6,6 +6,7 @@ import type { BlogPost, BlogSettings } from "~/utils/db.schema.server";
 import { generateSlug } from "~/utils/page.server";
 import { paragraphsToBlocks, paragraphsToGutenbergHtml } from "~/utils/blogBlocks.server";
 import { GoogleGenAI } from "@google/genai";
+import { generateText } from "~/utils/ai.server";
 
 const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
 const ai = new GoogleGenAI({ apiKey: GOOGLE_AI_API_KEY });
@@ -401,16 +402,12 @@ function getAxiosErrorMessage(error: unknown): string | null {
   const data = error.response?.data as { error?: { message?: string } } | undefined;
   const message = data?.error?.message || error.message;
   if (status) {
-    return `Google AI API error ${status}: ${message}`;
+    return `MiniMax API error ${status}: ${message}`;
   }
-  return `Google AI API error: ${message}`;
+  return `MiniMax API error: ${message}`;
 }
 
 export async function generateBlogPostFromSettings(settings: BlogSettings): Promise<BlogPost> {
-  if (!GOOGLE_AI_API_KEY) {
-    throw new Error("GOOGLE_AI_API_KEY is not configured");
-  }
-
   const tours = await getSelectedTours(settings);
   if (tours.length === 0) {
     throw new Error("No tours available to generate blog content");
@@ -425,27 +422,19 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
 
   let responseText = "";
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      config: {
-        temperature: 0.7,
-        maxOutputTokens: 4096,
-      }
-    });
-    responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    responseText = await generateText(prompt, { temperature: 0.7, maxTokens: 16000 });
   } catch (error) {
     const axiosMessage = getAxiosErrorMessage(error);
     if (axiosMessage) {
-      console.error("[BLOG-GENERATOR] Google AI request failed:", axiosMessage);
+      console.error("[BLOG-GENERATOR] MiniMax request failed:", axiosMessage);
       throw new Error(axiosMessage);
     }
-    console.error("[BLOG-GENERATOR] Google AI request failed:", error);
+    console.error("[BLOG-GENERATOR] MiniMax request failed:", error);
     throw error;
   }
 
   if (!responseText) {
-    throw new Error("Google AI response was empty");
+    throw new Error("MiniMax response was empty");
   }
 
   const cleaned = responseText.replace(/```json\n?|\n?```/g, "").trim();
@@ -453,7 +442,7 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
   try {
     const maybeParsed = JSON.parse(cleaned) as Record<string, unknown>;
     if (!isGeneratedLanguageContent(maybeParsed.es) || !isGeneratedLanguageContent(maybeParsed.en)) {
-      throw new Error("Google AI response must include valid 'es' and 'en' content");
+      throw new Error("MiniMax response must include valid 'es' and 'en' content");
     }
     parsed = { es: maybeParsed.es, en: maybeParsed.en };
   } catch (error) {
@@ -461,7 +450,7 @@ export async function generateBlogPostFromSettings(settings: BlogSettings): Prom
     if (error instanceof Error) {
       throw new Error(error.message);
     }
-    throw new Error("Google AI returned invalid JSON");
+    throw new Error("MiniMax returned invalid JSON");
   }
 
   const esParagraphs = normalizeParagraphs(parsed.es.paragraphs, settings.paragraphsMin, settings.paragraphsMax);

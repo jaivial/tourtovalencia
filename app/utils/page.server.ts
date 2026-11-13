@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import { generateTranslationFiles } from "./i18n/file-generator";
 import type { InfoRequestContactType } from "~/data/data";
 import { normalizeInfoRequestContact } from "./whatsapp";
+import { generateText, AI_MODEL, AI_TIMEOUT_MS } from "./ai.server";
 
 // Initialize dotenv
 dotenv.config();
@@ -267,17 +268,6 @@ async function uploadImagesToBunnyBatch(
 }
 
 const MAX_IMAGE_SIZE = 100 * 1024; // 100KB target per image (best-effort)
-// Configuration for Google AI Studio API
-const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
-const GOOGLE_AI_MODEL = process.env.GOOGLE_AI_MODEL || "gemini-3.1-pro-preview";
-const GOOGLE_AI_API_VERSION = process.env.GOOGLE_AI_API_VERSION || (GOOGLE_AI_MODEL.startsWith("gemini-3.") ? "v1beta" : "v1");
-const GOOGLE_AI_API_URL = `https://generativelanguage.googleapis.com/${GOOGLE_AI_API_VERSION}/models/${GOOGLE_AI_MODEL}:generateContent`;
-const TRANSLATION_REQUEST_TIMEOUT_MS = Number(process.env.GOOGLE_AI_TIMEOUT_MS || 45000);
-
-if (!GOOGLE_AI_API_KEY) {
-  throw new Error("Google AI Studio API key is not configured. Please set GOOGLE_AI_API_KEY in your .env file");
-}
-
 // Helper function to check if a string should NOT be translated
 function shouldSkipTranslation(value: string): boolean {
   if (!value.trim() || value.startsWith("/")) return true;
@@ -430,29 +420,7 @@ Respond with ONLY valid JSON in this format:
 }`;
 
   try {
-    const response = await axios.post(
-      `${GOOGLE_AI_API_URL}?key=${GOOGLE_AI_API_KEY}`,
-      {
-        contents: [
-          {
-            parts: [
-              { text: prompt },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.1,
-          maxOutputTokens: 8192,
-        },
-      },
-      {
-        headers: { "Content-Type": "application/json" },
-        timeout: TRANSLATION_REQUEST_TIMEOUT_MS,
-      }
-    );
-
-    // Parse the response
-    const responseText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const responseText = await generateText(prompt, { temperature: 0.1, maxTokens: 32000 });
     console.log("Bulk translation response received");
     
     // Clean up the response (remove markdown code blocks if present)
@@ -463,7 +431,7 @@ Respond with ONLY valid JSON in this format:
       translationMap = JSON.parse(cleanedResponse) as Record<string, string>;
     } catch (parseError) {
       console.error("[AI Translation][Bulk] Failed to parse response JSON", {
-        model: GOOGLE_AI_MODEL,
+        model: AI_MODEL,
         stringsCount: stringsToTranslate.length,
         promptLength: prompt.length,
         responsePreview: cleanedResponse.slice(0, 1200),
@@ -495,8 +463,8 @@ Respond with ONLY valid JSON in this format:
     };
 
     console.error("[AI Translation][Bulk] Translation failed", {
-      model: GOOGLE_AI_MODEL,
-      timeoutMs: TRANSLATION_REQUEST_TIMEOUT_MS,
+      model: AI_MODEL,
+      timeoutMs: AI_TIMEOUT_MS,
       stringsCount: stringsToTranslate.length,
       promptLength: prompt.length,
       status: err.response?.status,
@@ -735,7 +703,7 @@ export async function processContent(content: Record<string, unknown>, translate
   return { _value: content } as unknown as Record<string, unknown>;
 }
 
-// Helper function to translate text using Google AI Studio API
+// Helper function to translate text using MiniMax
 export async function translateText(text: string, retryCount = 0): Promise<string> {
   // Skip translation for empty strings or image paths
   if (!text.trim() || text.startsWith("/")) return text;
@@ -748,45 +716,22 @@ export async function translateText(text: string, retryCount = 0): Promise<strin
 
   try {
     console.log("Translating text:", text);
-    const response = await axios.post(
-      `${GOOGLE_AI_API_URL}?key=${GOOGLE_AI_API_KEY}`,
-      {
-        contents: [
-          {
-            parts: [
-              {
-                text: `You are a translator. Translate the following Spanish text to English. Respond only with the English translation, no additional text, no quotation marks.\n\nTranslate to English: ${text}`,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.1,
-          maxOutputTokens: 150,
-        },
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        timeout: TRANSLATION_REQUEST_TIMEOUT_MS,
-      }
+    const translation = await generateText(
+      `You are a translator. Translate the following Spanish text to English. Respond only with the English translation, no additional text, no quotation marks.\n\nTranslate to English: ${text}`,
+      { temperature: 0.1, maxTokens: 2048 }
     );
 
-    // Safely access the response data (Google AI Studio format)
-    if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-      const translation = response.data.candidates[0].content.parts[0].text.trim();
+    if (translation) {
       // Clean up any quotation marks that might have been added
       const cleanedTranslation = translation.replace(/^["']|["']$/g, '').replace(/\\"/g, '');
       console.log("Translated text:", cleanedTranslation);
       return cleanedTranslation;
     } else {
       console.error("[AI Translation][Single] Unexpected API response format", {
-        model: GOOGLE_AI_MODEL,
-        timeoutMs: TRANSLATION_REQUEST_TIMEOUT_MS,
+        model: AI_MODEL,
+        timeoutMs: AI_TIMEOUT_MS,
         textLength: text.length,
         textPreview: text.slice(0, 120),
-        responseData: response.data,
       });
       return text;
     }
@@ -800,8 +745,8 @@ export async function translateText(text: string, retryCount = 0): Promise<strin
     };
 
     console.error("[AI Translation][Single] Translation failed", {
-      model: GOOGLE_AI_MODEL,
-      timeoutMs: TRANSLATION_REQUEST_TIMEOUT_MS,
+      model: AI_MODEL,
+      timeoutMs: AI_TIMEOUT_MS,
       retryCount,
       textLength: text.length,
       textPreview: text.slice(0, 120),
